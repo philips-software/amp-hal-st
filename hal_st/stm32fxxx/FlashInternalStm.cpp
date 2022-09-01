@@ -13,36 +13,26 @@ namespace hal
         HAL_FLASH_Unlock();
 
 #if defined(STM32WB)
-
-        services::FlashAlign::WithAlignment<8> flashAlign;
-        flashAlign.Align(address, buffer);
-
-        services::FlashAlign::Chunk* chunk = flashAlign.First();
-        while (chunk != nullptr)
-        {
-            really_assert(chunk->data.size() % 8 == 0);
-            auto fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunk->alignedAddress);
-
-            for (uint64_t doubleWord : infra::ReinterpretCastMemoryRange<const uint64_t>(chunk->data))
-            {
-                auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, fullAddress, doubleWord);
-                really_assert(result == HAL_OK);
-                fullAddress += sizeof(uint64_t);
-            }
-            chunk = flashAlign.Next();
-        }
-#elif defined(STM32F0) || defined(STM32F3)
-        assert((address & 1) == 0);
-        assert((buffer.size() & 1) == 0);
-        for (uint16_t halfWord : infra::ReinterpretCastMemoryRange<const uint16_t>(buffer))
-        {
-            HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, reinterpret_cast<uint32_t>(flashMemory.begin() + address), halfWord);
-            ++address;
-        }
+        AlignedWriteBuffer<uint64_t, FLASH_TYPEPROGRAM_DOUBLEWORD>(buffer, address);
 #else
+        uint32_t word;
+        while (buffer.size() >= sizeof(word) && ((address & (sizeof(word) - 1)) == 0))
+        {
+            std::copy(buffer.begin(), buffer.begin() + sizeof(word), reinterpret_cast<uint8_t*>(&word));
+            auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, reinterpret_cast<uint32_t>(flashMemory.begin() + address), word);
+            really_assert(result == HAL_OK);
+            address += sizeof(word);
+            buffer.pop_front(sizeof(word));
+        }
+#endif
+
+#if defined(STM32F0) || defined(STM32F3)
+        AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD>(buffer, address);
+#elif !defined(STM32WB)
         for (uint8_t byte : buffer)
         {
-            HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
+            auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
+            really_assert(result == HAL_OK);
             ++address;
         }
 #endif
@@ -89,6 +79,28 @@ namespace hal
         HAL_FLASH_Lock();
 
         infra::EventDispatcher::Instance().Schedule(onDone);
+    }
+
+    template<typename alignment, uint32_t flashType>
+    void FlashInternalStmBase::AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address)
+    {
+        services::FlashAlign::WithAlignment<sizeof(alignment)> flashAlign;
+        flashAlign.Align(address, buffer);
+
+        services::FlashAlign::Chunk* chunk = flashAlign.First();
+        while (chunk != nullptr)
+        {
+            really_assert(chunk->data.size() % sizeof(alignment) == 0);
+            auto fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunk->alignedAddress);
+
+            for (alignment data : infra::ReinterpretCastMemoryRange<const alignment>(chunk->data))
+            {
+                auto result = HAL_FLASH_Program(flashType, fullAddress, data);
+                really_assert(result == HAL_OK);
+                fullAddress += sizeof(alignment);
+            }
+            chunk = flashAlign.Next();
+        }
     }
 
     FlashInternalStm::FlashInternalStm(infra::MemoryRange<uint32_t> sectorSizes, infra::ConstByteRange flashMemory)

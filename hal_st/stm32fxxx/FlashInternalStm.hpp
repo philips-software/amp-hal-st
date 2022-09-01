@@ -19,6 +19,10 @@ namespace hal
         virtual void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
 
     private:
+        template<typename alignment, uint32_t flashType>
+            void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
+
+    private:
         infra::ConstByteRange flashMemory;
     };
 
