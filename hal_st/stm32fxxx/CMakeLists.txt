@@ -52,8 +52,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:ResetStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:ResetStm.hpp>
+    ResetStm.cpp
+    ResetStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.hpp>
     SpiDataSizeConfiguratorStm.cpp
@@ -110,6 +110,7 @@ else()
     set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F767Z(G-I)Tx.xml")
 endif()
 
+<<<<<<< HEAD
 generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl PinoutTableItems.xml
     --stringparam gpio-document ${gpio_xml} --stringparam mcu-document ${mcu_xml})
 generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")

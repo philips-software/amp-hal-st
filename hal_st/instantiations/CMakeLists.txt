@@ -8,8 +8,10 @@ target_include_directories(hal_st.instantiations PUBLIC
 
 target_link_libraries(hal_st.instantiations PUBLIC
     hal_st.stm32fxxx
+    hal_st.synchronous_stm32fxxx
     infra.event
     infra.timer
+    services.tracer
 )
 
 target_sources(hal_st.instantiations PRIVATE
@@ -21,4 +23,6 @@ target_sources(hal_st.instantiations PRIVATE
     StmEventInfrastructure.hpp
     StmTracerInfrastructure.cpp
     StmTracerInfrastructure.hpp
+    TracingResetStm.cpp
+    TracingResetStm.hpp
 )
