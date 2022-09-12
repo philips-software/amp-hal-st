@@ -9,6 +9,7 @@ namespace hal
     extern const infra::MemoryRange<const infra::MemoryRange<const GpioStm::PinoutTable>> pinoutTableDefaultStm;
 
     extern const infra::MemoryRange<const GpioStm::PinoutTable> pinoutTableUart;
+    extern const infra::MemoryRange<const GpioStm::PinoutTable> pinoutTableLpuart;
     extern const infra::MemoryRange<const GpioStm::PinoutTable> pinoutTableSpi;
     extern const infra::MemoryRange<const GpioStm::PinoutTable> pinoutTableCan;
     extern const infra::MemoryRange<const GpioStm::PinoutTable> pinoutTableDac;

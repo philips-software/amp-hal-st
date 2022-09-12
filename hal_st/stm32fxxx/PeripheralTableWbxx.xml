@@ -4,6 +4,10 @@
     <item name="USART"/>
     <interrupt/>
   </peripheral>
+  <peripheral name="Lpuart" type="USART_TypeDef*">
+    <item name="LPUART"/>
+    <interrupt/>
+  </peripheral>
   <peripheral name="Spi" type="SPI_TypeDef*"><item name="SPI"/><interrupt/></peripheral>
   <peripheral name="I2c" type="I2C_TypeDef*"><item name="I2C"/>
     <interrupt name="Ev" postfix="_EV"/>
