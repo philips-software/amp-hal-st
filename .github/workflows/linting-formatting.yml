@@ -2,8 +2,6 @@
 name: Linting & Formatting
 
 on:
-  push:
-    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -37,5 +35,5 @@ jobs:
             megalinter-reports
       - uses: reviewdog/action-suggester@v1.6
         with:
-          tool_name: reviewdog-suggester
+          tool_name: MegaLinter
           filter_mode: diff_context
