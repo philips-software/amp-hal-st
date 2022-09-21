@@ -2,7 +2,7 @@
 
 [![Linting & Formatting](https://github.com/philips-software/amp-hal-st/actions/workflows/linting-formatting.yml/badge.svg)](https://github.com/philips-software/amp-hal-st/actions/workflows/linting-formatting.yml) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/philips-software/amp-hal-st/badge)](https://api.securityscorecards.dev/projects/github.com/philips-software/amp-hal-st)
 
-**Description**: amp-hal-st is a HAL (Hardware Abstraction Layer) implementation for a range of [ST](https://st.com) ARM Cortex-based microcontrollers. amp-hal-st implements the interfaces defined as part of [EmbeddedInfraLib].
+**Description**: amp-hal-st is a HAL (Hardware Abstraction Layer) implementation for a range of [ST](https://st.com) ARM Cortex-based micro-controllers. amp-hal-st implements the interfaces defined as part of [EmbeddedInfraLib].
 
 ## Dependencies
 
@@ -50,20 +50,18 @@ Due to the nature of amp-hal-st: a HAL implementation, there are no included aut
 
 ## Community
 
-This project uses the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) to define expected conduct in our community. Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting a project [CODEOWNER](CODEOWNERS)
+This project uses a [code-of-conduct](CODE_OF_CONDUCT.md) to define expected conduct in our community. Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting a project [maintainer](.github/CODEOWNERS)
 
 ## Changelog
 
-See [CHANGELOG](CHANGELOG.md) for more info on what's been changed.
+See the [changelog](CHANGELOG.md) for more info on what's been changed.
 
 ## Contributing
 
-Please refer to our [CONTRIBUTING](CONTRIBUTING.md) guide when you want to contribute to this project.
+Please refer to our [contributing](CONTRIBUTING.md) guide when you want to contribute to this project.
 
 ## License
 
-This HalSt Project is in general licensed under the following MIT license except the files named underneath (see corresponding notice files below)
-
-amp-hal-st is licensed under the [MIT](https://choosealicense.com/licenses/mit/) [LICENSE](LICENSE) except the files and/or directories named in the [NOTICE](NOTICE) file.
+amp-hal-st is licensed under the [MIT](https://choosealicense.com/licenses/mit/) [license](LICENSE) except the files and/or directories named in the [notice](NOTICE) file.
 
 [EmbeddedInfraLib]: https://github.com/philips-software/embeddedinfralib
