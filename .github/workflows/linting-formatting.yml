@@ -26,6 +26,13 @@ jobs:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Linter artifacts
+        if: ${{ success() }} || ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: linter
+          path: |
+            megalinter-reports
       - uses: reviewdog/action-suggester@v1.6
         with:
           tool_name: MegaLinter
