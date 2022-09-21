@@ -1,6 +1,8 @@
 # amp-hal-st
 
-[![Linting & Formatting](https://github.com/philips-software/amp-hal-st/actions/workflows/linting-formatting.yml/badge.svg)](https://github.com/philips-software/amp-hal-st/actions/workflows/linting-formatting.yml)
+[![Linting & Formatting](https://github.com/philips-software/amp-hal-st/actions/workflows/linting-formatting.yml/badge.svg)](https://github.com/philips-software/amp-hal-st/actions/workflows/linting-formatting.yml) [![OpenSSF Scorecard]
+(https://api.securityscorecards.dev/projects/github.com/philips-software/amp-hal-st/badge)]
+(https://api.securityscorecards.dev/projects/github.com/philips-software/amp-hal-st)
 
 **Description**: amp-hal-st is a HAL (Hardware Abstraction Layer) implementation for a range of [ST](https://st.com) ARM Cortex-based microcontrollers. amp-hal-st implements the interfaces defined as part of [EmbeddedInfraLib].
 
