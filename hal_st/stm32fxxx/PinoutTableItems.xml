@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<peripherals xmlns:xi="http://www.w3.org/2001/XInclude">
+  <peripheral name="Uart">
+    <pin name="Rx">
+      <input name="USART:_RX"/>
+      <input name="UART:_RX"/>
+    </pin>
+    <pin name="Tx">
+      <input name="USART:_TX"/>
+      <input name="UART:_TX"/>
+    </pin>
+	<pin name="Rts">
+      <input name="USART:_RTS"/>
+      <input name="UART:_RTS"/>
+    </pin>
+    <pin name="Cts">
+      <input name="USART:_CTS"/>
+      <input name="UART:_CTS"/>
+    </pin>
+  </peripheral>
+  <peripheral name="Spi">
+    <pin name="Clock"><input name="SPI:_SCK"/></pin>
+    <pin name="Miso"><input name="SPI:_MISO"/></pin>
+    <pin name="Mosi"><input name="SPI:_MOSI"/></pin>
+    <pin name="SlaveSelect"><input name="SPI:_NSS"/></pin>
+  </peripheral>
+  <peripheral name="Sai">
+    <pin name="Sck" speed="High"><input name="SAI:_SCK_A"/><input name="SAI:_SCK_B"/></pin>
+    <pin name="MClock" speed="High"><input name="SAI:_MCLK_A"/><input name="SAI:_MCLK_B"/></pin>
+    <pin name="Sd" speed="High"><input name="SAI:_SD_A"/><input name="SAI:_SD_B"/></pin>
+    <pin name="Fs" speed="High"><input name="SAI:_FS_A"/><input name="SAI:_FS_B"/></pin>
+  </peripheral>
+  <peripheral name="Sd">
+    <pin name="Clk" speed="High"><input name="SDMMC:_CK"/></pin>
+    <pin name="Cmd" speed="High"><input name="SDMMC:_CMD"/></pin>
+    <pin name="D0" speed="High"><input name="SDMMC:_D0"/></pin>
+    <pin name="D1" speed="High"><input name="SDMMC:_D1"/></pin>
+    <pin name="D2" speed="High"><input name="SDMMC:_D2"/></pin>
+    <pin name="D3" speed="High"><input name="SDMMC:_D3"/></pin>
+  </peripheral>
+  <peripheral name="QuadSpi">
+    <pin name="Clock" speed="High"><input name="QUADSPI_CLK"/></pin>
+    <pin name="SlaveSelect" speed="High"><input name="QUADSPI_BK1_NCS"/></pin>
+    <pin name="Data0" speed="High"><input name="QUADSPI_BK1_IO0"/></pin>
+    <pin name="Data1" speed="High"><input name="QUADSPI_BK1_IO1"/></pin>
+    <pin name="Data2" speed="High"><input name="QUADSPI_BK1_IO2"/></pin>
+    <pin name="Data3" speed="High"><input name="QUADSPI_BK1_IO3"/></pin>
+  </peripheral>
+  <peripheral name="I2c">
+    <pin name="Scl" drive="OpenDrain"><input name="I2C:_SCL"/></pin>
+    <pin name="Sda" drive="OpenDrain"><input name="I2C:_SDA"/></pin>
+  </peripheral>
+  <peripheral name="Ethernet">
+    <pin name="" speed="High">
+      <input name="ETH_CRS"/>
+      <input name="ETH_REF_CLK"/>
+      <input name="ETH_MDIO"/>
+      <input name="ETH_MDC"/>
+      <input name="ETH_COL"/>
+      <input name="ETH_CRS_DV"/>
+      <input name="ETH_PPS_OUT"/>
+      <input name="ETH_RX_DV"/>
+      <input name="ETH_RXD0"/>
+      <input name="ETH_RXD1"/>
+      <input name="ETH_RXD2"/>
+      <input name="ETH_RXD3"/>
+      <input name="ETH_RX_CLK"/>
+      <input name="ETH_RX_ER"/>
+      <input name="ETH_TX_EN"/>
+      <input name="ETH_TXD0"/>
+      <input name="ETH_TXD1"/>
+      <input name="ETH_TXD2"/>
+      <input name="ETH_TXD3"/>
+      <input name="ETH_TX_CLK"/>
+    </pin>
+  </peripheral>
+  <peripheral name="UsbFs">
+    <pin name="Id"><input name="USB_OTG_FS_ID"/></pin>
+    <pin name="Dm"><input name="USB_OTG_FS_DM"/></pin>
+    <pin name="Dp"><input name="USB_OTG_FS_DP"/></pin>
+  </peripheral>
+  <peripheral name="Can">
+    <pin name="Rx"><input name="CAN:_RX"/></pin>
+    <pin name="Tx"><input name="CAN:_TX"/></pin>
+  </peripheral>
+  <peripheral name="Timer">
+    <pin name="Channel1"><input name="TIM:_CH1"/></pin>
+    <pin name="Channel2"><input name="TIM:_CH2"/></pin>
+    <pin name="Channel3"><input name="TIM:_CH3"/></pin>
+    <pin name="Channel4"><input name="TIM:_CH4"/></pin>
+  </peripheral>
+  <peripheral name="Fmc">
+    <pin name="" speed="High">
+      <input name="FMC_NL"/>      <input name="FMC_CLK"/>     <input name="FMC_NBL0"/>     <input name="FMC_NBL1"/>
+      <input name="FMC_NBL2"/>    <input name="FMC_NBL3"/>    <input name="FMC_A0"/>       <input name="FMC_A1"/>
+      <input name="FMC_A2"/>      <input name="FMC_A3"/>      <input name="FMC_A4"/>       <input name="FMC_A5"/>
+      <input name="FMC_A6"/>      <input name="FMC_A7"/>      <input name="FMC_A8"/>       <input name="FMC_A9"/>
+      <input name="FMC_A10"/>     <input name="FMC_A11"/>     <input name="FMC_A12"/>      <input name="FMC_A13"/>
+      <input name="FMC_A14"/>     <input name="FMC_A15"/>     <input name="FMC_A16"/>      <input name="FMC_A17"/>
+      <input name="FMC_A18"/>     <input name="FMC_A19"/>     <input name="FMC_A10"/>      <input name="FMC_A21"/>
+      <input name="FMC_A22"/>     <input name="FMC_A23"/>     <input name="FMC_A24"/>      <input name="FMC_A25"/>
+      <input name="FMC_D0"/>      <input name="FMC_D1"/>      <input name="FMC_D2"/>       <input name="FMC_D3"/>
+      <input name="FMC_D4"/>      <input name="FMC_D5"/>      <input name="FMC_D6"/>       <input name="FMC_D7"/>
+      <input name="FMC_D8"/>      <input name="FMC_D9"/>      <input name="FMC_D10"/>      <input name="FMC_D11"/>
+      <input name="FMC_D12"/>     <input name="FMC_D13"/>     <input name="FMC_D14"/>      <input name="FMC_D15"/>
+      <input name="FMC_D16"/>     <input name="FMC_D17"/>     <input name="FMC_D18"/>      <input name="FMC_D19"/>
+      <input name="FMC_D10"/>     <input name="FMC_D21"/>     <input name="FMC_D22"/>      <input name="FMC_D23"/>
+      <input name="FMC_D24"/>     <input name="FMC_D25"/>     <input name="FMC_D26"/>      <input name="FMC_D27"/>
+      <input name="FMC_D28"/>     <input name="FMC_D29"/>     <input name="FMC_D30"/>      <input name="FMC_D31"/>
+      <input name="FMC_DA0"/>     <input name="FMC_DA1"/>     <input name="FMC_DA2"/>      <input name="FMC_DA3"/>
+      <input name="FMC_DA4"/>     <input name="FMC_DA5"/>     <input name="FMC_DA6"/>      <input name="FMC_DA7"/>
+      <input name="FMC_DA8"/>     <input name="FMC_DA9"/>     <input name="FMC_DA10"/>     <input name="FMC_DA11"/>
+      <input name="FMC_DA12"/>    <input name="FMC_DA13"/>    <input name="FMC_DA14"/>     <input name="FMC_DA15"/>
+      <input name="FMC_ALE"/>     <input name="FMC_BA0"/>     <input name="FMC_BA1"/>      <input name="FMC_NE1"/>
+      <input name="FMC_NE2"/>     <input name="FMC_NE3"/>     <input name="FMC_NE4"/>      <input name="FMC_NOE"/>
+      <input name="FMC_NWE"/>     <input name="FMC_NWAIT"/>   <input name="FMC_NCE"/>      <input name="FMC_INT"/>
+      <input name="FMC_SDCLK"/>   <input name="FMC_SDNWE"/>   <input name="FMC_SDCKE0"/>   <input name="FMC_SDCKE1"/>
+      <input name="FMC_SDNE0"/>   <input name="FMC_SDNE1"/>   <input name="FMC_SDNCAS"/>   <input name="FMC_SDNRAS"/>
+    </pin>
+  </peripheral>
+  <peripheral name="Lcd">
+    <pin name="" speed="High">
+      <input name="LTDC_HSYNC"/>   <input name="LTDC_VSYNC"/>   <input name="LTDC_DE"/>      <input name="LTDC_CLK"/>
+      <input name="LTDC_R0"/>      <input name="LTDC_R1"/>      <input name="LTDC_R2"/>      <input name="LTDC_R3"/>
+      <input name="LTDC_R4"/>      <input name="LTDC_R5"/>      <input name="LTDC_R6"/>      <input name="LTDC_R7"/>
+      <input name="LTDC_G0"/>      <input name="LTDC_G1"/>      <input name="LTDC_G2"/>      <input name="LTDC_G3"/>
+      <input name="LTDC_G4"/>      <input name="LTDC_G5"/>      <input name="LTDC_G6"/>      <input name="LTDC_G7"/>
+      <input name="LTDC_B0"/>      <input name="LTDC_B1"/>      <input name="LTDC_B2"/>      <input name="LTDC_B3"/>
+      <input name="LTDC_B4"/>      <input name="LTDC_B5"/>      <input name="LTDC_B6"/>      <input name="LTDC_B7"/>
+    </pin>
+  </peripheral>
+</peripherals>

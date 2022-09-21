@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Mcu ClockTree="STM32F4_F405-F407-F415-F417" DBVersion="V3.0" Family="STM32F4" HasPowerPad="false" IOType="" Line="STM32F407/417" Package="LQFP100" RefName="STM32F407V(E-G)Tx" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
+	<Core>ARM Cortex-M4</Core>
+	<Frequency>168</Frequency>
+	<Ram>128</Ram>
+	<Ram>128</Ram>
+	<IONb>82</IONb>
+	<Die>DIE413</Die>
+	<Flash>512</Flash>
+	<Flash>1024</Flash>
+	<Voltage Max="3.6" Min="1.8"/>
+	<Current Lowest="1.7" Run="215"/>
+	<Temperature Max="105" Min="-40"/>
+	<IP InstanceName="ADC1" Name="ADC" Version="aditf2_v1_1_Cube"/>
+	<IP InstanceName="ADC2" Name="ADC" Version="aditf2_v1_1_Cube"/>
+	<IP InstanceName="ADC3" Name="ADC" Version="aditf2_v1_1_Cube"/>
+	<IP ConfigFile="CAN-STM32F4xx" InstanceName="CAN1" Name="CAN" Version="bxcan1_v1_1_Cube"/>
+	<IP ConfigFile="CAN-STM32F4xx" InstanceName="CAN2" Name="CAN" Version="bxcan1_v1_1_Cube"/>
+	<IP ConfigFile="CRC-STM32F4xx" InstanceName="CRC" Name="CRC" Version="integtest1_v1_0"/>
+	<IP InstanceName="DAC" Name="DAC" Version="dacif_v1_1_Cube"/>
+	<IP ConfigFile="DCMI-STM32F4xx" InstanceName="DCMI" Name="DCMI" Version="cci_v1_0_Cube"/>
+	<IP ConfigFile="ETH-STM32F4xx" InstanceName="ETH" Name="ETH" Version="ethermac110_v2_0"/>
+	<IP ConfigFile="FATFS-STM32F4xx" InstanceName="FATFS" Name="FATFS" Version="v0.1.0_Cube"/>
+	<IP ConfigFile="FREERTOS-STM32F4xx" InstanceName="FREERTOS" Name="FREERTOS" Version="v8.0.0_Cube"/>
+	<IP ConfigFile="FSMC-STM32F4xx" InstanceName="FSMC" Name="FSMC" Version="f4_nornandmux_fsmc7_v4_0"/>
+	<IP ConfigFile="I2C-STM32F4xx" InstanceName="I2C1" Name="I2C" Version="i2c1_v1_5_Cube"/>
+	<IP ConfigFile="I2C-STM32F4xx" InstanceName="I2C2" Name="I2C" Version="i2c1_v1_5_Cube"/>
+	<IP ConfigFile="I2C-STM32F4xx" InstanceName="I2C3" Name="I2C" Version="i2c1_v1_5_Cube"/>
+	<IP ClockEnableMode="__HAL_RCC_SPI2_CLK_ENABLE" ConfigFile="I2S-STM32F4xx" InstanceName="I2S2" Name="I2S" Version="spi2s1_v2_2_Cube"/>
+	<IP ClockEnableMode="__HAL_RCC_SPI3_CLK_ENABLE" ConfigFile="I2S-STM32F4xx" InstanceName="I2S3" Name="I2S" Version="spi2s1_v2_2_Cube"/>
+	<IP ClockEnableMode="none" ConfigFile="IWDG-STM32F4xx" InstanceName="IWDG" Name="IWDG" Version="iwdg1_v1_1"/>
+	<IP ConfigFile="LWIP-STM32F4xx" InstanceName="LWIP" Name="LWIP" Version="v1.5.0_RC0_20160211"/>
+	<IP InstanceName="RCC" Name="RCC" Version="STM32F417-rcc_v1_0"/>
+	<IP ConfigFile="RNG-STM32F4xx" InstanceName="RNG" Name="RNG" Version="rng1_v1_1"/>
+	<IP ClockEnableMode="__HAL_RCC_RTC_ENABLE" ConfigFile="RTC-STM32F4xx" InstanceName="RTC" Name="RTC" Version="rtc2_v2_3"/>
+	<IP ConfigFile="SDIO-STM32F4xx" InstanceName="SDIO" Name="SDIO" Version="sdmmc_v1_2_Cube"/>
+	<IP ConfigFile="SPI-STM32F4xx" InstanceName="SPI1" Name="SPI" Version="spi2s1_v2_2_Cube"/>
+	<IP ConfigFile="SPI-STM32F4xx" InstanceName="SPI2" Name="SPI" Version="spi2s1_v2_2_Cube"/>
+	<IP ConfigFile="SPI-STM32F4xx" InstanceName="SPI3" Name="SPI" Version="spi2s1_v2_2_Cube"/>
+	<IP InstanceName="SYS" Name="SYS" Version="STM32F417_sys_v1_0"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM1" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM2" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM3" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM4" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM5" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM6" Name="TIM6_7" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM7" Name="TIM6_7" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM8" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM9" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM10" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM11" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM12" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM13" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP ConfigFile="TIM-STM32F4xx" InstanceName="TIM14" Name="TIM1_8" Version="gptimer2_v2_x_Cube"/>
+	<IP InstanceName="UART4" Name="UART" Version="sci2_v1_2_Cube"/>
+	<IP InstanceName="UART5" Name="UART" Version="sci2_v1_2_Cube"/>
+	<IP InstanceName="USART1" Name="USART" Version="sci2_v1_2_Cube"/>
+	<IP InstanceName="USART2" Name="USART" Version="sci2_v1_2_Cube"/>
+	<IP InstanceName="USART3" Name="USART" Version="sci2_v1_2_Cube"/>
+	<IP InstanceName="USART6" Name="USART" Version="sci2_v1_2_Cube"/>
+	<IP ConfigFile="USB_DEVICE-STM32F4xx" InstanceName="USB_DEVICE" Name="USB_DEVICE" Version="v1.0_Cube"/>
+	<IP ConfigFile="USB_HOST-STM32F4xx" InstanceName="USB_HOST" Name="USB_HOST" Version="v1.0_Cube"/>
+	<IP InstanceName="USB_OTG_FS" Name="USB_OTG_FS" Version="otgfs1_v1_2_Cube"/>
+	<IP InstanceName="USB_OTG_HS" Name="USB_OTG_HS" Version="otghs1_v1_1_Cube"/>
+	<IP ConfigFile="WWDG-STM32F4xx" InstanceName="WWDG" Name="WWDG" Version="wwdg1_v1_0"/>
+	<IP ConfigFile="GPIO-STM32F4xx" InstanceName="GPIO" Name="GPIO" Version="STM32F417_gpio_v1_0"/>
+	<IP ConfigFile="DMA-STM32F4xx" InstanceName="DMA" Name="DMA" Version="STM32F417_dma_v2_0"/>
+	<IP ConfigFile="NVIC-STM32F4xx" InstanceName="NVIC" Name="NVIC" Version="STM32F417"/>
+	<Pin Name="PE2" Position="1" Type="I/O">
+		<Signal Name="ETH_TXD3"/>
+		<Signal Name="FSMC_A23"/>
+		<Signal Name="SYS_TRACECLK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE3" Position="2" Type="I/O">
+		<Signal Name="FSMC_A19"/>
+		<Signal Name="SYS_TRACED0"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE4" Position="3" Type="I/O">
+		<Signal Name="DCMI_D4"/>
+		<Signal Name="FSMC_A20"/>
+		<Signal Name="SYS_TRACED1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE5" Position="4" Type="I/O">
+		<Signal Name="DCMI_D6"/>
+		<Signal Name="FSMC_A21"/>
+		<Signal Name="SYS_TRACED2"/>
+		<Signal Name="TIM9_CH1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE6" Position="5" Type="I/O">
+		<Signal Name="DCMI_D7"/>
+		<Signal Name="FSMC_A22"/>
+		<Signal Name="SYS_TRACED3"/>
+		<Signal Name="TIM9_CH2"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VBAT" Position="6" Type="Power"/>
+	<Pin Name="PC13-ANTI_TAMP" Position="7" Type="I/O">
+		<Signal Name="RTC_AF1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC14-OSC32_IN" Position="8" Type="I/O">
+		<Signal Name="RCC_OSC32_IN"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC15-OSC32_OUT" Position="9" Type="I/O">
+		<Signal Name="ADC1_EXTI15"/>
+		<Signal Name="ADC2_EXTI15"/>
+		<Signal Name="ADC3_EXTI15"/>
+		<Signal Name="RCC_OSC32_OUT"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VSS" Position="10" Type="Power"/>
+	<Pin Name="VDD" Position="11" Type="Power"/>
+	<Pin Name="PH0-OSC_IN" Position="12" Type="I/O">
+		<Signal Name="RCC_OSC_IN"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PH1-OSC_OUT" Position="13" Type="I/O">
+		<Signal Name="RCC_OSC_OUT"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="NRST" Position="14" Type="Reset"/>
+	<Pin Name="PC0" Position="15" Type="I/O">
+		<Signal Name="ADC1_IN10"/>
+		<Signal Name="ADC2_IN10"/>
+		<Signal Name="ADC3_IN10"/>
+		<Signal Name="USB_OTG_HS_ULPI_STP"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC1" Position="16" Type="I/O">
+		<Signal Name="ADC1_IN11"/>
+		<Signal Name="ADC2_IN11"/>
+		<Signal Name="ADC3_IN11"/>
+		<Signal Name="ETH_MDC"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC2" Position="17" Type="I/O">
+		<Signal Name="ADC1_IN12"/>
+		<Signal Name="ADC2_IN12"/>
+		<Signal Name="ADC3_IN12"/>
+		<Signal Name="ETH_TXD2"/>
+		<Signal Name="I2S2_ext_SD"/>
+		<Signal Name="SPI2_MISO"/>
+		<Signal Name="USB_OTG_HS_ULPI_DIR"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC3" Position="18" Type="I/O">
+		<Signal Name="ADC1_IN13"/>
+		<Signal Name="ADC2_IN13"/>
+		<Signal Name="ADC3_IN13"/>
+		<Signal Name="ETH_TX_CLK"/>
+		<Signal Name="I2S2_SD"/>
+		<Signal Name="SPI2_MOSI"/>
+		<Signal Name="USB_OTG_HS_ULPI_NXT"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VDD" Position="19" Type="Power"/>
+	<Pin Name="VSSA" Position="20" Type="Power"/>
+	<Pin Name="VREF+" Position="21" Type="Power"/>
+	<Pin Name="VDDA" Position="22" Type="Power"/>
+	<Pin Name="PA0-WKUP" Position="23" Type="I/O">
+		<Signal Name="ADC1_IN0"/>
+		<Signal Name="ADC2_IN0"/>
+		<Signal Name="ADC3_IN0"/>
+		<Signal Name="ETH_CRS"/>
+		<Signal Name="SYS_WKUP"/>
+		<Signal Name="TIM2_CH1"/>
+		<Signal Name="TIM2_ETR"/>
+		<Signal Name="TIM5_CH1"/>
+		<Signal Name="TIM8_ETR"/>
+		<Signal Name="UART4_TX"/>
+		<Signal Name="USART2_CTS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+		<Condition Diagnostic="ETR and CH1 on the same GPIO for TIM2" Expression="(!(TIM2_CH1 &amp; (PA15_S_TIM2_ETR|PA5_S_TIM2_ETR)) &amp; !(TIM2_ETR &amp; (PA15_S_TIM2_CH1|PA5_S_TIM2_CH1)))"/>
+	</Pin>
+	<Pin Name="PA1" Position="24" Type="I/O">
+		<Signal Name="ADC1_IN1"/>
+		<Signal Name="ADC2_IN1"/>
+		<Signal Name="ADC3_IN1"/>
+		<Signal Name="ETH_REF_CLK"/>
+		<Signal Name="ETH_RX_CLK"/>
+		<Signal Name="TIM2_CH2"/>
+		<Signal Name="TIM5_CH2"/>
+		<Signal Name="UART4_RX"/>
+		<Signal Name="USART2_RTS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA2" Position="25" Type="I/O">
+		<Signal Name="ADC1_IN2"/>
+		<Signal Name="ADC2_IN2"/>
+		<Signal Name="ADC3_IN2"/>
+		<Signal Name="ETH_MDIO"/>
+		<Signal Name="TIM2_CH3"/>
+		<Signal Name="TIM5_CH3"/>
+		<Signal Name="TIM9_CH1"/>
+		<Signal Name="USART2_TX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA3" Position="26" Type="I/O">
+		<Signal Name="ADC1_IN3"/>
+		<Signal Name="ADC2_IN3"/>
+		<Signal Name="ADC3_IN3"/>
+		<Signal Name="ETH_COL"/>
+		<Signal Name="TIM2_CH4"/>
+		<Signal Name="TIM5_CH4"/>
+		<Signal Name="TIM9_CH2"/>
+		<Signal Name="USART2_RX"/>
+		<Signal Name="USB_OTG_HS_ULPI_D0"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VSS" Position="27" Type="Power"/>
+	<Pin Name="VDD" Position="28" Type="Power"/>
+	<Pin Name="PA4" Position="29" Type="I/O">
+		<Signal Name="ADC1_IN4"/>
+		<Signal Name="ADC2_IN4"/>
+		<Signal Name="DAC_OUT1"/>
+		<Signal Name="DCMI_HSYNC"/>
+		<Signal Name="I2S3_WS"/>
+		<Signal Name="SPI1_NSS"/>
+		<Signal Name="SPI3_NSS"/>
+		<Signal Name="USART2_CK"/>
+		<Signal Name="USB_OTG_HS_SOF"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA5" Position="30" Type="I/O">
+		<Signal Name="ADC1_IN5"/>
+		<Signal Name="ADC2_IN5"/>
+		<Signal Name="DAC_OUT2"/>
+		<Signal Name="SPI1_SCK"/>
+		<Signal Name="TIM2_CH1"/>
+		<Signal Name="TIM2_ETR"/>
+		<Signal Name="TIM8_CH1N"/>
+		<Signal Name="USB_OTG_HS_ULPI_CK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+		<Condition Diagnostic="ETR and CH1 on the same GPIO for TIM2" Expression="(!(TIM2_CH1 &amp; (PA15_S_TIM2_ETR|PA0_S_TIM2_ETR)) &amp; !(TIM2_ETR &amp; (PA15_S_TIM2_CH1|PA0_S_TIM2_CH1)))"/>
+	</Pin>
+	<Pin Name="PA6" Position="31" Type="I/O">
+		<Signal Name="ADC1_IN6"/>
+		<Signal Name="ADC2_IN6"/>
+		<Signal Name="DCMI_PIXCK"/>
+		<Signal Name="SPI1_MISO"/>
+		<Signal Name="TIM13_CH1"/>
+		<Signal Name="TIM1_BKIN"/>
+		<Signal Name="TIM3_CH1"/>
+		<Signal Name="TIM8_BKIN"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA7" Position="32" Type="I/O">
+		<Signal Name="ADC1_IN7"/>
+		<Signal Name="ADC2_IN7"/>
+		<Signal Name="ETH_CRS_DV"/>
+		<Signal Name="ETH_RX_DV"/>
+		<Signal Name="SPI1_MOSI"/>
+		<Signal Name="TIM14_CH1"/>
+		<Signal Name="TIM1_CH1N"/>
+		<Signal Name="TIM3_CH2"/>
+		<Signal Name="TIM8_CH1N"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC4" Position="33" Type="I/O">
+		<Signal Name="ADC1_IN14"/>
+		<Signal Name="ADC2_IN14"/>
+		<Signal Name="ETH_RXD0"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC5" Position="34" Type="I/O">
+		<Signal Name="ADC1_IN15"/>
+		<Signal Name="ADC2_IN15"/>
+		<Signal Name="ETH_RXD1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB0" Position="35" Type="I/O">
+		<Signal Name="ADC1_IN8"/>
+		<Signal Name="ADC2_IN8"/>
+		<Signal Name="ETH_RXD2"/>
+		<Signal Name="TIM1_CH2N"/>
+		<Signal Name="TIM3_CH3"/>
+		<Signal Name="TIM8_CH2N"/>
+		<Signal Name="USB_OTG_HS_ULPI_D1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB1" Position="36" Type="I/O">
+		<Signal Name="ADC1_IN9"/>
+		<Signal Name="ADC2_IN9"/>
+		<Signal Name="ETH_RXD3"/>
+		<Signal Name="TIM1_CH3N"/>
+		<Signal Name="TIM3_CH4"/>
+		<Signal Name="TIM8_CH3N"/>
+		<Signal Name="USB_OTG_HS_ULPI_D2"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB2" Position="37" Type="I/O">
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE7" Position="38" Type="I/O">
+		<Signal Name="FSMC_D4"/>
+		<Signal Name="FSMC_DA4"/>
+		<Signal Name="TIM1_ETR"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE8" Position="39" Type="I/O">
+		<Signal Name="FSMC_D5"/>
+		<Signal Name="FSMC_DA5"/>
+		<Signal Name="TIM1_CH1N"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE9" Position="40" Type="I/O">
+		<Signal Name="DAC_EXTI9"/>
+		<Signal Name="FSMC_D6"/>
+		<Signal Name="FSMC_DA6"/>
+		<Signal Name="TIM1_CH1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE10" Position="41" Type="I/O">
+		<Signal Name="FSMC_D7"/>
+		<Signal Name="FSMC_DA7"/>
+		<Signal Name="TIM1_CH2N"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE11" Position="42" Type="I/O">
+		<Signal Name="ADC1_EXTI11"/>
+		<Signal Name="ADC2_EXTI11"/>
+		<Signal Name="ADC3_EXTI11"/>
+		<Signal Name="FSMC_D8"/>
+		<Signal Name="FSMC_DA8"/>
+		<Signal Name="TIM1_CH2"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE12" Position="43" Type="I/O">
+		<Signal Name="FSMC_D9"/>
+		<Signal Name="FSMC_DA9"/>
+		<Signal Name="TIM1_CH3N"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE13" Position="44" Type="I/O">
+		<Signal Name="FSMC_D10"/>
+		<Signal Name="FSMC_DA10"/>
+		<Signal Name="TIM1_CH3"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE14" Position="45" Type="I/O">
+		<Signal Name="FSMC_D11"/>
+		<Signal Name="FSMC_DA11"/>
+		<Signal Name="TIM1_CH4"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE15" Position="46" Type="I/O">
+		<Signal Name="ADC1_EXTI15"/>
+		<Signal Name="ADC2_EXTI15"/>
+		<Signal Name="ADC3_EXTI15"/>
+		<Signal Name="FSMC_D12"/>
+		<Signal Name="FSMC_DA12"/>
+		<Signal Name="TIM1_BKIN"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB10" Position="47" Type="I/O">
+		<Signal Name="ETH_RX_ER"/>
+		<Signal Name="I2C2_SCL"/>
+		<Signal Name="I2S2_CK"/>
+		<Signal Name="SPI2_SCK"/>
+		<Signal Name="TIM2_CH3"/>
+		<Signal Name="USART3_TX"/>
+		<Signal Name="USB_OTG_HS_ULPI_D3"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB11" Position="48" Type="I/O">
+		<Signal Name="ADC1_EXTI11"/>
+		<Signal Name="ADC2_EXTI11"/>
+		<Signal Name="ADC3_EXTI11"/>
+		<Signal Name="ETH_TX_EN"/>
+		<Signal Name="I2C2_SDA"/>
+		<Signal Name="TIM2_CH4"/>
+		<Signal Name="USART3_RX"/>
+		<Signal Name="USB_OTG_HS_ULPI_D4"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VCAP_1" Position="49" Type="Power"/>
+	<Pin Name="VDD" Position="50" Type="Power"/>
+	<Pin Name="PB12" Position="51" Type="I/O">
+		<Signal Name="CAN2_RX"/>
+		<Signal Name="ETH_TXD0"/>
+		<Signal Name="I2C2_SMBA"/>
+		<Signal Name="I2S2_WS"/>
+		<Signal Name="SPI2_NSS"/>
+		<Signal Name="TIM1_BKIN"/>
+		<Signal Name="USART3_CK"/>
+		<Signal Name="USB_OTG_HS_ID"/>
+		<Signal Name="USB_OTG_HS_ULPI_D5"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB13" Position="52" Type="I/O">
+		<Signal Name="CAN2_TX"/>
+		<Signal Name="ETH_TXD1"/>
+		<Signal Name="I2S2_CK"/>
+		<Signal Name="SPI2_SCK"/>
+		<Signal Name="TIM1_CH1N"/>
+		<Signal Name="USART3_CTS"/>
+		<Signal Name="USB_OTG_HS_ULPI_D6"/>
+		<Signal Name="USB_OTG_HS_VBUS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB14" Position="53" Type="I/O">
+		<Signal Name="I2S2_ext_SD"/>
+		<Signal Name="SPI2_MISO"/>
+		<Signal Name="TIM12_CH1"/>
+		<Signal Name="TIM1_CH2N"/>
+		<Signal Name="TIM8_CH2N"/>
+		<Signal Name="USART3_RTS"/>
+		<Signal Name="USB_OTG_HS_DM"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB15" Position="54" Type="I/O">
+		<Signal Name="ADC1_EXTI15"/>
+		<Signal Name="ADC2_EXTI15"/>
+		<Signal Name="ADC3_EXTI15"/>
+		<Signal Name="I2S2_SD"/>
+		<Signal Name="RTC_REFIN"/>
+		<Signal Name="SPI2_MOSI"/>
+		<Signal Name="TIM12_CH2"/>
+		<Signal Name="TIM1_CH3N"/>
+		<Signal Name="TIM8_CH3N"/>
+		<Signal Name="USB_OTG_HS_DP"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD8" Position="55" Type="I/O">
+		<Signal Name="FSMC_D13"/>
+		<Signal Name="FSMC_DA13"/>
+		<Signal Name="USART3_TX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD9" Position="56" Type="I/O">
+		<Signal Name="DAC_EXTI9"/>
+		<Signal Name="FSMC_D14"/>
+		<Signal Name="FSMC_DA14"/>
+		<Signal Name="USART3_RX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD10" Position="57" Type="I/O">
+		<Signal Name="FSMC_D15"/>
+		<Signal Name="FSMC_DA15"/>
+		<Signal Name="USART3_CK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD11" Position="58" Type="I/O">
+		<Signal Name="ADC1_EXTI11"/>
+		<Signal Name="ADC2_EXTI11"/>
+		<Signal Name="ADC3_EXTI11"/>
+		<Signal Name="FSMC_A16"/>
+		<Signal Name="FSMC_CLE"/>
+		<Signal Name="USART3_CTS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD12" Position="59" Type="I/O">
+		<Signal Name="FSMC_A17"/>
+		<Signal Name="FSMC_ALE"/>
+		<Signal Name="TIM4_CH1"/>
+		<Signal Name="USART3_RTS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD13" Position="60" Type="I/O">
+		<Signal Name="FSMC_A18"/>
+		<Signal Name="TIM4_CH2"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD14" Position="61" Type="I/O">
+		<Signal Name="FSMC_D0"/>
+		<Signal Name="FSMC_DA0"/>
+		<Signal Name="TIM4_CH3"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD15" Position="62" Type="I/O">
+		<Signal Name="ADC1_EXTI15"/>
+		<Signal Name="ADC2_EXTI15"/>
+		<Signal Name="ADC3_EXTI15"/>
+		<Signal Name="FSMC_D1"/>
+		<Signal Name="FSMC_DA1"/>
+		<Signal Name="TIM4_CH4"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC6" Position="63" Type="I/O">
+		<Signal Name="DCMI_D0"/>
+		<Signal Name="I2S2_MCK"/>
+		<Signal Name="SDIO_D6"/>
+		<Signal Name="TIM3_CH1"/>
+		<Signal Name="TIM8_CH1"/>
+		<Signal Name="USART6_TX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC7" Position="64" Type="I/O">
+		<Signal Name="DCMI_D1"/>
+		<Signal Name="I2S3_MCK"/>
+		<Signal Name="SDIO_D7"/>
+		<Signal Name="TIM3_CH2"/>
+		<Signal Name="TIM8_CH2"/>
+		<Signal Name="USART6_RX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC8" Position="65" Type="I/O">
+		<Signal Name="DCMI_D2"/>
+		<Signal Name="SDIO_D0"/>
+		<Signal Name="TIM3_CH3"/>
+		<Signal Name="TIM8_CH3"/>
+		<Signal Name="USART6_CK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC9" Position="66" Type="I/O">
+		<Signal Name="DAC_EXTI9"/>
+		<Signal Name="DCMI_D3"/>
+		<Signal Name="I2C3_SDA"/>
+		<Signal Name="I2S_CKIN"/>
+		<Signal Name="RCC_MCO_2"/>
+		<Signal Name="SDIO_D1"/>
+		<Signal Name="TIM3_CH4"/>
+		<Signal Name="TIM8_CH4"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA8" Position="67" Type="I/O">
+		<Signal Name="I2C3_SCL"/>
+		<Signal Name="RCC_MCO_1"/>
+		<Signal Name="TIM1_CH1"/>
+		<Signal Name="USART1_CK"/>
+		<Signal Name="USB_OTG_FS_SOF"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA9" Position="68" Type="I/O">
+		<Signal Name="DAC_EXTI9"/>
+		<Signal Name="DCMI_D0"/>
+		<Signal Name="I2C3_SMBA"/>
+		<Signal Name="TIM1_CH2"/>
+		<Signal Name="USART1_TX"/>
+		<Signal Name="USB_OTG_FS_VBUS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA10" Position="69" Type="I/O">
+		<Signal Name="DCMI_D1"/>
+		<Signal Name="TIM1_CH3"/>
+		<Signal Name="USART1_RX"/>
+		<Signal Name="USB_OTG_FS_ID"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA11" Position="70" Type="I/O">
+		<Signal Name="ADC1_EXTI11"/>
+		<Signal Name="ADC2_EXTI11"/>
+		<Signal Name="ADC3_EXTI11"/>
+		<Signal Name="CAN1_RX"/>
+		<Signal Name="TIM1_CH4"/>
+		<Signal Name="USART1_CTS"/>
+		<Signal Name="USB_OTG_FS_DM"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA12" Position="71" Type="I/O">
+		<Signal Name="CAN1_TX"/>
+		<Signal Name="TIM1_ETR"/>
+		<Signal Name="USART1_RTS"/>
+		<Signal Name="USB_OTG_FS_DP"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA13" Position="72" Type="I/O">
+		<Signal Name="SYS_JTMS-SWDIO"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VCAP_2" Position="73" Type="Power"/>
+	<Pin Name="VSS" Position="74" Type="Power"/>
+	<Pin Name="VDD" Position="75" Type="Power"/>
+	<Pin Name="PA14" Position="76" Type="I/O">
+		<Signal Name="SYS_JTCK-SWCLK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PA15" Position="77" Type="I/O">
+		<Signal Name="ADC1_EXTI15"/>
+		<Signal Name="ADC2_EXTI15"/>
+		<Signal Name="ADC3_EXTI15"/>
+		<Signal Name="I2S3_WS"/>
+		<Signal Name="SPI1_NSS"/>
+		<Signal Name="SPI3_NSS"/>
+		<Signal Name="SYS_JTDI"/>
+		<Signal Name="TIM2_CH1"/>
+		<Signal Name="TIM2_ETR"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+		<Condition Diagnostic="ETR and CH1 on the same GPIO for TIM2" Expression="(!(TIM2_CH1 &amp; (PA5_S_TIM2_ETR|PA0_S_TIM2_ETR)) &amp; !(TIM2_ETR &amp; (PA5_S_TIM2_CH1|PA0_S_TIM2_CH1)))"/>
+	</Pin>
+	<Pin Name="PC10" Position="78" Type="I/O">
+		<Signal Name="DCMI_D8"/>
+		<Signal Name="I2S3_CK"/>
+		<Signal Name="SDIO_D2"/>
+		<Signal Name="SPI3_SCK"/>
+		<Signal Name="UART4_TX"/>
+		<Signal Name="USART3_TX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC11" Position="79" Type="I/O">
+		<Signal Name="ADC1_EXTI11"/>
+		<Signal Name="ADC2_EXTI11"/>
+		<Signal Name="ADC3_EXTI11"/>
+		<Signal Name="DCMI_D4"/>
+		<Signal Name="I2S3_ext_SD"/>
+		<Signal Name="SDIO_D3"/>
+		<Signal Name="SPI3_MISO"/>
+		<Signal Name="UART4_RX"/>
+		<Signal Name="USART3_RX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PC12" Position="80" Type="I/O">
+		<Signal Name="DCMI_D9"/>
+		<Signal Name="I2S3_SD"/>
+		<Signal Name="SDIO_CK"/>
+		<Signal Name="SPI3_MOSI"/>
+		<Signal Name="UART5_TX"/>
+		<Signal Name="USART3_CK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD0" Position="81" Type="I/O">
+		<Signal Name="CAN1_RX"/>
+		<Signal Name="FSMC_D2"/>
+		<Signal Name="FSMC_DA2"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD1" Position="82" Type="I/O">
+		<Signal Name="CAN1_TX"/>
+		<Signal Name="FSMC_D3"/>
+		<Signal Name="FSMC_DA3"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD2" Position="83" Type="I/O">
+		<Signal Name="DCMI_D11"/>
+		<Signal Name="SDIO_CMD"/>
+		<Signal Name="TIM3_ETR"/>
+		<Signal Name="UART5_RX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD3" Position="84" Type="I/O">
+		<Signal Name="FSMC_CLK"/>
+		<Signal Name="USART2_CTS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD4" Position="85" Type="I/O">
+		<Signal Name="FSMC_NOE"/>
+		<Signal Name="USART2_RTS"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD5" Position="86" Type="I/O">
+		<Signal Name="FSMC_NWE"/>
+		<Signal Name="USART2_TX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD6" Position="87" Type="I/O">
+		<Signal Name="FSMC_NWAIT"/>
+		<Signal Name="USART2_RX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PD7" Position="88" Type="I/O">
+		<Signal Name="FSMC_NCE2"/>
+		<Signal Name="FSMC_NE1"/>
+		<Signal Name="USART2_CK"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB3" Position="89" Type="I/O">
+		<Signal Name="I2S3_CK"/>
+		<Signal Name="SPI1_SCK"/>
+		<Signal Name="SPI3_SCK"/>
+		<Signal Name="SYS_JTDO-SWO"/>
+		<Signal Name="TIM2_CH2"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB4" Position="90" Type="I/O">
+		<Signal Name="I2S3_ext_SD"/>
+		<Signal Name="SPI1_MISO"/>
+		<Signal Name="SPI3_MISO"/>
+		<Signal Name="SYS_JTRST"/>
+		<Signal Name="TIM3_CH1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB5" Position="91" Type="I/O">
+		<Signal Name="CAN2_RX"/>
+		<Signal Name="DCMI_D10"/>
+		<Signal Name="ETH_PPS_OUT"/>
+		<Signal Name="I2C1_SMBA"/>
+		<Signal Name="I2S3_SD"/>
+		<Signal Name="SPI1_MOSI"/>
+		<Signal Name="SPI3_MOSI"/>
+		<Signal Name="TIM3_CH2"/>
+		<Signal Name="USB_OTG_HS_ULPI_D7"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB6" Position="92" Type="I/O">
+		<Signal Name="CAN2_TX"/>
+		<Signal Name="DCMI_D5"/>
+		<Signal Name="I2C1_SCL"/>
+		<Signal Name="TIM4_CH1"/>
+		<Signal Name="USART1_TX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB7" Position="93" Type="I/O">
+		<Signal Name="DCMI_VSYNC"/>
+		<Signal Name="FSMC_NL"/>
+		<Signal Name="I2C1_SDA"/>
+		<Signal Name="TIM4_CH2"/>
+		<Signal Name="USART1_RX"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="BOOT0" Position="94" Type="Boot"/>
+	<Pin Name="PB8" Position="95" Type="I/O">
+		<Signal Name="CAN1_RX"/>
+		<Signal Name="DCMI_D6"/>
+		<Signal Name="ETH_TXD3"/>
+		<Signal Name="I2C1_SCL"/>
+		<Signal Name="SDIO_D4"/>
+		<Signal Name="TIM10_CH1"/>
+		<Signal Name="TIM4_CH3"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PB9" Position="96" Type="I/O">
+		<Signal Name="CAN1_TX"/>
+		<Signal Name="DAC_EXTI9"/>
+		<Signal Name="DCMI_D7"/>
+		<Signal Name="I2C1_SDA"/>
+		<Signal Name="I2S2_WS"/>
+		<Signal Name="SDIO_D5"/>
+		<Signal Name="SPI2_NSS"/>
+		<Signal Name="TIM11_CH1"/>
+		<Signal Name="TIM4_CH4"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE0" Position="97" Type="I/O">
+		<Signal Name="DCMI_D2"/>
+		<Signal Name="FSMC_NBL0"/>
+		<Signal Name="TIM4_ETR"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="PE1" Position="98" Type="I/O">
+		<Signal Name="DCMI_D3"/>
+		<Signal Name="FSMC_NBL1"/>
+		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+	</Pin>
+	<Pin Name="VSS" Position="99" Type="Power"/>
+	<Pin Name="VDD" Position="100" Type="Power"/>
+</Mcu>

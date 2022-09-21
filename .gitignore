@@ -1,0 +1,4 @@
+.vs/
+build/
+out/
+megalinter-reports/
