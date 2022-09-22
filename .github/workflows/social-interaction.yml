@@ -3,6 +3,9 @@ name: Social Interaction
 
 on: [pull_request, issues]
 
+permissions:
+  contents: read
+
 jobs:
   greeting:
     runs-on: ubuntu-latest
@@ -10,7 +13,7 @@ jobs:
       issues: write
       pull-requests: write
     steps:
-      - uses: actions/first-interaction@v1
+      - uses: actions/first-interaction@bd33205aa5c96838e10fd65df0d01efd613677c1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: "Thank you for adding your first issue. We will be looking into it as soon as possible."
