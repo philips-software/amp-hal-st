@@ -1,4 +1,4 @@
-if (${TARGET_MCU_VENDOR} STREQUAL st AND "${TARGET_MCU_FAMILY}" STREQUAL stm32wbxx)
+if ("${TARGET_MCU_VENDOR}" STREQUAL st AND "${TARGET_MCU_FAMILY}" STREQUAL stm32wbxx)
 
     add_library(hal_st.ble_middleware EXCLUDE_FROM_ALL STATIC)
     install(TARGETS hal_st.ble_middleware EXPORT halStTargets)

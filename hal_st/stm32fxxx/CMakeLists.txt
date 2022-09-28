@@ -78,7 +78,7 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:WatchDogStm.hpp>
 )
 
-if (${TARGET_MCU_VENDOR} STREQUAL st)
+if ("${TARGET_MCU_VENDOR}" STREQUAL st)
     if (${TARGET_MCU} STREQUAL stm32f372)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F373_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F373C(8-B-C)Tx.xml")
