@@ -23,19 +23,19 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@v6
+        uses: oxsecurity/megalinter@bd931465299fd65a0fb91d8ab8ef04419e3b198e
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Linter artifacts
         if: ${{ success() }} || ${{ failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
         with:
           name: linter
           path: |
             megalinter-reports
-      - uses: reviewdog/action-suggester@v1.6
-        with:
-          tool_name: MegaLinter
-          filter_mode: diff_context
+#      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e
+#        with:
+#          tool_name: MegaLinter
+#          filter_mode: diff_context
