@@ -25,7 +25,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@bd931465299fd65a0fb91d8ab8ef04419e3b198e
+        uses: oxsecurity/megalinter@67c177017bab4c22f1bb7b06dad6f6f14df18b88
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
