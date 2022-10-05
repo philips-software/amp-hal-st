@@ -1,7 +1,7 @@
 add_library(hal_st.std_periph_stm32wbxx EXCLUDE_FROM_ALL STATIC)
 install(TARGETS hal_st.std_periph_stm32wbxx EXPORT halStTargets)
 
-target_include_directories(hal_st.std_periph_stm32wbxx PUBLIC
+target_include_directories(hal_st.std_periph_stm32wbxx SYSTEM PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc>"
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc/cmsis>"
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/inc/stm32wb-hal>"

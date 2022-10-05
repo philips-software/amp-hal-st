@@ -1,0 +1,32 @@
+---
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  embedded_build:
+    name: Embedded Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        gcc: ["8-2019-q3", "9-2020-q2", "10.3-2021.10"]
+        configuration: ["RelWithDebInfo"]
+    steps:
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
+        uses: carlosperate/arm-none-eabi-gcc-action@828dd7ce6ea122338b9bafd5d9969de1b5dfbfe2
+        with:
+          release: ${{ matrix.gcc }}
+      - uses: seanmiddleditch/gha-setup-ninja@16b940825621068d98711680b6c3ff92201f8fc0
+      - uses: hendrikmuhs/ccache-action@ed038da2f2f09b0c8387c00e1498290a4808da2e
+        with:
+          key: ${{ matrix.gcc }}-${{ matrix.configuration }}
+      - run: |
+          cmake --preset host -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build --preset host-${{ matrix.configuration }}
+          cmake --preset stm32f767 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build --preset stm32f767-${{ matrix.configuration }}
