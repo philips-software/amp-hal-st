@@ -39,17 +39,17 @@
   ],
   "buildPresets": [
     {
-      "name": "Host-Debug",
+      "name": "host-Debug",
       "configuration": "Debug",
       "configurePreset": "host"
     },
     {
-      "name": "Host-RelWithDebInfo",
+      "name": "host-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "host"
     },
     {
-      "name": "Host-MinSizeRel",
+      "name": "host-MinSizeRel",
       "configuration": "MinSizeRel",
       "configurePreset": "host"
     },
