@@ -26,6 +26,7 @@ jobs:
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}
       - run: |
+          apt-get update && apt-get install --no-install-recommends -y xsltproc
           cmake --preset host -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build --preset host-${{ matrix.configuration }}
           cmake --preset stm32f767 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
