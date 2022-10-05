@@ -4,8 +4,8 @@ BLE LLD is a radio communication layer. It relies on BLE radio hardware, but it 
 BLE LLD provides a light and simple layer to develop proprietary protocols and applications.
 
 Two layers are available:
- - LLD with full features
- - HAL with simple API
+- LLD with full features
+- HAL with simple API
 
 # Architecture
 ```
@@ -40,26 +40,26 @@ core                   ┌───▼───┐
 ```
 
 On appli core:
- - Application is the user program using a custom radio protocol
- - HAL is a wrapper based on LLD for simple communications
- - LLD is the layer for full features communications
- - LLD proxy packs/unpacks data and commands to/from radio core
+- Application is the user program using a custom radio protocol
+- HAL is a wrapper based on LLD for simple communications
+- LLD is the layer for full features communications
+- LLD proxy packs/unpacks data and commands to/from radio core
 
 On radio core:
- - LLD proxy packs/unpacks data and commands to/from appli core
- - LLD provides the radio abstraction
- - BLE radio is the RF hardware
+- LLD proxy packs/unpacks data and commands to/from appli core
+- LLD provides the radio abstraction
+- BLE radio is the RF hardware
 
 ## Dual core
 BLE LLD is designed to run on a dual core hardware:
- - Application core runs user code
- - Radio core runs private code dedicated to radio management
+- Application core runs user code
+- Radio core runs private code dedicated to radio management
 
 The software communication layer between both core is called IPCC. This transport layer is decoupled from BLE LLD.
 
 This architecture brings some important constraints:
- - no application code runs on radio core
- - it takes a long time to run application code after a radio event
+- no application code runs on radio core
+- it takes a long time to run application code after a radio event
 
 To help implement fast radio operations sequences despite those constraints, "action packets" can be chained by the radio core. This chaining is configured by the application.
 
@@ -111,8 +111,8 @@ Before packets exchange with HAL, it must be initialized with `HAL_BLE_LLD_Init(
 
 ### Communication
 Two set of functions are available:
- - without ACK: the radio transmits/receives just one packet
- - with ACK: the radio transmits/receives one packet, then another packet goes in the opposite direction
+- without ACK: the radio transmits/receives just one packet
+- with ACK: the radio transmits/receives one packet, then another packet goes in the opposite direction
 
 "With ACK" functions can be used to detect packet loss, thus they can be used to implement a reliable communication channel with retransmissions of lost packets.
 
@@ -121,10 +121,10 @@ LLD is the layer that exposes all the features supported by the radio core. Its 
 
 ### Configuration
 Before packets exchange with LLD, it must be initialized with `BLE_LLD_Init()` then configured with:
- - `BLE_LLD_SetChannel()`
- - `BLE_LLD_SetTxAttributes()`
- - `BLE_LLD_SetTxPower()`
- - `BLE_LLD_SetTx_Rx_Phy()`
+- `BLE_LLD_SetChannel()`
+- `BLE_LLD_SetTxAttributes()`
+- `BLE_LLD_SetTxPower()`
+- `BLE_LLD_SetTx_Rx_Phy()`
 
 ### Communication
 With LLD API, user is responsible for the configuration of each action packet.
