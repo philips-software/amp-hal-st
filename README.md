@@ -30,7 +30,7 @@ FetchContent_Declare(
 
 FetchContent_Declare(
     halst
-    GIT_REPOSITORY https://github.com/philips-internal/amp-hal-st.git
+    GIT_REPOSITORY https://github.com/philips-software/amp-hal-st.git
     GIT_TAG        main
 )
 
