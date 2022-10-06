@@ -12,8 +12,10 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - uses: actions/first-interaction@bd33205aa5c96838e10fd65df0d01efd613677c1
+        continue-on-error: true
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           issue-message: "Thank you for adding your first issue. We will be looking into it as soon as possible."

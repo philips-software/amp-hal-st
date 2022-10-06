@@ -19,11 +19,11 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@bd931465299fd65a0fb91d8ab8ef04419e3b198e
+        uses: oxsecurity/megalinter@88a858eca0d241a5611b234a1b331771bd5335f3
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
@@ -35,6 +35,7 @@ jobs:
           name: linter
           path: |
             megalinter-reports
+
 #      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e
 #        with:
 #          tool_name: MegaLinter
