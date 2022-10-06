@@ -2,8 +2,6 @@
 name: Linting & Formatting
 
 on:
-  push:
-    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -25,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@bd931465299fd65a0fb91d8ab8ef04419e3b198e
+        uses: oxsecurity/megalinter@88a858eca0d241a5611b234a1b331771bd5335f3
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
@@ -40,5 +38,5 @@ jobs:
 
 #      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e
 #        with:
-#          tool_name: reviewdog-suggester
+#          tool_name: MegaLinter
 #          filter_mode: diff_context
