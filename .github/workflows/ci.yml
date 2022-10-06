@@ -7,6 +7,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+
 jobs:
   embedded_build:
     name: Embedded Build
@@ -27,6 +30,7 @@ jobs:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}
       - run: |
           sudo apt-get update && sudo apt-get install --no-install-recommends -y xsltproc
+          echo "::add-matcher::.github/matchers/gcc-problem-matcher.json"
           cmake --preset host -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build --preset host-${{ matrix.configuration }}
           cmake --preset stm32f767 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
