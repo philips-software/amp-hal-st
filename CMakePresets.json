@@ -2,7 +2,7 @@
   "version": 3,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 21,
+    "minor": 24,
     "patch": 0
   },
   "configurePresets": [
@@ -44,6 +44,11 @@
       "configurePreset": "host"
     },
     {
+      "name": "host-Release",
+      "configuration": "Release",
+      "configurePreset": "host"
+    },
+    {
       "name": "host-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "host"
@@ -56,6 +61,11 @@
     {
       "name": "stm32f767-Debug",
       "configuration": "Debug",
+      "configurePreset": "stm32f767"
+    },
+    {
+      "name": "stm32f767-Release",
+      "configuration": "Release",
       "configurePreset": "stm32f767"
     },
     {
