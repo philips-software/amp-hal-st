@@ -82,6 +82,21 @@ namespace hal
         TL_Enable();
     }
 
+    SystemTransportLayer::Version SystemTransportLayer::GetVersion() const
+    {
+        WirelessFwInfo_t wirelessInfo;
+        SHCI_GetWirelessFwInfo(&wirelessInfo);
+
+        return {wirelessInfo.VersionMajor,
+                wirelessInfo.VersionMinor,
+                wirelessInfo.VersionSub,
+                wirelessInfo.VersionReleaseType,
+                wirelessInfo.FusVersionMajor,
+                wirelessInfo.FusVersionMinor,
+                wirelessInfo.FusVersionSub,
+        };
+    }
+
     void SystemTransportLayer::HandleErrorNotifyEvent(TL_AsynchEvt_t* SysEvent)
     {}
 

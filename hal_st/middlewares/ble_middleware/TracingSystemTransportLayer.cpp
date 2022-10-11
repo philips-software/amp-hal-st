@@ -19,12 +19,12 @@ namespace hal
 
     void TracingSystemTransportLayer::UserEventHandler(void* pPayload)
     {
-        WirelessFwInfo_t wirelessInfo;
+        const auto transportLayerVersion = GetVersion();
 
-        SHCI_GetWirelessFwInfo(&wirelessInfo);
-        tracer.Trace() << "Wireless Firmware version: " << wirelessInfo.VersionMajor << "." << wirelessInfo.VersionMinor << "." << wirelessInfo.VersionSub;
-        tracer.Trace() << "Wireless Firmware build: " << wirelessInfo.VersionReleaseType;
-        tracer.Trace() << "FUS version: " << wirelessInfo.FusVersionMajor << "." << wirelessInfo.FusVersionMinor << "." << wirelessInfo.FusVersionSub;
+        tracer.Trace() << "Wireless Firmware version: " << transportLayerVersion.firmwareMajor << "." << transportLayerVersion.firmwareMinor << "." << transportLayerVersion.firmwareSub;
+        tracer.Trace() << "Wireless Firmware build: " << transportLayerVersion.firmwareReleaseType;
+        tracer.Trace() << "FUS version: " << transportLayerVersion.fusMajor << "." << transportLayerVersion.fusMinor << "." << transportLayerVersion.fusSub;
+
         SystemTransportLayer::UserEventHandler(pPayload);
     }
 

@@ -14,7 +14,22 @@ namespace hal
         , public HciEventSource
     {
     public:
+        struct Version
+        {
+            uint8_t firmwareMajor;
+            uint8_t firmwareMinor;
+            uint8_t firmwareSub;
+            uint8_t firmwareReleaseType;
+
+            uint8_t fusMajor;
+            uint8_t fusMinor;
+            uint8_t fusSub;
+        };
+
+    public:
         SystemTransportLayer(const infra::Function<void()>& protocolStackInitialized);
+
+        Version GetVersion() const;
 
         virtual void UserEventHandler(void* payload);
         virtual void HciEventHandler(hci_event_pckt& event);
