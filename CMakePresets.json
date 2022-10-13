@@ -1,0 +1,82 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "defaults",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
+        "HALST_BUILD_EXAMPLES": true
+      }
+    },
+    {
+      "name": "host",
+      "displayName": "host",
+      "description": "Build required tools for host",
+      "inherits": "defaults"
+    },
+    {
+      "name": "stm32f767",
+      "displayName": "stm32f767",
+      "description": "Build for stm32f767",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/examples/toolchain-arm-gcc.cmake",
+      "cacheVariables": {
+        "emil_DIR": "${sourceDir}/build/host/_deps/emil-build/cmake",
+        "EMIL_GENERATE_PACKAGE_CONFIG": false,
+        "TARGET_MCU": "stm32f767",
+        "TARGET_MCU_FAMILY": "stm32f7xx",
+        "TARGET_BUILD_CORTEX": true
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "host-Debug",
+      "configuration": "Debug",
+      "configurePreset": "host"
+    },
+    {
+      "name": "host-Release",
+      "configuration": "Release",
+      "configurePreset": "host"
+    },
+    {
+      "name": "host-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "host"
+    },
+    {
+      "name": "host-MinSizeRel",
+      "configuration": "MinSizeRel",
+      "configurePreset": "host"
+    },
+    {
+      "name": "stm32f767-Debug",
+      "configuration": "Debug",
+      "configurePreset": "stm32f767"
+    },
+    {
+      "name": "stm32f767-Release",
+      "configuration": "Release",
+      "configurePreset": "stm32f767"
+    },
+    {
+      "name": "stm32f767-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32f767"
+    },
+    {
+      "name": "stm32f767-MinSizeRel",
+      "configuration": "MinSizeRel",
+      "configurePreset": "stm32f767"
+    }
+  ]
+}
