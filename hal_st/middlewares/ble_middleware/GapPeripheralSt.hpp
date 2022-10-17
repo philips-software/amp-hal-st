@@ -48,6 +48,7 @@ namespace hal
 
         void SetPublicAddress(const hal::MacAddress& address);
         void UpdateState(services::GapPeripheralState newstate);
+        void RequestConnectionParameterUpdate();
 
         void HciGapGattInit();
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
@@ -89,6 +90,11 @@ namespace hal
         const uint8_t mitmMode = 0x00;
         const uint8_t secureConnectionSupport = 0x01;
         const uint8_t keypressNotificationSupport = 0x00;
+        
+        const uint16_t minConnectionInterval = 0x0006;
+        const uint16_t maxConnectionInterval = minConnectionInterval;
+        const uint16_t slaveLatency = 0;
+        const uint16_t supervisionTimeout = 500;
 
         const uint8_t identityRootKey[16] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
         const uint8_t encryptionRootKey[16] = { 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21, 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21 };

@@ -27,6 +27,7 @@ namespace hal
         tracer.Trace() << "Connection update event";
         tracer.Trace() << "Connection Interval  : " << evtConnectionUpdate->Conn_Interval;
         tracer.Trace() << "Connection Latency   : " << evtConnectionUpdate->Conn_Latency;
+        tracer.Trace() << "Supervision Timeout   : " << evtConnectionUpdate->Supervision_Timeout;
         GapPeripheralSt::HandleHciLeConnectionUpdateEvent(metaEvent);
     }
 

@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "services/tracer/GlobalTracer.hpp"
 
 namespace
 {
@@ -109,6 +110,11 @@ namespace hal
         infra::EventDispatcher::Instance().Schedule([this]() { GapPeripheral::NotifyObservers([this](auto& obs) { obs.StateUpdated(state); }); });
     }
 
+    void GapPeripheralSt::RequestConnectionParameterUpdate()
+    {
+        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle, minConnectionInterval, maxConnectionInterval, slaveLatency, supervisionTimeout);
+    }
+
     void GapPeripheralSt::Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
@@ -189,6 +195,9 @@ namespace hal
         std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(address));
  
         connectionContext.connectionHandle = connectionCompleteEvt->Connection_Handle;
+
+        RequestConnectionParameterUpdate();
+
         connectionContext.peerAddressType = connectionCompleteEvt->Peer_Address_Type;
         std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
 
