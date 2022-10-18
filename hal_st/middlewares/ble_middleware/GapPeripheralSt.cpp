@@ -1,6 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include "services/tracer/GlobalTracer.hpp"
 
 namespace
 {
