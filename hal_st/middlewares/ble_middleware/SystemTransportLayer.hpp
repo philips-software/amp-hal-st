@@ -27,7 +27,7 @@ namespace hal
         };
 
     public:
-        SystemTransportLayer(const infra::Function<void()>& protocolStackInitialized);
+        SystemTransportLayer(const infra::Function<void(uint32_t*)>& protocolStackInitialized);
 
         Version GetVersion() const;
 
@@ -49,7 +49,7 @@ namespace hal
         void MemoryChannelInit();
 
     private:
-        infra::Function<void()> protocolStackInitialized;
+        infra::Function<void(uint32_t*)> protocolStackInitialized;
     };
 }
 

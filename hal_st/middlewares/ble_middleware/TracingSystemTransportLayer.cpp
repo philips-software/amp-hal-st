@@ -12,7 +12,7 @@ extern "C"
 
 namespace hal
 {
-    TracingSystemTransportLayer::TracingSystemTransportLayer(const infra::Function<void()>& protoStackInit, services::Tracer& tracer)
+    TracingSystemTransportLayer::TracingSystemTransportLayer(const infra::Function<void(uint32_t*)>& protoStackInit, services::Tracer& tracer)
         : SystemTransportLayer(protoStackInit)
         , tracer(tracer)
     {}

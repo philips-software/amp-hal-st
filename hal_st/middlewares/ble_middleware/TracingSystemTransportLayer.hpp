@@ -10,7 +10,7 @@ namespace hal
         : public SystemTransportLayer
     {
     public:
-        TracingSystemTransportLayer(const infra::Function<void()>& protoStackInit, services::Tracer& tracer);
+        TracingSystemTransportLayer(const infra::Function<void(uint32_t*)>& protoStackInit, services::Tracer& tracer);
 
     protected:
         virtual void UserEventHandler(void* pPayload) override;

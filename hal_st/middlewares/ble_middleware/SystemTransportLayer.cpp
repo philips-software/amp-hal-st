@@ -33,32 +33,34 @@ namespace
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
     const uint16_t bleEventFrameSize = TL_EVT_HDR_SIZE + tlBleMaxEventPayloadSize;
     const uint32_t poolSize = bleEventQueueLength * 4u * DIVC(( sizeof(TL_PacketHeader_t) + bleEventFrameSize ), 4u);
+    const uint32_t bleBondsStorageLength = 507;
 
     // Buffers to be used by the mailbox to report the events
-    [[gnu::section("MB_MEM2")]] alignas(4) static uint8_t evtPool[poolSize];
-    [[gnu::section("MB_MEM2")]] alignas(4) static uint8_t systemSpareEvtBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
-    [[gnu::section("MB_MEM2")]] alignas(4) static uint8_t bleSpareEvtBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
+    [[gnu::section("MB_MEM2")]] alignas(4) uint8_t evtPool[poolSize];
+    [[gnu::section("MB_MEM2")]] alignas(4) uint8_t systemSpareEvtBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
+    [[gnu::section("MB_MEM2")]] alignas(4) uint8_t bleSpareEvtBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
+    [[gnu::section("MB_MEM2")]] uint32_t bleBondsStorage[bleBondsStorageLength];
 
     // Buffer to be used by the mailbox driver to send a BLE command
-    [[gnu::section("MB_MEM2")]] alignas(4) static TL_CmdPacket_t systemCmdBuffer;
-    [[gnu::section("MB_MEM1")]] alignas(4) static TL_CmdPacket_t bleCmdBuffer;
+    [[gnu::section("MB_MEM2")]] alignas(4) TL_CmdPacket_t systemCmdBuffer;
+    [[gnu::section("MB_MEM1")]] alignas(4) TL_CmdPacket_t bleCmdBuffer;
 
     // This is the registered callback in shci_init() to acknowledge if a system command can be 
     // sent. It must be used in a multi-thread application where system commands may be sent 
     // from different threads
-    static void ShciCommandStatus(SHCI_TL_CmdStatus_t status)
+    void ShciCommandStatus(SHCI_TL_CmdStatus_t status)
     {}
 
     // To be used in a multi-thread application where the BLE commands may be sent from different threads
-    static void HciCommandStatus(HCI_TL_CmdStatus_t status)
+    void HciCommandStatus(HCI_TL_CmdStatus_t status)
     {}
 
-    static void ShciUserEventHandler(void* payload)
+    void ShciUserEventHandler(void* payload)
     {
         hal::SystemTransportLayer::Instance().UserEventHandler(payload);
     }
 
-    static void HciUserEventHandler(void* payload)
+    void HciUserEventHandler(void* payload)
     {
         auto pParam = static_cast<tHCI_UserEvtRxParam*>(payload);
         auto svctlReturnStatus = SVCCTL_UserEvtRx(static_cast<void*>(&(pParam->pckt->evtserial)));
@@ -72,7 +74,7 @@ namespace
 
 namespace hal
 {
-    SystemTransportLayer::SystemTransportLayer(const infra::Function<void()>& protocolStackInitialized)
+    SystemTransportLayer::SystemTransportLayer(const infra::Function<void(uint32_t*)>& protocolStackInitialized)
         : protocolStackInitialized(protocolStackInitialized)
     {
         TL_Init();
@@ -128,7 +130,7 @@ namespace hal
 
     void SystemTransportLayer::HandleWirelessFwEvent(void* payload)
     {
-        protocolStackInitialized();
+        protocolStackInitialized(bleBondsStorage);
     }
 
     void SystemTransportLayer::HandleFusFwEvent(void* payload)
