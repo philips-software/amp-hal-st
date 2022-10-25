@@ -12,8 +12,8 @@ extern "C"
 
 namespace hal
 {
-    TracingSystemTransportLayer::TracingSystemTransportLayer(const infra::Function<void(uint32_t*)>& protoStackInit, services::Tracer& tracer)
-        : SystemTransportLayer(protoStackInit)
+    TracingSystemTransportLayer::TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer)
+        : SystemTransportLayer(flashStorage, protocolStackInitialized)
         , tracer(tracer)
     {}
 
@@ -38,6 +38,13 @@ namespace hal
     {
         tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_ERROR_NOTIF";
         SystemTransportLayer::HandleErrorNotifyEvent(sysEvent);
+    }
+
+    void TracingSystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
+    {
+        auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(sysEvent->payload);
+        tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : start: " << bleNvmRamUpdateEvent.StartAddress << ", size:" << bleNvmRamUpdateEvent.Size;
+        SystemTransportLayer::HandleBleNvmRamUpdateEvent(sysEvent);
     }
 
     void TracingSystemTransportLayer::HandleUnknownEvent(TL_AsynchEvt_t* sysEvent)

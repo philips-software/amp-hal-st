@@ -74,8 +74,9 @@ namespace
 
 namespace hal
 {
-    SystemTransportLayer::SystemTransportLayer(const infra::Function<void(uint32_t*)>& protocolStackInitialized)
-        : protocolStackInitialized(protocolStackInitialized)
+    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
+        : persistingBondStorage(flashStorage, infra::MakeByteRange(bleBondsStorage))
+        , protocolStackInitialized(protocolStackInitialized)
     {
         TL_Init();
         ShciInit();
@@ -102,6 +103,11 @@ namespace hal
     void SystemTransportLayer::HandleErrorNotifyEvent(TL_AsynchEvt_t* SysEvent)
     {}
 
+    void SystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
+    {
+        persistingBondStorage.Update();
+    }
+
     void SystemTransportLayer::HandleUnknownEvent(TL_AsynchEvt_t* SysEvent)
     {}
 
@@ -116,6 +122,9 @@ namespace hal
             break;
         case SHCI_SUB_EVT_ERROR_NOTIF:
             HandleErrorNotifyEvent(event);
+            break;
+        case SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE:
+            HandleBleNvmRamUpdateEvent(event);
             break;
         default:
             HandleUnknownEvent(event);

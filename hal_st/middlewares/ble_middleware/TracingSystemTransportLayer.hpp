@@ -10,12 +10,13 @@ namespace hal
         : public SystemTransportLayer
     {
     public:
-        TracingSystemTransportLayer(const infra::Function<void(uint32_t*)>& protoStackInit, services::Tracer& tracer);
+        TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer);
 
     protected:
         virtual void UserEventHandler(void* pPayload) override;
         virtual void HandleReadyEvent(void* pPayload) override;
         virtual void HandleErrorNotifyEvent(TL_AsynchEvt_t* sysEvent) override;
+        virtual void HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent) override;
         virtual void HandleUnknownEvent(TL_AsynchEvt_t* sysEvent) override;
 
         virtual void HandleWirelessFwEvent(void* pPayload) override;

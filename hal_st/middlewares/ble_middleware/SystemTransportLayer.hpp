@@ -6,6 +6,7 @@
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
 #include "interface/patterns/ble_thread/tl/tl.h"
+#include "services/ble/PersistingBondStorage.hpp"
 
 namespace hal
 {
@@ -27,7 +28,7 @@ namespace hal
         };
 
     public:
-        SystemTransportLayer(const infra::Function<void(uint32_t*)>& protocolStackInitialized);
+        SystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized);
 
         Version GetVersion() const;
 
@@ -37,6 +38,7 @@ namespace hal
     protected:
         virtual void HandleReadyEvent(void* payload);
         virtual void HandleErrorNotifyEvent(TL_AsynchEvt_t* event);
+        virtual void HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent);
         virtual void HandleUnknownEvent(TL_AsynchEvt_t* event);
 
         virtual void HandleWirelessFwEvent(void* payload);
@@ -49,6 +51,7 @@ namespace hal
         void MemoryChannelInit();
 
     private:
+        services::PersistingBondStorage persistingBondStorage;
         infra::Function<void(uint32_t*)> protocolStackInitialized;
     };
 }
