@@ -19,18 +19,18 @@ namespace hal
 
     void TracingSystemTransportLayer::UserEventHandler(void* pPayload)
     {
-        const auto transportLayerVersion = GetVersion();
-
-        tracer.Trace() << "Wireless Firmware version: " << transportLayerVersion.firmwareMajor << "." << transportLayerVersion.firmwareMinor << "." << transportLayerVersion.firmwareSub;
-        tracer.Trace() << "Wireless Firmware build: " << transportLayerVersion.firmwareReleaseType;
-        tracer.Trace() << "FUS version: " << transportLayerVersion.fusMajor << "." << transportLayerVersion.fusMinor << "." << transportLayerVersion.fusSub;
-
         SystemTransportLayer::UserEventHandler(pPayload);
     }
 
     void TracingSystemTransportLayer::HandleReadyEvent(void* pPayload)
     {
+        const auto transportLayerVersion = GetVersion();
+
+        tracer.Trace() << "Wireless Firmware version: " << transportLayerVersion.firmwareMajor << "." << transportLayerVersion.firmwareMinor << "." << transportLayerVersion.firmwareSub;
+        tracer.Trace() << "Wireless Firmware build: " << transportLayerVersion.firmwareReleaseType;
+        tracer.Trace() << "FUS version: " << transportLayerVersion.fusMajor << "." << transportLayerVersion.fusMinor << "." << transportLayerVersion.fusSub;
         tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_CODE_READY";
+
         SystemTransportLayer::HandleReadyEvent(pPayload);
     }
 
