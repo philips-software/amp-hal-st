@@ -43,7 +43,7 @@ namespace hal
     void TracingSystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
     {
         auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(sysEvent->payload);
-        tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : start: " << bleNvmRamUpdateEvent.StartAddress << ", size:" << bleNvmRamUpdateEvent.Size;
+        tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : size: " << bleNvmRamUpdateEvent.Size  << ", address: 0x" << infra::hex << bleNvmRamUpdateEvent.StartAddress;
         SystemTransportLayer::HandleBleNvmRamUpdateEvent(sysEvent);
     }
 
