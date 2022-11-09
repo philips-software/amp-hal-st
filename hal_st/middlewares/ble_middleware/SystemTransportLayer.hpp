@@ -6,7 +6,7 @@
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
 #include "interface/patterns/ble_thread/tl/tl.h"
-#include "services/ble/PersistingBondStorage.hpp"
+#include "services/ble/BondBlobPersistence.hpp"
 
 namespace hal
 {
@@ -51,7 +51,7 @@ namespace hal
         void MemoryChannelInit();
 
     private:
-        services::PersistingBondStorage persistingBondStorage;
+        services::BondBlobPersistence bondBlobPersistence;
         infra::Function<void(uint32_t*)> protocolStackInitialized;
     };
 }

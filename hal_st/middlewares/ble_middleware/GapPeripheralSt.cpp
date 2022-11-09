@@ -11,7 +11,7 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageManager, void()>& bondStorageManagerCreator, uint32_t* bleBondsStorage)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
         : HciEventSink(hciEventSource)
     {
         really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
@@ -73,12 +73,12 @@ namespace hal
 
         SetPublicAddress(address);
 
-        bondStorageManager.Emplace(bondStorageManagerCreator);
+        bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
     }
 
     void GapPeripheralSt::RemoveAllBonds()
     {
-        (*bondStorageManager)->RemoveAllBonds();
+        (*bondStorageSynchronizer)->RemoveAllBonds();
     }
 
     void GapPeripheralSt::SetPublicAddress(const hal::MacAddress& address)
@@ -265,7 +265,7 @@ namespace hal
             if (result != BLE_STATUS_SUCCESS)
                 std::copy(std::begin(connectionContext.peerAddress), std::end(connectionContext.peerAddress), std::begin(address));
 
-            (*bondStorageManager)->UpdateBondedDevice(address);
+            (*bondStorageSynchronizer)->UpdateBondedDevice(address);
         }
     }
 

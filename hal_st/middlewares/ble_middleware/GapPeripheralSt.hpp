@@ -7,7 +7,7 @@
 #include "hci_tl.h"
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ProxyCreator.hpp"
-#include "services/ble/BondStorageManager.hpp"
+#include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gatt.hpp"
 #include "services/ble/Gap.hpp"
 #include "shci.h"
@@ -22,7 +22,7 @@ namespace hal
         , public hal::HciEventSink
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageManager, void()>& bondStorageManagerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageManagerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
         virtual hal::MacAddress GetPublicAddress() const override;
@@ -77,7 +77,7 @@ namespace hal
         };
 
     private:
-        infra::Optional<infra::ProxyCreator<services::BondStorageManager, void()>> bondStorageManager;
+        infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
         services::GapPeripheralState state = services::GapPeripheralState::Standby;
         bool allowPairing = true;
 

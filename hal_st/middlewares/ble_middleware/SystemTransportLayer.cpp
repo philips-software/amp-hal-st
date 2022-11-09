@@ -75,7 +75,7 @@ namespace
 namespace hal
 {
     SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
-        : persistingBondStorage(flashStorage, infra::MakeByteRange(bleBondsStorage))
+        : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
         , protocolStackInitialized(protocolStackInitialized)
     {
         TL_Init();
@@ -105,7 +105,7 @@ namespace hal
 
     void SystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
     {
-        persistingBondStorage.Update();
+        bondBlobPersistence.Update();
     }
 
     void SystemTransportLayer::HandleUnknownEvent(TL_AsynchEvt_t* SysEvent)
