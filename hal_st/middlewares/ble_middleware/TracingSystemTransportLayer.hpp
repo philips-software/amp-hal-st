@@ -10,7 +10,7 @@ namespace hal
         : public SystemTransportLayer
     {
     public:
-        TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer);
+        TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer);
 
     protected:
         virtual void UserEventHandler(void* pPayload) override;

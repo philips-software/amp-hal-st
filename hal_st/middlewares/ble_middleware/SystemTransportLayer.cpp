@@ -74,7 +74,7 @@ namespace
 
 namespace hal
 {
-    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::BoundedVector<uint8_t>> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
+    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
         : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
         , protocolStackInitialized(protocolStackInitialized)
     {
