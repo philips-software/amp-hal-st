@@ -22,7 +22,7 @@ namespace hal
         , public hal::HciEventSink
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageManagerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
         virtual hal::MacAddress GetPublicAddress() const override;
