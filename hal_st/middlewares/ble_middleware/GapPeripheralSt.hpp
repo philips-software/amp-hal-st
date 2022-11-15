@@ -14,6 +14,13 @@
 
 namespace hal
 {
+    struct GapService
+    {
+        uint8_t* deviceName;
+        uint16_t deviceNameLength;
+        uint16_t appearance;
+    };
+
     class GapPeripheralSt
         : public services::GapPeripheral
         , public services::AttMtuExchange
@@ -22,7 +29,7 @@ namespace hal
         , public hal::HciEventSink
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, const GapService& gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
         virtual hal::MacAddress GetPublicAddress() const override;
@@ -83,7 +90,8 @@ namespace hal
 
         ConnectionContext connectionContext;
 
-        const char* devName = "ST-BLE";
+        const GapService& gapService;
+
         const uint8_t txPowerLevel = 0x18;
         const uint8_t bondingMode = 0x01;
         const uint8_t ioCapability = 0x03;

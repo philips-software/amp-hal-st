@@ -11,8 +11,9 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, const GapService& gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
         : HciEventSink(hciEventSource)
+        , gapService(gapService)
     {
         really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
         // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
@@ -301,7 +302,6 @@ namespace hal
     void GapPeripheralSt::HciGapGattInit()
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
-        uint16_t appearance[1] = { 0x0 };
 
         //HCI Reset to synchronise BLE Stack
         hci_reset();
@@ -315,8 +315,8 @@ namespace hal
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
         aci_gap_init(GAP_PERIPHERAL_ROLE, 0, 8, &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, strlen(devName), (uint8_t*)devName);
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&appearance);
+        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceNameLength, (uint8_t*)gapService.deviceName);
+        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&gapService.appearance);
         aci_gap_set_io_capability(ioCapability);
         aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, PUBLIC_ADDR);
     }
