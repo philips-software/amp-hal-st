@@ -5,6 +5,7 @@
 #include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "hci_tl.h"
+#include "infra/util/BoundedString.hpp"
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ProxyCreator.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
@@ -14,13 +15,6 @@
 
 namespace hal
 {
-    struct GapService
-    {
-        uint8_t* deviceName;
-        uint16_t deviceNameLength;
-        uint16_t appearance;
-    };
-
     class GapPeripheralSt
         : public services::GapPeripheral
         , public services::AttMtuExchange
@@ -28,8 +22,16 @@ namespace hal
         , public services::GapPeripheralPairing
         , public hal::HciEventSink
     {
+
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, const GapService& gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
+        struct GapService
+        {
+            infra::BoundedString::WithStorage<32> deviceName;
+            uint16_t appearance;
+        };
+
+    public:
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
         virtual hal::MacAddress GetPublicAddress() const override;
@@ -90,7 +92,7 @@ namespace hal
 
         ConnectionContext connectionContext;
 
-        const GapService& gapService;
+        const GapService gapService;
 
         const uint8_t txPowerLevel = 0x18;
         const uint8_t bondingMode = 0x01;
