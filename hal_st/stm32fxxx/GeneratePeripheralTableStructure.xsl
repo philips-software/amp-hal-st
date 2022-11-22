@@ -83,7 +83,13 @@
           </xsl:otherwise>
         </xsl:choose>
         <xsl:if test="@ClockEnableMode">
-          <xsl:attribute name="clock-enable"><xsl:value-of select="@ClockEnableMode"/></xsl:attribute>
+          <xsl:attribute name="clock-enable">
+            <xsl:call-template name="string-replace-all">
+              <xsl:with-param name="text" select="@ClockEnableMode"/>
+              <xsl:with-param name="replace" select="';'"/>
+              <xsl:with-param name="by" select="'();'"/>
+            </xsl:call-template>
+          </xsl:attribute>
         </xsl:if>
       </item>
     </xsl:if>
