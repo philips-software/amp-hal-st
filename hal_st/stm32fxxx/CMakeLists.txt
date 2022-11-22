@@ -26,6 +26,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:AnalogToDigitalPinStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:AnalogToDigitalPinStm.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.cpp>
@@ -126,3 +128,5 @@ target_sources(hal_st.stm32fxxx PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.hpp"
 )
+
+emil_exclude_from_clang_format(hal_st.stm32fxxx)
