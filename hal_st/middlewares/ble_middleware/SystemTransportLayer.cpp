@@ -3,6 +3,7 @@
 #include "shci.h"
 #include "shci_tl.h"
 #include "hci_tl.h"
+#include <atomic>
 
 extern "C"
 {
@@ -18,12 +19,24 @@ extern "C"
 
     void hci_notify_asynch_evt(void* data)
     {
-        infra::EventDispatcher::Instance().Schedule([]() { hci_user_evt_proc(); });
+        static std::atomic_bool notificationScheduled{ false };
+
+        if (!notificationScheduled.exchange(true))
+            infra::EventDispatcher::Instance().Schedule([]() {
+                notificationScheduled = false;
+                hci_user_evt_proc();
+            });
     }
 
     void shci_notify_asynch_evt(void* data)
     {
-        infra::EventDispatcher::Instance().Schedule([]() { shci_user_evt_proc(); });
+        static std::atomic_bool notificationScheduled{ false };
+
+        if (!notificationScheduled.exchange(true))
+            infra::EventDispatcher::Instance().Schedule([]() {
+                notificationScheduled = false;
+                shci_user_evt_proc();
+            });
     }
 }
 
@@ -32,7 +45,7 @@ namespace
     const uint8_t bleEventQueueLength = 0x05;
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
     const uint16_t bleEventFrameSize = TL_EVT_HDR_SIZE + tlBleMaxEventPayloadSize;
-    const uint32_t poolSize = bleEventQueueLength * 4u * DIVC(( sizeof(TL_PacketHeader_t) + bleEventFrameSize ), 4u);
+    const uint32_t poolSize = bleEventQueueLength * 4u * DIVC((sizeof(TL_PacketHeader_t) + bleEventFrameSize), 4u);
     const uint32_t bleBondsStorageLength = 507;
 
     // Buffers to be used by the mailbox to report the events
@@ -45,8 +58,8 @@ namespace
     [[gnu::section("MB_MEM2")]] alignas(4) TL_CmdPacket_t systemCmdBuffer;
     [[gnu::section("MB_MEM1")]] alignas(4) TL_CmdPacket_t bleCmdBuffer;
 
-    // This is the registered callback in shci_init() to acknowledge if a system command can be 
-    // sent. It must be used in a multi-thread application where system commands may be sent 
+    // This is the registered callback in shci_init() to acknowledge if a system command can be
+    // sent. It must be used in a multi-thread application where system commands may be sent
     // from different threads
     void ShciCommandStatus(SHCI_TL_CmdStatus_t status)
     {}
