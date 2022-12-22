@@ -18,7 +18,7 @@ namespace hal
         really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
         // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
 
-        const uint8_t maxNumberOfBleLinks = 0x02;
+        const uint8_t maxNumberOfBleLinks = 0x01;
         const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(maxAttMtuSize);
         const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, maxAttMtuSize, maxNumberOfBleLinks);
         const uint8_t bleStackOptions = ( SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 );
@@ -148,8 +148,13 @@ namespace hal
 
     void GapPeripheralSt::Standby()
     {
-        aci_gap_set_non_discoverable();
-        UpdateState(services::GapPeripheralState::Standby);
+        if (connectionContext.connectionHandle != 0)
+            aci_gap_terminate(connectionContext.connectionHandle, 0x13);
+        else
+        {
+            aci_gap_set_non_discoverable();
+            UpdateState(services::GapPeripheralState::Standby);
+        }
     }
 
     void GapPeripheralSt::AllowPairing(bool allow)
