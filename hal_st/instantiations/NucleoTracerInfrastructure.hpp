@@ -5,22 +5,51 @@
 
 namespace main_
 {
+    struct DummyTracerInfrastructure
+    {
+        infra::StreamWriterDummy dummyWriter;
+        infra::TextOutputStream::WithErrorPolicy logOutputStream{ dummyWriter };
+        services::TracerWithDateTime tracer{ logOutputStream };
+    };
+
     struct NucleoF767ziTracerInfrastructure
     {
-        hal::GpioPinStm traceUartTx{ hal::Port::D, 8 };
-        hal::GpioPinStm traceUartRx{ hal::Port::D, 9 };
+        NucleoF767ziTracerInfrastructure(bool loggingEnabled = true)
+            : traceUartTx(hal::Port::D, 8)
+            , traceUartRx(hal::Port::D, 9)
+            , tracerInfrastructure({ 3, traceUartTx, traceUartRx })
+            , tracer(loggingEnabled ? tracerInfrastructure.tracer : dummyTracerInfrastructure.tracer)
+            , alwaysEnabledTracer(tracerInfrastructure.tracer)
+        {
+            tracer.Trace() << "----------------------------------------------------------";
+        }
+        hal::GpioPinStm traceUartTx;
+        hal::GpioPinStm traceUartRx;
 
-        main_::StmTracerInfrastructure tracerInfrastructure{ { 3, traceUartTx, traceUartRx } };
-        services::Tracer& tracer{ tracerInfrastructure.tracer };
+        StmTracerInfrastructure tracerInfrastructure;
+        DummyTracerInfrastructure dummyTracerInfrastructure;
+        services::Tracer& tracer;
+        services::Tracer& alwaysEnabledTracer;
     };
 
     struct NucleoWb55rgTracerInfrastructure
     {
-        hal::GpioPinStm traceUartTx{ hal::Port::B, 6 };
-        hal::GpioPinStm traceUartRx{ hal::Port::B, 7 };
+        NucleoWb55rgTracerInfrastructure(bool loggingEnabled = true)
+            : traceUartTx(hal::Port::B, 6)
+            , traceUartRx(hal::Port::B, 7)
+            , tracerInfrastructure({ 1, traceUartTx, traceUartRx })
+            , tracer(loggingEnabled ? tracerInfrastructure.tracer : dummyTracerInfrastructure.tracer)
+            , alwaysEnabledTracer(tracerInfrastructure.tracer)
+        {
+            tracer.Trace() << "----------------------------------------------------------";
+        }
+        hal::GpioPinStm traceUartTx;
+        hal::GpioPinStm traceUartRx;
 
-        main_::StmTracerInfrastructure tracerInfrastructure{ { 1, traceUartTx, traceUartRx } };
-        services::Tracer& tracer{ tracerInfrastructure.tracer };
+        StmTracerInfrastructure tracerInfrastructure;
+        DummyTracerInfrastructure dummyTracerInfrastructure;
+        services::Tracer& tracer;
+        services::Tracer& alwaysEnabledTracer;
     };
 }
 

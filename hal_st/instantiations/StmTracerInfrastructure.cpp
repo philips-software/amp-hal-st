@@ -13,7 +13,5 @@ namespace main_
         , streamWriter(traceUart)
         , stream(streamWriter, infra::noFail)
         , tracer(stream)
-    {
-        tracer.Trace() << "----------------------------------------------------------";
-    }
+    {}
 }
