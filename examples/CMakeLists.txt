@@ -1,11 +1,13 @@
 include(FetchContent)
 
-FetchContent_Declare(
-    emil
-    GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
-    GIT_TAG        modern-cmake
-)
+if(NOT emil_POPULATED)
+    FetchContent_Declare(
+        emil
+        GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
+        GIT_TAG        modern-cmake
+    )
 
-FetchContent_MakeAvailable(emil)
+    FetchContent_MakeAvailable(emil)
+endif()
 
 add_subdirectory(blink)
