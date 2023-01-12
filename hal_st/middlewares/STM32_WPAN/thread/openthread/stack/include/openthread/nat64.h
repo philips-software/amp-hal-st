@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018, The OpenThread Authors.
+ *  Copyright (c) 2022, The OpenThread Authors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,74 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OPENTHREAD_CONFIG_ANDROID_VERSION_HEADER_ENABLE
-#include <openthread-config-android-version.h>
+/**
+ * @file
+ * @brief
+ *  This file defines the OpenThread API for NAT64 on a border router.
+ */
+
+#ifndef OPENTHREAD_NAT64_H_
+#define OPENTHREAD_NAT64_H_
+
+#include <openthread/message.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/* Define to 1 to enable the border agent feature. */
-#define OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE 1
+/**
+ * @addtogroup api-nat64
+ *
+ * @brief This module includes functions and structs for the NAT64 function on the border router. These functions are
+ * only available when `OPENTHREAD_CONFIG_BORDER_ROUTING_NAT64_ENABLE` is enabled.
+ *
+ * @{
+ *
+ */
 
-/* Define to 1 if you want to enable Border Router */
-#define OPENTHREAD_CONFIG_BORDER_ROUTER_ENABLE 1
+#define OT_IP4_ADDRESS_SIZE 4 ///< Size of an IPv4 address (bytes)
 
-/* Define to 1 if you want to enable channel manager feature */
-#define OPENTHREAD_CONFIG_CHANNEL_MANAGER_ENABLE 0
+/**
+ * @struct otIp4Address
+ *
+ * This structure represents an IPv4 address.
+ *
+ */
+OT_TOOL_PACKED_BEGIN
+struct otIp4Address
+{
+    union OT_TOOL_PACKED_FIELD
+    {
+        uint8_t  m8[OT_IP4_ADDRESS_SIZE]; ///< 8-bit fields
+        uint32_t m32;                     ///< 32-bit representation
+    } mFields;
+} OT_TOOL_PACKED_END;
 
-/* Define to 1 if you want to use channel monitor feature */
-#define OPENTHREAD_CONFIG_CHANNEL_MONITOR_ENABLE 0
+/**
+ * This structure represents an IPv4 address.
+ *
+ */
+typedef struct otIp4Address otIp4Address;
 
-/* Define to 1 if you want to use child supervision feature */
-#define OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE 1
+/**
+ * @struct otIp4Cidr
+ *
+ * This structure represents an IPv4 CIDR block.
+ *
+ */
+typedef struct otIp4Cidr
+{
+    otIp4Address mAddress;
+    uint8_t      mLength;
+} otIp4Cidr;
 
-/* Define to 1 to enable dtls support. */
-#define OPENTHREAD_CONFIG_DTLS_ENABLE 1
+/**
+ * @}
+ *
+ */
 
-/* Define to 1 if you want to use jam detection feature */
-#define OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE 1
+#ifdef __cplusplus
+}
+#endif
 
-/* Define to 1 to enable the joiner role. */
-#define OPENTHREAD_CONFIG_JOINER_ENABLE 1
-
-/* Define to 1 to enable the NCP HDLC interface. */
-#define OPENTHREAD_CONFIG_NCP_HDLC_ENABLE 1
-
-/* Define to 1 to enable posix platform. */
-#define OPENTHREAD_PLATFORM_POSIX 1
-
-/* Define to 1 if you want to enable Service */
-#define OPENTHREAD_CONFIG_TMF_NETDATA_SERVICE_ENABLE 1
-
-/* OpenThread examples */
-#define OPENTHREAD_EXAMPLES none
+#endif // OPENTHREAD_NAT64_H_

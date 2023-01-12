@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
-  * @file    openthread_api_config_concurrent.h
+  * @file    openthread_api_config_mtd.h
   * @author  MCD Application Team
   * @brief   This file contains configuration header for configuring OpenThread
-  *          stack in BLE Thread Concurrent Mode.
+  *          stack in MTD mode.
   ******************************************************************************
   * @attention
  *
@@ -19,11 +19,12 @@
 
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef OPENTHREAD_API_CONFIG_CONCURRENT_H_
-#define OPENTHREAD_API_CONFIG_CONCURRENT_H_
+#ifndef OPENTHREAD_API_CONFIG_MATTER_H_
+#define OPENTHREAD_API_CONFIG_MATTER_H_
 
-#ifndef OPENTHREAD_FTD
-#define OPENTHREAD_FTD 1
+
+#ifndef OPENTHREAD_MTD
+#define OPENTHREAD_MTD 1
 #endif
 
 /* Define to 1 if you want to enable support for multiple OpenThread
@@ -34,10 +35,10 @@
 #define OPENTHREAD_CONFIG_LOG_OUTPUT  OPENTHREAD_CONFIG_LOG_OUTPUT_APP
 
 /* Define to 1 to enable COAP. */
-#define OPENTHREAD_CONFIG_COAP_API_ENABLE 1
+#define OPENTHREAD_CONFIG_COAP_API_ENABLE 0
 
 /* Define to 1 to enable the commissioner role. */
-#define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE 1
+#define OPENTHREAD_CONFIG_COMMISSIONER_ENABLE 0
 
 /* Define to 1 if you want to use diagnostics module */
 #define OPENTHREAD_CONFIG_DIAG_ENABLE 0
@@ -64,10 +65,10 @@
 #define OPENTHREAD_CONFIG_CHILD_SUPERVISION_ENABLE 0
 
 /* Define to 1 to enable DHCPv6 Client. */
-#define OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE 1
+#define OPENTHREAD_CONFIG_DHCP6_CLIENT_ENABLE 0
 
 /* Define to 1 to enable DHCPv6 SERVER. */
-#define OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE 1
+#define OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE 0
 
 /* Define to 1 to enable MAC whitelist/blacklist feature. */
 #define OPENTHREAD_CONFIG_MAC_FILTER_ENABLE 1
@@ -91,7 +92,7 @@
 #define OPENTHREAD_CONFIG_LOG_LEVEL OT_LOG_LEVEL_INFO
 
 /* Define to 1 to enable CoAP Secure API */
-#define OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE 1
+#define OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE 0
 
 /* Define to 1 to enable IPv6 global addresses configuration utilities */
 #define OPENTHREAD_CONFIG_IP6_SLAAC_ENABLE 1
@@ -126,10 +127,40 @@
 /* Define to 1 to enable Backbone router DUA ND Proxy */
 #define OPENTHREAD_CONFIG_BACKBONE_ROUTER_DUA_NDPROXYING_ENABLE 1
 
+/* Define to 1 to enable Backbone Router Multicast Routing */
+#define OPENTHREAD_CONFIG_BACKBONE_ROUTER_MULTICAST_ROUTING_ENABLE 1
+
 /* Define to 1 to enable Thread Test Harness reference device support. */
 #define OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE 1
 
 /* Define to 1 to eanble Config MLR */
 #define OPENTHREAD_CONFIG_MLR_ENABLE 1
 
-#endif /* OPENTHREAD_API_CONFIG_CONCURRENT_H_ */
+/* Define to 1 to enable TCP feature */
+#define OPENTHREAD_CONFIG_TCP_ENABLE 0
+
+/* Define to 1 to enable Multicast Listener Registration parent proxing */
+#define OPENTHREAD_CONFIG_TMF_PROXY_MLR_ENABLE 1
+
+/* Define to 1 to enable DNS Client support */
+#define OPENTHREAD_CONFIG_DNS_CLIENT_ENABLE 1
+
+/* Define to 1 to enable DNS-SD Server support */
+#define OPENTHREAD_CONFIG_DNSSD_SERVER_ENABLE 1
+
+/* Define to 1 to enable SRP Client support */
+#define OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE 1
+
+/* Define to 1 to enable ECDSA support */
+#define OPENTHREAD_CONFIG_ECDSA_ENABLE 1
+
+/* Define to 1 for the SRP client implementation to provide APIs that get/set the domain name */
+#define OPENTHREAD_CONFIG_SRP_CLIENT_DOMAIN_NAME_API_ENABLE 1
+
+/* Define to 1 to enable SRP Client auto-start feature and its APIs */
+#define OPENTHREAD_CONFIG_SRP_CLIENT_AUTO_START_API_ENABLE 1
+
+/* Define to 1 to enable SRP Server support */
+#define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE 1
+
+#endif /* OPENTHREAD_API_CONFIG_MATTER_H_ */
