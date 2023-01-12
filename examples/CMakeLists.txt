@@ -1,6 +1,6 @@
 include(FetchContent)
 
-if(NOT emil_POPULATED)
+if(HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git

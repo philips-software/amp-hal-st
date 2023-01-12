@@ -9,6 +9,10 @@ option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
 
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set(HALST_STANDALONE On)
+endif()
+
 if (HALST_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
