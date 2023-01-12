@@ -1,6 +1,6 @@
 include(FetchContent)
 
-if(HALST_STANDALONE)
+if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
