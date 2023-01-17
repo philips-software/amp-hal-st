@@ -25,7 +25,7 @@ jobs:
         with:
           release: ${{ matrix.gcc }}
       - uses: seanmiddleditch/gha-setup-ninja@16b940825621068d98711680b6c3ff92201f8fc0
-      - uses: hendrikmuhs/ccache-action@fba817f3c0db4f854d7a3ee688241d6754da166e
+      - uses: hendrikmuhs/ccache-action@fba817f3c0db4f854d7a3ee688241d6754da166e # v1.2.8
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}
       - run: |
