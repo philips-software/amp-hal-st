@@ -36,9 +36,9 @@ namespace hal
 
         uartHandle.Instance = peripheralUart[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
-        uartHandle.Init.WordLength = USART_WORDLENGTH_8B;
+        uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
         uartHandle.Init.StopBits = USART_STOPBITS_1;
-        uartHandle.Init.Parity = USART_PARITY_NONE;
+        uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
         uartHandle.Init.HwFlowCtl = config.hwFlowControl;
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
@@ -73,9 +73,9 @@ namespace hal
 
         uartHandle.Instance = peripheralUart[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
-        uartHandle.Init.WordLength = USART_WORDLENGTH_8B;
+        uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
         uartHandle.Init.StopBits = USART_STOPBITS_1;
-        uartHandle.Init.Parity = USART_PARITY_NONE;
+        uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
         uartHandle.Init.HwFlowCtl = config.hwFlowControl;
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7)

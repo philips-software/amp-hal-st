@@ -19,6 +19,7 @@ namespace hal
 
             uint32_t baudrate = 115200;
             uint32_t hwFlowControl = UART_HWCONTROL_NONE;
+            uint32_t parity = USART_PARITY_NONE;
             infra::Optional<DmaChannelId> dmaChannelTx;
             infra::Optional<InterruptPriority> priority;
         };
