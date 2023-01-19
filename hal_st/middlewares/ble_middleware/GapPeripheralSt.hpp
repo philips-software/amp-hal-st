@@ -70,6 +70,8 @@ namespace hal
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
 
+        void UpdateWhiteList();
+
     protected:
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
         virtual void HandleHciUnknownEvent(hci_event_pckt& eventPacket);

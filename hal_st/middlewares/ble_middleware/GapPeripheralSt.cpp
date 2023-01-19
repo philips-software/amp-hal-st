@@ -1,6 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-
+#include "services/tracer/GlobalTracer.hpp"
 namespace
 {
     uint8_t ConvertAdvertisementType(services::GapPeripheral::AdvertisementType type)
@@ -141,6 +141,8 @@ namespace hal
 
     void GapPeripheralSt::Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
+        UpdateWhiteList();
+
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -171,16 +173,6 @@ namespace hal
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
-        if (!allow)
-        {
-            aci_gap_configure_whitelist();
-
-            uint8_t Num_of_Addresses;
-            std::array<Bonded_Device_Entry_t, 4> Bonded_Device_Entry;
-
-            aci_gap_get_bonded_devices(&Num_of_Addresses, Bonded_Device_Entry.begin());
-            aci_gap_add_devices_to_resolving_list(Num_of_Addresses, reinterpret_cast<const Whitelist_Identity_Entry_t*>(Bonded_Device_Entry.begin()), 1);
-        }
     }
 
     void GapPeripheralSt::HciEvent(hci_event_pckt& event)
@@ -339,6 +331,17 @@ namespace hal
             default:
                 break;
         }
+    }
+
+    void GapPeripheralSt::UpdateWhiteList()
+    {
+        aci_gap_configure_whitelist();
+
+        uint8_t numberOfBondedAddress;
+        std::array<Bonded_Device_Entry_t, 4> Bonded_Device_Entry;
+
+        aci_gap_get_bonded_devices(&numberOfBondedAddress, Bonded_Device_Entry.begin());
+        aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(Bonded_Device_Entry.begin()), 1);
     }
 
     void GapPeripheralSt::HandleHciUnknownEvent(hci_event_pckt& eventPacket)
