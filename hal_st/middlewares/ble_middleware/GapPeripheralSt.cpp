@@ -11,7 +11,7 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
         : HciEventSink(hciEventSource)
         , gapService(gapService)
     {
@@ -73,7 +73,8 @@ namespace hal
         hci_le_write_suggested_default_data_length(connectionInitialMaxTxOctets, connectionInitialMaxTxTime);
 
         SetPublicAddress(address);
-
+        SetIdentityRootKey(rootKeys.identity);
+        SetEncryptionRootKey(rootKeys.encryption);
         bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
     }
 
@@ -85,6 +86,16 @@ namespace hal
     void GapPeripheralSt::SetPublicAddress(const hal::MacAddress& address)
     {
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
+    }
+
+    void GapPeripheralSt::SetIdentityRootKey(const std::array<uint8_t, 16>& key)
+    {
+        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, key.data());
+    }
+
+    void GapPeripheralSt::SetEncryptionRootKey(const std::array<uint8_t, 16>& key)
+    {
+        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, key.data());
     }
 
     hal::MacAddress GapPeripheralSt::GetPublicAddress() const

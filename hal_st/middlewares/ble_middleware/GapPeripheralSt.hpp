@@ -9,8 +9,8 @@
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ProxyCreator.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
-#include "services/ble/Gatt.hpp"
 #include "services/ble/Gap.hpp"
+#include "services/ble/Gatt.hpp"
 #include "shci.h"
 
 namespace hal
@@ -22,7 +22,6 @@ namespace hal
         , public services::GapPeripheralPairing
         , public hal::HciEventSink
     {
-
     public:
         struct GapService
         {
@@ -30,8 +29,14 @@ namespace hal
             uint16_t appearance;
         };
 
+        struct RootKeys
+        {
+            std::array<uint8_t, 16> identity;
+            std::array<uint8_t, 16> encryption;
+        };
+
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
         virtual hal::MacAddress GetPublicAddress() const override;
@@ -56,6 +61,8 @@ namespace hal
         void UpdateAdvertisementData();
 
         void SetPublicAddress(const hal::MacAddress& address);
+        void SetIdentityRootKey(const std::array<uint8_t, 16>& key);
+        void SetEncryptionRootKey(const std::array<uint8_t, 16>& key);
         void UpdateState(services::GapPeripheralState newstate);
         void RequestConnectionParameterUpdate();
 
