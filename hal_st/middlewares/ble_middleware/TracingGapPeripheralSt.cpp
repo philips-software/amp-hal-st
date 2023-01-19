@@ -43,10 +43,22 @@ namespace hal
         tracer.Trace() << "GapPeripheralSt::HandleHciLeConnectionCompleteEvent Handle - " << connectionCompleteEvt->Connection_Handle;
 
         hal::MacAddress mac;
-        std::reverse_copy(std::begin(connectionCompleteEvt->Peer_Address),
+        std::copy(std::begin(connectionCompleteEvt->Peer_Address),
             std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
         tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac);
         GapPeripheralSt::HandleHciLeConnectionCompleteEvent(metaEvent);
+    }
+    
+    void TracingGapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        const auto enhancedConnectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
+        tracer.Trace() << "GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent Handle - " << enhancedConnectionCompleteEvt->Connection_Handle;
+
+        hal::MacAddress mac;
+        std::copy(std::begin(enhancedConnectionCompleteEvt->Peer_Address),
+            std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
+        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac);
+        GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
     }
 
     void TracingGapPeripheralSt::HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent)

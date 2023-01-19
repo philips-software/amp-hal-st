@@ -147,9 +147,9 @@ namespace hal
 
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
         if (allowPairing)
-            ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, PUBLIC_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
+            ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
         else
-            ret = aci_gap_set_undirected_connectable(multiplier, multiplier, PUBLIC_ADDR, WHITE_LIST_FOR_ALL);
+            ret = aci_gap_set_undirected_connectable(multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, WHITE_LIST_FOR_ALL);
 
         UpdateAdvertisementData();
 
@@ -172,7 +172,15 @@ namespace hal
     {
         allowPairing = allow;
         if (!allow)
+        {
             aci_gap_configure_whitelist();
+
+            uint8_t Num_of_Addresses;
+            std::array<Bonded_Device_Entry_t, 4> Bonded_Device_Entry;
+
+            aci_gap_get_bonded_devices(&Num_of_Addresses, Bonded_Device_Entry.begin());
+            aci_gap_add_devices_to_resolving_list(Num_of_Addresses, reinterpret_cast<const Whitelist_Identity_Entry_t*>(Bonded_Device_Entry.begin()), 1);
+        }
     }
 
     void GapPeripheralSt::HciEvent(hci_event_pckt& event)
@@ -234,6 +242,24 @@ namespace hal
         UpdateState(services::GapPeripheralState::Connected);
     }
 
+    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
+
+        hal::MacAddress address;
+        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(address));
+
+        connectionContext.connectionHandle = connectionCompleteEvt->Connection_Handle;
+
+        RequestConnectionParameterUpdate();
+
+        connectionContext.peerAddressType = connectionCompleteEvt->Peer_Address_Type;
+        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
+
+        maxAttMtu = defaultMaxAttMtuSize;
+        UpdateState(services::GapPeripheralState::Connected);
+    }
+
     void GapPeripheralSt::HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent)
     {}
 
@@ -246,21 +272,24 @@ namespace hal
 
         switch (metaEvent->subevent)
         {
-            case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
-                HandleHciLeConnectionUpdateEvent(metaEvent);
-                break;
-            case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
-                HandleHciLePhyUpdateCompleteEvent(metaEvent);
-                break;
-            case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-                HandleHciLeConnectionCompleteEvent(metaEvent);
-                break;
-            case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
-                HandleHciLeDataLengthUpdateEvent(metaEvent);
-                break;
-            default:
-                HandleHciLeUnknownEvent(metaEvent);
-                break;
+        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
+            HandleHciLeConnectionUpdateEvent(metaEvent);
+            break;
+        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
+            HandleHciLePhyUpdateCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
+            HandleHciLeConnectionCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
+            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
+            HandleHciLeDataLengthUpdateEvent(metaEvent);
+            break;
+        default:
+            HandleHciLeUnknownEvent(metaEvent);
+            break;
         }
     }
 
@@ -330,10 +359,10 @@ namespace hal
 
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
-        aci_gap_init(GAP_PERIPHERAL_ROLE, 0, 8, &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+        aci_gap_init(GAP_PERIPHERAL_ROLE, PRIVACY_ENABLED, 8, &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
         aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), (uint8_t*)gapService.deviceName.data());
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&gapService.appearance);
         aci_gap_set_io_capability(ioCapability);
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 }
