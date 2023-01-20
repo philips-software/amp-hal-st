@@ -61,12 +61,10 @@ namespace hal
         void UpdateAdvertisementData();
 
         void SetPublicAddress(const hal::MacAddress& address);
-        void SetIdentityRootKey(const std::array<uint8_t, 16>& key);
-        void SetEncryptionRootKey(const std::array<uint8_t, 16>& key);
         void UpdateState(services::GapPeripheralState newstate);
         void RequestConnectionParameterUpdate();
 
-        void HciGapGattInit();
+        void HciGapGattInit(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey);
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
 
@@ -115,9 +113,6 @@ namespace hal
         const uint16_t maxConnectionInterval = minConnectionInterval;
         const uint16_t slaveLatency = 0;
         const uint16_t supervisionTimeout = 500;
-
-        const uint8_t identityRootKey[16] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
-        const uint8_t encryptionRootKey[16] = { 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21, 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21 };
 
         infra::BoundedVector<uint8_t>::WithMaxSize<maxAdvertisementDataSize> advertisementData;
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;

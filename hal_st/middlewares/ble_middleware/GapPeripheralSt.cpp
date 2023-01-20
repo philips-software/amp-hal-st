@@ -68,13 +68,11 @@ namespace hal
         if (SHCI_C2_BLE_Init(&bleInitCmdPacket) != SHCI_Success)
             std::abort();
 
-        HciGapGattInit();
+        HciGapGattInit(rootKeys.identity, rootKeys.encryption);
         SVCCTL_Init();
         hci_le_write_suggested_default_data_length(connectionInitialMaxTxOctets, connectionInitialMaxTxTime);
 
         SetPublicAddress(address);
-        SetIdentityRootKey(rootKeys.identity);
-        SetEncryptionRootKey(rootKeys.encryption);
         bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
     }
 
@@ -86,16 +84,6 @@ namespace hal
     void GapPeripheralSt::SetPublicAddress(const hal::MacAddress& address)
     {
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
-    }
-
-    void GapPeripheralSt::SetIdentityRootKey(const std::array<uint8_t, 16>& key)
-    {
-        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, key.data());
-    }
-
-    void GapPeripheralSt::SetEncryptionRootKey(const std::array<uint8_t, 16>& key)
-    {
-        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, key.data());
     }
 
     hal::MacAddress GapPeripheralSt::GetPublicAddress() const
@@ -141,8 +129,6 @@ namespace hal
 
     void GapPeripheralSt::Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
-        UpdateWhiteList();
-
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -173,6 +159,9 @@ namespace hal
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
+
+        if (!allow)
+            UpdateWhiteList();
     }
 
     void GapPeripheralSt::HciEvent(hci_event_pckt& event)
@@ -347,7 +336,7 @@ namespace hal
     void GapPeripheralSt::HandleHciUnknownEvent(hci_event_pckt& eventPacket)
     {}
 
-    void GapPeripheralSt::HciGapGattInit()
+    void GapPeripheralSt::HciGapGattInit(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey)
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
 
@@ -355,10 +344,10 @@ namespace hal
         hci_reset();
 
         // Write Identity root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, (uint8_t*)identityRootKey);
+        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, identityRootKey.data());
 
         // Write Encryption root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, (uint8_t*)encryptionRootKey);
+        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, encryptionRootKey.data());
 
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
