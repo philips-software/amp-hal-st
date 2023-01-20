@@ -135,9 +135,15 @@ namespace hal
 
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
         if (allowPairing)
+        {
+            ClearResolvingList();
             ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
+        }
         else
+        {
+            UpdateResolvingList();
             ret = aci_gap_set_undirected_connectable(multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, WHITE_LIST_FOR_ALL);
+        }
 
         UpdateAdvertisementData();
 
@@ -159,9 +165,6 @@ namespace hal
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
-
-        if (!allow)
-            UpdateWhiteList();
     }
 
     void GapPeripheralSt::HciEvent(hci_event_pckt& event)
@@ -322,7 +325,7 @@ namespace hal
         }
     }
 
-    void GapPeripheralSt::UpdateWhiteList()
+    void GapPeripheralSt::UpdateResolvingList()
     {
         aci_gap_configure_whitelist();
 
@@ -330,7 +333,15 @@ namespace hal
         std::array<Bonded_Device_Entry_t, 4> Bonded_Device_Entry;
 
         aci_gap_get_bonded_devices(&numberOfBondedAddress, Bonded_Device_Entry.begin());
+
         aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(Bonded_Device_Entry.begin()), 1);
+    }
+
+    void GapPeripheralSt::ClearResolvingList()
+    {
+        aci_gap_configure_whitelist();
+        
+        aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
     void GapPeripheralSt::HandleHciUnknownEvent(hci_event_pckt& eventPacket)
