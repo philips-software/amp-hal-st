@@ -1,5 +1,5 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/synchronous_stm32fxxx/SynchronousSpiMasterStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/util/BitLogic.hpp"
 
 namespace hal

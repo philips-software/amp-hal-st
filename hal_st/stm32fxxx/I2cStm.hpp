@@ -3,8 +3,8 @@
 
 #include "cmsis_device.h"
 #include "hal/interfaces/I2c.hpp"
-#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 
 namespace hal
@@ -15,7 +15,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
 #if defined(STM32F0) || defined(STM32F7)
             uint32_t timing = 0x00304d4d;

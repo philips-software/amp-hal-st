@@ -1,14 +1,14 @@
 #ifndef SYNCHRONOUS_HAL_SYNCHRONOUS_GPIO_STM_HPP
 #define SYNCHRONOUS_HAL_SYNCHRONOUS_GPIO_STM_HPP
 
-#include "hal/synchronous_interfaces/SynchronousGpio.hpp"
 #include "cmsis_device.h"
+#include "hal/synchronous_interfaces/SynchronousGpio.hpp"
 #include <array>
 #include <cstdlib>
 
 namespace hal
 {
-    enum class Port: uint8_t
+    enum class Port : uint8_t
     {
         A,
         B,
@@ -21,7 +21,7 @@ namespace hal
         I
     };
 
-    enum class WeakPull: uint8_t
+    enum class WeakPull : uint8_t
     {
         None,
         Up,
@@ -29,14 +29,14 @@ namespace hal
         Default = None
     };
 
-    enum class Drive: uint8_t
+    enum class Drive : uint8_t
     {
         PushPull,
         OpenDrain,
         Default = PushPull
     };
 
-    enum class Speed: uint8_t
+    enum class Speed : uint8_t
     {
         Low,
         Medium,
@@ -82,7 +82,7 @@ namespace hal
         };
 
         template<std::size_t N>
-            SmallPeripheralPinStm(const Definition<N>& definition, uint8_t peripheral, Port port, uint8_t index);
+        SmallPeripheralPinStm(const Definition<N>& definition, uint8_t peripheral, Port port, uint8_t index);
         SmallPeripheralPinStm(const Definition<1>& definition);
         SmallPeripheralPinStm(const SmallPeripheralPinStm& other) = delete;
         SmallPeripheralPinStm& operator=(const SmallPeripheralPinStm& other) = delete;
@@ -103,7 +103,7 @@ namespace hal
         : port(port)
         , index(index)
     {
-        for (auto& position: definition.positions)
+        for (auto& position : definition.positions)
         {
             if (position.peripheralIndex == peripheral && position.port == port && position.pin == index)
             {

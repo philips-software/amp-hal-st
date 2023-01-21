@@ -22,7 +22,7 @@ namespace hal
         while (!result.empty())
         {
             if ((RNG->SR & RNG_SR_CEIS) != 0)
-                std::abort();   // RNG clock must be set to at least HCLK / 16
+                std::abort(); // RNG clock must be set to at least HCLK / 16
 
             if ((RNG->SR & RNG_SR_SEIS) != 0)
             {

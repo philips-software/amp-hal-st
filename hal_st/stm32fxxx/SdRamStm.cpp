@@ -50,7 +50,8 @@ namespace hal
         result.Init.SDBank = config.bank == 1 ? FMC_SDRAM_BANK1 : FMC_SDRAM_BANK2;
         result.Init.ColumnBitsNumber = columnBits[config.columnBits];
         result.Init.RowBitsNumber = rowBits[config.rowBits];
-        result.Init.MemoryDataWidth = config.busWidth == 8 ? FMC_SDRAM_MEM_BUS_WIDTH_8 : config.busWidth == 16 ? FMC_SDRAM_MEM_BUS_WIDTH_16 : FMC_SDRAM_MEM_BUS_WIDTH_32;
+        result.Init.MemoryDataWidth = config.busWidth == 8 ? FMC_SDRAM_MEM_BUS_WIDTH_8 : config.busWidth == 16 ? FMC_SDRAM_MEM_BUS_WIDTH_16
+                                                                                                               : FMC_SDRAM_MEM_BUS_WIDTH_32;
         result.Init.InternalBankNumber = FMC_SDRAM_INTERN_BANKS_NUM_4;
         result.Init.CASLatency = casLatency[config.casLatency];
         result.Init.WriteProtection = FMC_SDRAM_WRITE_PROTECTION_DISABLE;

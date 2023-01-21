@@ -87,7 +87,7 @@ namespace hal
         for (uint32_t index = beginIndex; index != endIndex; ++index)
         {
 #if defined(STM32F0) || defined(STM32F3)
-            abort();    // Not implemented
+            abort(); // Not implemented
 #else
             FLASH_Erase_Sector(index, VOLTAGE_RANGE_3);
 #endif

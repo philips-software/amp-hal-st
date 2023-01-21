@@ -1,5 +1,5 @@
-#include "generated/stm32fxxx/PinoutTableDefault.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
+#include "generated/stm32fxxx/PinoutTableDefault.hpp"
 
 namespace main_
 {

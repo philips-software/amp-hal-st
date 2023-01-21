@@ -1,10 +1,10 @@
 #ifndef HAL_DMA_STM_HPP
 #define HAL_DMA_STM_HPP
 
+#include "cmsis_device.h"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
-#include "cmsis_device.h"
 
 namespace hal
 {
@@ -66,7 +66,7 @@ namespace hal
         void ReleaseStream(uint8_t dmaIndex, uint8_t streamIndex);
 
     private:
-        std::array<uint32_t, 2> streamAllocation = {{ 0, 0 }};
+        std::array<uint32_t, 2> streamAllocation = { { 0, 0 } };
     };
 }
 

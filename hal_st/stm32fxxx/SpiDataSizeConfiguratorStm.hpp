@@ -9,7 +9,7 @@ namespace hal
         : public CommunicationConfigurator
     {
     public:
-        SpiDataSizeConfiguratorStm(SpiMasterStmDma& spi, uint32_t dataSize);    // dataSize = SPI_DATASIZE_4BIT .. SPI_DATASIZE_16BIT
+        SpiDataSizeConfiguratorStm(SpiMasterStmDma& spi, uint32_t dataSize); // dataSize = SPI_DATASIZE_4BIT .. SPI_DATASIZE_16BIT
 
         virtual void ActivateConfiguration() override;
         virtual void DeactivateConfiguration() override;

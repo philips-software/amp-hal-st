@@ -1,5 +1,5 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/SpiDataSizeConfiguratorStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
 {

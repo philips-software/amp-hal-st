@@ -1,5 +1,5 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/I2cStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/ReallyAssert.hpp"
 
@@ -9,8 +9,10 @@ namespace hal
         : instance(oneBasedI2cIndex - 1)
         , scl(scl, PinConfigTypeStm::i2cScl, oneBasedI2cIndex)
         , sda(sda, PinConfigTypeStm::i2cSda, oneBasedI2cIndex)
-        , evInterruptHandler(peripheralI2cEvIrq[instance], [this]() { EventInterrupt(); })
-        , erInterruptHandler(peripheralI2cErIrq[instance], [this]() { ErrorInterrupt(); })
+        , evInterruptHandler(peripheralI2cEvIrq[instance], [this]()
+              { EventInterrupt(); })
+        , erInterruptHandler(peripheralI2cErIrq[instance], [this]()
+              { ErrorInterrupt(); })
     {
         EnableClockI2c(instance);
 
@@ -31,9 +33,9 @@ namespace hal
         i2cHandle.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
         HAL_I2C_Init(&i2cHandle);
 
-#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) ||\
-    defined(STM32F401xC) || defined(STM32F401xE) || defined(STM32F411xE) || defined(STM32F446xx) ||\
-    defined(STM32F469xx) || defined(STM32F479xx) ||\
+#if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) || \
+    defined(STM32F401xC) || defined(STM32F401xE) || defined(STM32F411xE) || defined(STM32F446xx) || \
+    defined(STM32F469xx) || defined(STM32F479xx) ||                                                 \
     defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
         HAL_I2CEx_AnalogFilter_Config(&i2cHandle, I2C_ANALOGFILTER_ENABLE);
 #endif
@@ -60,8 +62,7 @@ namespace hal
         __DMB();
 
 #if defined(STM32F0) || defined(STM32F7)
-        peripheralI2c[instance]->CR2 = ((address.address << 1) & I2C_CR2_SADD) | (continuingPrevious ? 0 : I2C_CR2_START)
-            | (std::min<uint32_t>(sendData.size(), 255) << 16) | (sendData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
+        peripheralI2c[instance]->CR2 = ((address.address << 1) & I2C_CR2_SADD) | (continuingPrevious ? 0 : I2C_CR2_START) | (std::min<uint32_t>(sendData.size(), 255) << 16) | (sendData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
         peripheralI2c[instance]->CR1 |= I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE;
 #else
         really_assert(!sendData.empty());
@@ -90,8 +91,7 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F7)
         peripheralI2c[instance]->ICR = I2C_ICR_STOPCF;
-        peripheralI2c[instance]->CR2 = ((address.address << 1) & I2C_CR2_SADD) | I2C_CR2_RD_WRN | (continuingPrevious ? 0 : I2C_CR2_START)
-            | (std::min<uint32_t>(receiveData.size(), 255) << 16) | (receiveData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
+        peripheralI2c[instance]->CR2 = ((address.address << 1) & I2C_CR2_SADD) | I2C_CR2_RD_WRN | (continuingPrevious ? 0 : I2C_CR2_START) | (std::min<uint32_t>(receiveData.size(), 255) << 16) | (receiveData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
         peripheralI2c[instance]->CR1 |= I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE;
 #else
         really_assert(!receiveData.empty());
@@ -140,8 +140,7 @@ namespace hal
                     {
                         receiveData.clear();
                         onReceived(hal::Result::partialComplete);
-                    }
-                });
+                    } });
         }
 
         if ((peripheralI2c[instance]->ISR & I2C_ISR_TXIS) != 0)
@@ -154,7 +153,7 @@ namespace hal
 
         ReadReceivedData();
 
-        if ((peripheralI2c[instance]->ISR & I2C_ISR_TCR) != 0)  // Transfer Complete Reload
+        if ((peripheralI2c[instance]->ISR & I2C_ISR_TCR) != 0) // Transfer Complete Reload
         {
             if (sendData.empty() && receiveData.empty())
             {
@@ -162,7 +161,8 @@ namespace hal
                 if (nextAction == Action::stop)
                     peripheralI2c[instance]->CR2 = I2C_CR2_STOP;
                 continuingPrevious = nextAction == Action::continueSession;
-                infra::EventDispatcher::Instance().Schedule([this]() { onSent(hal::Result::complete, sent); });
+                infra::EventDispatcher::Instance().Schedule([this]()
+                    { onSent(hal::Result::complete, sent); });
             }
             else if (!receiveData.empty())
                 peripheralI2c[instance]->CR2 = (std::min<uint32_t>(receiveData.size(), 255) << 16) | (receiveData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
@@ -170,7 +170,7 @@ namespace hal
                 peripheralI2c[instance]->CR2 = (std::min<uint32_t>(sendData.size(), 255) << 16) | (sendData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
         }
 
-        if ((peripheralI2c[instance]->ISR & I2C_ISR_TC) != 0)   // Transfer Complete
+        if ((peripheralI2c[instance]->ISR & I2C_ISR_TC) != 0) // Transfer Complete
         {
             ReadReceivedData();
             really_assert(sendData.empty());
@@ -180,105 +180,112 @@ namespace hal
                 peripheralI2c[instance]->CR2 = I2C_CR2_STOP;
             continuingPrevious = nextAction == Action::continueSession;
             if (onSent != nullptr)
-                infra::EventDispatcher::Instance().Schedule([this]() { onSent(hal::Result::complete, sent); });
+                infra::EventDispatcher::Instance().Schedule([this]()
+                    { onSent(hal::Result::complete, sent); });
             else
-                infra::EventDispatcher::Instance().Schedule([this]() { onReceived(hal::Result::complete); });
+                infra::EventDispatcher::Instance().Schedule([this]()
+                    { onReceived(hal::Result::complete); });
         }
 #else
-    auto sr1 = peripheralI2c[instance]->SR1;
+        auto sr1 = peripheralI2c[instance]->SR1;
 
-    if ((sr1 & I2C_SR1_SB) != 0)
-    {
-        peripheralI2c[instance]->DR = (address.address << 1) | (sendData.empty() ? 1 : 0);
-    }
-    else if ((sr1 & I2C_SR1_ADDR) != 0)
-    {
-        if (receiveData.size() == 1 || receiveData.size() == 2)
-            peripheralI2c[instance]->CR1 &= ~I2C_CR1_ACK;
-        if (receiveData.size() == 2)
-            peripheralI2c[instance]->CR1 |= I2C_CR1_POS;
-
-        (void)peripheralI2c[instance]->SR2;    // Clear ADDR
-
-        if (receiveData.size() == 1)
+        if ((sr1 & I2C_SR1_SB) != 0)
         {
+            peripheralI2c[instance]->DR = (address.address << 1) | (sendData.empty() ? 1 : 0);
+        }
+        else if ((sr1 & I2C_SR1_ADDR) != 0)
+        {
+            if (receiveData.size() == 1 || receiveData.size() == 2)
+                peripheralI2c[instance]->CR1 &= ~I2C_CR1_ACK;
+            if (receiveData.size() == 2)
+                peripheralI2c[instance]->CR1 |= I2C_CR1_POS;
+
+            (void)peripheralI2c[instance]->SR2; // Clear ADDR
+
+            if (receiveData.size() == 1)
+            {
+                if (nextAction == Action::stop)
+                    peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
+                continuingPrevious = nextAction == Action::continueSession;
+            }
+
+            if (receiveData.size() != 2)
+                peripheralI2c[instance]->CR2 |= I2C_CR2_ITBUFEN;
+        }
+        else if ((sr1 & I2C_SR1_TXE) != 0 && !sendData.empty() && (peripheralI2c[instance]->CR2 & I2C_CR2_ITBUFEN) != 0)
+        {
+            auto data = sendData.front();
+            sendData.pop_front();
+            ++sent;
+
+            if (sendData.empty())
+                peripheralI2c[instance]->CR2 &= ~I2C_CR2_ITBUFEN;
+
+            peripheralI2c[instance]->DR = data;
+        }
+        else if ((sr1 & I2C_SR1_BTF) != 0 && receiveData.size() == 2)
+        {
+            peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
+
             if (nextAction == Action::stop)
                 peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
             continuingPrevious = nextAction == Action::continueSession;
+
+            receiveData.front() = peripheralI2c[instance]->DR;
+            receiveData.pop_front();
+            ++received;
+
+            receiveData.front() = peripheralI2c[instance]->DR;
+            receiveData.pop_front();
+            ++received;
+
+            infra::EventDispatcher::Instance().Schedule([this]()
+                { onReceived(hal::Result::complete); });
         }
+        else if ((sr1 & I2C_SR1_RXNE) != 0 && receiveData.size() == 1)
+        {
+            peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN | I2C_CR2_ITBUFEN);
 
-        if (receiveData.size() != 2)
-            peripheralI2c[instance]->CR2 |= I2C_CR2_ITBUFEN;
-    }
-    else if ((sr1 & I2C_SR1_TXE) != 0 && !sendData.empty() && (peripheralI2c[instance]->CR2 & I2C_CR2_ITBUFEN) != 0)
-    {
-        auto data = sendData.front();
-        sendData.pop_front();
-        ++sent;
+            receiveData.front() = peripheralI2c[instance]->DR;
+            ;
+            receiveData.pop_front();
+            ++received;
 
-        if (sendData.empty())
-            peripheralI2c[instance]->CR2 &= ~I2C_CR2_ITBUFEN;
-        
-        peripheralI2c[instance]->DR = data;
-    }
-    else if ((sr1 & I2C_SR1_BTF) != 0 && receiveData.size() == 2)
-    {
-        peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
+            infra::EventDispatcher::Instance().Schedule([this]()
+                { onReceived(hal::Result::complete); });
+        }
+        else if ((sr1 & I2C_SR1_RXNE) != 0 && !receiveData.empty())
+        {
+            if (receiveData.size() == 2)
+                peripheralI2c[instance]->CR1 &= ~I2C_CR1_ACK;
 
-        if (nextAction == Action::stop)
-            peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
-        continuingPrevious = nextAction == Action::continueSession;
+            receiveData.front() = peripheralI2c[instance]->DR;
+            ;
+            receiveData.pop_front();
+            ++received;
 
-        receiveData.front() = peripheralI2c[instance]->DR;
-        receiveData.pop_front();
-        ++received;
+            if (receiveData.size() == 1)
+            {
+                if (nextAction == Action::stop)
+                    peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
+                continuingPrevious = nextAction == Action::continueSession;
+            }
+        }
+        else if ((sr1 & I2C_SR1_BTF) != 0 && sendData.empty() && onSent != nullptr)
+        {
+            peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
 
-        receiveData.front() = peripheralI2c[instance]->DR;
-        receiveData.pop_front();
-        ++received;
+            if (nextAction == Action::stop)
+                peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
+            else
+                (void)peripheralI2c[instance]->DR; // Clear BTF
+            continuingPrevious = nextAction == Action::continueSession;
 
-        infra::EventDispatcher::Instance().Schedule([this]() { onReceived(hal::Result::complete); });
-    }
-    else if ((sr1 & I2C_SR1_RXNE) != 0 && receiveData.size() == 1)
-    {
-        peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN | I2C_CR2_ITBUFEN);
-
-        receiveData.front() = peripheralI2c[instance]->DR;;
-        receiveData.pop_front();
-        ++received;
-
-        infra::EventDispatcher::Instance().Schedule([this]() { onReceived(hal::Result::complete); });
-    }
-     else if ((sr1 & I2C_SR1_RXNE) != 0 && !receiveData.empty())
-     {
-         if (receiveData.size() == 2)
-             peripheralI2c[instance]->CR1 &= ~I2C_CR1_ACK;
-
-         receiveData.front() = peripheralI2c[instance]->DR;;
-         receiveData.pop_front();
-         ++received;
-
-         if (receiveData.size() == 1)
-         {
-             if (nextAction == Action::stop)
-                 peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
-             continuingPrevious = nextAction == Action::continueSession;
-         }
-    }
-    else if ((sr1 & I2C_SR1_BTF) != 0 && sendData.empty() && onSent != nullptr)
-    {
-        peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN);
-
-        if (nextAction == Action::stop)
-            peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
+            infra::EventDispatcher::Instance().Schedule([this]()
+                { onSent(hal::Result::complete, sent); });
+        }
         else
-            (void)peripheralI2c[instance]->DR;  // Clear BTF
-        continuingPrevious = nextAction == Action::continueSession;
-
-        infra::EventDispatcher::Instance().Schedule([this]() { onSent(hal::Result::complete, sent); });
-    }
-    else
-        std::abort();
+            std::abort();
 #endif
     }
 
@@ -298,10 +305,7 @@ namespace hal
         }
 
         really_assert(
-            (peripheralI2c[instance]->ISR & I2C_ISR_OVR) == 0
-            && (peripheralI2c[instance]->ISR & I2C_ISR_PECERR) == 0
-            && (peripheralI2c[instance]->ISR & I2C_ISR_TIMEOUT) == 0
-            && (peripheralI2c[instance]->ISR & I2C_ISR_ALERT) == 0);
+            (peripheralI2c[instance]->ISR & I2C_ISR_OVR) == 0 && (peripheralI2c[instance]->ISR & I2C_ISR_PECERR) == 0 && (peripheralI2c[instance]->ISR & I2C_ISR_TIMEOUT) == 0 && (peripheralI2c[instance]->ISR & I2C_ISR_ALERT) == 0);
 #else
         if ((peripheralI2c[instance]->SR1 & I2C_SR1_AF) != 0)
         {
@@ -322,8 +326,7 @@ namespace hal
                     {
                         receiveData.clear();
                         onReceived(hal::Result::partialComplete);
-                    }
-                });
+                    } });
         }
         else if ((peripheralI2c[instance]->SR1 & I2C_SR1_BERR) != 0)
         {
@@ -332,9 +335,7 @@ namespace hal
             peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                {
-                    BusError();
-                });
+                { BusError(); });
         }
         else if ((peripheralI2c[instance]->SR1 & I2C_SR1_ARLO) != 0)
         {
@@ -342,9 +343,7 @@ namespace hal
             peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN | I2C_CR2_ITBUFEN);
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                {
-                    ArbitrationLost();
-                });
+                { ArbitrationLost(); });
         }
         else
             std::abort();

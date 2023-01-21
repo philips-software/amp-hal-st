@@ -9,7 +9,8 @@ namespace hal
     EthernetMacStm::EthernetMacStm(EthernetSmi& ethernetSmi, LinkSpeed linkSpeed, std::array<uint8_t, 6> macAddress)
         : ethernetSmi(ethernetSmi)
         , macAddress(macAddress)
-        , interrupt(peripheralEthernetIrq[0], [this]() { Interrupt(); })
+        , interrupt(peripheralEthernetIrq[0], [this]()
+              { Interrupt(); })
         , receiveDescriptors(*this)
         , sendDescriptors(*this)
     {
@@ -19,12 +20,7 @@ namespace hal
         peripheralEthernet[0]->DMAIER = ETH_DMAIER_TIE | ETH_DMAIER_RIE | ETH_DMAIER_RPSIE | ETH_DMAIER_FBEIE | ETH_DMAIER_AISE | ETH_DMAIER_NISE;
         peripheralEthernet[0]->DMABMR = ETH_DMABMR_EDE | ETH_DMABMR_PBL_1Beat;
 
-        peripheralEthernet[0]->MACCR
-            = ((linkSpeed == LinkSpeed::fullDuplex100MHz || linkSpeed == LinkSpeed::halfDuplex100MHz) ? ETH_MACCR_FES : 0)
-            | ((linkSpeed == LinkSpeed::fullDuplex100MHz || linkSpeed == LinkSpeed::fullDuplex10MHz) ? ETH_MACCR_DM : 0)
-            | ETH_MACCR_IPCO
-            | ETH_MACCR_TE
-            | ETH_MACCR_RE;
+        peripheralEthernet[0]->MACCR = ((linkSpeed == LinkSpeed::fullDuplex100MHz || linkSpeed == LinkSpeed::halfDuplex100MHz) ? ETH_MACCR_FES : 0) | ((linkSpeed == LinkSpeed::fullDuplex100MHz || linkSpeed == LinkSpeed::fullDuplex10MHz) ? ETH_MACCR_DM : 0) | ETH_MACCR_IPCO | ETH_MACCR_TE | ETH_MACCR_RE;
 
         peripheralEthernet[0]->DMAOMR = ETH_DMAOMR_SR | ETH_DMAOMR_ST | ETH_DMAOMR_TSF | ETH_DMAOMR_DFRF | ETH_DMAOMR_RSF | ETH_DMAOMR_FEF;
     }
@@ -158,21 +154,18 @@ namespace hal
         peripheralEthernet[0]->DMARDLAR = reinterpret_cast<uint32_t>(descriptors.data());
 
         infra::EventDispatcher::Instance().Schedule([this]()
-        {
+            {
             // This is scheduled so that the observer is instantiated
-            RequestReceiveBuffers();
-        });
+            RequestReceiveBuffers(); });
     }
 
     void EthernetMacStm::ReceiveDescriptors::ReceivedFrame()
     {
         while (receivedFramesAllocated != 0 && (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_OWN) == 0)
         {
-            bool receiveDone = (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_OWN) == 0
-                && (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_LS) != 0;
+            bool receiveDone = (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_OWN) == 0 && (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_LS) != 0;
             uint16_t frameSize = (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_FL) >> 16;
-            bool errorFrame = (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_ES) != 0
-                && (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_LS) != 0;
+            bool errorFrame = (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_ES) != 0 && (descriptors[receiveDescriptorReceiveIndex].Status & ETH_DMARXDESC_LS) != 0;
             descriptors[receiveDescriptorReceiveIndex].Buffer1Addr = 0;
             ++receivedFrameBuffers;
             --receivedFramesAllocated;
@@ -255,9 +248,7 @@ namespace hal
         else
             descriptors[sendDescriptorIndex].Status &= ~ETH_DMATXDESC_LS;
 
-        descriptors[sendDescriptorIndex].Status &= ~(ETH_DMATXDESC_DB | ETH_DMATXDESC_UF | ETH_DMATXDESC_ED
-            | ETH_DMATXDESC_CC | ETH_DMATXDESC_EC | ETH_DMATXDESC_LCO | ETH_DMATXDESC_NC | ETH_DMATXDESC_LCA
-            | ETH_DMATXDESC_PCE | ETH_DMATXDESC_FF | ETH_DMATXDESC_JT | ETH_DMATXDESC_ES | ETH_DMATXDESC_IHE);
+        descriptors[sendDescriptorIndex].Status &= ~(ETH_DMATXDESC_DB | ETH_DMATXDESC_UF | ETH_DMATXDESC_ED | ETH_DMATXDESC_CC | ETH_DMATXDESC_EC | ETH_DMATXDESC_LCO | ETH_DMATXDESC_NC | ETH_DMATXDESC_LCA | ETH_DMATXDESC_PCE | ETH_DMATXDESC_FF | ETH_DMATXDESC_JT | ETH_DMATXDESC_ES | ETH_DMATXDESC_IHE);
 
         if (sendFirst)
             sendDescriptorIndexFirst = sendDescriptorIndex;

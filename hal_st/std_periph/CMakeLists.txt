@@ -46,3 +46,5 @@ function(halst_target_linker_scripts)
 
     set_property(TARGET ${HALST_TARGET} PROPERTY INTERFACE_LINK_DEPENDS ${HALST_LINKER_SCRIPTS})
 endfunction()
+
+emil_exclude_directory_from_clang_format(.)
