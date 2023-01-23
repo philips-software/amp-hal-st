@@ -1,5 +1,5 @@
-#include "infra/event/EventDispatcher.hpp"
 #include "hal_st/stm32fxxx/RandomDataGeneratorStm.hpp"
+#include "infra/event/EventDispatcher.hpp"
 
 #if defined(HAS_PERIPHERAL_RNG)
 
@@ -41,7 +41,7 @@ namespace hal
     void RandomDataGeneratorStm::Invoke()
     {
         if ((RNG->SR & RNG_SR_CEIS) != 0)
-            std::abort();   // RNG clock must be set to at least HCLK / 16
+            std::abort(); // RNG clock must be set to at least HCLK / 16
 
         if ((RNG->SR & RNG_SR_SEIS) != 0)
         {

@@ -1,18 +1,16 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/SpiMasterStmDma.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
 {
     namespace
     {
-        const std::array<std::pair<DmaChannelId, DmaChannelId>, 6> defaultDmaChannelId = {{
-            std::make_pair(DmaChannelId{ 2, 3, 3 }, DmaChannelId{ 2, 0, 3 }),
+        const std::array<std::pair<DmaChannelId, DmaChannelId>, 6> defaultDmaChannelId = { { std::make_pair(DmaChannelId{ 2, 3, 3 }, DmaChannelId{ 2, 0, 3 }),
             std::make_pair(DmaChannelId{ 1, 4, 0 }, DmaChannelId{ 1, 3, 0 }),
             std::make_pair(DmaChannelId{ 1, 5, 0 }, DmaChannelId{ 1, 0, 0 }),
             std::make_pair(DmaChannelId{ 2, 1, 4 }, DmaChannelId{ 2, 0, 4 }),
             std::make_pair(DmaChannelId{ 2, 4, 2 }, DmaChannelId{ 2, 3, 2 }),
-            std::make_pair(DmaChannelId{ 2, 5, 1 }, DmaChannelId{ 2, 6, 1 })
-        }};
+            std::make_pair(DmaChannelId{ 2, 5, 1 }, DmaChannelId{ 2, 6, 1 }) } };
     }
 
     SpiMasterStmDma::SpiMasterStmDma(hal::DmaStm& dmaStm, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config, GpioPinStm& slaveSelect)
@@ -21,8 +19,10 @@ namespace hal
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
-        , rx(dmaStm, config.dmaChannelRx.ValueOr(defaultDmaChannelId[spiInstance].second), &peripheralSpi[spiInstance]->DR, [this]() { ReceiveDone(); })
-        , tx(dmaStm, config.dmaChannelTx.ValueOr(defaultDmaChannelId[spiInstance].first), &peripheralSpi[spiInstance]->DR, [this]() { SendDone(); })
+        , rx(dmaStm, config.dmaChannelRx.ValueOr(defaultDmaChannelId[spiInstance].second), &peripheralSpi[spiInstance]->DR, [this]()
+              { ReceiveDone(); })
+        , tx(dmaStm, config.dmaChannelTx.ValueOr(defaultDmaChannelId[spiInstance].first), &peripheralSpi[spiInstance]->DR, [this]()
+              { SendDone(); })
     {
         EnableClockSpi(spiInstance);
 
@@ -76,12 +76,12 @@ namespace hal
             rx.StartReceive(receiveData);
             tx.StartTransmit(sendData);
         }
-        else if(!sendData.empty())
+        else if (!sendData.empty())
         {
             rx.StartReceiveDummy(sendData.size());
             tx.StartTransmit(sendData);
         }
-        else if(!receiveData.empty())
+        else if (!receiveData.empty())
         {
             rx.StartReceive(receiveData);
             tx.StartTransmitDummy(receiveData.size());

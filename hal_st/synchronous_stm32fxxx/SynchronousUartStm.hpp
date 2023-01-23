@@ -1,11 +1,11 @@
 #ifndef SYNCHRONOUS_HAL_SYNCHRONOUS_UART_STM_HPP
 #define SYNCHRONOUS_HAL_SYNCHRONOUS_UART_STM_HPP
 
-#include "infra/util/WithStorage.hpp"
-#include "hal_st/cortex/InterruptCortex.hpp"
-#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal/synchronous_interfaces/SynchronousSerialCommunication.hpp"
 #include "hal/synchronous_interfaces/TimeKeeper.hpp"
+#include "hal_st/cortex/InterruptCortex.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "infra/util/WithStorage.hpp"
 #include <atomic>
 
 namespace hal
@@ -24,10 +24,10 @@ namespace hal
         };
 
         template<std::size_t Size>
-            using WithStorage = infra::WithStorage<SynchronousUartStm, std::array<uint8_t, Size>>;
+        using WithStorage = infra::WithStorage<SynchronousUartStm, std::array<uint8_t, Size>>;
 
         SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, TimeKeeper& timeKeeper, uint32_t baudrate = 115200);
-        SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, TimeKeeper& timeKeeper, 
+        SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, TimeKeeper& timeKeeper,
             HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
         ~SynchronousUartStm();
 
@@ -65,7 +65,7 @@ namespace hal
         };
 
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, uint32_t baudrate = 115200);
-        SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, 
+        SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
             HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
         ~SynchronousUartStmSendOnly();
 

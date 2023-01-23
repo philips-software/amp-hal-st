@@ -1,10 +1,10 @@
 #ifndef HAL_ETHERNET_MAC_STM_HPP
 #define HAL_ETHERNET_MAC_STM_HPP
 
+#include "cmsis_device.h"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/Ethernet.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
-#include "cmsis_device.h"
 #include <array>
 
 #if defined(HAS_PERIPHERAL_ETHERNET)
@@ -61,7 +61,7 @@ namespace hal
         private:
             EthernetMacStm& ethernetMac;
 
-            alignas(uint64_t)std::array<ETH_DMADescTypeDef, 12> descriptors;
+            alignas(uint64_t) std::array<ETH_DMADescTypeDef, 12> descriptors;
 
             uint32_t sendDescriptorIndexFirst = 0;
             uint32_t sendDescriptorIndex = 0;

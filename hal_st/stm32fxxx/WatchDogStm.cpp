@@ -4,7 +4,8 @@ namespace hal
 {
     WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired)
         : onExpired(onExpired)
-        , interruptRegistration(WWDG_IRQn, [this]() { Interrupt(); })
+        , interruptRegistration(WWDG_IRQn, [this]()
+              { Interrupt(); })
     {
         __WWDG_CLK_ENABLE();
 
@@ -26,7 +27,8 @@ namespace hal
         NVIC_SetPriority(WWDG_IRQn, 0);
         WWDG->CFR |= WWDG_CFR_EWI;
 
-        feedingTimer.Start(std::chrono::milliseconds(25), [this]() { Feed(); });
+        feedingTimer.Start(std::chrono::milliseconds(25), [this]()
+            { Feed(); });
     }
 
     void WatchDogStm::Interrupt()
@@ -37,7 +39,7 @@ namespace hal
         HAL_WWDG_Refresh(&handle);
 #endif
         WWDG->SR = 0;
-        if (++delay == 41)      // 41 * 36ms = 1.5s
+        if (++delay == 41) // 41 * 36ms = 1.5s
             onExpired();
     }
 

@@ -26,7 +26,7 @@ namespace hal
             { DMA2_Stream0_IRQn, DMA2_Stream1_IRQn, DMA2_Stream2_IRQn, DMA2_Stream3_IRQn, DMA2_Stream4_IRQn, DMA2_Stream5_IRQn, DMA2_Stream6_IRQn, DMA2_Stream7_IRQn }
         };
 
-#if defined (STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx)
+#if defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx)
         const uint32_t dmaChannel[16] = {
             DMA_CHANNEL_0, DMA_CHANNEL_1, DMA_CHANNEL_2, DMA_CHANNEL_3, DMA_CHANNEL_4, DMA_CHANNEL_5, DMA_CHANNEL_6, DMA_CHANNEL_7,
             DMA_CHANNEL_8, DMA_CHANNEL_9, DMA_CHANNEL_10, DMA_CHANNEL_11, DMA_CHANNEL_12, DMA_CHANNEL_13, DMA_CHANNEL_14, DMA_CHANNEL_15
@@ -71,7 +71,8 @@ namespace hal
         , dmaIndex(channelId.dma)
         , streamIndex(channelId.stream)
         , actionOnTransferComplete(actionOnTransferComplete)
-        , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]() { OnInterrupt(); })
+        , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
+              { OnInterrupt(); })
     {
         dma.ReserveStream(dmaIndex, streamIndex);
 
@@ -100,7 +101,8 @@ namespace hal
         , dmaIndex(other.dmaIndex)
         , streamIndex(other.streamIndex)
         , actionOnTransferComplete(other.actionOnTransferComplete)
-        , interruptHandler(std::move(other.interruptHandler), [this]() { OnInterrupt(); })
+        , interruptHandler(std::move(other.interruptHandler), [this]()
+              { OnInterrupt(); })
     {
         other.streamIndex = 0xff;
         other.actionOnTransferComplete = nullptr;
@@ -117,7 +119,8 @@ namespace hal
         dmaIndex = other.dmaIndex;
         streamIndex = other.streamIndex;
         actionOnTransferComplete = other.actionOnTransferComplete;
-        interruptHandler.Assign(std::move(other.interruptHandler), [this]() { OnInterrupt(); });
+        interruptHandler.Assign(std::move(other.interruptHandler), [this]()
+            { OnInterrupt(); });
 
         other.streamIndex = 0xff;
         other.actionOnTransferComplete = nullptr;

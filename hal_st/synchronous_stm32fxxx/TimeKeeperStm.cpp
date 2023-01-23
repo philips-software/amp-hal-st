@@ -1,10 +1,10 @@
 #include "hal_st/synchronous_stm32fxxx/TimeKeeperStm.hpp"
 
-namespace hal 
+namespace hal
 {
     TimeKeeperSt::TimeKeeperSt(infra::Duration duration, hal::SystemTickTimerService& timeService)
         : duration(duration)
-        , timeService(timeService) 
+        , timeService(timeService)
     {
         Reset();
     }

@@ -1,11 +1,11 @@
 #ifndef HAL_CAN_STM_HPP
 #define HAL_CAN_STM_HPP
 
+#include "cmsis_device.h"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/Can.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "cmsis_device.h"
 
 #if defined(HAS_PERIPHERAL_CAN)
 
@@ -17,7 +17,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
             uint32_t prescaler = 1024;
         };

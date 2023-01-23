@@ -1,10 +1,10 @@
 #ifndef HAL_GPIO_STM_HPP
 #define HAL_GPIO_STM_HPP
 
+#include "cmsis_device.h"
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include "cmsis_device.h"
 #include <cstdint>
 
 namespace hal
@@ -57,7 +57,7 @@ namespace hal
         dac
     };
 
-    enum class Port: uint8_t
+    enum class Port : uint8_t
     {
         A,
         B,
@@ -72,7 +72,7 @@ namespace hal
         K
     };
 
-    enum class WeakPull: uint8_t
+    enum class WeakPull : uint8_t
     {
         None,
         Up,
@@ -80,14 +80,14 @@ namespace hal
         Default = None
     };
 
-    enum class Drive: uint8_t
+    enum class Drive : uint8_t
     {
         PushPull,
         OpenDrain,
         Default = PushPull
     };
 
-    enum class Speed: uint8_t
+    enum class Speed : uint8_t
     {
         Low,
         Medium,

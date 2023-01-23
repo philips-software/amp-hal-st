@@ -1,8 +1,8 @@
 #ifndef HAL_ST_ETHERNET_HPP
 #define HAL_ST_ETHERNET_HPP
 
-#include "hal_st_lwip/instantiations_lwip/EthernetSmiObserver.hpp"
 #include "hal_st/stm32fxxx/EthernetSmiStm.hpp"
+#include "hal_st_lwip/instantiations_lwip/EthernetSmiObserver.hpp"
 #include "lwip/lwip_cpp/LightweightIp.hpp"
 #include "services/network/LlmnrResponder.hpp"
 
@@ -65,7 +65,9 @@ namespace main_
 
         infra::CreatorBase<services::Stoppable, void(services::LightweightIp& lightweightIp)>* connectedCreator = nullptr;
         infra::Creator<services::Stoppable, Connected, void(services::LightweightIp& lightweightIp)> connected{ [this](infra::Optional<Connected>& value, services::LightweightIp& lightweightIp)
-            { value.Emplace(lightweightIp, hostName, connectedCreator); } };
+            {
+                value.Emplace(lightweightIp, hostName, connectedCreator);
+            } };
     };
 
     template<std::size_t MaxListeners, std::size_t MaxConnectors, std::size_t MaxConnections>
@@ -74,11 +76,10 @@ namespace main_
         , lightweightIpConfig(ConvertConfig(hostName))
         , lightweightIpOverEthernetFactory(macAddress, lightweightIpConfig)
         , setSysConfig([]()
-            {
+              {
                 SYSCFG->CMPCR |= SYSCFG_CMPCR_CMP_PD;
                 while ((SYSCFG->CMPCR & SYSCFG_CMPCR_READY) == 0)
-                {}
-            })
+                {} })
         , mdio(pins[0].first, pins[0].second)
         , mdc(pins[1].first, pins[1].second)
         , rmiiRefClk(pins[2].first, pins[2].second)
@@ -100,11 +101,10 @@ namespace main_
         , lightweightIpConfig(ConvertConfig(hostName))
         , lightweightIpOverEthernetFactory(macAddress, lightweightIpConfig)
         , setSysConfig([]()
-            {
+              {
                 SYSCFG->CMPCR |= SYSCFG_CMPCR_CMP_PD;
                 while ((SYSCFG->CMPCR & SYSCFG_CMPCR_READY) == 0)
-                {}
-            })
+                {} })
         , mdio(pins[0].first, pins[0].second)
         , mdc(pins[1].first, pins[1].second)
         , rmiiRefClk(pins[2].first, pins[2].second)

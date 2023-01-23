@@ -1,10 +1,10 @@
 #ifndef HAL_FLASH_INTERNAL_STM_HPP
 #define HAL_FLASH_INTERNAL_STM_HPP
 
+#include "cmsis_device.h"
 #include "hal/interfaces/Flash.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
-#include "cmsis_device.h"
 
 namespace hal
 {

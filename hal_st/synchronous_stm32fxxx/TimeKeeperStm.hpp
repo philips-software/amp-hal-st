@@ -5,10 +5,10 @@
 #include "hal/synchronous_interfaces/TimeService.hpp"
 #include "hal_st/stm32fxxx/SystemTickTimerService.hpp"
 
-namespace hal 
+namespace hal
 {
-    class TimeKeeperSt 
-        : public TimeKeeper 
+    class TimeKeeperSt
+        : public TimeKeeper
     {
     public:
         explicit TimeKeeperSt(infra::Duration duration, hal::SystemTickTimerService& timeService);

@@ -1,9 +1,9 @@
 #ifndef SYNCHRONOUS_HAL_SYNCHRONOUS_FLASH_INTERNAL_STM_HPP
 #define SYNCHRONOUS_HAL_SYNCHRONOUS_FLASH_INTERNAL_STM_HPP
 
+#include "cmsis_device.h"
 #include "hal/synchronous_interfaces/SynchronousFlash.hpp"
 #include "infra/util/ByteRange.hpp"
-#include "cmsis_device.h"
 
 namespace hal
 {

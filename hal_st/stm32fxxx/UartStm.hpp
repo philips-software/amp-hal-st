@@ -14,7 +14,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
             uint32_t baudrate = 115200;
             uint32_t hwFlowControl = UART_HWCONTROL_NONE;
@@ -42,7 +43,7 @@ namespace hal
 
         infra::Function<void()> transferDataComplete;
         infra::Function<void(infra::ConstByteRange data)> dataReceived;
-        
+
         infra::MemoryRange<const uint8_t> sendData;
         bool sending = false;
     };

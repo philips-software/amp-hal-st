@@ -1,5 +1,5 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include <cassert>
 
 namespace hal
@@ -29,7 +29,8 @@ namespace hal
     AdcStm::AdcStm(uint8_t oneBasedIndex)
         : index(oneBasedIndex - 1)
         , handle()
-        , interruptHandler(ADC_IRQn, [this]() { MeasurementDone(); })
+        , interruptHandler(ADC_IRQn, [this]()
+              { MeasurementDone(); })
     {
         EnableClockAdc(index);
 
