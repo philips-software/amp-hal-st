@@ -11,15 +11,15 @@ namespace hal
             GPIOD,
             GPIOE,
             GPIOF,
-    #if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
+#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
             GPIOG,
             GPIOH,
             GPIOI,
-    #endif
-    #if defined(STM32F7)
+#endif
+#if defined(STM32F7)
             GPIOJ,
             GPIOK
-    #endif
+#endif
         };
 
         const uint16_t pinToGPIOPin[16] = {

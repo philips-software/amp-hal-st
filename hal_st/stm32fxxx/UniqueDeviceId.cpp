@@ -7,7 +7,7 @@ namespace hal
     {
         const uint8_t* base = reinterpret_cast<const uint8_t*>(0x1FFFF7AC);
         return infra::ConstByteRange(base, base + 12);
-}
+    }
 #endif
 
 #if defined(STM32F407xx)

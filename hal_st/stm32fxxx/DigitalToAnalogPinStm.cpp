@@ -1,7 +1,7 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/DigitalToAnalogPinStm.hpp"
-#include "infra/util/BitLogic.hpp"
 #include "cmsis_device.h"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/util/BitLogic.hpp"
 
 namespace hal
 {

@@ -6,7 +6,7 @@ namespace hal
 {
     namespace
     {
-#if defined (STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx)
+#if defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx)
         const DmaChannelId quadSpiDmaChannel{ 2, 2, 11 };
 #else
         const DmaChannelId quadSpiDmaChannel{ 2, 7, 3 };
@@ -20,8 +20,10 @@ namespace hal
         , data1(data1, PinConfigTypeStm::quadSpiData1, 0)
         , data2(data2, PinConfigTypeStm::quadSpiData2, 0)
         , data3(data3, PinConfigTypeStm::quadSpiData3, 0)
-        , dmaStream(dma, quadSpiDmaChannel, &QUADSPI->DR, [this]() { OnDmaTransferDone(); })
-        , interruptHandler(QUADSPI_IRQn, [this]() { OnInterrupt(); })
+        , dmaStream(dma, quadSpiDmaChannel, &QUADSPI->DR, [this]()
+              { OnDmaTransferDone(); })
+        , interruptHandler(QUADSPI_IRQn, [this]()
+              { OnInterrupt(); })
     {
         EnableClockQuadSpi(0);
 
@@ -43,7 +45,7 @@ namespace hal
         if (!data.empty())
         {
             QUADSPI->DLR = data.size() - 1;
-            //QUADSPI->CCR = (QUADSPI->CCR & ~QUADSPI_CCR_FMODE);
+            // QUADSPI->CCR = (QUADSPI->CCR & ~QUADSPI_CCR_FMODE);
         }
         else
             QUADSPI->CR |= QUADSPI_CR_TCIE;
@@ -96,39 +98,33 @@ namespace hal
 
         if (header.instruction)
         {
-            static const std::array<uint32_t, 5> ccrLines = { {
-                0,
+            static const std::array<uint32_t, 5> ccrLines = { { 0,
                 QSPI_INSTRUCTION_1_LINE,
                 QSPI_INSTRUCTION_2_LINES,
                 0,
-                QSPI_INSTRUCTION_4_LINES
-            } };
+                QSPI_INSTRUCTION_4_LINES } };
 
             ccr |= ccrLines[lines.instructionLines] | *header.instruction;
         }
 
         if (!header.address.empty())
         {
-            static const std::array<uint32_t, 5> ccrLines = { {
-                0,
+            static const std::array<uint32_t, 5> ccrLines = { { 0,
                 QSPI_ADDRESS_1_LINE,
                 QSPI_ADDRESS_2_LINES,
                 0,
-                QSPI_ADDRESS_4_LINES
-            } };
+                QSPI_ADDRESS_4_LINES } };
 
             ccr |= ccrLines[lines.addressLines] | (((header.address.size() - 1) & 0x03) << 12);
         }
 
         if (!header.alternate.empty())
         {
-            static const std::array<uint32_t, 5> ccrLines = { {
-                0,
+            static const std::array<uint32_t, 5> ccrLines = { { 0,
                 QSPI_ALTERNATE_BYTES_1_LINE,
                 QSPI_ALTERNATE_BYTES_2_LINES,
                 0,
-                QSPI_ALTERNATE_BYTES_4_LINES
-            } };
+                QSPI_ALTERNATE_BYTES_4_LINES } };
 
             ccr |= ccrLines[lines.alternateLines] | (((header.alternate.size() - 1) & 0x03) << 16);
             QUADSPI->ABR = *reinterpret_cast<const uint32_t*>(header.alternate.data());
@@ -139,13 +135,11 @@ namespace hal
 
         if (dataSize != 0)
         {
-            static const std::array<uint32_t, 5> ccrLines = { {
-                0,
+            static const std::array<uint32_t, 5> ccrLines = { { 0,
                 QSPI_DATA_1_LINE,
                 QSPI_DATA_2_LINES,
                 0,
-                QSPI_DATA_4_LINES
-            } };
+                QSPI_DATA_4_LINES } };
 
             ccr |= ccrLines[lines.dataLines];
         }

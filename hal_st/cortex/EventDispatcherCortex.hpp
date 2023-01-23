@@ -10,7 +10,7 @@ namespace hal
     {
     public:
         template<std::size_t StorageSize>
-            using WithSize = infra::WithStorage<EventDispatcherCortexWorker, std::array<std::pair<infra::Function<void()>, std::atomic<bool>>, StorageSize>>;
+        using WithSize = infra::WithStorage<EventDispatcherCortexWorker, std::array<std::pair<infra::Function<void()>, std::atomic<bool>>, StorageSize>>;
 
         EventDispatcherCortexWorker(infra::MemoryRange<std::pair<infra::Function<void()>, std::atomic<bool>>> scheduledActionsStorage);
 

@@ -14,7 +14,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
             infra::Optional<DmaChannelId> dmaChannelTx;
             infra::Optional<DmaChannelId> dmaChannelRx;

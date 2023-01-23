@@ -1,11 +1,11 @@
 #ifndef HAL_INTERRUPT_CORTEX_HPP
 #define HAL_INTERRUPT_CORTEX_HPP
 
+#include "cmsis_device.h"
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/WithStorage.hpp"
-#include "cmsis_device.h"
 #include <array>
 
 namespace hal
@@ -46,7 +46,7 @@ namespace hal
     {
     public:
         template<std::size_t Size>
-            using WithStorage = infra::WithStorage<InterruptTable, std::array<InterruptHandler*, Size>>;
+        using WithStorage = infra::WithStorage<InterruptTable, std::array<InterruptHandler*, Size>>;
 
         InterruptTable(infra::MemoryRange<InterruptHandler*> table);
 

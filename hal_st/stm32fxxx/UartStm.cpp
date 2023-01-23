@@ -1,15 +1,15 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/UartStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
 
 namespace hal
 {
     UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-    : uartIndex(aUartIndex - 1)
-    , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-    , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-    , uartHandle()
+        : uartIndex(aUartIndex - 1)
+        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
+        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
+        , uartHandle()
     {
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
@@ -56,15 +56,15 @@ namespace hal
         this->dataReceived = dataReceived;
 
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-    if (dataReceived == nullptr)
-        peripheralUart[uartIndex]->CR1 &= ~(1 << (USART_IT_RXNE & USART_IT_MASK));
-    else
-        peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
+        if (dataReceived == nullptr)
+            peripheralUart[uartIndex]->CR1 &= ~(1 << (USART_IT_RXNE & USART_IT_MASK));
+        else
+            peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
 #else
-    if (dataReceived == nullptr)
-        peripheralUart[uartIndex]->CR1 &= ~(USART_IT_RXNE & USART_IT_MASK);
-    else
-        peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
+        if (dataReceived == nullptr)
+            peripheralUart[uartIndex]->CR1 &= ~(USART_IT_RXNE & USART_IT_MASK);
+        else
+            peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
 #endif
     }
 
@@ -92,16 +92,16 @@ namespace hal
             {
                 uint8_t receivedByte =
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-                peripheralUart[uartIndex]->RDR;
+                    peripheralUart[uartIndex]->RDR;
 #else
-                peripheralUart[uartIndex]->DR;
+                    peripheralUart[uartIndex]->DR;
 #endif
                 buffer.push_back(receivedByte);
             }
-            
+
             // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
             really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
-            
+
             if (dataReceived != nullptr)
                 dataReceived(buffer.range());
         }

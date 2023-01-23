@@ -1,10 +1,10 @@
 #ifndef HAL_USB_LINK_LAYER_STM_HPP
 #define HAL_USB_LINK_LAYER_STM_HPP
 
+#include "cmsis_device.h"
 #include "hal/interfaces/UsbLinkLayer.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/InterfaceConnector.hpp"
-#include "cmsis_device.h"
 
 namespace hal
 {

@@ -1,7 +1,7 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/EthernetSmiStm.hpp"
-#include "infra/util/BitLogic.hpp"
 #include "cmsis_device.h"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/util/BitLogic.hpp"
 
 #if defined(HAS_PERIPHERAL_ETHERNET)
 
@@ -43,13 +43,12 @@ namespace hal
     void EthernetSmiStm::RunPhy()
     {
         sequencer.Load([this]()
-        {
+            {
             ResetPhy();
             sequencer.While([]() { return true; });
                 DetectLink();
                 Delay(std::chrono::milliseconds(200));
-            sequencer.EndWhile();
-        });
+            sequencer.EndWhile(); });
     }
 
     void EthernetSmiStm::SetMiiClockRange()
@@ -72,18 +71,22 @@ namespace hal
 
     void EthernetSmiStm::ResetPhy()
     {
-        sequencer.Execute([this]() { WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrReset)); });
+        sequencer.Execute([this]()
+            { WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrReset)); });
         sequencer.DoWhile();
-            Delay(std::chrono::milliseconds(1));
-            sequencer.Execute([this]() { phyRegisterValue = ReadPhyRegister(phyBasicControlRegister); });
-        sequencer.EndDoWhile([this]() { return infra::IsBitSet(phyRegisterValue, phyBcrReset); });
-        sequencer.Execute([this]() { WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable)); });
+        Delay(std::chrono::milliseconds(1));
+        sequencer.Execute([this]()
+            { phyRegisterValue = ReadPhyRegister(phyBasicControlRegister); });
+        sequencer.EndDoWhile([this]()
+            { return infra::IsBitSet(phyRegisterValue, phyBcrReset); });
+        sequencer.Execute([this]()
+            { WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable)); });
     }
 
     void EthernetSmiStm::DetectLink()
     {
         sequencer.Execute([this]()
-        {
+            {
             uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
             bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && infra::IsBitSet(status, phyBsrAutoNegotiationComplete);
 
@@ -109,17 +112,12 @@ namespace hal
                 }
                 else
                     GetObserver().LinkDown();
-            }
-        });
+            } });
     }
 
     uint16_t EthernetSmiStm::ReadPhyRegister(uint16_t reg)
     {
-        peripheralEthernet[0]->MACMIIAR
-            = (peripheralEthernet[0]->MACMIIAR & ~ETH_MACMIIAR_CR_MASK)
-            | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA)
-            | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR)
-            | ETH_MACMIIAR_MB;
+        peripheralEthernet[0]->MACMIIAR = (peripheralEthernet[0]->MACMIIAR & ~ETH_MACMIIAR_CR_MASK) | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA) | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR) | ETH_MACMIIAR_MB;
 
         while (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_MB != 0)
         {}
@@ -130,12 +128,7 @@ namespace hal
     void EthernetSmiStm::WritePhyRegister(uint16_t reg, uint16_t value)
     {
         peripheralEthernet[0]->MACMIIDR = value;
-        peripheralEthernet[0]->MACMIIAR
-            = (peripheralEthernet[0]->MACMIIAR & ~ETH_MACMIIAR_CR_MASK)
-            | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA)
-            | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR)
-            | ETH_MACMIIAR_MW
-            | ETH_MACMIIAR_MB;
+        peripheralEthernet[0]->MACMIIAR = (peripheralEthernet[0]->MACMIIAR & ~ETH_MACMIIAR_CR_MASK) | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA) | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR) | ETH_MACMIIAR_MW | ETH_MACMIIAR_MB;
 
         while (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_MB != 0)
         {}
@@ -144,7 +137,9 @@ namespace hal
     void EthernetSmiStm::Delay(infra::Duration duration)
     {
         delay = duration;
-        sequencer.Step([this]() { delayTimer.Start(delay, [this]() { sequencer.Continue(); }); });
+        sequencer.Step([this]()
+            { delayTimer.Start(delay, [this]()
+                  { sequencer.Continue(); }); });
     }
 }
 

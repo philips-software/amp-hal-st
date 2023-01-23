@@ -14,7 +14,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
             bool msbFirst = true;
             uint32_t baudRatePrescaler = SPI_BAUDRATEPRESCALER_16;

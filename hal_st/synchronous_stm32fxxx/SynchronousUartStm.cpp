@@ -1,11 +1,11 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/synchronous_stm32fxxx/SynchronousUartStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
 {
     SynchronousUartStm::SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, TimeKeeper& timeKeeper, uint32_t baudrate)
         : SynchronousUartStm(readBuffer, aUartIndex, uartTx, uartRx, uartTx, uartRx, timeKeeper, HwFlowControl::hwControlDisable, baudrate)
-    { }
+    {}
 
     SynchronousUartStm::SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, TimeKeeper& timeKeeper,
         HwFlowControl flowControl, uint32_t baudrate)
@@ -132,8 +132,7 @@ namespace hal
 
     bool SynchronousUartStm::Full() const
     {
-        return (contentsEnd == readBuffer.end() - 1 || contentsBegin == contentsEnd + 1)
-            && (contentsEnd != readBuffer.end() - 1 || contentsBegin == readBuffer.begin());
+        return (contentsEnd == readBuffer.end() - 1 || contentsBegin == contentsEnd + 1) && (contentsEnd != readBuffer.end() - 1 || contentsBegin == readBuffer.begin());
     }
 
     bool SynchronousUartStm::Empty() const
@@ -143,7 +142,7 @@ namespace hal
 
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, uint32_t baudrate)
         : SynchronousUartStmSendOnly(aUartIndex, uartTx, uartTx, HwFlowControl::hwControlDisable, baudrate)
-    { }
+    {}
 
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
         HwFlowControl flowControl, uint32_t baudrate)

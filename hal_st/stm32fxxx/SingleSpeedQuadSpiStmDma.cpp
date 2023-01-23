@@ -18,9 +18,11 @@ namespace hal
         continuedSession = nextAction == SpiAction::continueSession;
 
         if (!sendData.empty())
-            quadSpi.SendData(QuadSpi::Header{ infra::none, {}, {}, 0 }, sendData, QuadSpi::Lines::SingleSpeed(), [this]() { Done(); });
+            quadSpi.SendData(QuadSpi::Header{ infra::none, {}, {}, 0 }, sendData, QuadSpi::Lines::SingleSpeed(), [this]()
+                { Done(); });
         else
-            quadSpi.ReceiveData(QuadSpi::Header{ infra::none, {}, {}, 0 }, receiveData, QuadSpi::Lines::SingleSpeed(), [this]() { Done(); });
+            quadSpi.ReceiveData(QuadSpi::Header{ infra::none, {}, {}, 0 }, receiveData, QuadSpi::Lines::SingleSpeed(), [this]()
+                { Done(); });
     }
 
     void SingleSpeedQuadSpiStmDma::SetChipSelectConfigurator(ChipSelectConfigurator& configurator)

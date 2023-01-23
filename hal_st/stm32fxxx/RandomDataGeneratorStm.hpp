@@ -1,8 +1,8 @@
 #ifndef HAL_RANDOM_DATA_GENERATOR_STM_HPP
 #define HAL_RANDOM_DATA_GENERATOR_STM_HPP
 
-#include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal/interfaces/RandomDataGenerator.hpp"
+#include "hal_st/cortex/InterruptCortex.hpp"
 
 #if defined(HAS_PERIPHERAL_RNG)
 

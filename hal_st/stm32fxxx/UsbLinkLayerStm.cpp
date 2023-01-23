@@ -53,17 +53,17 @@ void HAL_PCD_SuspendCallback(PCD_HandleTypeDef* hpcd)
     static_cast<hal::UsbLinkLayerStm*>(hpcd->pData)->SuspendCallback();
 }
 
-void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd)
+void HAL_PCD_ResumeCallback(PCD_HandleTypeDef* hpcd)
 {
     static_cast<hal::UsbLinkLayerStm*>(hpcd->pData)->ResumeCallback();
 }
 
-void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
+void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef* hpcd, uint8_t epnum)
 {
     static_cast<hal::UsbLinkLayerStm*>(hpcd->pData)->GetObserver().IsochronousOutIncomplete(epnum);
 }
 
-void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
+void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef* hpcd, uint8_t epnum)
 {
     static_cast<hal::UsbLinkLayerStm*>(hpcd->pData)->GetObserver().IsochronousInIncomplete(epnum);
 }

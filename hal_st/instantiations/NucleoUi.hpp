@@ -15,7 +15,7 @@ namespace main_
 
     struct NucleoWb55rgNucleoUi
     {
-        hal::GpioPinStm buttonOne{ hal::Port::C, 4,  hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm buttonOne{ hal::Port::C, 4, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
         hal::GpioPinStm buttonTwo{ hal::Port::D, 0, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
         hal::GpioPinStm buttonThree{ hal::Port::D, 1, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
         hal::GpioPinStm ledRed{ hal::Port::B, 1 };

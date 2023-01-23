@@ -1,5 +1,5 @@
-#include "infra/event/EventDispatcher.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
+#include "infra/event/EventDispatcher.hpp"
 #include <cstdlib>
 
 namespace hal
@@ -7,7 +7,7 @@ namespace hal
     namespace
     {
         void EnableInterrupt(IRQn_Type irq, InterruptPriority priority)
-        {            
+        {
             if (irq >= 0)
             {
                 NVIC_SetPriority(irq, static_cast<uint32_t>(priority));
@@ -170,7 +170,8 @@ namespace hal
 
         IRQn_Type irq = Irq();
         DispatchedInterruptHandler& handler = *this;
-        infra::EventDispatcher::Instance().Schedule([irq, &handler]() { InvokeScheduled(irq, handler); });
+        infra::EventDispatcher::Instance().Schedule([irq, &handler]()
+            { InvokeScheduled(irq, handler); });
     }
 
     void DispatchedInterruptHandler::SetInvoke(const infra::Function<void()>& onInvoke)

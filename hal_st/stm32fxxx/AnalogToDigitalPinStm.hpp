@@ -1,11 +1,11 @@
 #ifndef HAL_ANALOG_TO_DIGITAL_PIN_STM_HPP
 #define HAL_ANALOG_TO_DIGITAL_PIN_STM_HPP
 
+#include "cmsis_device.h"
 #include "hal/interfaces/AnalogToDigitalPin.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/AutoResetFunction.hpp"
-#include "cmsis_device.h"
 
 namespace hal
 {

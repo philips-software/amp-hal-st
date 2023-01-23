@@ -15,7 +15,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
             uint32_t baudrate = 115200;
             uint32_t hwFlowControl = UART_HWCONTROL_NONE;
