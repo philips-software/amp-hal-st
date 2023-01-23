@@ -137,10 +137,11 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-        const uint32_t ISR_RXNE = 0x20U;
-        const uint32_t ISR_ORE = 0x8U;
-
-        while (peripheralUart[uartIndex]->ISR & ISR_RXNE)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
+#else
+        while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
+#endif
         {
             uint8_t receivedByte =
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
@@ -152,7 +153,11 @@ namespace hal
         }
 
         // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-        really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & ISR_ORE));
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+        really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
+#else
+        really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));
+#endif
 
         if (dataReceived != nullptr)
             dataReceived(buffer.range());
