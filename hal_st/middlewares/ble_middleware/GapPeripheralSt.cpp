@@ -87,12 +87,22 @@ namespace hal
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
     }
 
-    hal::MacAddress GapPeripheralSt::GetPublicAddress() const
+    hal::MacAddress GapPeripheralSt::GetResolvableAddress() const
     {
+        uint8_t numberOfBondedAddress;
+        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
+        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
+
+        const auto& peerIdentity = numberOfBondedAddress == 0 ? dummyPeer : bondedDevices[numberOfBondedAddress-1];
+
         hal::MacAddress address;
-        uint8_t length;
-        aci_hal_read_config_data(CONFIG_DATA_PUBADDR_OFFSET, &length, address.data());
-        assert(length == CONFIG_DATA_PUBADDR_LEN);
+        /* Use last peer addres to get current RPA */
+        auto status = hci_le_read_local_resolvable_address(peerIdentity.Address_Type,
+                                                    peerIdentity.Address,
+                                                    address.data());
+
+        assert(status == BLE_STATUS_SUCCESS);
+
         return address;
     }
 
@@ -134,17 +144,13 @@ namespace hal
 
         auto advTypeSt = ConvertAdvertisementType(type);
 
+        UpdateResolvingList();
+
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
         if (allowPairing)
-        {
-            ClearResolvingList();
             ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
-        }
         else
-        {
-            UpdateResolvingList();
             ret = aci_gap_set_undirected_connectable(multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, WHITE_LIST_FOR_ALL);
-        }
 
         UpdateAdvertisementData();
 
@@ -331,11 +337,13 @@ namespace hal
         aci_gap_configure_whitelist();
 
         uint8_t numberOfBondedAddress;
-        std::array<Bonded_Device_Entry_t, 4> Bonded_Device_Entry;
+        std::array<Bonded_Device_Entry_t, maxNumberOfBonds + 1> bondedDevices;
 
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, Bonded_Device_Entry.begin());
+        bondedDevices[0] = dummyPeer;
 
-        aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(Bonded_Device_Entry.begin()), 1);
+        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data() + 1);
+        
+        aci_gap_add_devices_to_resolving_list(numberOfBondedAddress + 1, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
     }
 
     void GapPeripheralSt::ClearResolvingList()

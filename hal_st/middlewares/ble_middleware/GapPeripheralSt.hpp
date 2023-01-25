@@ -39,7 +39,7 @@ namespace hal
         GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
-        virtual hal::MacAddress GetPublicAddress() const override;
+        virtual hal::MacAddress GetResolvableAddress() const override;
         virtual void SetAdvertisementData(infra::ConstByteRange data) override;
         virtual void SetScanResponseData(infra::ConstByteRange data) override;
         virtual void Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
@@ -55,7 +55,7 @@ namespace hal
         virtual void HciEvent(hci_event_pckt& event);
 
         // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override;
+        virtual uint16_t EffectiveMaxAttMtuSize() const override; 
 
     private:
         void UpdateAdvertisementData();
@@ -110,6 +110,7 @@ namespace hal
         const uint8_t mitmMode = 0x00;
         const uint8_t secureConnectionSupport = 0x01;
         const uint8_t keypressNotificationSupport = 0x00;
+        static constexpr uint8_t maxNumberOfBonds = 10;
 
         const uint16_t minConnectionInterval = 0x0006;
         const uint16_t maxConnectionInterval = minConnectionInterval;
@@ -120,6 +121,8 @@ namespace hal
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;
 
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+
+        Bonded_Device_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
     };
 }
 
