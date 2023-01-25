@@ -2,8 +2,8 @@
 
 namespace hal
 {
-    TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, const GapService& gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage, services::Tracer& tracer)
-        : GapPeripheralSt(hciEventSource, address, rootKeys, maxAttMtuSize, gapService, bondStorageSynchronizerCreator, bleBondsStorage)
+    TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService& gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage, services::Tracer& tracer)
+        : GapPeripheralSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, gapService, bondStorageSynchronizerCreator, bleBondsStorage)
         , tracer(tracer)
     {}
 

@@ -36,7 +36,7 @@ namespace hal
         };
 
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
         virtual hal::MacAddress GetPublicAddress() const override;
@@ -101,9 +101,10 @@ namespace hal
 
         ConnectionContext connectionContext;
 
+        uint8_t txPowerLevel;
+
         const GapService gapService;
 
-        const uint8_t txPowerLevel = 0x18;
         const uint8_t bondingMode = 0x01;
         const uint8_t ioCapability = 0x03;
         const uint8_t mitmMode = 0x00;
