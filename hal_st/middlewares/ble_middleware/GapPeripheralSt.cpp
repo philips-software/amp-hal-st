@@ -89,17 +89,9 @@ namespace hal
 
     hal::MacAddress GapPeripheralSt::GetResolvableAddress() const
     {
-        uint8_t numberOfBondedAddress;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
-
-        const auto& peerIdentity = numberOfBondedAddress == 0 ? dummyPeer : bondedDevices[numberOfBondedAddress-1];
-
         hal::MacAddress address;
         /* Use last peer addres to get current RPA */
-        auto status = hci_le_read_local_resolvable_address(peerIdentity.Address_Type,
-                                                    peerIdentity.Address,
-                                                    address.data());
+        auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.data());
 
         assert(status == BLE_STATUS_SUCCESS);
 
@@ -294,14 +286,10 @@ namespace hal
         auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
  
         if (pairingComplete->Connection_Handle == connectionContext.connectionHandle
-            && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress) == BLE_STATUS_SUCCESS)
+            && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
         {
-            hal::MacAddress address;
-
-            auto result = aci_gap_resolve_private_addr(connectionContext.peerAddress, address.data());
-            if (result != BLE_STATUS_SUCCESS)
-                std::copy(std::begin(connectionContext.peerAddress), std::end(connectionContext.peerAddress), std::begin(address));
-
+            hal::MacAddress address = connectionContext.peerAddress;
+            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
             (*bondStorageSynchronizer)->UpdateBondedDevice(address);
         }
     }
@@ -337,13 +325,23 @@ namespace hal
         aci_gap_configure_whitelist();
 
         uint8_t numberOfBondedAddress;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds + 1> bondedDevices;
+        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
+        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
 
-        bondedDevices[0] = dummyPeer;
+        if (numberOfBondedAddress == 0)
+        {
+            aci_gap_add_devices_to_resolving_list(1, &dummyPeer, 1);
 
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data() + 1);
-        
-        aci_gap_add_devices_to_resolving_list(numberOfBondedAddress + 1, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
+            std::copy(std::begin(dummyPeer.Peer_Identity_Address), std::end(dummyPeer.Peer_Identity_Address), connectionContext.peerAddress.begin());
+            connectionContext.peerAddressType = dummyPeer.Peer_Identity_Address_Type;
+        }
+        else
+        {
+            aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
+            
+            std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
+            connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
+        }        
     }
 
     void GapPeripheralSt::ClearResolvingList()

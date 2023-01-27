@@ -91,7 +91,7 @@ namespace hal
         {
             uint16_t connectionHandle;
             uint8_t peerAddressType;
-            uint8_t peerAddress[6];
+            std::array<uint8_t, 6> peerAddress;
         };
 
     private:
@@ -122,7 +122,7 @@ namespace hal
 
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
 
-        Bonded_Device_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
+        const Whitelist_Identity_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
     };
 }
 
