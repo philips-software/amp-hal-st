@@ -1,6 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include "services/tracer/GlobalTracer.hpp"
+
 namespace
 {
     uint8_t ConvertAdvertisementType(services::GapPeripheral::AdvertisementType type)
