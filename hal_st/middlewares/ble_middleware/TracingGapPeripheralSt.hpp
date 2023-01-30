@@ -18,7 +18,6 @@ namespace hal
 
         virtual void HandleHciLeConnectionUpdateEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent) override;

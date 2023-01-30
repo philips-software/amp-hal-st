@@ -91,7 +91,7 @@ namespace hal
     {
         hal::MacAddress address;
         /* Use last peer addres to get current RPA */
-        auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.data());
+        [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.data());
 
         assert(status == BLE_STATUS_SUCCESS);
 
@@ -207,24 +207,6 @@ namespace hal
     void GapPeripheralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
     {}
 
-    void GapPeripheralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
-    {
-        auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
-
-        hal::MacAddress address;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(address));
- 
-        connectionContext.connectionHandle = connectionCompleteEvt->Connection_Handle;
-
-        RequestConnectionParameterUpdate();
-
-        connectionContext.peerAddressType = connectionCompleteEvt->Peer_Address_Type;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
-
-        maxAttMtu = defaultMaxAttMtuSize;
-        UpdateState(services::GapPeripheralState::Connected);
-    }
-
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
@@ -260,9 +242,6 @@ namespace hal
             break;
         case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
             HandleHciLePhyUpdateCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionCompleteEvent(metaEvent);
             break;
         case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
             HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
