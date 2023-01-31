@@ -38,7 +38,7 @@ namespace hal
             std::abort();
 
         SHCI_C2_Ble_Init_Cmd_Packet_t bleInitCmdPacket =
-        {
+            {
             {{0,0,0}},      // Header (unused)
             {
                 0x00,       // BLE buffer address (unused)
@@ -170,18 +170,18 @@ namespace hal
     {
         switch (event.evt)
         {
-            case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-                HandleHciDisconnectEvent(event);
-                break;
-            case HCI_LE_META_EVT_CODE:
-                HandleHciLeMetaEvent(event);
-                break;
-            case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-                HandleHciVendorSpecificDebugEvent(event);
-                break;
-            default:
-                HandleHciUnknownEvent(event);
-                break;
+        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
+            HandleHciDisconnectEvent(event);
+            break;
+        case HCI_LE_META_EVT_CODE:
+            HandleHciLeMetaEvent(event);
+            break;
+        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
+            HandleHciVendorSpecificDebugEvent(event);
+            break;
+        default:
+            HandleHciUnknownEvent(event);
+            break;
         }
     }
 
@@ -211,14 +211,11 @@ namespace hal
     {
         auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
-        hal::MacAddress address;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(address));
-
         connectionContext.connectionHandle = connectionCompleteEvt->Connection_Handle;
 
         RequestConnectionParameterUpdate();
 
-        connectionContext.peerAddressType = connectionCompleteEvt->Peer_Address_Type;
+        connectionContext.peerAddressType = connectionCompleteEvt->Peer_Address_Type % 2;
         std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
 
         maxAttMtu = defaultMaxAttMtuSize;
@@ -230,7 +227,7 @@ namespace hal
 
     void GapPeripheralSt::HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent)
     {}
-    
+
     void GapPeripheralSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
     {
         auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
@@ -263,15 +260,15 @@ namespace hal
     void GapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
     {
         auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
- 
+
         if (pairingComplete->Connection_Handle == connectionContext.connectionHandle
             && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
-        {
-            hal::MacAddress address = connectionContext.peerAddress;
-            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-            (*bondStorageSynchronizer)->UpdateBondedDevice(address);
+            {
+                hal::MacAddress address = connectionContext.peerAddress;
+                aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
+                (*bondStorageSynchronizer)->UpdateBondedDevice(address);
+            }
         }
-    }
 
     void GapPeripheralSt::HandleMtuExchangeEvent(evt_blecore_aci* vendorEvent)
     {
@@ -285,17 +282,17 @@ namespace hal
 
         switch (vendorEvent->ecode)
         {
-            case ACI_GAP_BOND_LOST_VSEVT_CODE:
-                HandleBondLostEvent(vendorEvent);
-                break; 
-            case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
-                HandlePairingCompleteEvent(vendorEvent);
-                break;
-            case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
-                HandleMtuExchangeEvent(vendorEvent);
-                break;
-            default:
-                break;
+        case ACI_GAP_BOND_LOST_VSEVT_CODE:
+            HandleBondLostEvent(vendorEvent);
+            break;
+        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
+            HandlePairingCompleteEvent(vendorEvent);
+            break;
+        case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
+            HandleMtuExchangeEvent(vendorEvent);
+            break;
+        default:
+            break;
         }
     }
 
@@ -317,16 +314,16 @@ namespace hal
         else
         {
             aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
-            
+
             std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
             connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
-        }        
+        }
     }
 
     void GapPeripheralSt::ClearResolvingList()
     {
         aci_gap_configure_whitelist();
-        
+
         aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
