@@ -183,7 +183,7 @@ namespace hal
             HandleHciUnknownEvent(event);
             break;
         }
-    }
+    }   
 
     uint16_t GapPeripheralSt::EffectiveMaxAttMtuSize() const
     {
@@ -209,13 +209,36 @@ namespace hal
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        static constexpr auto deducePeerAddressType = [](auto peerAddressType){ 
+            enum class PeerAddressType : uint8_t
+            {
+                PUBLIC,
+                RANDOM,
+                RESOLVED_PUBLIC_IDENTITY,
+                RESOLVED_RANDOM_STATIC_IDENTITY
+            };
+
+            switch (static_cast<PeerAddressType>(peerAddressType))
+            {
+                case PeerAddressType::PUBLIC:
+                case PeerAddressType::RANDOM:
+                    return peerAddressType;
+
+                case PeerAddressType::RESOLVED_PUBLIC_IDENTITY:
+                    return infra::enum_cast(PeerAddressType::PUBLIC);
+
+                case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY: 
+                    return infra::enum_cast(PeerAddressType::RANDOM);
+            }
+        };
+
         auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
         connectionContext.connectionHandle = connectionCompleteEvt->Connection_Handle;
 
         RequestConnectionParameterUpdate();
 
-        connectionContext.peerAddressType = connectionCompleteEvt->Peer_Address_Type % 2;
+        connectionContext.peerAddressType = deducePeerAddressType(connectionCompleteEvt->Peer_Address_Type);
         std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
 
         maxAttMtu = defaultMaxAttMtuSize;
