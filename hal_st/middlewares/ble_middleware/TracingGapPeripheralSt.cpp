@@ -45,7 +45,7 @@ namespace hal
         hal::MacAddress mac;
         std::copy(std::begin(enhancedConnectionCompleteEvt->Peer_Address),
             std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
-        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac);
+        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << enhancedConnectionCompleteEvt->Peer_Address_Type;
         GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
     }
 
