@@ -104,7 +104,11 @@ namespace hal
             }
 
             // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-            really_assert( !(peripheralUart[uartIndex]->ISR & USART_ISR_ORE) );
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+            really_assert(!(peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
+#else
+            really_assert(!(peripheralUart[uartIndex]->SR & USART_SR_ORE));
+#endif
 
             if (dataReceived != nullptr)
                 dataReceived(buffer.range());
