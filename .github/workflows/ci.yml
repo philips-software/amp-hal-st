@@ -21,8 +21,10 @@ jobs:
         target: ["stm32wb55cg", "stm32f407", "stm32f429", "stm32f746", "stm32f767"]
         include:
           - gcc: "8-2019-q3"
+            configuration: "RelWithDebInfo"
             target: "stm32f767"
           - gcc: "9-2020-q2"
+            configuration: "RelWithDebInfo"
             target: "stm32f767"
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
