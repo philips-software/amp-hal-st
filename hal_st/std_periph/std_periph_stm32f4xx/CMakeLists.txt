@@ -20,6 +20,7 @@ target_compile_definitions(hal_st.std_periph_stm32f4xx PUBLIC
     HSE_VALUE=8000000
     STM32F4
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:STM32F407xx>
+    $<$<STREQUAL:${TARGET_MCU},stm32f429>:STM32F429xx>
     $<$<BOOL:${EMIL_HOST_BUILD}>:STM32F407xx> # For syntax recognition
     $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT>
     $<$<NOT:$<CONFIG:MinSizeRel>>:TRACE>

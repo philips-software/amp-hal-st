@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.24)
 
 project(hal_st LANGUAGES C CXX VERSION 1.0.0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED On)
+
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
 option(HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS "Include default memory-layout and sections linker scripts; turn off when providing custom linker scripts" ON)
@@ -11,6 +14,26 @@ set_directory_properties(PROPERTY USE_FOLDERS ON)
 
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(HALST_STANDALONE On)
+endif()
+
+if (HALST_STANDALONE)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        emil
+        GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
+        GIT_TAG        49f69a32e013bd1219cf058e525bb287dad7bee1
+    )
+
+    FetchContent_MakeAvailable(emil)
+endif()
+
+# When building HalSt by itself do not exclude any targets from all
+# Libraries will only be excluded from all when HalSt is a consumed as a dependency.
+if (HALST_STANDALONE AND NOT EMIL_HOST_BUILD)
+    set(HALST_EXCLUDE_FROM_ALL "")
+else()
+    set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
 if (HALST_BUILD_EXAMPLES)

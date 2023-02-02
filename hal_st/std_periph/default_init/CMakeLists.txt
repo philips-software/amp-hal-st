@@ -1,4 +1,4 @@
-add_library(hal_st.default_init EXCLUDE_FROM_ALL OBJECT)
+add_library(hal_st.default_init ${HALST_EXCLUDE_FROM_ALL} OBJECT)
 install(TARGETS hal_st.default_init EXPORT halStTargets)
 
 target_include_directories(hal_st.default_init PUBLIC

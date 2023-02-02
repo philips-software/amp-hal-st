@@ -18,6 +18,13 @@ jobs:
       matrix:
         gcc: ["8-2019-q3", "9-2020-q2", "10.3-2021.10"]
         configuration: ["RelWithDebInfo"]
+        include:
+          - gcc: "8-2019-q3"
+            target: "stm32f767"
+          - gcc: "9-2020-q2"
+            target: "stm32f767"
+          - gcc: "10.3-2021.10"
+            target: ["stm32wb55cg", "stm32f407", "stm32f429", "stm32f746", "stm32f767"]
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
@@ -26,11 +33,11 @@ jobs:
           release: ${{ matrix.gcc }}
       - uses: hendrikmuhs/ccache-action@fba817f3c0db4f854d7a3ee688241d6754da166e # v1.2.8
         with:
-          key: ${{ matrix.gcc }}-${{ matrix.configuration }}
+          key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
       - run: |
           sudo apt-get update && sudo apt-get install --no-install-recommends ninja-build xsltproc
           echo "::add-matcher::.github/matchers/gcc-problem-matcher.json"
           cmake --preset host -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build --preset host-${{ matrix.configuration }}
-          cmake --preset stm32f767 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          cmake --build --preset stm32f767-${{ matrix.configuration }}
+          cmake --preset ${{ matrix.target }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake --build --preset ${{ matrix.target }}-${{ matrix.configuration }}

@@ -1,4 +1,7 @@
-add_library(hal_st.instantiations_lwip EXCLUDE_FROM_ALL STATIC)
+add_library(hal_st.instantiations_lwip STATIC)
+if (EMIL_HOST_BUILD OR TARGET_MCU_FAMILY STREQUAL stm32wbxx)
+    set_property(TARGET hal_st.instantiations_lwip PROPERTY EXCLUDE_FROM_ALL TRUE)
+endif()
 install(TARGETS hal_st.instantiations_lwip EXPORT halStLwipTargets)
 
 target_include_directories(hal_st.instantiations_lwip PUBLIC

@@ -1,4 +1,4 @@
-add_library(hal_st.stm32fxxx EXCLUDE_FROM_ALL STATIC)
+add_library(hal_st.stm32fxxx ${HALST_EXCLUDE_FROM_ALL} STATIC)
 install(TARGETS hal_st.stm32fxxx EXPORT halStTargets)
 
 target_include_directories(hal_st.stm32fxxx PUBLIC
@@ -115,7 +115,7 @@ generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.x
 generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
 generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
 
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<STREQUAL:${TARGET_CMAKE_FAMILY},stm32wbxx>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
+generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
     --stringparam mcu-document ${mcu_xml})
 generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
 generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
