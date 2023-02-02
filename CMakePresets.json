@@ -26,7 +26,7 @@
       "name": "stm32",
       "hidden": true,
       "inherits": "defaults",
-      "toolchainFile": "${sourceDir}/examples/toolchain-arm-gcc.cmake",
+      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc.cmake",
       "cacheVariables": {
         "emil_DIR": "${sourceDir}/build/host/_deps/emil-build/cmake",
         "EMIL_GENERATE_PACKAGE_CONFIG": false,
