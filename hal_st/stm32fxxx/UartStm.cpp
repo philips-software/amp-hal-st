@@ -30,11 +30,13 @@ namespace hal
 
         HAL_UART_Init(&uartHandle);
 
+#if defined(STM32WB)
         // Enable FIFO. FIFO can only be enabled after 'HAL_UART_Init'; but UART must be disabled first.
         peripheralUart[uartIndex]->CR1 &= ~USART_CR1_UE;
         peripheralUart[uartIndex]->CR1 |= USART_CR1_FIFOEN | USART_CR1_UE;
 
         peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
+#endif
     }
 
     UartStm::~UartStm()
