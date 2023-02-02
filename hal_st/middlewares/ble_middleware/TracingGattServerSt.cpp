@@ -31,7 +31,7 @@ namespace hal
 
     services::GattCharacteristicClientOperations::UpdateStatus TracingGattServerSt::Update(const services::GattCharacteristicClientOperationsObserver& characteristic, infra::ConstByteRange data) const
     {
-        tracer.Trace() << "GattServerSt::Update [" << characteristic.CharacteristicHandle() << "] " << infra::ByteRangeAsString(data);
+        tracer.Trace() << "GattServerSt::Update [" << characteristic.CharacteristicHandle() << "] 0x" << infra::AsHex(data);
         return GattServerSt::Update(characteristic, data);
     }
 
@@ -43,8 +43,8 @@ namespace hal
 
     void TracingGattServerSt::HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event)
     {
-        infra::ByteRange data{event.Attr_Data, event.Attr_Data + event.Attr_Data_Length};
-        tracer.Trace() << "GattServerSt::HandleGattAttributeModified [" << event.Attr_Handle << "] L:" << infra::hex << event.Attr_Data_Length << " D:'" << infra::AsHex(data) << "'";
+        infra::ByteRange data{ event.Attr_Data, event.Attr_Data + event.Attr_Data_Length };
+        tracer.Trace() << "GattServerSt::HandleGattAttributeModified [" << event.Attr_Handle << "] L:" << event.Attr_Data_Length << " 0x" << infra::AsHex(data);
 
         GattServerSt::HandleGattAttributeModified(event);
     }

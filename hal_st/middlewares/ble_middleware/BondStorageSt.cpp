@@ -6,7 +6,7 @@ namespace hal
         : maxNumberOfBonds(maxNumberOfBonds)
     {}
 
-    void BondStorageSt::BondStorageManagerCreated(services::BondStorageManager& manager)
+    void BondStorageSt::BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager)
     {}
 
     void BondStorageSt::UpdateBondedDevice(hal::MacAddress address)

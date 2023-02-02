@@ -1,7 +1,7 @@
 #ifndef HAL_ST_BOND_STORAGE_ST_HPP
 #define HAL_ST_BOND_STORAGE_ST_HPP
 
-#include "services/ble/BondStorageManager.hpp"
+#include "services/ble/BondStorageSynchronizer.hpp"
 
 extern "C"
 {
@@ -17,7 +17,7 @@ namespace hal
         explicit BondStorageSt(uint32_t maxNumberOfBonds);
 
         // Implementation of BondStorage
-        virtual void BondStorageManagerCreated(services::BondStorageManager& manager) override;
+        virtual void BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager) override;
         virtual void UpdateBondedDevice(hal::MacAddress address) override;
         virtual void RemoveBond(hal::MacAddress address) override;
         virtual void RemoveAllBonds() override;

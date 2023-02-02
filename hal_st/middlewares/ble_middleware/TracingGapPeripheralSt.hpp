@@ -10,7 +10,7 @@ namespace hal
         : public GapPeripheralSt
     {
     public:
-        TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageManager, void()>& bondStorageManagerCreator, services::Tracer& tracer);
+        TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService& gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage, services::Tracer& tracer);
 
     protected:
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
@@ -18,7 +18,7 @@ namespace hal
 
         virtual void HandleHciLeConnectionUpdateEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent) override;
 

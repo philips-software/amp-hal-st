@@ -8,12 +8,22 @@ namespace main_
         , rx(rx)
     {}
 
-    StmTracerInfrastructure::StmTracerInfrastructure(const Configuration& configuration)
+    StmTracerInfrastructure::StmTracerInfrastructure(const Configuration& configuration, bool loggingEnabled)
         : traceUart(configuration.index, configuration.tx)
-        , streamWriter(traceUart)
-        , stream(streamWriter, infra::noFail)
-        , tracer(stream)
+        , traceWriter(traceUart)
+        , alwaysEnabledTracerOutputStream(traceWriter)
+        , tracerOutputStream(GetStreamWriter(loggingEnabled), infra::noFail)
+        , alwaysEnabledTracer(alwaysEnabledTracerOutputStream)
+        , tracer(tracerOutputStream)
     {
         tracer.Trace() << "----------------------------------------------------------";
+    }
+
+    infra::StreamWriter& StmTracerInfrastructure::GetStreamWriter(bool loggingEnabled)
+    {
+        if (loggingEnabled)
+            return traceWriter;
+        else
+            return dummyWriter;
     }
 }

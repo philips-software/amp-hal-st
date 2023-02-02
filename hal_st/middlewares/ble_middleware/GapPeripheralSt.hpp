@@ -5,11 +5,12 @@
 #include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "hci_tl.h"
+#include "infra/util/BoundedString.hpp"
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/ProxyCreator.hpp"
-#include "services/ble/BondStorageManager.hpp"
-#include "services/ble/Gatt.hpp"
+#include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
+#include "services/ble/Gatt.hpp"
 #include "shci.h"
 
 namespace hal
@@ -22,10 +23,23 @@ namespace hal
         , public hal::HciEventSink
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, uint16_t maxAttMtuSize, infra::CreatorBase<services::BondStorageManager, void()>& bondStorageManagerCreator);
+        struct GapService
+        {
+            infra::BoundedString::WithStorage<32> deviceName;
+            uint16_t appearance;
+        };
+
+        struct RootKeys
+        {
+            std::array<uint8_t, 16> identity;
+            std::array<uint8_t, 16> encryption;
+        };
+
+    public:
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
-        virtual hal::MacAddress GetPublicAddress() const override;
+        virtual hal::MacAddress GetResolvableAddress() const override;
         virtual void SetAdvertisementData(infra::ConstByteRange data) override;
         virtual void SetScanResponseData(infra::ConstByteRange data) override;
         virtual void Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
@@ -41,17 +55,21 @@ namespace hal
         virtual void HciEvent(hci_event_pckt& event);
 
         // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override;
+        virtual uint16_t EffectiveMaxAttMtuSize() const override; 
 
     private:
         void UpdateAdvertisementData();
 
         void SetPublicAddress(const hal::MacAddress& address);
         void UpdateState(services::GapPeripheralState newstate);
+        void RequestConnectionParameterUpdate();
 
-        void HciGapGattInit();
+        void HciGapGattInit(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey);
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
+
+        void UpdateResolvingList();
+        void ClearResolvingList();
 
     protected:
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
@@ -59,7 +77,7 @@ namespace hal
 
         virtual void HandleHciLeConnectionUpdateEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent);
 
@@ -72,31 +90,38 @@ namespace hal
         {
             uint16_t connectionHandle;
             uint8_t peerAddressType;
-            uint8_t peerAddress[6];
+            std::array<uint8_t, 6> peerAddress;
         };
 
     private:
-        infra::Optional<infra::ProxyCreator<services::BondStorageManager, void()>> bondStorageManager;
+        infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
         services::GapPeripheralState state = services::GapPeripheralState::Standby;
         bool allowPairing = true;
 
         ConnectionContext connectionContext;
 
-        const char* devName = "ST-BLE";
-        const uint8_t txPowerLevel = 0x18;
+        uint8_t txPowerLevel;
+
+        const GapService gapService;
+
         const uint8_t bondingMode = 0x01;
         const uint8_t ioCapability = 0x03;
         const uint8_t mitmMode = 0x00;
         const uint8_t secureConnectionSupport = 0x01;
         const uint8_t keypressNotificationSupport = 0x00;
+        static constexpr uint8_t maxNumberOfBonds = 10;
 
-        const uint8_t identityRootKey[16] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0, 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
-        const uint8_t encryptionRootKey[16] = { 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21, 0xFE, 0xDC, 0xBA, 0x09, 0x87, 0x65, 0x43, 0x21 };
+        const uint16_t minConnectionInterval = 0x0006;
+        const uint16_t maxConnectionInterval = minConnectionInterval;
+        const uint16_t slaveLatency = 0;
+        const uint16_t supervisionTimeout = 500;
 
         infra::BoundedVector<uint8_t>::WithMaxSize<maxAdvertisementDataSize> advertisementData;
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;
 
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+
+        const Whitelist_Identity_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
     };
 }
 

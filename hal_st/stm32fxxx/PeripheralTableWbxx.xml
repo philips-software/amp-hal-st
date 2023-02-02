@@ -18,4 +18,5 @@
     <interrupt/>
   </peripheral>
   <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral>
+  <peripheral name="Rtc" type="RTC_TypeDef*"><item name="RTC"/></peripheral>
 </peripherals>

@@ -1,5 +1,6 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/SpiMasterStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BitLogic.hpp"
 
 namespace hal
@@ -57,11 +58,11 @@ namespace hal
         if (!receiving)
             dummyToReceive = sendData.size();
 
+        really_assert(!spiInterruptRegistration);
+        spiInterruptRegistration.Emplace(peripheralSpiIrq[spiInstance], [this]() { HandleInterrupt(); });
+
         peripheralSpi[spiInstance]->CR2 |= SPI_IT_TXE;
         peripheralSpi[spiInstance]->CR2 |= SPI_IT_RXNE;
-
-        assert(!spiInterruptRegistration);
-        spiInterruptRegistration.Emplace(peripheralSpiIrq[spiInstance], [this]() { HandleInterrupt(); });
     }
 
     void SpiMasterStm::SetChipSelectConfigurator(ChipSelectConfigurator& configurator)
@@ -134,7 +135,7 @@ namespace hal
             spiInterruptRegistration = infra::none;
             if (chipSelectConfigurator && !continuedSession)
                 chipSelectConfigurator->EndSession();
-            onDone();
+            infra::EventDispatcher::Instance().Schedule([this]() { onDone(); });
         }
     }
 }

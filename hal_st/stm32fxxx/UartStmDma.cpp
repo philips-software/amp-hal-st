@@ -99,9 +99,13 @@ namespace hal
 
     void UartStmDma::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
     {
-        transferDataComplete = actionOnCompletion;
-
-        transmitDmaChannel.StartTransmit(data);
+        if (!data.empty())
+        {
+            transferDataComplete = actionOnCompletion;
+            transmitDmaChannel.StartTransmit(data);
+        }
+        else 
+            infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
     }
 
     void UartStmDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)

@@ -60,6 +60,39 @@ otError otCommissionerStart(otInstance *                 aInstance,
   return (otError)p_ot_req->Data[0];
 }
 
+const char *otCommissionerGetId(otInstance *aInstance)
+{
+  Pre_OtCmdProcessing();
+  /* prepare buffer */
+  Thread_OT_Cmd_Request_t* p_ot_req = THREAD_Get_OTCmdPayloadBuffer();
+
+  p_ot_req->ID = MSG_M4TOM0_OT_COMMISSIONER_GET_ID;
+
+  p_ot_req->Size=0;
+
+  Ot_Cmd_Transfer();
+
+  p_ot_req = THREAD_Get_OTCmdRspPayloadBuffer();
+  return (char *)p_ot_req->Data[0];
+}
+
+otError otCommissionerSetId(otInstance *aInstance, const char *aId)
+{
+  Pre_OtCmdProcessing();
+  /* prepare buffer */
+  Thread_OT_Cmd_Request_t* p_ot_req = THREAD_Get_OTCmdPayloadBuffer();
+
+  p_ot_req->ID = MSG_M4TOM0_OT_COMMISSIONER_SET_ID;
+
+  p_ot_req->Size=1;
+  p_ot_req->Data[0] = (uint32_t) aId;
+
+  Ot_Cmd_Transfer();
+
+  p_ot_req = THREAD_Get_OTCmdRspPayloadBuffer();
+  return (otError)p_ot_req->Data[0];
+}
+
 otError otCommissionerStop(otInstance *aInstance)
 {
   Pre_OtCmdProcessing();
@@ -70,7 +103,7 @@ otError otCommissionerStop(otInstance *aInstance)
 
   p_ot_req->Size=0;
 
-  Ot_Cmd_Transfer();
+  Ot_Cmd_TransferWithNotif();
 
   p_ot_req = THREAD_Get_OTCmdRspPayloadBuffer();
   return (otError)p_ot_req->Data[0];
@@ -149,7 +182,7 @@ otError otCommissionerRemoveJoiner(otInstance *aInstance, const otExtAddress *aE
   p_ot_req->Size=1;
   p_ot_req->Data[0] = (uint32_t) aEui64;
 
-  Ot_Cmd_Transfer();
+  Ot_Cmd_TransferWithNotif();
 
   p_ot_req = THREAD_Get_OTCmdRspPayloadBuffer();
   return (otError)p_ot_req->Data[0];
@@ -166,7 +199,7 @@ otError otCommissionerRemoveJoinerWithDiscerner(otInstance *aInstance, const otJ
   p_ot_req->Size=1;
   p_ot_req->Data[0] = (uint32_t) aDiscerner;
 
-  Ot_Cmd_Transfer();
+  Ot_Cmd_TransferWithNotif();
 
   p_ot_req = THREAD_Get_OTCmdRspPayloadBuffer();
   return (otError)p_ot_req->Data[0];

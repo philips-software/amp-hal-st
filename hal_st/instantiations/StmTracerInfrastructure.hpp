@@ -32,13 +32,18 @@ namespace main_
             hal::GpioPinStm& rx;
         };
 
-        StmTracerInfrastructure(const Configuration& configuration);
+        StmTracerInfrastructure(const Configuration& configuration, bool loggingEnabled = true);
+
+        infra::StreamWriter& GetStreamWriter(bool loggingEnabled);
 
         TimeKeeperStub timeKeeper;
         hal::SynchronousUartStmSendOnly traceUart;
 
-        services::StreamWriterOnSynchronousSerialCommunication streamWriter;
-        infra::TextOutputStream::WithErrorPolicy stream;
+        infra::StreamWriterDummy dummyWriter;
+        services::StreamWriterOnSynchronousSerialCommunication traceWriter;
+        infra::TextOutputStream::WithErrorPolicy alwaysEnabledTracerOutputStream;
+        infra::TextOutputStream::WithErrorPolicy tracerOutputStream;
+        services::TracerWithDateTime alwaysEnabledTracer;
         services::TracerWithDateTime tracer;
     };
 }

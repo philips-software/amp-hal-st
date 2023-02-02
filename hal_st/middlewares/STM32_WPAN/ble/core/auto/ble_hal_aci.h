@@ -51,7 +51,10 @@ tBleStatus aci_hal_get_fw_build_number( uint16_t* Build_Number );
  *        - 0x2E: CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
  *          Static Random Address; 6 bytes
  *        - 0xB0: CONFIG_DATA_SMP_MODE_OFFSET;
- *          SMP mode (0: normal, 1:bypass); 1 byte
+ *          SMP mode (0: "normal", 1: "bypass", 2: "no blacklist"); 1 byte
+ *        - 0xC0: CONFIG_DATA_LL_SCAN_CHAN_MAP_OFFSET;
+ *          LL scan channel map (same format as Primary_Adv_Channel_Map); 1
+ *          byte
  * @param Length Length of data to be written
  * @param Value Data to be written
  * @return Value indicating success or error code.
@@ -171,8 +174,8 @@ tBleStatus aci_hal_le_tx_test_packet_number( uint32_t* Number_Of_Packets );
  * ongoing.
  * The tone should be stopped by ACI_HAL_TONE_STOP command.
  * 
- * @param RF_Channel BLE Channel ID, from 0x00 to 0x27 meaning (2.402 + 2*0xXX)
- *        GHz
+ * @param RF_Channel BLE Channel ID, from 0x00 to 0x27 meaning (2.402 +
+ *        0.002*0xXX) GHz
  *        Device will continuously emit 0s, that means that the tone
  *        will be at the channel center frequency less the maximum
  *        frequency deviation (250kHz).
@@ -211,8 +214,9 @@ tBleStatus aci_hal_tone_stop( void );
  *        - 0x05: Connected in master role
  *        - 0x06: TX test mode
  *        - 0x07: RX test mode
+ *        - 0x81: Advertising with Additional Beacon (only for STM32WB)
  * @param[out] Link_Connection_Handle Array of connection handles (2 bytes) for
- *        8 links.
+ *        8 links. Valid only if the link status is "connected" (0x02 or 0x05)
  * @return Value indicating success or error code.
  */
 tBleStatus aci_hal_get_link_status( uint8_t* Link_Status,
@@ -229,10 +233,9 @@ tBleStatus aci_hal_get_link_status( uint8_t* Link_Status,
  *        Flags:
  *        - 0x0001: Idle
  *        - 0x0002: Advertising
- *        - 0x0004: Connection event slave
+ *        - 0x0004: Connection slave
  *        - 0x0008: Scanning
- *        - 0x0010: Connection request
- *        - 0x0020: Connection event master
+ *        - 0x0020: Connection master
  *        - 0x0040: TX test mode
  *        - 0x0080: RX test mode
  * @return Value indicating success or error code.
@@ -295,6 +298,19 @@ tBleStatus aci_hal_get_pm_debug_info( uint8_t* Allocated_For_TX,
 tBleStatus aci_hal_set_slave_latency( uint8_t Enable );
 
 /**
+ * @brief ACI_HAL_READ_RSSI
+ * This command returns the value of the RSSI.
+ * 
+ * @param[out] RSSI RSSI (signed integer).
+ *        Units: dBm.
+ *        Values:
+ *        - 127: RSSI not available
+ *        - -127 ... 20
+ * @return Value indicating success or error code.
+ */
+tBleStatus aci_hal_read_rssi( uint8_t* RSSI );
+
+/**
  * @brief ACI_HAL_READ_RADIO_REG
  * This command Reads Register value from the RF module.
  * 
@@ -329,8 +345,8 @@ tBleStatus aci_hal_read_raw_rssi( uint8_t* Value );
  * @brief ACI_HAL_RX_START
  * This command does set up the RF to listen to a specific RF channel.
  * 
- * @param RF_Channel BLE Channel ID, from 0x00 to 0x27 meaning (2.402 + 2*0xXX)
- *        GHz
+ * @param RF_Channel BLE Channel ID, from 0x00 to 0x27 meaning (2.402 +
+ *        0.002*0xXX) GHz
  *        Device will continuously emit 0s, that means that the tone
  *        will be at the channel center frequency less the maximum
  *        frequency deviation (250kHz).
@@ -342,7 +358,7 @@ tBleStatus aci_hal_rx_start( uint8_t RF_Channel );
 
 /**
  * @brief ACI_HAL_RX_STOP
- * This command stop a previous ACI_HAL_RX_START command.
+ * This command stops a previous ACI_HAL_RX_START command.
  * 
  * @return Value indicating success or error code.
  */
