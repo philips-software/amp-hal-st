@@ -1,4 +1,4 @@
-add_library(hal_st.cmsis_arm EXCLUDE_FROM_ALL INTERFACE)
+add_library(hal_st.cmsis_arm ${HALST_EXCLUDE_FROM_ALL} INTERFACE)
 install(TARGETS hal_st.cmsis_arm EXPORT halStTargets)
 
 target_include_directories(hal_st.cmsis_arm INTERFACE

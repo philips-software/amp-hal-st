@@ -7,7 +7,7 @@ add_subdirectory(std_periph_stm32wbxx)
 add_subdirectory(windows_cmsis_stub)
 add_subdirectory(atomic)
 
-add_library(hal_st.std_periph EXCLUDE_FROM_ALL INTERFACE)
+add_library(hal_st.std_periph ${HALST_EXCLUDE_FROM_ALL} INTERFACE)
 install(TARGETS hal_st.std_periph EXPORT halStTargets)
 
 target_link_libraries(hal_st.std_periph INTERFACE

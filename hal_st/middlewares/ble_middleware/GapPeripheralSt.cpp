@@ -227,8 +227,11 @@ namespace hal
                 case PeerAddressType::RESOLVED_PUBLIC_IDENTITY:
                     return infra::enum_cast(PeerAddressType::PUBLIC);
 
-                case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY: 
+                case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY:
                     return infra::enum_cast(PeerAddressType::RANDOM);
+
+                default:
+                    std::abort();
             }
         };
 

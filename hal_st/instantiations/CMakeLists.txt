@@ -1,4 +1,4 @@
-add_library(hal_st.instantiations EXCLUDE_FROM_ALL STATIC)
+add_library(hal_st.instantiations ${HALST_EXCLUDE_FROM_ALL} STATIC)
 install(TARGETS hal_st.instantiations EXPORT halStTargets)
 
 target_include_directories(hal_st.instantiations PUBLIC

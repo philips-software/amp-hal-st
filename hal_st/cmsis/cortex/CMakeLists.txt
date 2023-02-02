@@ -1,4 +1,4 @@
-add_library(hal_st.cmsis_cortex EXCLUDE_FROM_ALL STATIC)
+add_library(hal_st.cmsis_cortex ${HALST_EXCLUDE_FROM_ALL} STATIC)
 install(TARGETS hal_st.cmsis_cortex EXPORT halStTargets)
 
 target_include_directories(hal_st.cmsis_cortex PUBLIC

@@ -1,6 +1,6 @@
 if ("${TARGET_MCU_VENDOR}" STREQUAL st AND "${TARGET_MCU_FAMILY}" STREQUAL stm32wbxx)
 
-    add_library(hal_st.stm32_wpan EXCLUDE_FROM_ALL STATIC)
+    add_library(hal_st.stm32_wpan ${HALST_EXCLUDE_FROM_ALL} STATIC)
     install(TARGETS hal_st.stm32_wpan EXPORT halStTargets)
 
     target_include_directories(hal_st.stm32_wpan PUBLIC
