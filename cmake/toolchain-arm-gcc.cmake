@@ -55,8 +55,16 @@ find_program(EMIL_DEBUG_TOOL
     NAMES arm-none-eabi-gdb
     HINTS ${hints_paths})
 
-add_link_options(LINKER:--gc-sections,--print-memory-usage)
-add_link_options(-specs=nano.specs -nostartfiles -mthumb -mcpu=cortex-m7)
+if (TARGET_MCU_FAMILY STREQUAL stm32f7xx)
+    set(cpu cortex-m7)
+elseif (TARGET_MCU_FAMILY STREQUAL stm32f4xx)
+    set(cpu cortex-m4)
+else()
+    set(cpu cortex-m0plus)
+endif()
 
-add_compile_options(-ffunction-sections -fdata-sections -mthumb -mcpu=cortex-m7)
+add_link_options(LINKER:--gc-sections,--print-memory-usage)
+add_link_options(-specs=nano.specs -nostartfiles -mthumb -mcpu=${cpu})
+
+add_compile_options(-ffunction-sections -fdata-sections -mthumb -mcpu=${cpu})
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit$<SEMICOLON>-fno-threadsafe-statics$<SEMICOLON>-fno-rtti$<SEMICOLON>-fno-exceptions>)
