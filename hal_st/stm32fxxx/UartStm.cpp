@@ -27,9 +27,16 @@ namespace hal
 #else
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
 #endif
+
         HAL_UART_Init(&uartHandle);
 
+#if defined(STM32WB)
+        // Enable FIFO. FIFO can only be enabled after 'HAL_UART_Init'; but UART must be disabled first.
+        peripheralUart[uartIndex]->CR1 &= ~USART_CR1_UE;
+        peripheralUart[uartIndex]->CR1 |= USART_CR1_FIFOEN | USART_CR1_UE;
+
         peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
+#endif
     }
 
     UartStm::~UartStm()
@@ -44,28 +51,17 @@ namespace hal
         sendData = data;
         sending = true;
 
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-        peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_TXE & USART_IT_MASK);
-#else
-        peripheralUart[uartIndex]->CR1 |= USART_IT_TXE & USART_IT_MASK;
-#endif
+        peripheralUart[uartIndex]->CR1 |=  USART_CR1_TXEIE;
     }
 
     void UartStm::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
     {
         this->dataReceived = dataReceived;
 
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
         if (dataReceived == nullptr)
-            peripheralUart[uartIndex]->CR1 &= ~(1 << (USART_IT_RXNE & USART_IT_MASK));
+            peripheralUart[uartIndex]->CR1 &= ~USART_CR1_RXNEIE;
         else
-            peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
-#else
-        if (dataReceived == nullptr)
-            peripheralUart[uartIndex]->CR1 &= ~(USART_IT_RXNE & USART_IT_MASK);
-        else
-            peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
-#endif
+            peripheralUart[uartIndex]->CR1 |= USART_CR1_RXNEIE;
     }
 
     void UartStm::RegisterInterrupt(const Config& config)
@@ -109,9 +105,9 @@ namespace hal
 
             // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-            really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
+            really_assert(!(peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
 #else
-            really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));
+            really_assert(!(peripheralUart[uartIndex]->SR & USART_SR_ORE));
 #endif
 
             if (dataReceived != nullptr)
@@ -137,11 +133,7 @@ namespace hal
             if (sendData.empty())
             {
                 TransferComplete();
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-                peripheralUart[uartIndex]->CR1 &= ~(1 << (USART_IT_TXE & USART_IT_MASK));
-#else
-                peripheralUart[uartIndex]->CR1 &= ~(USART_IT_TXE & USART_IT_MASK);
-#endif
+                peripheralUart[uartIndex]->CR1 &= ~USART_CR1_TXEIE;
                 sending = false;
             }
         }
