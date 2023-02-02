@@ -22,7 +22,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
-        GIT_TAG        49f69a32e013bd1219cf058e525bb287dad7bee1
+        GIT_TAG        modern-cmake
     )
 
     FetchContent_MakeAvailable(emil)
