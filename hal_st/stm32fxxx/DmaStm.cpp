@@ -131,6 +131,7 @@ namespace hal
     void DmaStm::Stream::StartTransmit(infra::ConstByteRange data)
     {
         assert(data.size() <= 65535);
+        assert(!data.empty());
         __DMB();
         DMA_Stream_TypeDef* streamRegister = dmaStream[dmaIndex][streamIndex];
         streamRegister->CR |= DMA_MINC_ENABLE;
