@@ -27,5 +27,3 @@ target_sources(hal_st.synchronous_stm32fxxx PRIVATE
     TimeKeeperStm.cpp
     TimeKeeperStm.hpp
 )
-
-emil_exclude_from_clang_format(hal_st.synchronous_stm32fxxx)
