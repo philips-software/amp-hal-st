@@ -6,6 +6,7 @@ set(hints_paths)
 
 if (CMAKE_HOST_WIN32)
     set(X86_PROGRAM_FILES "ProgramFiles(x86)")
+    list(APPEND hints_paths "$ENV{${X86_PROGRAM_FILES}}/Arm GNU Toolchain arm-none-eabi/12.2 rel1/bin")
     list(APPEND hints_paths "$ENV{${X86_PROGRAM_FILES}}/GNU Arm Embedded Toolchain/10 2021.10/bin/")
 endif()
 
@@ -55,16 +56,9 @@ find_program(EMIL_DEBUG_TOOL
     NAMES arm-none-eabi-gdb
     HINTS ${hints_paths})
 
-if (TARGET_MCU_FAMILY STREQUAL stm32f7xx)
-    set(cpu cortex-m7)
-elseif (TARGET_MCU_FAMILY STREQUAL stm32f4xx)
-    set(cpu cortex-m4)
-else()
-    set(cpu cortex-m0plus)
-endif()
-
 add_link_options(LINKER:--gc-sections,--print-memory-usage)
-add_link_options(-specs=nano.specs -nostartfiles -mthumb -mcpu=${cpu})
+add_link_options(-specs=nano.specs -nostartfiles -mthumb)
 
-add_compile_options(-ffunction-sections -fdata-sections -mthumb -mcpu=${cpu})
+add_compile_options($<$<COMPILE_LANGUAGE:C>:-ffunction-sections$<SEMICOLON>-fdata-sections$<SEMICOLON>-mthumb>)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-ffunction-sections$<SEMICOLON>-fdata-sections$<SEMICOLON>-mthumb>)
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit$<SEMICOLON>-fno-threadsafe-statics$<SEMICOLON>-fno-rtti$<SEMICOLON>-fno-exceptions>)

@@ -1,5 +1,6 @@
 #include "cmsis_device.h"
 #include "hal_st/synchronous_stm32fxxx/SynchronousQuadSpiStm.hpp"
+#include <limits>
 
 #if defined(HAS_PERIPHERAL_QUADSPI)
 
