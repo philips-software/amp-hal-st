@@ -128,5 +128,3 @@ target_sources(hal_st.stm32fxxx PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.hpp"
 )
-
-emil_exclude_from_clang_format(hal_st.stm32fxxx)
