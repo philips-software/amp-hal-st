@@ -51,7 +51,7 @@ namespace hal
         sendData = data;
         sending = true;
 
-        peripheralUart[uartIndex]->CR1 |=  USART_CR1_TXEIE;
+        peripheralUart[uartIndex]->CR1 |= USART_CR1_TXEIE;
     }
 
     void UartStm::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
