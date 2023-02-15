@@ -13,6 +13,5 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 void __initialize_hardware(void)
 {
     ConfigureDefaultClock();
-    SystemCoreClockUpdate();
     HAL_Init();
 }
