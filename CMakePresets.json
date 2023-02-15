@@ -37,7 +37,7 @@
       "displayName": "stm32wb55cg",
       "description": "Build for stm32wb55cg",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-fpv4-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32wbxx",
@@ -50,7 +50,7 @@
       "displayName": "stm32f407",
       "description": "Build for stm32f407",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-fpv4-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32f4xx",
