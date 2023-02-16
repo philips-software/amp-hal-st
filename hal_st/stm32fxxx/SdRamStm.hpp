@@ -54,18 +54,16 @@ namespace hal
     };
 
     inline constexpr SdRamStm::Config stm32f7discoverySdRamConfig = { 0xC0000000, 0x800000, 0x0603, 1, 8, 12, 16, 2 };
-    inline constexpr std::array<std::pair<hal::Port, uint8_t>, 39> stm32f7discoveryFmcPins = { {
-        { hal::Port::C, 3 },{ hal::Port::D, 0 },{ hal::Port::D, 1 },{ hal::Port::D, 3 },
-        { hal::Port::D, 8 },{ hal::Port::D, 9 },{ hal::Port::D, 10 },{ hal::Port::D, 14 },
-        { hal::Port::D, 15 },{ hal::Port::E, 0 },{ hal::Port::E, 1 },{ hal::Port::E, 7 },
-        { hal::Port::E, 8 },{ hal::Port::E, 9 },{ hal::Port::E, 10 },{ hal::Port::E, 11 },
-        { hal::Port::E, 12 },{ hal::Port::E, 13 },{ hal::Port::E, 14 },{ hal::Port::E, 15 },
-        { hal::Port::F, 0 },{ hal::Port::F, 1 },{ hal::Port::F, 2 },{ hal::Port::F, 3 },
-        { hal::Port::F, 4 },{ hal::Port::F, 5 },{ hal::Port::F, 11 },{ hal::Port::F, 12 },
-        { hal::Port::F, 13 },{ hal::Port::F, 14 },{ hal::Port::F, 15 },{ hal::Port::G, 0 },
-        { hal::Port::G, 1 },{ hal::Port::G, 4 },{ hal::Port::G, 5 },{ hal::Port::G, 8 },
-        { hal::Port::G, 15 },{ hal::Port::H, 3 },{ hal::Port::H, 5 }
-    } }; 
+    inline constexpr std::array<std::pair<hal::Port, uint8_t>, 39> stm32f7discoveryFmcPins = { { { hal::Port::C, 3 }, { hal::Port::D, 0 }, { hal::Port::D, 1 }, { hal::Port::D, 3 },
+        { hal::Port::D, 8 }, { hal::Port::D, 9 }, { hal::Port::D, 10 }, { hal::Port::D, 14 },
+        { hal::Port::D, 15 }, { hal::Port::E, 0 }, { hal::Port::E, 1 }, { hal::Port::E, 7 },
+        { hal::Port::E, 8 }, { hal::Port::E, 9 }, { hal::Port::E, 10 }, { hal::Port::E, 11 },
+        { hal::Port::E, 12 }, { hal::Port::E, 13 }, { hal::Port::E, 14 }, { hal::Port::E, 15 },
+        { hal::Port::F, 0 }, { hal::Port::F, 1 }, { hal::Port::F, 2 }, { hal::Port::F, 3 },
+        { hal::Port::F, 4 }, { hal::Port::F, 5 }, { hal::Port::F, 11 }, { hal::Port::F, 12 },
+        { hal::Port::F, 13 }, { hal::Port::F, 14 }, { hal::Port::F, 15 }, { hal::Port::G, 0 },
+        { hal::Port::G, 1 }, { hal::Port::G, 4 }, { hal::Port::G, 5 }, { hal::Port::G, 8 },
+        { hal::Port::G, 15 }, { hal::Port::H, 3 }, { hal::Port::H, 5 } } };
 }
 
 #endif

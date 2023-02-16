@@ -1,62 +1,32 @@
-#include "cmsis_device.h"
 #include "hal_st/synchronous_stm32fxxx/SynchronousQuadSpiStm.hpp"
+#include "cmsis_device.h"
 
 #if defined(HAS_PERIPHERAL_QUADSPI)
 
 namespace hal
 {
     const hal::SmallPeripheralPinStm::Definition<1> SynchronousQuadSpiStm::clock = {
-        {{
-            { 0, hal::Port::B, 2, GPIO_AF9_QUADSPI }
-        }}
-        , hal::Drive::Default
-        , hal::Speed::High
-        , hal::WeakPull::Default
+        { { { 0, hal::Port::B, 2, GPIO_AF9_QUADSPI } } }, hal::Drive::Default, hal::Speed::High, hal::WeakPull::Default
     };
 
     const hal::SmallPeripheralPinStm::Definition<1> SynchronousQuadSpiStm::slaveSelect = {
-        {{
-            { 0, hal::Port::B, 6, GPIO_AF10_QUADSPI }
-        }}
-        , hal::Drive::Default
-        , hal::Speed::High
-        , hal::WeakPull::Default
+        { { { 0, hal::Port::B, 6, GPIO_AF10_QUADSPI } } }, hal::Drive::Default, hal::Speed::High, hal::WeakPull::Default
     };
 
     const hal::SmallPeripheralPinStm::Definition<3> SynchronousQuadSpiStm::data0 = {
-        {{
-            { 0, hal::Port::C, 9, GPIO_AF9_QUADSPI }, { 0, hal::Port::D, 11, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 8, GPIO_AF10_QUADSPI }
-        }}
-        , hal::Drive::Default
-        , hal::Speed::High
-        , hal::WeakPull::Default
+        { { { 0, hal::Port::C, 9, GPIO_AF9_QUADSPI }, { 0, hal::Port::D, 11, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 8, GPIO_AF10_QUADSPI } } }, hal::Drive::Default, hal::Speed::High, hal::WeakPull::Default
     };
 
     const hal::SmallPeripheralPinStm::Definition<3> SynchronousQuadSpiStm::data1 = {
-        {{
-            { 0, hal::Port::C, 10, GPIO_AF9_QUADSPI }, { 0, hal::Port::D, 12, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 9, GPIO_AF10_QUADSPI }
-        }}
-        , hal::Drive::Default
-        , hal::Speed::High
-        , hal::WeakPull::Default
+        { { { 0, hal::Port::C, 10, GPIO_AF9_QUADSPI }, { 0, hal::Port::D, 12, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 9, GPIO_AF10_QUADSPI } } }, hal::Drive::Default, hal::Speed::High, hal::WeakPull::Default
     };
 
     const hal::SmallPeripheralPinStm::Definition<2> SynchronousQuadSpiStm::data2 = {
-        {{
-            { 0, hal::Port::E, 2, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 7, GPIO_AF9_QUADSPI }
-        }}
-        , hal::Drive::Default
-        , hal::Speed::High
-        , hal::WeakPull::Default
+        { { { 0, hal::Port::E, 2, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 7, GPIO_AF9_QUADSPI } } }, hal::Drive::Default, hal::Speed::High, hal::WeakPull::Default
     };
 
     const hal::SmallPeripheralPinStm::Definition<3> SynchronousQuadSpiStm::data3 = {
-        {{
-            { 0, hal::Port::A, 1, GPIO_AF9_QUADSPI }, { 0, hal::Port::D, 13, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 6, GPIO_AF9_QUADSPI }
-        }}
-        , hal::Drive::Default
-        , hal::Speed::High
-        , hal::WeakPull::Default
+        { { { 0, hal::Port::A, 1, GPIO_AF9_QUADSPI }, { 0, hal::Port::D, 13, GPIO_AF9_QUADSPI }, { 0, hal::Port::F, 6, GPIO_AF9_QUADSPI } } }, hal::Drive::Default, hal::Speed::High, hal::WeakPull::Default
     };
 
     SynchronousQuadSpiStm::SynchronousQuadSpiStm(const Config& config)
