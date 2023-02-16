@@ -2,8 +2,6 @@
   ******************************************************************************
   * @file    stm32f4xx_hal_pwr.c
   * @author  MCD Application Team
-  * @version V1.4.0
-  * @date    14-August-2015
   * @brief   PWR HAL module driver.
   *          This file provides firmware functions to manage the following 
   *          functionalities of the Power Controller (PWR) peripheral:
@@ -13,30 +11,12 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
+  * Copyright (c) 2017 STMicroelectronics.
+  * All rights reserved.
   *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
+  * This software is licensed under terms that can be found in the LICENSE file in
+  * the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   ******************************************************************************
   */ 
 
@@ -63,10 +43,10 @@
 /** @defgroup PWR_PVD_Mode_Mask PWR PVD Mode Mask
   * @{
   */     
-#define PVD_MODE_IT               ((uint32_t)0x00010000)
-#define PVD_MODE_EVT              ((uint32_t)0x00020000)
-#define PVD_RISING_EDGE           ((uint32_t)0x00000001)
-#define PVD_FALLING_EDGE          ((uint32_t)0x00000002)
+#define PVD_MODE_IT               0x00010000U
+#define PVD_MODE_EVT              0x00020000U
+#define PVD_RISING_EDGE           0x00000001U
+#define PVD_FALLING_EDGE          0x00000002U
 /**
   * @}
   */
@@ -118,11 +98,19 @@ void HAL_PWR_DeInit(void)
   *         backup data registers and backup SRAM).
   * @note If the HSE divided by 2, 3, ..31 is used as the RTC clock, the 
   *         Backup Domain Access should be kept enabled.
+  * @note The following sequence is required to bypass the delay between
+  *         DBP bit programming and the effective enabling  of the backup domain.
+  *         Please check the Errata Sheet for more details under "Possible delay
+  *         in backup domain protection disabling/enabling after programming the
+  *         DBP bit" section.
   * @retval None
   */
 void HAL_PWR_EnableBkUpAccess(void)
 {
+  __IO uint32_t dummyread;
   *(__IO uint32_t *) CR_DBP_BB = (uint32_t)ENABLE;
+  dummyread = PWR->CR;
+  UNUSED(dummyread);
 }
 
 /**
@@ -130,11 +118,19 @@ void HAL_PWR_EnableBkUpAccess(void)
   *         backup data registers and backup SRAM).
   * @note If the HSE divided by 2, 3, ..31 is used as the RTC clock, the 
   *         Backup Domain Access should be kept enabled.
+  * @note The following sequence is required to bypass the delay between
+  *         DBP bit programming and the effective disabling  of the backup domain.
+  *         Please check the Errata Sheet for more details under "Possible delay
+  *         in backup domain protection disabling/enabling after programming the
+  *         DBP bit" section.
   * @retval None
   */
 void HAL_PWR_DisableBkUpAccess(void)
 {
+  __IO uint32_t dummyread;
   *(__IO uint32_t *) CR_DBP_BB = (uint32_t)DISABLE;
+  dummyread = PWR->CR;
+  UNUSED(dummyread);
 }
 
 /**
@@ -168,7 +164,7 @@ void HAL_PWR_DisableBkUpAccess(void)
           forced in input pull-down configuration and is active on rising edges.
       (+) There is one Wake-up pin: Wake-up Pin 1 on PA.00.
 	   (++) For STM32F446xx there are two Wake-Up pins: Pin1 on PA.00 and Pin2 on PC.13
-           (++) For STM32F410xx there are three Wake-Up pins: Pin1 on PA.00, Pin2 on PC.00 and Pin3 on PC.01
+           (++) For STM32F410xx/STM32F412xx/STM32F413xx/STM32F423xx  there are three Wake-Up pins: Pin1 on PA.00, Pin2 on PC.00 and Pin3 on PC.01 
 
     *** Low Power modes configuration ***
     =====================================
@@ -260,7 +256,7 @@ void HAL_PWR_DisableBkUpAccess(void)
 
 /**
   * @brief Configures the voltage threshold detected by the Power Voltage Detector(PVD).
-  * @param sConfigPVD: pointer to an PWR_PVDTypeDef structure that contains the configuration
+  * @param sConfigPVD pointer to an PWR_PVDTypeDef structure that contains the configuration
   *        information for the PVD.
   * @note Refer to the electrical characteristics of your device datasheet for
   *         more details about the voltage threshold corresponding to each 
@@ -326,11 +322,11 @@ void HAL_PWR_DisablePVD(void)
 
 /**
   * @brief Enables the Wake-up PINx functionality.
-  * @param WakeUpPinx: Specifies the Power Wake-Up pin to enable.
+  * @param WakeUpPinx Specifies the Power Wake-Up pin to enable.
   *         This parameter can be one of the following values:
   *           @arg PWR_WAKEUP_PIN1
-  *           @arg PWR_WAKEUP_PIN2 available only on STM32F410xx/STM32F446xx devices
-  *           @arg PWR_WAKEUP_PIN3 available only on STM32F410xx devices
+  *           @arg PWR_WAKEUP_PIN2 available only on STM32F410xx/STM32F446xx/STM32F412xx/STM32F413xx/STM32F423xx devices
+  *           @arg PWR_WAKEUP_PIN3 available only on STM32F410xx/STM32F412xx/STM32F413xx/STM32F423xx devices
   * @retval None
   */
 void HAL_PWR_EnableWakeUpPin(uint32_t WakeUpPinx)
@@ -344,11 +340,11 @@ void HAL_PWR_EnableWakeUpPin(uint32_t WakeUpPinx)
 
 /**
   * @brief Disables the Wake-up PINx functionality.
-  * @param WakeUpPinx: Specifies the Power Wake-Up pin to disable.
+  * @param WakeUpPinx Specifies the Power Wake-Up pin to disable.
   *         This parameter can be one of the following values:
   *           @arg PWR_WAKEUP_PIN1
-  *           @arg PWR_WAKEUP_PIN2 available only on STM32F410xx/STM32F446xx devices
-  *           @arg PWR_WAKEUP_PIN3 available only on STM32F410xx devices
+  *           @arg PWR_WAKEUP_PIN2 available only on STM32F410xx/STM32F446xx/STM32F412xx/STM32F413xx/STM32F423xx devices
+  *           @arg PWR_WAKEUP_PIN3 available only on STM32F410xx/STM32F412xx/STM32F413xx/STM32F423xx devices
   * @retval None
   */
 void HAL_PWR_DisableWakeUpPin(uint32_t WakeUpPinx)
@@ -368,13 +364,13 @@ void HAL_PWR_DisableWakeUpPin(uint32_t WakeUpPinx)
   * @note In Sleep mode, the systick is stopped to avoid exit from this mode with
   *       systick interrupt when used as time base for Timeout 
   *                
-  * @param Regulator: Specifies the regulator state in SLEEP mode.
+  * @param Regulator Specifies the regulator state in SLEEP mode.
   *            This parameter can be one of the following values:
   *            @arg PWR_MAINREGULATOR_ON: SLEEP mode with regulator ON
   *            @arg PWR_LOWPOWERREGULATOR_ON: SLEEP mode with low power regulator ON
   * @note This parameter is not used for the STM32F4 family and is kept as parameter
   *       just to maintain compatibility with the lower power families.
-  * @param SLEEPEntry: Specifies if SLEEP mode in entered with WFI or WFE instruction.
+  * @param SLEEPEntry Specifies if SLEEP mode in entered with WFI or WFE instruction.
   *          This parameter can be one of the following values:
   *            @arg PWR_SLEEPENTRY_WFI: enter SLEEP mode with WFI instruction
   *            @arg PWR_SLEEPENTRY_WFE: enter SLEEP mode with WFE instruction
@@ -413,11 +409,11 @@ void HAL_PWR_EnterSLEEPMode(uint32_t Regulator, uint8_t SLEEPEntry)
   *         startup delay is incurred when waking up from Stop mode. 
   *         By keeping the internal regulator ON during Stop mode, the consumption 
   *         is higher although the startup time is reduced.    
-  * @param Regulator: Specifies the regulator state in Stop mode.
+  * @param Regulator Specifies the regulator state in Stop mode.
   *          This parameter can be one of the following values:
   *            @arg PWR_MAINREGULATOR_ON: Stop mode with regulator ON
   *            @arg PWR_LOWPOWERREGULATOR_ON: Stop mode with low power regulator ON
-  * @param STOPEntry: Specifies if Stop mode in entered with WFI or WFE instruction.
+  * @param STOPEntry Specifies if Stop mode in entered with WFI or WFE instruction.
   *          This parameter can be one of the following values:
   *            @arg PWR_STOPENTRY_WFI: Enter Stop mode with WFI instruction
   *            @arg PWR_STOPENTRY_WFE: Enter Stop mode with WFE instruction
@@ -573,5 +569,3 @@ void HAL_PWR_DisableSEVOnPend(void)
 /**
   * @}
   */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -40,94 +40,140 @@ if (HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS)
 endif()
 
 target_sources(hal_st.std_periph_stm32f4xx PRIVATE
-    inc/stm32f4xx_hal_conf.h
-    inc/cmsis/cmsis_device.h
     inc/cmsis/cmsis_device_hal.h
+    inc/cmsis/cmsis_device.h
     inc/cmsis/stm32f4xx.h
     inc/cmsis/stm32f401xc.h
     inc/cmsis/stm32f401xe.h
     inc/cmsis/stm32f405xx.h
     inc/cmsis/stm32f407xx.h
+    inc/cmsis/stm32f410cx.h
+    inc/cmsis/stm32f410rx.h
+    inc/cmsis/stm32f410tx.h
     inc/cmsis/stm32f411xe.h
+    inc/cmsis/stm32f412cx.h
+    inc/cmsis/stm32f412rx.h
+    inc/cmsis/stm32f412vx.h
+    inc/cmsis/stm32f412zx.h
+    inc/cmsis/stm32f413xx.h
     inc/cmsis/stm32f415xx.h
     inc/cmsis/stm32f417xx.h
+    inc/cmsis/stm32f423xx.h
     inc/cmsis/stm32f427xx.h
     inc/cmsis/stm32f429xx.h
     inc/cmsis/stm32f437xx.h
     inc/cmsis/stm32f439xx.h
+    inc/cmsis/stm32f446xx.h
+    inc/cmsis/stm32f469xx.h
+    inc/cmsis/stm32f479xx.h
+    inc/stm32f4xx_hal_conf.h
+    inc/stm32_assert.h
     inc/cmsis/system_stm32f4xx.h
-    inc/stm32f4-hal/stm32f4xx_hal.h
-    inc/stm32f4-hal/stm32f4xx_hal_adc.h
+    inc/stm32f4-hal/Legacy/stm32_hal_legacy.h
+    inc/stm32f4-hal/Legacy/stm32f4xx_hal_can_legacy.h
+    inc/stm32f4-hal/Legacy/stm32f4xx_hal_eth_legacy.h
     inc/stm32f4-hal/stm32f4xx_hal_adc_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_adc.h
     inc/stm32f4-hal/stm32f4xx_hal_can.h
     inc/stm32f4-hal/stm32f4xx_hal_cec.h
-    inc/stm32f4-hal/stm32f4xx_hal_conf_template.h
     inc/stm32f4-hal/stm32f4xx_hal_cortex.h
     inc/stm32f4-hal/stm32f4xx_hal_crc.h
-    inc/stm32f4-hal/stm32f4xx_hal_cryp.h
     inc/stm32f4-hal/stm32f4xx_hal_cryp_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_dac.h
+    inc/stm32f4-hal/stm32f4xx_hal_cryp.h
     inc/stm32f4-hal/stm32f4xx_hal_dac_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_dcmi.h
+    inc/stm32f4-hal/stm32f4xx_hal_dac.h
     inc/stm32f4-hal/stm32f4xx_hal_dcmi_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_dcmi.h
     inc/stm32f4-hal/stm32f4xx_hal_def.h
-    inc/stm32f4-hal/stm32f4xx_hal_dma.h
+    inc/stm32f4-hal/stm32f4xx_hal_dfsdm.h
     inc/stm32f4-hal/stm32f4xx_hal_dma_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_dma.h
     inc/stm32f4-hal/stm32f4xx_hal_dma2d.h
     inc/stm32f4-hal/stm32f4xx_hal_dsi.h
     inc/stm32f4-hal/stm32f4xx_hal_eth.h
-    inc/stm32f4-hal/stm32f4xx_hal_flash.h
+    inc/stm32f4-hal/stm32f4xx_hal_exti.h
     inc/stm32f4-hal/stm32f4xx_hal_flash_ex.h
     inc/stm32f4-hal/stm32f4xx_hal_flash_ramfunc.h
-    inc/stm32f4-hal/stm32f4xx_hal_fmpi2c.h
+    inc/stm32f4-hal/stm32f4xx_hal_flash.h
     inc/stm32f4-hal/stm32f4xx_hal_fmpi2c_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_gpio.h
+    inc/stm32f4-hal/stm32f4xx_hal_fmpi2c.h
+    inc/stm32f4-hal/stm32f4xx_hal_fmpsmbus_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_fmpsmbus.h
     inc/stm32f4-hal/stm32f4xx_hal_gpio_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_hash.h
+    inc/stm32f4-hal/stm32f4xx_hal_gpio.h
     inc/stm32f4-hal/stm32f4xx_hal_hash_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_hash.h
     inc/stm32f4-hal/stm32f4xx_hal_hcd.h
-    inc/stm32f4-hal/stm32f4xx_hal_i2c.h
     inc/stm32f4-hal/stm32f4xx_hal_i2c_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_i2s.h
+    inc/stm32f4-hal/stm32f4xx_hal_i2c.h
     inc/stm32f4-hal/stm32f4xx_hal_i2s_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_i2s.h
     inc/stm32f4-hal/stm32f4xx_hal_irda.h
     inc/stm32f4-hal/stm32f4xx_hal_iwdg.h
     inc/stm32f4-hal/stm32f4xx_hal_lptim.h
-    inc/stm32f4-hal/stm32f4xx_hal_ltdc.h
     inc/stm32f4-hal/stm32f4xx_hal_ltdc_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_ltdc.h
+    inc/stm32f4-hal/stm32f4xx_hal_mmc.h
     inc/stm32f4-hal/stm32f4xx_hal_nand.h
     inc/stm32f4-hal/stm32f4xx_hal_nor.h
     inc/stm32f4-hal/stm32f4xx_hal_pccard.h
-    inc/stm32f4-hal/stm32f4xx_hal_pcd.h
     inc/stm32f4-hal/stm32f4xx_hal_pcd_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_pwr.h
+    inc/stm32f4-hal/stm32f4xx_hal_pcd.h
     inc/stm32f4-hal/stm32f4xx_hal_pwr_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_pwr.h
     inc/stm32f4-hal/stm32f4xx_hal_qspi.h
-    inc/stm32f4-hal/stm32f4xx_hal_rcc.h
     inc/stm32f4-hal/stm32f4xx_hal_rcc_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_rcc.h
     inc/stm32f4-hal/stm32f4xx_hal_rng.h
-    inc/stm32f4-hal/stm32f4xx_hal_rtc.h
     inc/stm32f4-hal/stm32f4xx_hal_rtc_ex.h
-    inc/stm32f4-hal/stm32f4xx_hal_sai.h
+    inc/stm32f4-hal/stm32f4xx_hal_rtc.h
     inc/stm32f4-hal/stm32f4xx_hal_sai_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_sai.h
     inc/stm32f4-hal/stm32f4xx_hal_sd.h
     inc/stm32f4-hal/stm32f4xx_hal_sdram.h
     inc/stm32f4-hal/stm32f4xx_hal_smartcard.h
+    inc/stm32f4-hal/stm32f4xx_hal_smbus.h
     inc/stm32f4-hal/stm32f4xx_hal_spdifrx.h
     inc/stm32f4-hal/stm32f4xx_hal_spi.h
     inc/stm32f4-hal/stm32f4xx_hal_sram.h
-    inc/stm32f4-hal/stm32f4xx_hal_tim.h
     inc/stm32f4-hal/stm32f4xx_hal_tim_ex.h
+    inc/stm32f4-hal/stm32f4xx_hal_tim.h
     inc/stm32f4-hal/stm32f4xx_hal_uart.h
     inc/stm32f4-hal/stm32f4xx_hal_usart.h
     inc/stm32f4-hal/stm32f4xx_hal_wwdg.h
+    inc/stm32f4-hal/stm32f4xx_hal.h
+    inc/stm32f4-hal/stm32f4xx_ll_adc.h
+    inc/stm32f4-hal/stm32f4xx_ll_bus.h
+    inc/stm32f4-hal/stm32f4xx_ll_cortex.h
+    inc/stm32f4-hal/stm32f4xx_ll_crc.h
+    inc/stm32f4-hal/stm32f4xx_ll_dac.h
+    inc/stm32f4-hal/stm32f4xx_ll_dma.h
+    inc/stm32f4-hal/stm32f4xx_ll_dma2d.h
+    inc/stm32f4-hal/stm32f4xx_ll_exti.h
     inc/stm32f4-hal/stm32f4xx_ll_fmc.h
+    inc/stm32f4-hal/stm32f4xx_ll_fmpi2c.h
     inc/stm32f4-hal/stm32f4xx_ll_fsmc.h
+    inc/stm32f4-hal/stm32f4xx_ll_gpio.h
+    inc/stm32f4-hal/stm32f4xx_ll_i2c.h
+    inc/stm32f4-hal/stm32f4xx_ll_iwdg.h
+    inc/stm32f4-hal/stm32f4xx_ll_lptim.h
+    inc/stm32f4-hal/stm32f4xx_ll_pwr.h
+    inc/stm32f4-hal/stm32f4xx_ll_rcc.h
+    inc/stm32f4-hal/stm32f4xx_ll_rng.h
+    inc/stm32f4-hal/stm32f4xx_ll_rtc.h
     inc/stm32f4-hal/stm32f4xx_ll_sdmmc.h
+    inc/stm32f4-hal/stm32f4xx_ll_spi.h
+    inc/stm32f4-hal/stm32f4xx_ll_system.h
+    inc/stm32f4-hal/stm32f4xx_ll_tim.h
+    inc/stm32f4-hal/stm32f4xx_ll_usart.h
     inc/stm32f4-hal/stm32f4xx_ll_usb.h
-    inc/stm32f4-hal/Legacy/stm32_hal_legacy.h
+    inc/stm32f4-hal/stm32f4xx_ll_utils.h
+    inc/stm32f4-hal/stm32f4xx_ll_wwdg.h
+    inc/stm32f4xx_hal_conf.h
     src/cmsis/system_stm32f4xx.c
     src/cmsis/vectors_stm32f4xx.c
+    src/stm32f4-hal/Legacy/stm32f4xx_hal_can.c
+    src/stm32f4-hal/Legacy/stm32f4xx_hal_eth.c
     src/stm32f4-hal/stm32f4xx_hal_adc_ex.c
     src/stm32f4-hal/stm32f4xx_hal_adc.c
     src/stm32f4-hal/stm32f4xx_hal_can.c
@@ -138,18 +184,22 @@ target_sources(hal_st.std_periph_stm32f4xx PRIVATE
     src/stm32f4-hal/stm32f4xx_hal_cryp.c
     src/stm32f4-hal/stm32f4xx_hal_dac_ex.c
     src/stm32f4-hal/stm32f4xx_hal_dac.c
-    src/stm32f4-hal/stm32f4xx_hal_dcmi.c
     src/stm32f4-hal/stm32f4xx_hal_dcmi_ex.c
+    src/stm32f4-hal/stm32f4xx_hal_dcmi.c
+    src/stm32f4-hal/stm32f4xx_hal_dfsdm.c
     src/stm32f4-hal/stm32f4xx_hal_dma_ex.c
     src/stm32f4-hal/stm32f4xx_hal_dma.c
     src/stm32f4-hal/stm32f4xx_hal_dma2d.c
     src/stm32f4-hal/stm32f4xx_hal_dsi.c
     src/stm32f4-hal/stm32f4xx_hal_eth.c
+    src/stm32f4-hal/stm32f4xx_hal_exti.c
     src/stm32f4-hal/stm32f4xx_hal_flash_ex.c
     src/stm32f4-hal/stm32f4xx_hal_flash_ramfunc.c
     src/stm32f4-hal/stm32f4xx_hal_flash.c
-    src/stm32f4-hal/stm32f4xx_hal_fmpi2c.c
     src/stm32f4-hal/stm32f4xx_hal_fmpi2c_ex.c
+    src/stm32f4-hal/stm32f4xx_hal_fmpi2c.c
+    src/stm32f4-hal/stm32f4xx_hal_fmpsmbus_ex.c
+    src/stm32f4-hal/stm32f4xx_hal_fmpsmbus.c
     src/stm32f4-hal/stm32f4xx_hal_gpio.c
     src/stm32f4-hal/stm32f4xx_hal_hash_ex.c
     src/stm32f4-hal/stm32f4xx_hal_hash.c
@@ -161,9 +211,9 @@ target_sources(hal_st.std_periph_stm32f4xx PRIVATE
     src/stm32f4-hal/stm32f4xx_hal_irda.c
     src/stm32f4-hal/stm32f4xx_hal_iwdg.c
     src/stm32f4-hal/stm32f4xx_hal_lptim.c
-    src/stm32f4-hal/stm32f4xx_hal_ltdc.c
     src/stm32f4-hal/stm32f4xx_hal_ltdc_ex.c
-    src/stm32f4-hal/stm32f4xx_hal_msp_template.c
+    src/stm32f4-hal/stm32f4xx_hal_ltdc.c
+    src/stm32f4-hal/stm32f4xx_hal_mmc.c
     src/stm32f4-hal/stm32f4xx_hal_nand.c
     src/stm32f4-hal/stm32f4xx_hal_nor.c
     src/stm32f4-hal/stm32f4xx_hal_pccard.c
@@ -177,11 +227,12 @@ target_sources(hal_st.std_periph_stm32f4xx PRIVATE
     src/stm32f4-hal/stm32f4xx_hal_rng.c
     src/stm32f4-hal/stm32f4xx_hal_rtc_ex.c
     src/stm32f4-hal/stm32f4xx_hal_rtc.c
-    src/stm32f4-hal/stm32f4xx_hal_sai.c
     src/stm32f4-hal/stm32f4xx_hal_sai_ex.c
+    src/stm32f4-hal/stm32f4xx_hal_sai.c
     src/stm32f4-hal/stm32f4xx_hal_sd.c
     src/stm32f4-hal/stm32f4xx_hal_sdram.c
     src/stm32f4-hal/stm32f4xx_hal_smartcard.c
+    src/stm32f4-hal/stm32f4xx_hal_smbus.c
     src/stm32f4-hal/stm32f4xx_hal_spdifrx.c
     src/stm32f4-hal/stm32f4xx_hal_spi.c
     src/stm32f4-hal/stm32f4xx_hal_sram.c
@@ -191,8 +242,26 @@ target_sources(hal_st.std_periph_stm32f4xx PRIVATE
     src/stm32f4-hal/stm32f4xx_hal_usart.c
     src/stm32f4-hal/stm32f4xx_hal_wwdg.c
     src/stm32f4-hal/stm32f4xx_hal.c
+    src/stm32f4-hal/stm32f4xx_ll_adc.c
+    src/stm32f4-hal/stm32f4xx_ll_crc.c
+    src/stm32f4-hal/stm32f4xx_ll_dac.c
+    src/stm32f4-hal/stm32f4xx_ll_dma.c
+    src/stm32f4-hal/stm32f4xx_ll_dma2d.c
+    src/stm32f4-hal/stm32f4xx_ll_exti.c
     src/stm32f4-hal/stm32f4xx_ll_fmc.c
+    src/stm32f4-hal/stm32f4xx_ll_fmpi2c.c
     src/stm32f4-hal/stm32f4xx_ll_fsmc.c
+    src/stm32f4-hal/stm32f4xx_ll_gpio.c
+    src/stm32f4-hal/stm32f4xx_ll_i2c.c
+    src/stm32f4-hal/stm32f4xx_ll_lptim.c
+    src/stm32f4-hal/stm32f4xx_ll_pwr.c
+    src/stm32f4-hal/stm32f4xx_ll_rcc.c
+    src/stm32f4-hal/stm32f4xx_ll_rng.c
+    src/stm32f4-hal/stm32f4xx_ll_rtc.c
     src/stm32f4-hal/stm32f4xx_ll_sdmmc.c
+    src/stm32f4-hal/stm32f4xx_ll_spi.c
+    src/stm32f4-hal/stm32f4xx_ll_tim.c
+    src/stm32f4-hal/stm32f4xx_ll_usart.c
     src/stm32f4-hal/stm32f4xx_ll_usb.c
+    src/stm32f4-hal/stm32f4xx_ll_utils.c
 )
