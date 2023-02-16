@@ -42,74 +42,74 @@ if (HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS)
 endif()
 
 target_sources(hal_st.std_periph_stm32wbxx PRIVATE
-    inc/stm32wbxx_hal_conf.h
-    inc/cmsis/cmsis_device.h
     inc/cmsis/cmsis_device_hal.h
+    inc/cmsis/cmsis_device.h
+    inc/cmsis/stm32wb1mxx.h
+    inc/cmsis/stm32wb5mxx.h
     inc/cmsis/stm32wb10xx.h
     inc/cmsis/stm32wb15xx.h
     inc/cmsis/stm32wb30xx.h
     inc/cmsis/stm32wb35xx.h
     inc/cmsis/stm32wb50xx.h
     inc/cmsis/stm32wb55xx.h
-    inc/cmsis/stm32wb5mxx.h
     inc/cmsis/stm32wbxx.h
     inc/cmsis/system_stm32wbxx.h
     inc/stm32wb-hal/Legacy/stm32_hal_legacy.h
     inc/stm32wb-hal/stm32_assert_template.h
-    inc/stm32wb-hal/stm32wbxx_hal.h
-    inc/stm32wb-hal/stm32wbxx_hal_adc.h
     inc/stm32wb-hal/stm32wbxx_hal_adc_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_adc.h
     inc/stm32wb-hal/stm32wbxx_hal_comp.h
     inc/stm32wb-hal/stm32wbxx_hal_conf_template.h
     inc/stm32wb-hal/stm32wbxx_hal_cortex.h
-    inc/stm32wb-hal/stm32wbxx_hal_crc.h
     inc/stm32wb-hal/stm32wbxx_hal_crc_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_cryp.h
+    inc/stm32wb-hal/stm32wbxx_hal_crc.h
     inc/stm32wb-hal/stm32wbxx_hal_cryp_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_cryp.h
     inc/stm32wb-hal/stm32wbxx_hal_def.h
-    inc/stm32wb-hal/stm32wbxx_hal_dma.h
     inc/stm32wb-hal/stm32wbxx_hal_dma_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_dma.h
     inc/stm32wb-hal/stm32wbxx_hal_exti.h
-    inc/stm32wb-hal/stm32wbxx_hal_flash.h
     inc/stm32wb-hal/stm32wbxx_hal_flash_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_gpio.h
+    inc/stm32wb-hal/stm32wbxx_hal_flash.h
     inc/stm32wb-hal/stm32wbxx_hal_gpio_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_gpio.h
     inc/stm32wb-hal/stm32wbxx_hal_hsem.h
-    inc/stm32wb-hal/stm32wbxx_hal_i2c.h
     inc/stm32wb-hal/stm32wbxx_hal_i2c_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_i2c.h
     inc/stm32wb-hal/stm32wbxx_hal_ipcc.h
-    inc/stm32wb-hal/stm32wbxx_hal_irda.h
     inc/stm32wb-hal/stm32wbxx_hal_irda_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_irda.h
     inc/stm32wb-hal/stm32wbxx_hal_iwdg.h
     inc/stm32wb-hal/stm32wbxx_hal_lcd.h
     inc/stm32wb-hal/stm32wbxx_hal_lptim.h
-    inc/stm32wb-hal/stm32wbxx_hal_pcd.h
     inc/stm32wb-hal/stm32wbxx_hal_pcd_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_pcd.h
     inc/stm32wb-hal/stm32wbxx_hal_pka.h
-    inc/stm32wb-hal/stm32wbxx_hal_pwr.h
     inc/stm32wb-hal/stm32wbxx_hal_pwr_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_pwr.h
     inc/stm32wb-hal/stm32wbxx_hal_qspi.h
-    inc/stm32wb-hal/stm32wbxx_hal_rcc.h
     inc/stm32wb-hal/stm32wbxx_hal_rcc_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_rcc.h
     inc/stm32wb-hal/stm32wbxx_hal_rng.h
-    inc/stm32wb-hal/stm32wbxx_hal_rtc.h
     inc/stm32wb-hal/stm32wbxx_hal_rtc_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_sai.h
+    inc/stm32wb-hal/stm32wbxx_hal_rtc.h
     inc/stm32wb-hal/stm32wbxx_hal_sai_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_smartcard.h
+    inc/stm32wb-hal/stm32wbxx_hal_sai.h
     inc/stm32wb-hal/stm32wbxx_hal_smartcard_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_smbus.h
+    inc/stm32wb-hal/stm32wbxx_hal_smartcard.h
     inc/stm32wb-hal/stm32wbxx_hal_smbus_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_spi.h
+    inc/stm32wb-hal/stm32wbxx_hal_smbus.h
     inc/stm32wb-hal/stm32wbxx_hal_spi_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_tim.h
+    inc/stm32wb-hal/stm32wbxx_hal_spi.h
     inc/stm32wb-hal/stm32wbxx_hal_tim_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_tim.h
     inc/stm32wb-hal/stm32wbxx_hal_tsc.h
-    inc/stm32wb-hal/stm32wbxx_hal_uart.h
     inc/stm32wb-hal/stm32wbxx_hal_uart_ex.h
-    inc/stm32wb-hal/stm32wbxx_hal_usart.h
+    inc/stm32wb-hal/stm32wbxx_hal_uart.h
     inc/stm32wb-hal/stm32wbxx_hal_usart_ex.h
+    inc/stm32wb-hal/stm32wbxx_hal_usart.h
     inc/stm32wb-hal/stm32wbxx_hal_wwdg.h
+    inc/stm32wb-hal/stm32wbxx_hal.h
     inc/stm32wb-hal/stm32wbxx_ll_adc.h
     inc/stm32wb-hal/stm32wbxx_ll_bus.h
     inc/stm32wb-hal/stm32wbxx_ll_comp.h
@@ -138,58 +138,64 @@ target_sources(hal_st.std_periph_stm32wbxx PRIVATE
     inc/stm32wb-hal/stm32wbxx_ll_usb.h
     inc/stm32wb-hal/stm32wbxx_ll_utils.h
     inc/stm32wb-hal/stm32wbxx_ll_wwdg.h
+    inc/stm32_assert.h
+    inc/stm32wbxx_hal_conf.h
     src/cmsis/system_stm32wbxx.c
     src/cmsis/vectors_stm32wbxx.c
-    src/stm32wb-hal/stm32wbxx_hal.c
-    src/stm32wb-hal/stm32wbxx_hal_adc.c
     src/stm32wb-hal/stm32wbxx_hal_adc_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_adc.c
     src/stm32wb-hal/stm32wbxx_hal_comp.c
     src/stm32wb-hal/stm32wbxx_hal_cortex.c
-    src/stm32wb-hal/stm32wbxx_hal_crc.c
     src/stm32wb-hal/stm32wbxx_hal_crc_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_cryp.c
+    src/stm32wb-hal/stm32wbxx_hal_crc.c
     src/stm32wb-hal/stm32wbxx_hal_cryp_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_dma.c
+    src/stm32wb-hal/stm32wbxx_hal_cryp.c
     src/stm32wb-hal/stm32wbxx_hal_dma_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_dma.c
     src/stm32wb-hal/stm32wbxx_hal_exti.c
-    src/stm32wb-hal/stm32wbxx_hal_flash.c
     src/stm32wb-hal/stm32wbxx_hal_flash_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_flash.c
     src/stm32wb-hal/stm32wbxx_hal_gpio.c
     src/stm32wb-hal/stm32wbxx_hal_hsem.c
-    src/stm32wb-hal/stm32wbxx_hal_i2c.c
     src/stm32wb-hal/stm32wbxx_hal_i2c_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_i2c.c
     src/stm32wb-hal/stm32wbxx_hal_ipcc.c
     src/stm32wb-hal/stm32wbxx_hal_irda.c
     src/stm32wb-hal/stm32wbxx_hal_iwdg.c
     src/stm32wb-hal/stm32wbxx_hal_lcd.c
     src/stm32wb-hal/stm32wbxx_hal_lptim.c
-    src/stm32wb-hal/stm32wbxx_hal_pcd.c
+    src/stm32wb-hal/stm32wbxx_hal_msp_template.c
     src/stm32wb-hal/stm32wbxx_hal_pcd_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_pcd.c
     src/stm32wb-hal/stm32wbxx_hal_pka.c
-    src/stm32wb-hal/stm32wbxx_hal_pwr.c
     src/stm32wb-hal/stm32wbxx_hal_pwr_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_pwr.c
     src/stm32wb-hal/stm32wbxx_hal_qspi.c
-    src/stm32wb-hal/stm32wbxx_hal_rcc.c
     src/stm32wb-hal/stm32wbxx_hal_rcc_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_rcc.c
     src/stm32wb-hal/stm32wbxx_hal_rng.c
-    src/stm32wb-hal/stm32wbxx_hal_rtc.c
     src/stm32wb-hal/stm32wbxx_hal_rtc_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_sai.c
+    src/stm32wb-hal/stm32wbxx_hal_rtc.c
     src/stm32wb-hal/stm32wbxx_hal_sai_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_smartcard.c
+    src/stm32wb-hal/stm32wbxx_hal_sai.c
     src/stm32wb-hal/stm32wbxx_hal_smartcard_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_smbus.c
+    src/stm32wb-hal/stm32wbxx_hal_smartcard.c
     src/stm32wb-hal/stm32wbxx_hal_smbus_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_spi.c
+    src/stm32wb-hal/stm32wbxx_hal_smbus.c
     src/stm32wb-hal/stm32wbxx_hal_spi_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_tim.c
+    src/stm32wb-hal/stm32wbxx_hal_spi.c
     src/stm32wb-hal/stm32wbxx_hal_tim_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_tim.c
+    src/stm32wb-hal/stm32wbxx_hal_timebase_rtc_alarm_template.c
+    src/stm32wb-hal/stm32wbxx_hal_timebase_rtc_wakeup_template.c
+    src/stm32wb-hal/stm32wbxx_hal_timebase_tim_template.c
     src/stm32wb-hal/stm32wbxx_hal_tsc.c
-    src/stm32wb-hal/stm32wbxx_hal_uart.c
     src/stm32wb-hal/stm32wbxx_hal_uart_ex.c
-    src/stm32wb-hal/stm32wbxx_hal_usart.c
+    src/stm32wb-hal/stm32wbxx_hal_uart.c
     src/stm32wb-hal/stm32wbxx_hal_usart_ex.c
+    src/stm32wb-hal/stm32wbxx_hal_usart.c
     src/stm32wb-hal/stm32wbxx_hal_wwdg.c
+    src/stm32wb-hal/stm32wbxx_hal.c
     src/stm32wb-hal/stm32wbxx_ll_adc.c
     src/stm32wb-hal/stm32wbxx_ll_comp.c
     src/stm32wb-hal/stm32wbxx_ll_crc.c

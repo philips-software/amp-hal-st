@@ -105,8 +105,8 @@
 /** @defgroup EXTI_Private_Constants EXTI Private Constants
   * @{
   */
-#define EXTI_MODE_OFFSET                    0x04u   /* 0x10: offset between CPU IMR/EMR registers */
-#define EXTI_CONFIG_OFFSET                  0x08u   /* 0x20: offset between CPU Rising/Falling configuration registers */
+#define EXTI_MODE_OFFSET                    0x04u  /* 0x10: offset between CPU IMR/EMR registers */
+#define EXTI_CONFIG_OFFSET                  0x08u  /* 0x20: offset between CPU Rising/Falling configuration registers */
 /**
   * @}
   */
@@ -121,8 +121,8 @@
   */
 
 /** @addtogroup EXTI_Exported_Functions_Group1
- *  @brief    Configuration functions
- *
+  *  @brief    Configuration functions
+  *
 @verbatim
  ===============================================================================
               ##### Configuration functions #####
@@ -235,7 +235,7 @@ HAL_StatusTypeDef HAL_EXTI_SetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigT
 
   /* The event mode cannot be configured if the line does not support it */
   assert_param(((pExtiConfig->Line & EXTI_EVENT) == EXTI_EVENT) || ((pExtiConfig->Mode & EXTI_MODE_EVENT) != EXTI_MODE_EVENT));
-  
+
   /* Configure event mode : read current mode */
   regaddr = (&EXTI->EMR1 + (EXTI_MODE_OFFSET * offset));
   regval = *regaddr;
@@ -280,7 +280,7 @@ HAL_StatusTypeDef HAL_EXTI_GetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigT
   /* Check the parameter */
   assert_param(IS_EXTI_LINE(hexti->Line));
 
-  /* Store handle line number to configiguration structure */
+  /* Store handle line number to configuration structure */
   pExtiConfig->Line = hexti->Line;
 
   /* compute line register offset and line mask */
@@ -344,7 +344,7 @@ HAL_StatusTypeDef HAL_EXTI_GetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigT
       assert_param(IS_EXTI_GPIO_PIN(linepos));
 
       regval = SYSCFG->EXTICR[linepos >> 2u];
-      pExtiConfig->GPIOSel = ((regval << (SYSCFG_EXTICR1_EXTI1_Pos * (3uL - (linepos & 0x03u)))) >> 24);
+      pExtiConfig->GPIOSel = (regval >> (SYSCFG_EXTICR1_EXTI1_Pos * (linepos & 0x03u))) & SYSCFG_EXTICR1_EXTI0;
     }
   }
 
@@ -423,7 +423,8 @@ HAL_StatusTypeDef HAL_EXTI_ClearConfigLine(EXTI_HandleTypeDef *hexti)
   * @param  pPendingCbfn function pointer to be stored as callback.
   * @retval HAL Status.
   */
-HAL_StatusTypeDef HAL_EXTI_RegisterCallback(EXTI_HandleTypeDef *hexti, EXTI_CallbackIDTypeDef CallbackID, void (*pPendingCbfn)(void))
+HAL_StatusTypeDef HAL_EXTI_RegisterCallback(EXTI_HandleTypeDef *hexti, EXTI_CallbackIDTypeDef CallbackID,
+                                            void (*pPendingCbfn)(void))
 {
   HAL_StatusTypeDef status = HAL_OK;
 
@@ -474,8 +475,8 @@ HAL_StatusTypeDef HAL_EXTI_GetHandle(EXTI_HandleTypeDef *hexti, uint32_t ExtiLin
   */
 
 /** @addtogroup EXTI_Exported_Functions_Group2
- *  @brief EXTI IO functions.
- *
+  *  @brief EXTI IO functions.
+  *
 @verbatim
  ===============================================================================
                        ##### IO operation functions #####
@@ -530,6 +531,9 @@ void HAL_EXTI_IRQHandler(EXTI_HandleTypeDef *hexti)
   */
 uint32_t HAL_EXTI_GetPending(EXTI_HandleTypeDef *hexti, uint32_t Edge)
 {
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(Edge);
+
   __IO uint32_t *regaddr;
   uint32_t regval;
   uint32_t linepos;
@@ -539,7 +543,6 @@ uint32_t HAL_EXTI_GetPending(EXTI_HandleTypeDef *hexti, uint32_t Edge)
   /* Check parameters */
   assert_param(IS_EXTI_LINE(hexti->Line));
   assert_param(IS_EXTI_CONFIG_LINE(hexti->Line));
-  assert_param(IS_EXTI_PENDING_EDGE(Edge));
 
   /* compute line register offset and line mask */
   offset = ((hexti->Line & EXTI_REG_MASK) >> EXTI_REG_SHIFT);
@@ -566,6 +569,9 @@ uint32_t HAL_EXTI_GetPending(EXTI_HandleTypeDef *hexti, uint32_t Edge)
   */
 void HAL_EXTI_ClearPending(EXTI_HandleTypeDef *hexti, uint32_t Edge)
 {
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(Edge);
+
   __IO uint32_t *regaddr;
   uint32_t maskline;
   uint32_t offset;
@@ -573,7 +579,6 @@ void HAL_EXTI_ClearPending(EXTI_HandleTypeDef *hexti, uint32_t Edge)
   /* Check parameters */
   assert_param(IS_EXTI_LINE(hexti->Line));
   assert_param(IS_EXTI_CONFIG_LINE(hexti->Line));
-  assert_param(IS_EXTI_PENDING_EDGE(Edge));
 
   /* compute line register offset and line mask */
   offset = ((hexti->Line & EXTI_REG_MASK) >> EXTI_REG_SHIFT);
