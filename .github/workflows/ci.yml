@@ -20,12 +20,6 @@ jobs:
         gcc: [ "10.3-2021.10" ]
         target: ["stm32wb55cg", "stm32f407", "stm32f429", "stm32f746", "stm32f767"]
         include:
-          - gcc: "5-2016-q3"
-            configuration: "RelWithDebInfo"
-            target: "stm32f767"
-          - gcc: "6-2017-q2"
-            configuration: "RelWithDebInfo"
-            target: "stm32f767"
           - gcc: "7-2018-q2"
             configuration: "RelWithDebInfo"
             target: "stm32f767"

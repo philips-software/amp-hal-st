@@ -104,7 +104,7 @@ namespace hal
             transferDataComplete = actionOnCompletion;
             transmitDmaChannel.StartTransmit(data);
         }
-        else 
+        else
             infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
     }
 
