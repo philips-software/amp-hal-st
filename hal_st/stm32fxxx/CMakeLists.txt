@@ -34,8 +34,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DmaStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DmaStm.hpp>
+    DmaStm.cpp
+    DmaStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetSmiStm.cpp>
@@ -72,12 +72,14 @@ target_sources(hal_st.stm32fxxx PRIVATE
     UartStm.hpp
     UartStmDma.cpp
     UartStmDma.hpp
+    UartStmDuplexDma.cpp
+    UartStmDuplexDma.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.hpp>
     UniqueDeviceId.cpp
     UniqueDeviceId.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:WatchDogStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:WatchDogStm.hpp>
+    WatchDogStm.cpp
+    WatchDogStm.hpp
 )
 
 if ("${TARGET_MCU_VENDOR}" STREQUAL st)

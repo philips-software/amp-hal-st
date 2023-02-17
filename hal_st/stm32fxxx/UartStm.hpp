@@ -29,8 +29,10 @@ namespace hal
         };
         
         UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
 #if defined(STM32WB)
         UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
 #endif
         ~UartStm();
 
@@ -45,8 +47,11 @@ namespace hal
 
     private:
         uint8_t uartIndex;
-        infra::Optional<hal::PeripheralPinStm> uartTx;
-        infra::Optional<hal::PeripheralPinStm> uartRx;
+        hal::PeripheralPinStm uartTx;
+        hal::PeripheralPinStm uartRx;
+        infra::Optional<hal::PeripheralPinStm> uartRts;
+        infra::Optional<hal::PeripheralPinStm> uartCts;
+
 
         UART_HandleTypeDef uartHandle = {};
 

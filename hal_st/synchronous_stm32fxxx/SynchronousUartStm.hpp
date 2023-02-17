@@ -10,6 +10,10 @@
 
 namespace hal
 {
+#if defined(STM32WB)
+    struct SyncLpUart {};
+    extern const SyncLpUart syncLpUart;
+#endif
     class SynchronousUartStm
         : public SynchronousSerialCommunication
         , private InterruptHandler
@@ -29,6 +33,7 @@ namespace hal
         SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, TimeKeeper& timeKeeper, uint32_t baudrate = 115200);
         SynchronousUartStm(infra::ByteRange readBuffer, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, TimeKeeper& timeKeeper,
             HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
+
         ~SynchronousUartStm();
 
         void SendData(infra::ConstByteRange data) override;
@@ -67,13 +72,19 @@ namespace hal
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, uint32_t baudrate = 115200);
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
             HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
+#if defined(STM32WB)
+        SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate = 115200);
+        SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
+#endif
         ~SynchronousUartStmSendOnly();
 
         void SendData(infra::ConstByteRange data) override;
         bool ReceiveData(infra::ByteRange data) override;
 
     private:
-        uint8_t uartIndex;
+        void UartStmHalInit(HwFlowControl flowControl, uint32_t baudrate);
+
+        USART_TypeDef* const uartBase;
         PeripheralPinStm uartTx;
         infra::Optional<PeripheralPinStm> uartRts;
     };

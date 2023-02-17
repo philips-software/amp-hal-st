@@ -7,10 +7,10 @@ namespace hal
 {
     UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, const Config& config)
         : uartIndex(aUartIndex - 1)
+        , uartTx(uartTxPin, PinConfigTypeStm::uartTx, aUartIndex)
+        , uartRx(uartRxPin, PinConfigTypeStm::uartRx, aUartIndex)
         , uartHandle()
     {
-        uartTx.Emplace(uartTxPin, PinConfigTypeStm::uartTx, aUartIndex);
-        uartRx.Emplace(uartRxPin, PinConfigTypeStm::uartRx, aUartIndex);
         uartArray = peripheralUart;
         uartIrqArray = peripheralUartIrq;
         RegisterInterrupt(config);
@@ -18,18 +18,32 @@ namespace hal
         UartStmHalInit(config);
     }
 
+    UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config)
+        : UartStm(aUartIndex, uartTxPin, uartRxPin, config)
+    {
+        uartRts.Emplace(uartRtsPin, PinConfigTypeStm::uartRts, aUartIndex);
+        uartCts.Emplace(uartCtsPin, PinConfigTypeStm::uartCts, aUartIndex);
+    }
+
 #if defined(STM32WB)
     UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config)
     : uartIndex(aUartIndex - 1)
+    , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, aUartIndex)
+    , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, aUartIndex)
     , uartHandle()
     {
-        uartTx.Emplace(uartTxPin, PinConfigTypeStm::lpuartTx, aUartIndex);
-        uartRx.Emplace(uartRxPin, PinConfigTypeStm::lpuartRx, aUartIndex);
         uartArray = peripheralLpuart;
         uartIrqArray = peripheralLpuartIrq;
         RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config);
+    }
+
+    UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config)
+    : UartStm(aUartIndex, uartTxPin, uartRxPin, lpUart, config)
+    {
+        uartRts.Emplace(uartRtsPin, PinConfigTypeStm::lpuartRts, aUartIndex);
+        uartCts.Emplace(uartCtsPin, PinConfigTypeStm::lpuartCts, aUartIndex);
     }
 #endif
 
