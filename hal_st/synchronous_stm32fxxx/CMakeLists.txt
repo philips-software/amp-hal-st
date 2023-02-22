@@ -16,8 +16,8 @@ target_sources(hal_st.synchronous_stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousGpioStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousFlashInternalStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousFlashInternalStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousRandomDataGeneratorStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousRandomDataGeneratorStm.hpp>
+    SynchronousRandomDataGeneratorStm.cpp
+    SynchronousRandomDataGeneratorStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousSpiMasterStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SynchronousSpiMasterStm.hpp>
     SynchronousUartStm.cpp
