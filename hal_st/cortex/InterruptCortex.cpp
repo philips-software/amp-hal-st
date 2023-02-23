@@ -6,6 +6,8 @@ namespace hal
 {
     namespace
     {
+        constexpr auto invalidIrq = static_cast<IRQn_Type>(0xffff);
+
         void EnableInterrupt(IRQn_Type irq, InterruptPriority priority)
         {
             if (irq >= 0)
@@ -58,7 +60,7 @@ namespace hal
         : irq(other.irq)
     {
         InterruptTable::Instance().TakeOverHandler(irq, *this, other);
-        other.irq = static_cast<IRQn_Type>(0xffff);
+        other.irq = invalidIrq;
     }
 
     InterruptHandler& InterruptHandler::operator=(InterruptHandler&& other)
@@ -67,14 +69,14 @@ namespace hal
         irq = other.irq;
 
         InterruptTable::Instance().TakeOverHandler(irq, *this, other);
-        other.irq = static_cast<IRQn_Type>(0xffff);
+        other.irq = invalidIrq;
 
         return *this;
     }
 
     InterruptHandler::~InterruptHandler()
     {
-        if (irq != static_cast<IRQn_Type>(0xffff))
+        if (irq != invalidIrq)
             InterruptTable::Instance().DeregisterHandler(irq, *this);
     }
 
@@ -87,7 +89,7 @@ namespace hal
     void InterruptHandler::Unregister()
     {
         InterruptTable::Instance().DeregisterHandler(irq, *this);
-        this->irq = static_cast<IRQn_Type>(0xffff);
+        irq = invalidIrq;
     }
 
     IRQn_Type InterruptHandler::Irq() const
