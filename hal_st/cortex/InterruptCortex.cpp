@@ -83,7 +83,7 @@ namespace hal
     void InterruptHandler::Register(IRQn_Type irq, InterruptPriority priority)
     {
         this->irq = irq;
-        InterruptTable::Instance().RegisterHandler(irq, *this, priority);
+        InterruptTable::Instance().RegisterHandler(this->irq, *this, priority);
     }
 
     void InterruptHandler::Unregister()
