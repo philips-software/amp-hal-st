@@ -72,8 +72,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     UartStm.hpp
     UartStmDma.cpp
     UartStmDma.hpp
-    UartStmDuplexDma.cpp
-    UartStmDuplexDma.hpp
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.cpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.hpp>
     UniqueDeviceId.cpp
