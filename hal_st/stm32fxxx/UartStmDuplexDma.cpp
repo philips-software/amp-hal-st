@@ -84,6 +84,7 @@ namespace hal
 
     UartStmDuplexDma::~UartStmDuplexDma()
     {
+        receiveDmaChannel.StopTransfer();
         peripheralUart[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
         DisableClockUart(uartIndex);
     }
