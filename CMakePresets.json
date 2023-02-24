@@ -13,7 +13,8 @@
       "generator": "Ninja Multi-Config",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "HALST_BUILD_EXAMPLES": true
+        "HALST_BUILD_EXAMPLES": true,
+        "HALST_BUILD_EXAMPLES_FREERTOS": true
       }
     },
     {

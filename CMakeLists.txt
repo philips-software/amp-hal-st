@@ -4,7 +4,15 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(HALST_STANDALONE On)
 endif()
 
+option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
+option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
+option(HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS "Include default memory-layout and sections linker scripts; turn off when providing custom linker scripts" ON)
+option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
+option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
+
 if (HALST_STANDALONE)
+    set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})
+
     include(FetchContent)
 
     FetchContent_Declare(
@@ -20,11 +28,6 @@ project(hal_st LANGUAGES C CXX VERSION 1.0.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
-
-option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
-option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
-option(HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS "Include default memory-layout and sections linker scripts; turn off when providing custom linker scripts" ON)
-option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
 
