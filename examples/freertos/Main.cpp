@@ -2,6 +2,7 @@
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "osal/Osal.hpp"
+#include "osal/freertos/LowPowerStrategyFreeRtos.hpp"
 #include "osal/freertos_system_time/TimerServiceFreeRtos.hpp"
 #include "services/util/DebugLed.hpp"
 #include <chrono>
@@ -30,7 +31,8 @@ int main()
     static hal::InterruptTable::WithStorage<128> interruptTable;
     static hal::GpioStm gpio{ hal::pinoutTableDefaultStm, hal::analogTableDefaultStm };
     static hal::TimerServiceFreeRtos timerService;
-    static infra::EventDispatcherWithWeakPtr::WithSize<50> eventDispatcher;
+    static hal::LowPowerStrategyFreeRtos lowPowerStrategy;
+    static infra::LowPowerEventDispatcher::WithSize<50> eventDispatcher(lowPowerStrategy);
 
     osal::Init();
 

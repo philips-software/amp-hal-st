@@ -13,8 +13,7 @@
       "generator": "Ninja Multi-Config",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "HALST_BUILD_EXAMPLES": true,
-        "HALST_BUILD_EXAMPLES_FREERTOS": true
+        "HALST_BUILD_EXAMPLES": true
       }
     },
     {
@@ -94,7 +93,9 @@
       "cacheVariables": {
         "TARGET_CORTEX": "m7",
         "TARGET_MCU_FAMILY": "stm32f7xx",
-        "TARGET_MCU": "stm32f767"
+        "TARGET_MCU": "stm32f767",
+        "HALST_BUILD_EXAMPLES_FREERTOS": true,
+        "FREERTOS_CONFIG_FILE_DIRECTORY": "${sourceDir}/examples/freertos/config"
       }
     }
   ],
