@@ -17,6 +17,14 @@ infra::Optional<hal::OutputPin> pinGreen;
 
 using namespace std::chrono_literals;
 
+void xPortPendSVHandler();
+void xPortSysTickHandler();
+void vPortSVCHandler();
+
+extern "C" [[gnu::naked]] void SVC_Handler() { asm("b vPortSVCHandler"); }
+extern "C" [[gnu::naked]] void PendSV_Handler() { asm("b xPortPendSVHandler"); }
+extern "C" [[gnu::naked]] void SysTick_Handler() { asm("b xPortSysTickHandler"); };
+
 int main()
 {
     static hal::InterruptTable::WithStorage<128> interruptTable;
@@ -34,9 +42,9 @@ int main()
 
             while (true)
             {
-                // std::this_thread::sleep_for(800s);
+                std::this_thread::sleep_for(700ms);
                 pin.Set(true);
-                // std::this_thread::sleep_for(200ms);
+                std::this_thread::sleep_for(200ms);
                 pin.Set(false);
             }
         });
