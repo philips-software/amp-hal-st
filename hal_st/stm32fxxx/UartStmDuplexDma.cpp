@@ -30,14 +30,14 @@ namespace hal
     }};
 
     const std::array<DmaChannelId, 8> defaultRxDmaChannelId = {{
-        DmaChannelId{ 2, 7, 4 },
-        DmaChannelId{ 1, 6, 4 },
-        DmaChannelId{ 1, 3, 4 },
-        DmaChannelId{ 1, 4, 4 },
-        DmaChannelId{ 1, 7, 4 },
-        DmaChannelId{ 2, 6, 5 },
-        DmaChannelId{ 1, 1, 5 },
-        DmaChannelId{ 1, 0, 5 }
+        DmaChannelId{ 2, 2, 4 },
+        DmaChannelId{ 1, 5, 4 },
+        DmaChannelId{ 1, 1, 4 },
+        DmaChannelId{ 1, 2, 4 },
+        DmaChannelId{ 1, 0, 4 },
+        DmaChannelId{ 2, 7, 5 },
+        DmaChannelId{ 1, 3, 5 },
+        DmaChannelId{ 1, 6, 5 }
     }};
 #endif
 
