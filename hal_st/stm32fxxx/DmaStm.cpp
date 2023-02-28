@@ -173,8 +173,10 @@ namespace hal
     {
         auto streamRegister = dmaStream[dmaIndex][streamIndex];
         bool finished = Finished();
+        DisableHalfTransferCompleteInterrupt();
+        DisableTransferCompleteInterrupt();
         Disable();
-        *dmaIFCR[dmaIndex][streamIndex] |= streamToTCIF[streamIndex];
+        *dmaIFCR[dmaIndex][streamIndex] |= streamToTCIF[streamIndex] | streamToHTIF[streamIndex];
         return !finished;
     }
 
