@@ -19,6 +19,19 @@ namespace main_
         tracer.Trace() << "----------------------------------------------------------";
     }
 
+#if defined(STM32WB)
+    StmTracerInfrastructure::StmTracerInfrastructure(const Configuration& configuration, hal::SyncLpUart syncLpUart, bool loggingEnabled)
+        : traceUart(configuration.index, configuration.tx, syncLpUart)
+        , traceWriter(traceUart)
+        , alwaysEnabledTracerOutputStream(traceWriter)
+        , tracerOutputStream(GetStreamWriter(loggingEnabled), infra::noFail)
+        , alwaysEnabledTracer(alwaysEnabledTracerOutputStream)
+        , tracer(tracerOutputStream)
+    {
+        tracer.Trace() << "----------------------------------------------------------";
+    }
+#endif
+
     infra::StreamWriter& StmTracerInfrastructure::GetStreamWriter(bool loggingEnabled)
     {
         if (loggingEnabled)

@@ -21,6 +21,7 @@ namespace hal
         };
 
         SynchronousSpiMasterStm(uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
+        ~SynchronousSpiMasterStm();
 
         // Implementation of SynchronousSpi
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, Action nextAction) override;
@@ -35,6 +36,7 @@ namespace hal
         PeripheralPinStm mosi;
         PeripheralPinStm slaveSelect;
 
+        SPI_HandleTypeDef spiHandle;
         infra::ConstByteRange sendData;
         infra::ByteRange receiveData;
         bool sending;

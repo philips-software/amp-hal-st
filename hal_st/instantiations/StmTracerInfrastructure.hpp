@@ -33,7 +33,9 @@ namespace main_
         };
 
         StmTracerInfrastructure(const Configuration& configuration, bool loggingEnabled = true);
-
+#if defined(STM32WB)
+        StmTracerInfrastructure(const Configuration& configuration, hal::SyncLpUart syncLpUart, bool loggingEnabled = true);
+#endif
         infra::StreamWriter& GetStreamWriter(bool loggingEnabled);
 
         TimeKeeperStub timeKeeper;

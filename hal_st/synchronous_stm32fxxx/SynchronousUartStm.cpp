@@ -146,18 +146,76 @@ namespace hal
 
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
         HwFlowControl flowControl, uint32_t baudrate)
-        : uartIndex(aUartIndex - 1)
+        : uartBase(peripheralUart[aUartIndex - 1])
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
     {
-        if (flowControl != HwFlowControl::hwControlDisable)
-        {
-            this->uartRts.Emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
-        }
-        EnableClockUart(uartIndex);
+        EnableClockUart(aUartIndex - 1);
 
+        if (flowControl != HwFlowControl::hwControlDisable)
+            this->uartRts.Emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
+
+        UartStmHalInit(flowControl, baudrate);
+    }
+
+#if defined(STM32WB)
+    SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate)
+        : SynchronousUartStmSendOnly(aUartIndex, uartTx, uartTx, lpUart, HwFlowControl::hwControlDisable, baudrate)
+    { }
+
+    SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl, uint32_t baudrate)
+        : uartBase(peripheralLpuart[aUartIndex - 1])
+        , uartTx(uartTx, PinConfigTypeStm::lpuartTx, aUartIndex)
+    {
+        EnableClockLpuart(aUartIndex - 1);
+
+        if (flowControl != HwFlowControl::hwControlDisable)
+            this->uartRts.Emplace(uartRts, PinConfigTypeStm::lpuartRts, aUartIndex);
+
+        UartStmHalInit(flowControl, baudrate);
+    }
+#endif
+
+    SynchronousUartStmSendOnly::~SynchronousUartStmSendOnly()
+    {
+        uartBase->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+    }
+
+    void SynchronousUartStmSendOnly::SendData(infra::ConstByteRange data)
+    {
+        for (uint8_t byte : data)
+        {
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+            while ((uartBase->ISR & USART_ISR_TXE) == 0)
+            {}
+
+            uartBase->TDR = byte;
+#else
+            while ((uartBase->SR & USART_SR_TXE) == 0)
+            {}
+
+            uartBase->DR = byte;
+#endif
+        }
+
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+        while ((uartBase->ISR & USART_ISR_TXE) == 0)
+        {}
+#else
+        while ((uartBase->SR & USART_SR_TXE) == 0)
+        {}
+#endif
+    }
+
+    bool SynchronousUartStmSendOnly::ReceiveData(infra::ByteRange data)
+    {
+        return false;
+    }
+
+    void SynchronousUartStmSendOnly::UartStmHalInit(HwFlowControl flowControl, uint32_t baudrate)
+    {
         UART_HandleTypeDef uartHandle = {};
 
-        uartHandle.Instance = peripheralUart[uartIndex];
+        uartHandle.Instance = uartBase;
         uartHandle.Init.BaudRate = baudrate;
         uartHandle.Init.WordLength = USART_WORDLENGTH_8B;
         uartHandle.Init.StopBits = USART_STOPBITS_1;
@@ -172,48 +230,12 @@ namespace hal
 #endif
         HAL_UART_Init(&uartHandle);
 
-        peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
+        uartBase->CR2 &= ~USART_CLOCK_ENABLED;
 
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-        peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
+        uartBase->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
 #else
-        peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
+        uartBase->CR1 |= USART_IT_RXNE & USART_IT_MASK;
 #endif
-    }
-
-    SynchronousUartStmSendOnly::~SynchronousUartStmSendOnly()
-    {
-        peripheralUart[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-    }
-
-    void SynchronousUartStmSendOnly::SendData(infra::ConstByteRange data)
-    {
-        for (uint8_t byte : data)
-        {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-            while ((peripheralUart[uartIndex]->ISR & USART_ISR_TXE) == 0)
-            {}
-
-            peripheralUart[uartIndex]->TDR = byte;
-#else
-            while ((peripheralUart[uartIndex]->SR & USART_SR_TXE) == 0)
-            {}
-
-            peripheralUart[uartIndex]->DR = byte;
-#endif
-        }
-
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-        while ((peripheralUart[uartIndex]->ISR & USART_ISR_TXE) == 0)
-        {}
-#else
-        while ((peripheralUart[uartIndex]->SR & USART_SR_TXE) == 0)
-        {}
-#endif
-    }
-
-    bool SynchronousUartStmSendOnly::ReceiveData(infra::ByteRange data)
-    {
-        return false;
     }
 }

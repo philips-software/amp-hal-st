@@ -34,8 +34,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DmaStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DmaStm.hpp>
+    DmaStm.cpp
+    DmaStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetSmiStm.cpp>
@@ -52,8 +52,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:ResetStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:ResetStm.hpp>
+    ResetStm.cpp
+    ResetStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.hpp>
     SpiDataSizeConfiguratorStm.cpp
@@ -72,12 +72,14 @@ target_sources(hal_st.stm32fxxx PRIVATE
     UartStm.hpp
     UartStmDma.cpp
     UartStmDma.hpp
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.cpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.hpp>
     UniqueDeviceId.cpp
     UniqueDeviceId.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:WatchDogStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:WatchDogStm.hpp>
+    WatchDogStm.cpp
+    WatchDogStm.hpp
 )
 
 if ("${TARGET_MCU_VENDOR}" STREQUAL st)
