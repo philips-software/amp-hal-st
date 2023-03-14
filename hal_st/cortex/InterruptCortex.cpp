@@ -65,7 +65,9 @@ namespace hal
 
     InterruptHandler& InterruptHandler::operator=(InterruptHandler&& other)
     {
-        InterruptTable::Instance().DeregisterHandler(irq, *this);
+        if (irq != invalidIrq)
+            InterruptTable::Instance().DeregisterHandler(irq, *this);
+
         irq = other.irq;
 
         InterruptTable::Instance().TakeOverHandler(irq, *this, other);
