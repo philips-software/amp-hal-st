@@ -18,7 +18,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
-        GIT_TAG        feature/add-osal
+        GIT_TAG        modern-cmake
     )
 
     FetchContent_MakeAvailable(emil)
