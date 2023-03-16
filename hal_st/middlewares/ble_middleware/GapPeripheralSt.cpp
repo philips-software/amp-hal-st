@@ -3,9 +3,9 @@
 
 namespace
 {
-    uint8_t ConvertAdvertisementType(services::GapPeripheral::AdvertisementType type)
+    uint8_t ConvertAdvertisementType(services::GapAdvertisementType type)
     {
-        return type == services::GapPeripheral::AdvertisementType::advInd ? ADV_IND : ADV_NONCONN_IND;
+        return type == services::GapAdvertisementType::advInd ? ADV_IND : ADV_NONCONN_IND;
     }
 }
 
@@ -82,18 +82,53 @@ namespace hal
         (*bondStorageSynchronizer)->RemoveAllBonds();
     }
 
+    void GapPeripheralSt::RemoveOldestBond()
+    {
+        std::abort();
+    }
+
+    size_t GapPeripheralSt::GetMaxNumberOfBonds() const
+    {
+        if (bondStorageSynchronizer)
+            return (*bondStorageSynchronizer)->GetMaxNumberOfBonds();
+
+        return 0;
+    }
+
+    size_t GapPeripheralSt::GetNumberOfBonds() const
+    {
+        uint8_t numberOfBondedAddress = 0;
+        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
+        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
+
+        return numberOfBondedAddress;
+    }
+
     void GapPeripheralSt::SetPublicAddress(const hal::MacAddress& address)
     {
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
     }
 
-    hal::MacAddress GapPeripheralSt::GetResolvableAddress() const
+    services::GapAddress GapPeripheralSt::GetAddress() const
     {
-        hal::MacAddress address;
+        services::GapAddress address;
         /* Use last peer addres to get current RPA */
-        [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.data());
+        [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.address.data());
+
+        address.type = services::GapAddressType::publicAddress;
 
         assert(status == BLE_STATUS_SUCCESS);
+
+        return address;
+    }
+
+    services::GapAddress GapPeripheralSt::GetIdentityAddress() const
+    {
+        services::GapAddress address;
+        uint8_t length = 0;
+
+        aci_hal_read_config_data(CONFIG_DATA_PUBADDR_OFFSET, &length, address.address.data());
+        address.type = services::GapAddressType::publicAddress;
 
         return address;
     }
@@ -122,7 +157,7 @@ namespace hal
     void GapPeripheralSt::UpdateState(services::GapPeripheralState newState)
     {
         state = newState;
-        infra::EventDispatcher::Instance().Schedule([this]() { GapPeripheral::NotifyObservers([this](auto& obs) { obs.StateUpdated(state); }); });
+        infra::EventDispatcher::Instance().Schedule([this]() { GapPeripheral::NotifyObservers([this](auto& obs) { obs.StateChanged(state); }); });
     }
 
     void GapPeripheralSt::RequestConnectionParameterUpdate()
@@ -130,7 +165,7 @@ namespace hal
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle, minConnectionInterval, maxConnectionInterval, slaveLatency, supervisionTimeout);
     }
 
-    void GapPeripheralSt::Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier)
+    void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
@@ -147,7 +182,7 @@ namespace hal
         UpdateAdvertisementData();
 
         if (ret == BLE_STATUS_SUCCESS)
-            UpdateState(services::GapPeripheralState::Advertising);
+            UpdateState(services::GapPeripheralState::advertising);
     }
 
     void GapPeripheralSt::Standby()
@@ -157,13 +192,54 @@ namespace hal
         else
         {
             aci_gap_set_non_discoverable();
-            UpdateState(services::GapPeripheralState::Standby);
+            UpdateState(services::GapPeripheralState::standby);
         }
     }
 
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
+    }
+
+    void GapPeripheralSt::SetSecurityMode(services::GapSecurityMode mode, services::GapSecurityLevel level)
+    {
+        // Not supported
+    }
+
+    void GapPeripheralSt::SetIoCapabilities(services::GapIoCapabilities caps)
+    {
+        tBleStatus status = BLE_STATUS_FAILED;
+
+        switch (caps)
+        {
+            case services::GapIoCapabilities::display:
+                status = aci_gap_set_io_capability(0);
+                break;
+            case services::GapIoCapabilities::displayYesNo:
+                status = aci_gap_set_io_capability(1);
+                break;
+            case services::GapIoCapabilities::keyboard:
+                status = aci_gap_set_io_capability(2);
+                break;
+            case services::GapIoCapabilities::none:
+                status = aci_gap_set_io_capability(3);
+                break;
+            case services::GapIoCapabilities::keyboardDisplay:
+                status = aci_gap_set_io_capability(4);
+                break;
+        }
+
+        assert(status == BLE_STATUS_SUCCESS);
+    }
+
+    void GapPeripheralSt::AuthenticateWithPasskey(uint32_t passkey)
+    {
+        std::abort();
+    }
+
+    void GapPeripheralSt::NumericComparisonConfirm(bool accept)
+    {
+        std::abort();
     }
 
     void GapPeripheralSt::HciEvent(hci_event_pckt& event)
@@ -197,7 +273,7 @@ namespace hal
         if (disconnectEvt->Connection_Handle == connectionContext.connectionHandle)
         {
             connectionContext.connectionHandle = 0;
-            UpdateState(services::GapPeripheralState::Standby);
+            UpdateState(services::GapPeripheralState::standby);
         }
     }
 
@@ -245,7 +321,7 @@ namespace hal
         std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
 
         maxAttMtu = defaultMaxAttMtuSize;
-        UpdateState(services::GapPeripheralState::Connected);
+        UpdateState(services::GapPeripheralState::connected);
     }
 
     void GapPeripheralSt::HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent)

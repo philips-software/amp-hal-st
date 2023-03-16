@@ -39,17 +39,25 @@ namespace hal
         GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
-        virtual hal::MacAddress GetResolvableAddress() const override;
+        virtual services::GapAddress GetAddress() const override;
+        virtual services::GapAddress GetIdentityAddress() const override;
         virtual void SetAdvertisementData(infra::ConstByteRange data) override;
         virtual void SetScanResponseData(infra::ConstByteRange data) override;
-        virtual void Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
+        virtual void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         virtual void Standby() override;
 
         // Implementation of GapPeripheralBonding
-        virtual void RemoveAllBonds();
+        virtual void RemoveAllBonds() override;
+        virtual void RemoveOldestBond() override;
+        virtual size_t GetMaxNumberOfBonds() const override;
+        virtual size_t GetNumberOfBonds() const override;
 
         // Implementation of GapPeripheralPairing
         virtual void AllowPairing(bool allow) override;
+        virtual void SetSecurityMode(services::GapSecurityMode mode, services::GapSecurityLevel level) override;
+        virtual void SetIoCapabilities(services::GapIoCapabilities caps) override;
+        virtual void AuthenticateWithPasskey(uint32_t passkey) override;
+        virtual void NumericComparisonConfirm(bool accept) override;
 
         // Implementation of HciEventSink
         virtual void HciEvent(hci_event_pckt& event);
@@ -95,7 +103,7 @@ namespace hal
 
     private:
         infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
-        services::GapPeripheralState state = services::GapPeripheralState::Standby;
+        services::GapPeripheralState state = services::GapPeripheralState::standby;
         bool allowPairing = true;
 
         ConnectionContext connectionContext;
