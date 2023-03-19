@@ -13,7 +13,6 @@ namespace hal
     {
         EnableClockSpi(spiInstance);
 
-        SPI_HandleTypeDef spiHandle;
         spiHandle.Instance = peripheralSpi[spiInstance];
         spiHandle.Init.Mode = SPI_MODE_MASTER;
         spiHandle.Init.Direction = SPI_DIRECTION_2LINES;
@@ -26,7 +25,7 @@ namespace hal
         spiHandle.Init.TIMode = SPI_TIMODE_DISABLED;
         spiHandle.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
         spiHandle.Init.CRCPolynomial = 1;
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
         spiHandle.Init.CRCLength = SPI_CRC_LENGTH_8BIT;
         spiHandle.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
 #endif
@@ -37,6 +36,13 @@ namespace hal
 #endif
 
         __HAL_SPI_ENABLE(&spiHandle);
+    }
+
+    SynchronousSpiMasterStm::~SynchronousSpiMasterStm()
+    {
+        __HAL_SPI_DISABLE(&spiHandle);
+        HAL_SPI_DeInit(&spiHandle);
+        DisableClockSpi(spiInstance);
     }
 
     void SynchronousSpiMasterStm::SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, Action nextAction)

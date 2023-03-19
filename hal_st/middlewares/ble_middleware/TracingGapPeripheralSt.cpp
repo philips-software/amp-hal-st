@@ -10,7 +10,8 @@ namespace hal
     void TracingGapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
         const auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
-        tracer.Trace() << "GapPeripheralSt::HandleHciDisconnectEvent handle = " << disconnectEvt->Connection_Handle;
+        tracer.Trace() << "GapPeripheralSt::HandleHciDisconnectEvent Handle = " << disconnectEvt->Connection_Handle;
+        tracer.Continue() << " : Reason = " << disconnectEvt->Reason;
         GapPeripheralSt::HandleHciDisconnectEvent(eventPacket);
     }
 

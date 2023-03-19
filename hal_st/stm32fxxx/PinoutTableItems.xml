@@ -18,6 +18,20 @@
       <input name="UART:_CTS"/>
     </pin>
   </peripheral>
+  <peripheral name="Lpuart">
+    <pin name="Rx">
+      <input name="LPUART:_RX"/>
+    </pin>
+    <pin name="Tx">
+      <input name="LPUART:_TX"/>
+    </pin>
+	<pin name="Rts">
+      <input name="LPUART:_RTS"/>
+    </pin>
+    <pin name="Cts">
+      <input name="LPUART:_CTS"/>
+    </pin>
+  </peripheral>
   <peripheral name="Spi">
     <pin name="Clock"><input name="SPI:_SCK"/></pin>
     <pin name="Miso"><input name="SPI:_MISO"/></pin>

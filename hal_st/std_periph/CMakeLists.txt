@@ -18,7 +18,7 @@ target_link_libraries(hal_st.std_periph INTERFACE
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f4xx>:hal_st.std_periph_stm32f4xx>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>:hal_st.std_periph_stm32f7xx>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:hal_st.std_periph_stm32wbxx>
-    $<$<IN_LIST:${TARGET_MCU_FAMILY},stm32f0xx;stm32f2xx;stm32f3xx;stm32f4xx;stm32f7xx;stm32wbxx>:$<TARGET_OBJECTS:hal_st.startup>>
+    $<TARGET_OBJECTS:hal_st.startup>
     $<$<BOOL:${EMIL_HOST_BUILD}>:hal_st.cmsis_windows_stub>
 )
 
