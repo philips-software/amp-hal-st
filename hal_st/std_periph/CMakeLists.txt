@@ -12,7 +12,7 @@ install(TARGETS hal_st.std_periph EXPORT halStTargets)
 
 if("${TARGET_MCU_FAMILY}" STREQUAL stm32f0xx)
     target_link_libraries(hal_st.std_periph INTERFACE hal_st.atomic)
-    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32wbxx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32f0xx)
 elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32f2xx)
     target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32f2xx)
 elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32f3xx)
