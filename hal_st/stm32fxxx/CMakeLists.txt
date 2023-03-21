@@ -60,6 +60,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SpiDataSizeConfiguratorStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SingleSpeedQuadSpiStmDma.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SingleSpeedQuadSpiStmDma.hpp>
+    SpiMasterStm.cpp
+    SpiMasterStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiMasterStmDma.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiMasterStmDma.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiSlaveStmDma.cpp>
