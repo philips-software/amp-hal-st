@@ -89,7 +89,7 @@
       "displayName": "stm32f767",
       "description": "Build for stm32f767",
       "inherits": "stm32",
-      "toolchainFile": "${binaryDir}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m7",
         "TARGET_MCU_FAMILY": "stm32f7xx",
