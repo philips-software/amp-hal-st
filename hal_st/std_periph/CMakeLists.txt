@@ -10,16 +10,25 @@ add_subdirectory(atomic)
 add_library(hal_st.std_periph ${HALST_EXCLUDE_FROM_ALL} INTERFACE)
 install(TARGETS hal_st.std_periph EXPORT halStTargets)
 
+if("${TARGET_MCU_FAMILY}" STREQUAL stm32f0xx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.atomic)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32wbxx)
+elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32f2xx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32f2xx)
+elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32f3xx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32f3xx)
+elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32f4xx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32f4xx)
+elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32f7xx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32f7xx)
+elseif("${TARGET_MCU_FAMILY}" STREQUAL stm32wbxx)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.std_periph_stm32wbxx)
+elseif(EMIL_HOST_BUILD)
+    target_link_libraries(hal_st.std_periph INTERFACE hal_st.cmsis_windows_stub)
+endif()
+
 target_link_libraries(hal_st.std_periph INTERFACE
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f0xx>:hal_st.atomic>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f0xx>:hal_st.std_periph_stm32f0xx>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f2xx>:hal_st.std_periph_stm32f2xx>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f3xx>:hal_st.std_periph_stm32f3xx>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f4xx>:hal_st.std_periph_stm32f4xx>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>:hal_st.std_periph_stm32f7xx>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:hal_st.std_periph_stm32wbxx>
-    $<$<IN_LIST:${TARGET_MCU_FAMILY},stm32f0xx;stm32f2xx;stm32f3xx;stm32f4xx;stm32f7xx;stm32wbxx>:$<TARGET_OBJECTS:hal_st.startup>>
-    $<$<BOOL:${EMIL_HOST_BUILD}>:hal_st.cmsis_windows_stub>
+    $<TARGET_OBJECTS:hal_st.startup>
 )
 
 add_library(hal_st.default_linker_scripts INTERFACE)
