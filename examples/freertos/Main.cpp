@@ -13,14 +13,11 @@ extern "C" void Default_Handler()
     hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
 }
 
-main_::NucleoF767ziUi ui;
-infra::Optional<hal::OutputPin> pinGreen;
-
 using namespace std::chrono_literals;
 
-void xPortPendSVHandler();
-void xPortSysTickHandler();
-void vPortSVCHandler();
+extern "C" void xPortPendSVHandler();
+extern "C" void xPortSysTickHandler();
+extern "C" void vPortSVCHandler();
 
 extern "C" [[gnu::naked]] void SVC_Handler() { asm("b vPortSVCHandler"); }
 extern "C" [[gnu::naked]] void PendSV_Handler() { asm("b xPortPendSVHandler"); }
@@ -36,7 +33,8 @@ int main()
 
     osal::Init();
 
-    pinGreen.Emplace(ui.ledGreen);
+    static main_::NucleoF767ziUi ui;
+    static hal::OutputPin pinGreen{ ui.ledGreen };
 
     static std::thread t1([]()
         {
