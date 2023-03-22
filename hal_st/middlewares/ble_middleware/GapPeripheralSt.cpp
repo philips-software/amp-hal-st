@@ -115,7 +115,7 @@ namespace hal
         /* Use last peer addres to get current RPA */
         [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.address.data());
 
-        address.type = services::GapAddressType::publicAddress;
+        address.type = services::GapDeviceAddressType::publicAddress;
 
         assert(status == BLE_STATUS_SUCCESS);
 
@@ -128,7 +128,7 @@ namespace hal
         uint8_t length = 0;
 
         aci_hal_read_config_data(CONFIG_DATA_PUBADDR_OFFSET, &length, address.address.data());
-        address.type = services::GapAddressType::publicAddress;
+        address.type = services::GapDeviceAddressType::publicAddress;
 
         return address;
     }
@@ -154,7 +154,7 @@ namespace hal
         hci_le_set_scan_response_data(scanResponseData.size(), scanResponseData.begin());
     }
 
-    void GapPeripheralSt::UpdateState(services::GapPeripheralState newState)
+    void GapPeripheralSt::UpdateState(services::GapState newState)
     {
         state = newState;
         infra::EventDispatcher::Instance().Schedule([this]() { GapPeripheral::NotifyObservers([this](auto& obs) { obs.StateChanged(state); }); });
@@ -182,7 +182,7 @@ namespace hal
         UpdateAdvertisementData();
 
         if (ret == BLE_STATUS_SUCCESS)
-            UpdateState(services::GapPeripheralState::advertising);
+            UpdateState(services::GapState::advertising);
     }
 
     void GapPeripheralSt::Standby()
@@ -192,7 +192,7 @@ namespace hal
         else
         {
             aci_gap_set_non_discoverable();
-            UpdateState(services::GapPeripheralState::standby);
+            UpdateState(services::GapState::standby);
         }
     }
 
@@ -259,7 +259,7 @@ namespace hal
             HandleHciUnknownEvent(event);
             break;
         }
-    }   
+    }
 
     uint16_t GapPeripheralSt::EffectiveMaxAttMtuSize() const
     {
@@ -273,7 +273,7 @@ namespace hal
         if (disconnectEvt->Connection_Handle == connectionContext.connectionHandle)
         {
             connectionContext.connectionHandle = 0;
-            UpdateState(services::GapPeripheralState::standby);
+            UpdateState(services::GapState::standby);
         }
     }
 
@@ -285,7 +285,7 @@ namespace hal
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
-        static constexpr auto deducePeerAddressType = [](auto peerAddressType){ 
+        static constexpr auto deducePeerAddressType = [](auto peerAddressType){
             enum class PeerAddressType : uint8_t
             {
                 PUBLIC,
@@ -321,7 +321,7 @@ namespace hal
         std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
 
         maxAttMtu = defaultMaxAttMtuSize;
-        UpdateState(services::GapPeripheralState::connected);
+        UpdateState(services::GapState::connected);
     }
 
     void GapPeripheralSt::HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent)

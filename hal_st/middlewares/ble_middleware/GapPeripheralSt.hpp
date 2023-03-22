@@ -63,13 +63,13 @@ namespace hal
         virtual void HciEvent(hci_event_pckt& event);
 
         // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override; 
+        virtual uint16_t EffectiveMaxAttMtuSize() const override;
 
     private:
         void UpdateAdvertisementData();
 
         void SetPublicAddress(const hal::MacAddress& address);
-        void UpdateState(services::GapPeripheralState newstate);
+        void UpdateState(services::GapState newstate);
         void RequestConnectionParameterUpdate();
 
         void HciGapGattInit(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey);
@@ -103,7 +103,7 @@ namespace hal
 
     private:
         infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
-        services::GapPeripheralState state = services::GapPeripheralState::standby;
+        services::GapState state = services::GapState::standby;
         bool allowPairing = true;
 
         ConnectionContext connectionContext;
