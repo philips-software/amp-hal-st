@@ -1,17 +1,42 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Current target (stm32f767)",
-            "cwd": "${workspaceRoot}",
-            "request": "launch",
-            "executable": "${command:cmake.launchTargetPath}",
-            "type": "cortex-debug",
-            "servertype": "jlink",
-            "device": "STM32F767ZI"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+     {
+       "name": "Debug Host",
+       "type": "cppdbg",
+       "request": "launch",
+       "program": "${command:cmake.launchTargetPath}",
+       "args": [],
+       "stopAtEntry": false,
+       "cwd": "${workspaceFolder}",
+       "environment": [],
+       "externalConsole": false,
+       "MIMode": "gdb",
+       "miDebuggerPath": "/usr/bin/gdb",
+       "setupCommands": [
+         {
+           "description": "Enable pretty-printing for gdb",
+           "text": "-enable-pretty-printing",
+           "ignoreFailures": true
+         }
+       ]
+     },
+     {
+       "name": "Debug stm32f767",
+       "cwd": "${workspaceFolder}",
+       "executable": "${command:cmake.launchTargetPath}",
+       "request": "launch",
+       "type": "cortex-debug",
+       "device": "STM32F767ZI",
+       "servertype": "external",
+       "showDevDebugOutput": "both",
+       "gdbTarget": "host.docker.internal:2331",
+       "overrideLaunchCommands": [
+         "monitor reset",
+         "-target-download",
+         "monitor reset"
+       ],
+       "overrideRestartCommands": ["monitor reset"]
+     }
+  ]
 }

@@ -1,129 +1,129 @@
 {
-  "version": 3,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 24,
-    "patch": 0
-  },
-  "configurePresets": [
-    {
-      "name": "defaults",
-      "hidden": true,
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "generator": "Ninja Multi-Config",
-      "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "HALST_BUILD_EXAMPLES": true
-      }
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 24,
+        "patch": 0
     },
-    {
-      "name": "host",
-      "displayName": "host",
-      "description": "Build required tools for host",
-      "inherits": "defaults"
-    },
-    {
-      "name": "stm32",
-      "hidden": true,
-      "inherits": "defaults",
-      "cacheVariables": {
-        "emil_DIR": "${sourceDir}/build/host/_deps/emil-build/cmake",
-        "EMIL_GENERATE_PACKAGE_CONFIG": false,
-        "TARGET_MCU_VENDOR": "st"
-      }
-    },
-    {
-      "name": "stm32wb55cg",
-      "displayName": "stm32wb55cg",
-      "description": "Build for stm32wb55cg",
-      "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
-      "cacheVariables": {
-        "TARGET_CORTEX": "m4",
-        "TARGET_MCU_FAMILY": "stm32wbxx",
-        "TARGET_MCU": "stm32wb55",
-        "TARGET_MCU_VARIANT": "stm32wb55cg"
-      }
-    },
-    {
-      "name": "stm32f407",
-      "displayName": "stm32f407",
-      "description": "Build for stm32f407",
-      "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
-      "cacheVariables": {
-        "TARGET_CORTEX": "m4",
-        "TARGET_MCU_FAMILY": "stm32f4xx",
-        "TARGET_MCU": "stm32f407"
-      }
-    },
-    {
-      "name": "stm32f429",
-      "displayName": "stm32f429",
-      "description": "Build for stm32f429",
-      "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
-      "cacheVariables": {
-        "TARGET_CORTEX": "m4",
-        "TARGET_MCU_FAMILY": "stm32f4xx",
-        "TARGET_MCU": "stm32f429"
-      }
-    },
-    {
-      "name": "stm32f746",
-      "displayName": "stm32f746",
-      "description": "Build for stm32f746",
-      "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m7-fpv5-sp-d16.cmake",
-      "cacheVariables": {
-        "TARGET_CORTEX": "m7",
-        "TARGET_MCU_FAMILY": "stm32f7xx",
-        "TARGET_MCU": "stm32f746"
-      }
-    },
-    {
-      "name": "stm32f767",
-      "displayName": "stm32f767",
-      "description": "Build for stm32f767",
-      "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
-      "cacheVariables": {
-        "TARGET_CORTEX": "m7",
-        "TARGET_MCU_FAMILY": "stm32f7xx",
-        "TARGET_MCU": "stm32f767"
-      }
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "host-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "host"
-    },
-    {
-      "name": "stm32wb55cg-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32wb55cg"
-    },
-    {
-      "name": "stm32f407-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f407"
-    },
-    {
-      "name": "stm32f429-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f429"
-    },
-    {
-      "name": "stm32f746-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f746"
-    },
-    {
-      "name": "stm32f767-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f767"
-    }
-  ]
+    "configurePresets": [
+        {
+            "name": "defaults",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "generator": "Ninja Multi-Config",
+            "cacheVariables": {
+                "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
+                "HALST_BUILD_EXAMPLES": true
+            }
+        },
+        {
+            "name": "host",
+            "displayName": "host",
+            "description": "Build required tools for host",
+            "inherits": "defaults"
+        },
+        {
+            "name": "stm32",
+            "hidden": true,
+            "inherits": "defaults",
+            "cacheVariables": {
+                "emil_DIR": "${sourceDir}/build/host/_deps/emil-build/cmake",
+                "EMIL_GENERATE_PACKAGE_CONFIG": false,
+                "TARGET_MCU_VENDOR": "st"
+            }
+        },
+        {
+            "name": "stm32wb55cg",
+            "displayName": "stm32wb55cg",
+            "description": "Build for stm32wb55cg",
+            "inherits": "stm32",
+            "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+            "cacheVariables": {
+                "TARGET_CORTEX": "m4",
+                "TARGET_MCU_FAMILY": "stm32wbxx",
+                "TARGET_MCU": "stm32wb55",
+                "TARGET_MCU_VARIANT": "stm32wb55cg"
+            }
+        },
+        {
+            "name": "stm32f407",
+            "displayName": "stm32f407",
+            "description": "Build for stm32f407",
+            "inherits": "stm32",
+            "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+            "cacheVariables": {
+                "TARGET_CORTEX": "m4",
+                "TARGET_MCU_FAMILY": "stm32f4xx",
+                "TARGET_MCU": "stm32f407"
+            }
+        },
+        {
+            "name": "stm32f429",
+            "displayName": "stm32f429",
+            "description": "Build for stm32f429",
+            "inherits": "stm32",
+            "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+            "cacheVariables": {
+                "TARGET_CORTEX": "m4",
+                "TARGET_MCU_FAMILY": "stm32f4xx",
+                "TARGET_MCU": "stm32f429"
+            }
+        },
+        {
+            "name": "stm32f746",
+            "displayName": "stm32f746",
+            "description": "Build for stm32f746",
+            "inherits": "stm32",
+            "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m7-fpv5-sp-d16.cmake",
+            "cacheVariables": {
+                "TARGET_CORTEX": "m7",
+                "TARGET_MCU_FAMILY": "stm32f7xx",
+                "TARGET_MCU": "stm32f746"
+            }
+        },
+        {
+            "name": "stm32f767",
+            "displayName": "stm32f767",
+            "description": "Build for stm32f767",
+            "inherits": "stm32",
+            "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
+            "cacheVariables": {
+                "TARGET_CORTEX": "m7",
+                "TARGET_MCU_FAMILY": "stm32f7xx",
+                "TARGET_MCU": "stm32f767"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "host-RelWithDebInfo",
+            "configuration": "RelWithDebInfo",
+            "configurePreset": "host"
+        },
+        {
+            "name": "stm32wb55cg-RelWithDebInfo",
+            "configuration": "RelWithDebInfo",
+            "configurePreset": "stm32wb55cg"
+        },
+        {
+            "name": "stm32f407-RelWithDebInfo",
+            "configuration": "RelWithDebInfo",
+            "configurePreset": "stm32f407"
+        },
+        {
+            "name": "stm32f429-RelWithDebInfo",
+            "configuration": "RelWithDebInfo",
+            "configurePreset": "stm32f429"
+        },
+        {
+            "name": "stm32f746-RelWithDebInfo",
+            "configuration": "RelWithDebInfo",
+            "configurePreset": "stm32f746"
+        },
+        {
+            "name": "stm32f767-RelWithDebInfo",
+            "configuration": "RelWithDebInfo",
+            "configurePreset": "stm32f767"
+        }
+    ]
 }
