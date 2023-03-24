@@ -87,7 +87,7 @@ namespace hal
         std::abort();
     }
 
-    size_t GapPeripheralSt::GetMaxNumberOfBonds() const
+    std::size_t GapPeripheralSt::GetMaxNumberOfBonds() const
     {
         if (bondStorageSynchronizer)
             return (*bondStorageSynchronizer)->GetMaxNumberOfBonds();
@@ -95,7 +95,7 @@ namespace hal
         return 0;
     }
 
-    size_t GapPeripheralSt::GetNumberOfBonds() const
+    std::size_t GapPeripheralSt::GetNumberOfBonds() const
     {
         uint8_t numberOfBondedAddress = 0;
         std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
@@ -203,7 +203,19 @@ namespace hal
 
     void GapPeripheralSt::SetSecurityMode(services::GapSecurityMode mode, services::GapSecurityLevel level)
     {
-        // Not supported
+        assert(mode == services::GapSecurityMode::mode1);
+
+        enum class SecureConnection : uint8_t
+        {
+            notSupported = 0,
+            optional = 1,
+            mandatory
+        };
+
+        SecureConnection secureConnectionSupport = (level == services::GapSecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
+        uint8_t mitmMode = (level == services::GapSecurityLevel::level3 || level == services::GapSecurityLevel::level4) ? 1 : 0;
+
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapPeripheralSt::SetIoCapabilities(services::GapIoCapabilities caps)
@@ -450,7 +462,8 @@ namespace hal
         aci_gap_init(GAP_PERIPHERAL_ROLE, PRIVACY_ENABLED, 8, &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
         aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), (uint8_t*)gapService.deviceName.data());
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&gapService.appearance);
-        aci_gap_set_io_capability(ioCapability);
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        
+        SetIoCapabilities(services::GapIoCapabilities::none);
+        SetSecurityMode(services::GapSecurityMode::mode1, services::GapSecurityLevel::level1);
     }
 }

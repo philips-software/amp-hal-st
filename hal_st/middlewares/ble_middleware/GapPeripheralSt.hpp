@@ -49,8 +49,8 @@ namespace hal
         // Implementation of GapPeripheralBonding
         virtual void RemoveAllBonds() override;
         virtual void RemoveOldestBond() override;
-        virtual size_t GetMaxNumberOfBonds() const override;
-        virtual size_t GetNumberOfBonds() const override;
+        virtual std::size_t GetMaxNumberOfBonds() const override;
+        virtual std::size_t GetNumberOfBonds() const override;
 
         // Implementation of GapPeripheralPairing
         virtual void AllowPairing(bool allow) override;
@@ -113,9 +113,7 @@ namespace hal
         const GapService gapService;
 
         const uint8_t bondingMode = 0x01;
-        const uint8_t ioCapability = 0x03;
-        const uint8_t mitmMode = 0x00;
-        const uint8_t secureConnectionSupport = 0x01;
+
         const uint8_t keypressNotificationSupport = 0x00;
         static constexpr uint8_t maxNumberOfBonds = 10;
 
