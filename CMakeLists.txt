@@ -42,6 +42,7 @@ endif()
 
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
+add_subdirectory(integration_test)
 
 emil_clangformat_directories(hal_st DIRECTORIES .)
 
