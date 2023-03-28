@@ -26,6 +26,9 @@
       "name": "stm32",
       "hidden": true,
       "inherits": "defaults",
+      "environment": {
+        "CMAKE_TOOLCHAIN_FILE": ""
+      },
       "cacheVariables": {
         "emil_DIR": "${sourceDir}/build/host/_deps/emil-build/cmake",
         "EMIL_GENERATE_PACKAGE_CONFIG": false,
@@ -37,7 +40,7 @@
       "displayName": "stm32wb55cg",
       "description": "Build for stm32wb55cg",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32wbxx",
@@ -50,7 +53,7 @@
       "displayName": "stm32f407",
       "description": "Build for stm32f407",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32f4xx",
@@ -62,7 +65,7 @@
       "displayName": "stm32f429",
       "description": "Build for stm32f429",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32f4xx",
@@ -74,7 +77,7 @@
       "displayName": "stm32f746",
       "description": "Build for stm32f746",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m7-fpv5-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m7",
         "TARGET_MCU_FAMILY": "stm32f7xx",
@@ -86,11 +89,13 @@
       "displayName": "stm32f767",
       "description": "Build for stm32f767",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m7",
         "TARGET_MCU_FAMILY": "stm32f7xx",
-        "TARGET_MCU": "stm32f767"
+        "TARGET_MCU": "stm32f767",
+        "HALST_BUILD_EXAMPLES_FREERTOS": true,
+        "FREERTOS_CONFIG_FILE_DIRECTORY": "${sourceDir}/examples/freertos/config"
       }
     }
   ],
