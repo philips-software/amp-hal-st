@@ -2,6 +2,7 @@
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "services/util/DebugLed.hpp"
 #include "hal/interfaces/Gpio.hpp"
+#include "services/util/GpioPinInverted.hpp"
 
 extern "C" void Default_Handler()
 {
@@ -10,6 +11,11 @@ extern "C" void Default_Handler()
 
 int main()
 {
+    static hal::GpioPinStm nBooted(hal::Port::E, 3);
+    static services::GpioPinInverted booted(nBooted);
+
+    booted.Set(false);
+
     static main_::StmEventInfrastructure eventInfrastructure;
     static main_::NucleoF767ziUi ui;
     static services::DebugLed debugLed(ui.ledBlue);    
@@ -26,6 +32,8 @@ int main()
         outNPin.Set(!value);
     }, hal::InterruptTrigger::bothEdges);
 
+    booted.Set(true);
+    
     eventInfrastructure.Run();
     __builtin_unreachable();
 }
