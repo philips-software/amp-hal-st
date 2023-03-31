@@ -33,11 +33,7 @@ namespace hal
 
     void WatchDogStm::Interrupt()
     {
-#if defined(STM32F7) || defined(STM32WB)
         HAL_WWDG_Refresh(&handle);
-#else
-        HAL_WWDG_Refresh(&handle, WWDG_CR_T);
-#endif
         WWDG->SR = 0;
         if (++delay == 41) // 41 * 36ms = 1.5s
             onExpired();
