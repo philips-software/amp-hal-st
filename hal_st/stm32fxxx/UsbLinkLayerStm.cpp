@@ -1,7 +1,7 @@
 #include "hal_st/stm32fxxx/UsbLinkLayerStm.hpp"
 #include <cstdlib>
 
-#ifndef STM32F3
+#if !defined(STM32F3) && !defined(STM32G4)
 
 extern "C" void OTG_FS_IRQHandler(void)
 {

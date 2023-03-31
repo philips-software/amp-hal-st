@@ -115,7 +115,7 @@ namespace hal
         DisableDma();
         peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32G4)
         assert(dataSizeInBits >= 4 && dataSizeInBits <= 16);
         peripheralSpi[spiInstance]->CR2 = (peripheralSpi[spiInstance]->CR2 & ~SPI_CR2_DS) | ((dataSizeInBits - 1) << POSITION_VAL(SPI_CR2_DS)) | (dataSizeInBits <= 8 ? SPI_CR2_FRXTH : 0);
 #else
@@ -131,7 +131,7 @@ namespace hal
 
     uint8_t SpiMasterStmDma::DataSize() const
     {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32G4)
         return ((peripheralSpi[spiInstance]->CR2 & SPI_CR2_DS) >> POSITION_VAL(SPI_CR2_DS)) + 1;
 #else
         if ((peripheralSpi[spiInstance]->CR1 & SPI_CR1_DFF) != 0)

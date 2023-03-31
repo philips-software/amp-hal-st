@@ -428,7 +428,7 @@ namespace hal
         uint32_t extiValue = static_cast<uint8_t>(port) << ((index & 0x03) << 2);
         SYSCFG->EXTICR[index >> 2] = (SYSCFG->EXTICR[index >> 2] & ~extiMask) | extiValue;
 
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4)
         if (trigger != InterruptTrigger::fallingEdge)
             EXTI->RTSR1 |= 1 << index;
         else
@@ -459,7 +459,7 @@ namespace hal
 
     void GpioStm::DisableInterrupt(Port port, uint8_t index)
     {
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4)
         EXTI->IMR1 &= ~(1 << index);
 #else
         EXTI->IMR &= ~(1 << index);
@@ -471,7 +471,7 @@ namespace hal
     {
         for (std::size_t line = from; line != to; ++line)
         {
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4)
             if (EXTI->PR1 & (1 << line))
             {
                 EXTI->PR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it

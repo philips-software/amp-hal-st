@@ -19,4 +19,5 @@ target_sources(hal_st.default_init PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockSTM32F746.c>
     $<$<STREQUAL:${TARGET_MCU},stm32f767>:DefaultClockSTM32F767.c>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockSTM32WB55.c>
+    $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockSTM32G431.c>
 )

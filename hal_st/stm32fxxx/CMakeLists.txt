@@ -24,8 +24,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:AnalogToDigitalPinStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:AnalogToDigitalPinStm.hpp>
+    AnalogToDigitalPinStm.cpp
+    AnalogToDigitalPinStm.hpp
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.cpp>
@@ -44,8 +44,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     FlashInternalStm.hpp
     GpioStm.cpp
     GpioStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:I2cStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:I2cStm.hpp>
+    I2cStm.cpp
+    I2cStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.cpp>
@@ -100,6 +100,9 @@ if ("${TARGET_MCU_VENDOR}" STREQUAL st)
     elseif (${TARGET_MCU} STREQUAL stm32f767)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F76x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F767Z(G-I)Tx.xml")
+    elseif (${TARGET_MCU} STREQUAL stm32g431)
+        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G43x_gpio_v1_0_Modes.xml")
+        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G431R(6-8-B)Tx.xml")
     elseif (${TARGET_MCU_VARIANT} STREQUAL stm32wb55cg)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WB55x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55CGUx.xml")
