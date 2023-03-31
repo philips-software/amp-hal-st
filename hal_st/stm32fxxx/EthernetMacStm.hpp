@@ -1,7 +1,7 @@
 #ifndef HAL_ETHERNET_MAC_STM_HPP
 #define HAL_ETHERNET_MAC_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/Ethernet.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"

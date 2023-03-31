@@ -7,7 +7,7 @@
 
 #if defined(TRACE)
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "Trace.h"
 
 // ----------------------------------------------------------------------------

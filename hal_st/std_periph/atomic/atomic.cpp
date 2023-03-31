@@ -1,4 +1,4 @@
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 
 extern "C"
 {

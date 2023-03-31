@@ -1,7 +1,7 @@
 #ifndef HAL_DAC_STM_HPP
 #define HAL_DAC_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/Dac.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 

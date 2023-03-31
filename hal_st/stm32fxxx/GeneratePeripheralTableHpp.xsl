@@ -11,7 +11,7 @@
 #define HAL_PERIPHERAL_TABLE_HPP
 
 #include "infra/util/MemoryRange.hpp"
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 
 namespace hal
 {</xsl:text>

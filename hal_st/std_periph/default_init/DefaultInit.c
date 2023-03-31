@@ -1,4 +1,4 @@
-#include "cmsis_device_hal.h"
+#include DEVICE_HEADER
 #include "DefaultClock.h"
 
 void __initialize_hardware_early(void)

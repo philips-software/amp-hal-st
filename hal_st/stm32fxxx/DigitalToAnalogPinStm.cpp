@@ -1,5 +1,5 @@
 #include "hal_st/stm32fxxx/DigitalToAnalogPinStm.hpp"
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/util/BitLogic.hpp"
 

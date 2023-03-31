@@ -1,7 +1,7 @@
 #ifndef HAL_I2C_STM_HPP
 #define HAL_I2C_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/I2c.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"

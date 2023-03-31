@@ -2,7 +2,9 @@ add_subdirectory(std_periph_stm32f0xx)
 add_subdirectory(std_periph_stm32f2xx)
 add_subdirectory(std_periph_stm32f3xx)
 add_subdirectory(std_periph_stm32f4xx)
-add_subdirectory(std_periph_stm32f7xx)
+
+include(stm32f7xx_hal_driver.cmake)
+
 add_subdirectory(std_periph_stm32wbxx)
 add_subdirectory(windows_cmsis_stub)
 add_subdirectory(atomic)

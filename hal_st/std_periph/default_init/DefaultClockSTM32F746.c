@@ -1,4 +1,4 @@
-#include "cmsis_device_hal.h"
+#include DEVICE_HEADER
 #include "DefaultClock.h"
 
 /* The system Clock is configured as follow :

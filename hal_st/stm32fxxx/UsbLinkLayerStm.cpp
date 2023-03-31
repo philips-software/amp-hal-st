@@ -84,7 +84,7 @@ namespace hal
         pcd.Init.dev_endpoints = 7;
         pcd.Init.speed = PCD_SPEED_FULL;
         pcd.Init.dma_enable = DISABLE;
-        pcd.Init.ep0_mps = DEP0CTL_MPS_64;
+        pcd.Init.ep0_mps = EP_MPS_64;
         pcd.Init.phy_itface = PCD_PHY_EMBEDDED;
         pcd.Init.Sof_enable = DISABLE;
         pcd.Init.low_power_enable = DISABLE;
