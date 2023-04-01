@@ -22,8 +22,6 @@ target_compile_definitions(hal_st.std_periph_stm32g4xx PUBLIC
     DEVICE_HEADER="stm32g4xx.h"
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:STM32G431xx=1>
     $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT=1>
-    $<$<NOT:$<CONFIG:MinSizeRel>>:TRACE=1>
-    $<$<NOT:$<CONFIG:MinSizeRel>>:OS_USE_TRACE_ITM=1>
 )
 
 if (HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS)

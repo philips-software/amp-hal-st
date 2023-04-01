@@ -23,8 +23,6 @@ target_compile_definitions(hal_st.std_periph_stm32f4xx PUBLIC
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:STM32F407xx=1>
     $<$<STREQUAL:${TARGET_MCU},stm32f429>:STM32F429xx=1>
     $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT=1>
-    $<$<NOT:$<CONFIG:MinSizeRel>>:TRACE=1>
-    $<$<NOT:$<CONFIG:MinSizeRel>>:OS_USE_TRACE_ITM=1>
 )
 
 if (HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS)
