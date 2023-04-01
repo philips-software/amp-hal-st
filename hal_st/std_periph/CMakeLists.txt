@@ -1,14 +1,7 @@
-add_subdirectory(std_periph_stm32f0xx)
-add_subdirectory(std_periph_stm32f2xx)
-add_subdirectory(std_periph_stm32f3xx)
-
 include(stm32f4xx_hal_driver.cmake)
 include(stm32f7xx_hal_driver.cmake)
 include(stm32wbxx_hal_driver.cmake)
 include(stm32g4xx_hal_driver.cmake)
-
-add_subdirectory(windows_cmsis_stub)
-add_subdirectory(atomic)
 
 add_library(hal_st.std_periph ${HALST_EXCLUDE_FROM_ALL} INTERFACE)
 install(TARGETS hal_st.std_periph EXPORT halStTargets)
