@@ -2,9 +2,12 @@
 #define HAL_USB_LINK_LAYER_STM_HPP
 
 #include DEVICE_HEADER
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/UsbLinkLayer.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/InterfaceConnector.hpp"
+
+#ifdef HAS_PERIPHERAL_USB
 
 namespace hal
 {
@@ -52,5 +55,7 @@ namespace hal
         PCD_HandleTypeDef pcd;
     };
 }
+
+#endif
 
 #endif

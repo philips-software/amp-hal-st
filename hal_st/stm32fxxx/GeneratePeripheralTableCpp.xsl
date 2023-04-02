@@ -234,13 +234,13 @@ namespace hal
       <xsl:text>            case </xsl:text><xsl:value-of select="$index - 1"/><xsl:text>: </xsl:text>
       <xsl:choose>
         <xsl:when test="item[@position=$index]/@clock-enable">
-          <xsl:value-of select="substring(item[@position=$index]/@clock-enable, 1, string-length(item[@position=$index]/@clock-enable) - 11)"/>
+          <xsl:value-of select="substring(item[@position=$index]/@clock-enable, 1, string-length(item[@position=$index]/@clock-enable) - 7)"/><xsl:text>_DISABLE</xsl:text>
         </xsl:when>
         <xsl:otherwise>
-          <xsl:text>__HAL_RCC_</xsl:text><xsl:value-of select="item[@position=$index]/@name"/>
+          <xsl:text>__HAL_RCC_</xsl:text><xsl:value-of select="item[@position=$index]/@name"/><xsl:text>_CLK_DISABLE</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:text>_CLK_DISABLE(); break;
+      <xsl:text>(); break;
 </xsl:text>
     </xsl:if>
     <xsl:if test="$index != $max">

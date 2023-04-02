@@ -1,7 +1,11 @@
 #ifndef HAL_DIGITAL_TO_ANALOG_PIN_STM_HPP
 #define HAL_DIGITAL_TO_ANALOG_PIN_STM_HPP
+
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/DigitalToAnalogPin.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+
+#ifdef HAS_PERIPHERAL_DAC
 
 namespace hal
 {
@@ -36,5 +40,7 @@ namespace hal
         DAC_HandleTypeDef handle;
     };
 }
+
+#endif
 
 #endif

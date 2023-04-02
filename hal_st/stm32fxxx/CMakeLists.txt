@@ -26,46 +26,46 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 target_sources(hal_st.stm32fxxx PRIVATE
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.cpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.hpp>
+    BackupRamStm.cpp
+    BackupRamStm.hpp
+    CanStm.cpp
+    CanStm.hpp
+    DacStm.cpp
+    DacStm.hpp
+    DigitalToAnalogPinStm.cpp
+    DigitalToAnalogPinStm.hpp
     DmaStm.cpp
     DmaStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetSmiStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetSmiStm.hpp>
+    EthernetMacStm.cpp
+    EthernetMacStm.hpp
+    EthernetSmiStm.cpp
+    EthernetSmiStm.hpp
     FlashInternalStm.cpp
     FlashInternalStm.hpp
     GpioStm.cpp
     GpioStm.hpp
     I2cStm.cpp
     I2cStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.hpp>
+    QuadSpiStm.cpp
+    QuadSpiStm.hpp
+    QuadSpiStmDma.cpp
+    QuadSpiStmDma.hpp
+    RandomDataGeneratorStm.cpp
+    RandomDataGeneratorStm.hpp
     ResetStm.cpp
     ResetStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.hpp>
+    SdRamStm.cpp
+    SdRamStm.hpp
     SpiDataSizeConfiguratorStm.cpp
     SpiDataSizeConfiguratorStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SingleSpeedQuadSpiStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SingleSpeedQuadSpiStmDma.hpp>
+    SingleSpeedQuadSpiStmDma.cpp
+    SingleSpeedQuadSpiStmDma.hpp
     SpiMasterStm.cpp
     SpiMasterStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiMasterStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiMasterStmDma.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiSlaveStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiSlaveStmDma.hpp>
+    SpiMasterStmDma.cpp
+    SpiMasterStmDma.hpp
+    SpiSlaveStmDma.cpp
+    SpiSlaveStmDma.hpp
     SystemTickStm.cpp
     SystemTickStm.hpp
     SystemTickTimerService.cpp
@@ -74,10 +74,10 @@ target_sources(hal_st.stm32fxxx PRIVATE
     UartStm.hpp
     UartStmDma.cpp
     UartStmDma.hpp
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.cpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.hpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>:UartStmDuplexDma.cpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>:UartStmDuplexDma.hpp>
+    UsbLinkLayerStm.cpp
+    UsbLinkLayerStm.hpp
     UniqueDeviceId.cpp
     UniqueDeviceId.hpp
     WatchDogStm.cpp

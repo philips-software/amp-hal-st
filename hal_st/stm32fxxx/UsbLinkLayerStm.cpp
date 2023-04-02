@@ -1,7 +1,7 @@
 #include "hal_st/stm32fxxx/UsbLinkLayerStm.hpp"
 #include <cstdlib>
 
-#if !defined(STM32F3) && !defined(STM32G4)
+#ifdef HAS_PERIPHERAL_USB
 
 extern "C" void OTG_FS_IRQHandler(void)
 {

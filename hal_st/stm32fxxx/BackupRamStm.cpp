@@ -1,15 +1,14 @@
-
 #include "hal_st/stm32fxxx/BackupRamStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
 {
-    BackupRamStm::BackupRamStm()
-    {
-        peripheralHandle.Instance = peripheralRtc[0];
-    }
-
     infra::MemoryRange<volatile uint32_t> BackupRamStm::Get() const
     {
-        return infra::MakeRange(&peripheralHandle.Instance->BKP0R, (&peripheralHandle.Instance->BKP19R) + 1);
+#if defined(STM32G4)
+        return infra::MakeRange(&TAMP->BKP0R, (&TAMP->BKP15R) + 1);
+#else
+        return infra::MakeRange(&peripheralRtc[0]->BKP0R, (&peripheralRtc[0]->BKP19R) + 1);
+#endif
     }
 }

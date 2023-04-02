@@ -24,8 +24,10 @@ namespace hal
         handle.Init.FlashSize = config.flashSizeLog2 - 1;
         handle.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_2_CYCLE;
         handle.Init.ClockMode = QSPI_CLOCK_MODE_0;
+#if !defined(STM32WB)
         handle.Init.FlashID = QSPI_FLASH_ID_1;
         handle.Init.DualFlash = QSPI_DUALFLASH_DISABLE;
+#endif
 
         HAL_QSPI_Init(&handle);
     }
@@ -42,7 +44,7 @@ namespace hal
         onDone = actionOnCompletion;
 
         QSPI_CommandTypeDef command = CreateConfig(header, data.size(), lines);
-        HAL_StatusTypeDef status = HAL_QSPI_Command(&handle, &command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE);
+        HAL_StatusTypeDef status = HAL_QSPI_Command(&handle, &command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
         assert(status == HAL_OK);
 
         if (!data.empty())
@@ -61,7 +63,7 @@ namespace hal
         onDone = actionOnCompletion;
 
         QSPI_CommandTypeDef command = CreateConfig(header, data.size(), lines);
-        HAL_StatusTypeDef status = HAL_QSPI_Command(&handle, &command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE);
+        HAL_StatusTypeDef status = HAL_QSPI_Command(&handle, &command, HAL_QSPI_TIMEOUT_DEFAULT_VALUE);
         assert(status == HAL_OK);
 
         if (!data.empty())
@@ -111,7 +113,9 @@ namespace hal
         command.DataMode = dataSize != 0 ? (lines.dataLines == 4 ? QSPI_DATA_4_LINES : QSPI_DATA_1_LINE) : QSPI_DATA_NONE;
         command.NbData = dataSize;
         command.DdrMode = QSPI_DDR_MODE_DISABLE;
+#if !defined(STM32WB)
         command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+#endif
         command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
 
         return command;

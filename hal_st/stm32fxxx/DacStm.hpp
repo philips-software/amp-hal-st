@@ -2,8 +2,11 @@
 #define HAL_DAC_STM_HPP
 
 #include DEVICE_HEADER
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/Dac.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+
+#if defined(HAS_PERIPHERAL_DAC)
 
 namespace hal
 {
@@ -21,5 +24,7 @@ namespace hal
         DAC_HandleTypeDef dacHandle;
     };
 }
+
+#endif
 
 #endif
