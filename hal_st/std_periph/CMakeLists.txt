@@ -44,8 +44,6 @@ target_link_libraries(hal_st.std_periph INTERFACE
     $<TARGET_OBJECTS:hal_st.startup>
 )
 
-add_subdirectory(default_init)
-
 function(halst_target_linker_scripts)
     set(singleArgs TARGET)
     set(multiArgs LINKER_SCRIPTS)

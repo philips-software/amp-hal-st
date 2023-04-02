@@ -8,4 +8,5 @@ if ("${TARGET_MCU}" STREQUAL "stm32f767" AND ${HALST_BUILD_EXAMPLES_FREERTOS})
     )
 
     halst_target_default_linker_scripts(hal_st.freertos)
+    halst_default_init(hal_st.freertos)
 endif()

@@ -7,15 +7,6 @@ target_include_directories(hal_st.stm32fxxx PUBLIC
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-if (HALST_INCLUDE_DEFAULT_INIT)
-    # hal_st.default_init is an OBJECT library
-    # it is important that this dependency is listed
-    # first.
-    target_link_libraries(hal_st.stm32fxxx PUBLIC
-        $<TARGET_OBJECTS:hal_st.default_init>
-    )
-endif()
-
 target_link_libraries(hal_st.stm32fxxx PUBLIC
     hal.interfaces
     infra.timer

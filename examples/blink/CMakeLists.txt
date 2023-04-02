@@ -7,6 +7,7 @@ if ("${TARGET_MCU}" STREQUAL "stm32f767")
     )
 
     halst_target_default_linker_scripts(hal_st.blink)
+    halst_default_init(hal_st.blink)
 
     emil_generate_artifacts(TARGET hal_st.blink LST MAP BIN HEX)
 endif()

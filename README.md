@@ -42,6 +42,10 @@ target_link_libraries(myprogram PUBLIC
     infra.event
     hal_st.stm32fxxx
 )
+
+halst_target_default_linker_scripts(myprogram)
+halst_default_init(myprogram)
+
 ```
 
 ## How to test the software
