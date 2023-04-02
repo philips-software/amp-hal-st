@@ -25,18 +25,6 @@ function(add_hal_driver target_name hal_driver cmsis)
         $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT=1>
     )
 
-    if (HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS)
-        target_link_options(${target_name} PUBLIC
-            LINKER:-T${CMAKE_CURRENT_LIST_DIR}/ldscripts/mem_${TARGET_MCU}.ld,
-                   -T${CMAKE_CURRENT_LIST_DIR}/ldscripts/sections.ld
-        )
-
-        set_property(TARGET ${target_name} PROPERTY INTERFACE_LINK_DEPENDS
-            ${CMAKE_CURRENT_LIST_DIR}/ldscripts/mem_${TARGET_MCU}.ld
-            ${CMAKE_CURRENT_LIST_DIR}/ldscripts/sections.ld
-        )
-    endif()
-
     # Assembler does not understand -Werror
     set_target_properties(${target_name} PROPERTIES COMPILE_WARNING_AS_ERROR Off)
 
