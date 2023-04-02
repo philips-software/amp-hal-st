@@ -52,7 +52,7 @@ function(halst_target_linker_scripts)
     cmake_parse_arguments(PARSE_ARGV 0 HALST "" "${singleArgs}" "${multiArgs}")
 
     foreach(script ${HALST_LINKER_SCRIPTS})
-        cmake_path(IS_RELATIVE ${script} is_relative)
+        cmake_path(IS_RELATIVE script is_relative)
         if (is_relative)
             target_link_options(${HALST_TARGET} PUBLIC LINKER:-T${CMAKE_CURRENT_LIST_DIR}/${script})
         else()
@@ -64,7 +64,7 @@ function(halst_target_linker_scripts)
 endfunction()
 
 function(halst_target_default_linker_scripts target)
-    halst_target_linker_scripts(${target} ldscripts/mem_${TARGET_MCU}.ld ldscripts/sections.ld)
+    halst_target_linker_scripts(TARGET ${target} LINKER_SCRIPTS ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ldscripts/mem_${TARGET_MCU}.ld ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ldscripts/sections.ld)
 endfunction()
 
 emil_exclude_directory_from_clang_format(.)

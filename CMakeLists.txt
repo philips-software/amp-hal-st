@@ -38,12 +38,12 @@ else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
+add_subdirectory(hal_st)
+add_subdirectory(hal_st_lwip)
+
 if (HALST_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
-
-add_subdirectory(hal_st)
-add_subdirectory(hal_st_lwip)
 
 emil_clangformat_directories(hal_st DIRECTORIES .)
 
