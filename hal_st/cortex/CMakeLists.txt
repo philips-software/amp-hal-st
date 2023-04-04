@@ -7,7 +7,7 @@ target_include_directories(hal_st.cortex PUBLIC
 )
 
 target_link_libraries(hal_st.cortex PUBLIC
-    hal_st.std_periph
+    st.hal_driver
     infra.event
 )
 

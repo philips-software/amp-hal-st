@@ -10,7 +10,7 @@ target_include_directories(hal_st.stm32fxxx PUBLIC
 target_link_libraries(hal_st.stm32fxxx PUBLIC
     hal.interfaces
     infra.timer
-    hal_st.std_periph
+    st.hal_driver
     hal_st.cortex
 )
 

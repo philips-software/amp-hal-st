@@ -16,10 +16,6 @@ function(add_hal_driver target_name hal_driver cmsis)
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/hal_conf>"
     )
 
-    target_link_libraries(${target_name} PUBLIC
-        hal_st.cmsis_cortex
-    )
-
     target_compile_definitions(${target_name} PUBLIC
         USE_HAL_DRIVER=1
         $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT=1>

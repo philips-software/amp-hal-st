@@ -1,6 +1,3 @@
-/*
- * The '__stack' definition is required by crt0, do not remove it.
- */
 __stack = ORIGIN(RAM) + LENGTH(RAM);
 _estack = __stack;         /* STM specific definition */
 
@@ -15,7 +12,7 @@ PROVIDE(_Heap_Limit = __stack - __Main_Stack_Size);
 
 EXTERN(__isr_vectors)
 
-ENTRY(_start)
+ENTRY(Reset_Handler)
 
 SECTIONS
 {
@@ -23,7 +20,6 @@ SECTIONS
     {
         FILL(0xFF)
 
-        __vectors_start__ = ABSOLUTE(.) ;
         KEEP(*(.isr_vector))
         *(.after_vectors .after_vectors.*)
     } >FLASH
@@ -62,13 +58,20 @@ SECTIONS
     .text : ALIGN(4)
     {
         *(.text .text.*)
-        *(.rodata .rodata.* .constdata .constdata.*)
-        *(vtable)
 
         KEEP(*(.eh_frame*))
 
         *(.glue_7)    /* Linker-generated stubs for ARM code calling Thumb code */
         *(.glue_7t)   /* Linker-generated stubs for Thumb code calling ARM code */
+
+        . = ALIGN(4);
+        _etext = .;
+    } >FLASH
+
+    .rodata : ALIGN(4)
+    {
+        *(.rodata)
+        *(.rodata*)
     } >FLASH
 
     /* Exception sections */
@@ -77,41 +80,37 @@ SECTIONS
        *(.ARM.extab* .gnu.linkonce.armextab.*)
     } > FLASH
 
-    . = ALIGN(4);
-    __exidx_start = .;
     .ARM.exidx : ALIGN(4)
     {
-       *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+        __exidx_start = .;
+        *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+        . = ALIGN(4);
+        __exidx_end = .;
     } > FLASH
-    __exidx_end = .;
 
-    . = ALIGN(4);
-    _etext = .;
-    __etext = .;
-    
     _sidata = LOADADDR(.data);
 
     .data : ALIGN(4)
     {
-            FILL(0xFF)
-        __data_start__ = . ;
-        *(.data_begin .data_begin.*)
+        FILL(0xFF)
+        _sdata = .;
+        __data_start__ = _sdata;
         *(.data .data.*)
-        *(.data_end .data_end.*)
         . = ALIGN(4);
-        __data_end__ = . ;
+        _edata = .;
+        __data_end__ = _edata;
 
     } >RAM AT>FLASH
     
     .bss (NOLOAD) : ALIGN(4)
     {
-        __bss_start__ = .;
-        *(.bss_begin .bss_begin.*)
+        _sbss = .;
+        __bss_start__ = _sbss;
         *(.bss .bss.*)
         *(COMMON)
-        *(.bss_end .bss_end.*)
         . = ALIGN(4);
-        __bss_end__ = .;
+        _ebss = .;
+        __bss_end__ = _ebss;
     } >RAM
 
     .noinit (NOLOAD) : ALIGN(4)

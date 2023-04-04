@@ -30,7 +30,7 @@
   .thumb
 
 .global  g_pfnVectors
-.global  Default_Handler
+.weak  Default_Handler
 
 /* start address for the initialization values of the .data section. 
 defined in linker script */

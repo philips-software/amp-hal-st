@@ -7,7 +7,7 @@ target_include_directories(hal_st.default_init PUBLIC
 )
 
 target_link_libraries(hal_st.default_init PUBLIC
-    hal_st.std_periph
+    st.hal_driver
 )
 
 target_sources(hal_st.default_init PRIVATE

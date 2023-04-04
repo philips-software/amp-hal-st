@@ -38,6 +38,7 @@ else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
+add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
 
