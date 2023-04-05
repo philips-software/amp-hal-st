@@ -123,6 +123,10 @@ SECTIONS
 
     PROVIDE(__end__ = _end_noinit);
 
+    MAPPING_TABLE (NOLOAD) : { *(MAPPING_TABLE) } >RAM_SHARED
+    MB_MEM1 (NOLOAD)       : { *(MB_MEM1) } >RAM_SHARED
+    MB_MEM2 (NOLOAD)       : { _sMB_MEM2 = . ; *(MB_MEM2) ; _eMB_MEM2 = . ; } >RAM_SHARED
+
     ._check_stack : ALIGN(4)
     {
         . = . + __Main_Stack_Size ;

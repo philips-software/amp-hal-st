@@ -100,10 +100,10 @@ Reset_Handler:
 
 /* Copy the data segment initializers from flash to SRAM */
   INIT_DATA _sdata, _edata, _sidata
-  INIT_DATA _sMB_MEM2, _eMB_MEM2, _siMB_MEM2
 
 /* Zero fill the bss segments. */
   INIT_BSS _sbss, _ebss
+  INIT_BSS _sMB_MEM2, _eMB_MEM2
 
 /* Call static constructors */
   bl __libc_init_array

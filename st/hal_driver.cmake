@@ -31,6 +31,7 @@ function(add_hal_driver target_name hal_driver cmsis)
         ${cmsis}/Device/ST/*/Include/*.h
         ${cmsis}/Device/ST/*/Source/Templates/system_*.c
         ${cmsis}/Device/ST/*/Source/Templates/gcc/startup_${TARGET_MCU}xx.s
+        ${cmsis}/Device/ST/*/Source/Templates/gcc/startup_${TARGET_MCU}xx_cm4.s
         hal_conf/*_hal_conf.h
     )
     set(sources)
