@@ -44,7 +44,7 @@ target_link_libraries(myprogram PUBLIC
 )
 
 halst_target_default_linker_scripts(myprogram)
-halst_default_init(myprogram)
+halst_target_default_init(myprogram)
 
 ```
 

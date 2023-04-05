@@ -23,7 +23,7 @@ target_sources(hal_st.default_init PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockSTM32G431.c>
 )
 
-function(halst_default_init target)
+function(halst_target_default_init target)
     target_link_libraries(${target} PUBLIC
         $<TARGET_OBJECTS:hal_st.default_init>
     )
