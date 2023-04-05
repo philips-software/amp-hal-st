@@ -7,6 +7,8 @@
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "services/util/GpioPinInverted.hpp"
 #include "services/util/DebouncedButton.hpp"
+#include "protobuf/echo/EchoInstantiation.hpp"
+#include "generated/echo/Tester.pb.hpp"
 
 /* Tester    Stim   Function
  * ------    ------ --------
@@ -19,19 +21,20 @@
  * CN9-28 <- CN9-28 inverted GPIO
  */
 
+
+/* Connect debug session to GDB, bring up with:
+ * JLinkGDBServer -select USB -device STM32F767ZI -endian little -if JTAG -speed auto -noir -LocalhostOnly -nologtofile
+ */
+
 extern "C" void Default_Handler()
 {
     hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
 }
 
+
 class Report
 {
 public:
-    Report(hal::GpioPin& redPin, hal::GpioPin& greenPin)
-    : red(redPin)
-    , green(greenPin)
-    {}
-
     enum class Condition
     {
         Ready,
@@ -41,21 +44,68 @@ public:
         Failed
     };
 
-    void State(Condition condition)
+    virtual void State(Condition condition) = 0;
+};
+
+
+class LedReport
+    : public Report
+{
+public:
+    LedReport(hal::GpioPin& redPin, hal::GpioPin& greenPin)
+    : red(redPin)
+    , green(greenPin)
+    {}
+
+    void State(Condition condition) override
     {
-        red.Set(Conditions[static_cast<int>(condition)].red);
-        green.Set(Conditions[static_cast<int>(condition)].green);
+        red.Set(conditions[static_cast<int>(condition)].red);
+        green.Set(conditions[static_cast<int>(condition)].green);
     }
 
 private:
     hal::OutputPin red;
     hal::OutputPin green;
 
-    struct
+    static constexpr struct
     {
         bool red;
         bool green;
-    } Conditions[5] =
+    } conditions[5] =
+    {
+        {true, true},
+        {false, true},
+        {true, false},
+        {true, false},
+        {true, false}
+    };
+};
+
+
+class EchoReport
+    : public Report
+{
+public:
+    EchoReport(tester_echo::ReponseProxy& response)
+    : response(response)
+    {}
+
+    void State(Condition condition) override
+    {
+        response.RequestSend([this, condition]() {
+            response.GpioTestResult(conditions[static_cast<int>(condition)].value, conditions[static_cast<int>(condition)].valueN);
+        });
+        
+    }
+
+private:
+    tester_echo::ReponseProxy& response;
+
+    static constexpr struct
+    {
+        bool value;
+        bool valueN;
+    } conditions[5] =
     {
         {true, true},
         {false, true},
@@ -97,12 +147,13 @@ private:
     infra::TimerSingleShot resetTimer;
 };
 
+
 void Tester::ResetStim()
 {
     ready = false;
     reset.Set(true);
 
-    resetTimer.Start(std::chrono::milliseconds(3), [this]()
+    resetTimer.Start(std::chrono::milliseconds(3000), [this]()
     {
         assert(booted.Get() == true);
         booted.EnableInterrupt([this]() {
@@ -112,6 +163,7 @@ void Tester::ResetStim()
         reset.Set(false);
     });
 }
+
 
 void Tester::Run()
 {
@@ -130,11 +182,13 @@ void Tester::Run()
     out.Set(expected);
 }
 
+
 void Tester::Timeout()
 {
     in.DisableInterrupt();
     report.State(Report::Condition::Timeout);
 }
+
 
 void Tester::Triggered()
 {
@@ -144,6 +198,31 @@ void Tester::Triggered()
         else
             report.State(Report::Condition::Failed);
 }
+
+
+class Command
+    : public tester_echo::Command
+{
+public:
+    Command(services::Echo& echo, Tester& tester, hal::GpioPin& led)
+        : tester_echo::Command(echo)
+        , tester(tester)
+        , led(led)
+    {
+    }
+
+    void RunGpioTest(bool value) override
+    {
+        led.Set(true);
+        tester.Run();
+        MethodDone();
+    }
+
+private:
+    Tester& tester;
+    hal::OutputPin led;
+};
+
 
 int main()
 {
@@ -161,14 +240,23 @@ int main()
     static hal::GpioPinStm inPin(hal::Port::F, 8);
     static hal::GpioPinStm inNPin(hal::Port::F, 9);
 
+    // Echo infrastructure
+    static hal::GpioPinStm hostUartTxPin(hal::Port::C, 10);
+    static hal::GpioPinStm hostUartRxPin(hal::Port::C, 11);
+    static hal::DmaStm dma;
+    static hal::UartStmDma hostUart(dma, 4, hostUartTxPin, hostUartRxPin);
+    static main_::EchoOnSerialCommunication<60> echo(hostUart);
+    static tester_echo::ReponseProxy response(echo);
+    
     // Tester infrastucture
-    static Report report(ui.ledRed, ui.ledGreen);
-
-    static Tester tester(nResetStimPinInverted, nBootedPinInverted, outPin, inPin, inNPin, report);
+    static LedReport ledReport(ui.ledRed, ui.ledGreen);
+    static EchoReport echoReport(response);
+    static Tester tester(nResetStimPinInverted, nBootedPinInverted, outPin, inPin, inNPin, echoReport);
     tester.ResetStim();
-    static services::DebouncedButton button(ui.userButtonPin, []() { tester.Run(); }); // how to disable until booted?
+    static services::DebouncedButton button(ui.userButtonPin, []() { tester.Run(); });
 
-    // Event loop
+    // Event infrastructure
+    static Command command(echo, tester, ui.ledGreen);
     static services::DebugLed debugLed(ui.ledBlue);
     eventInfrastructure.Run();
     __builtin_unreachable();
