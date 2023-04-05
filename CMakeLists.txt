@@ -8,6 +8,8 @@ option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
+set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
+set(HALST_XML_STM32 "" CACHE STRING "XML STM32 table")
 
 if (HALST_STANDALONE)
     set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})

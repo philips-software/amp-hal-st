@@ -75,48 +75,48 @@ target_sources(hal_st.stm32fxxx PRIVATE
     WatchDogStm.hpp
 )
 
-if ("${TARGET_MCU_VENDOR}" STREQUAL st)
-    if (${TARGET_MCU} STREQUAL stm32f407)
+if (TARGET_MCU_VENDOR STREQUAL st)
+    if (HALST_XML_GPIO AND HALST_XML_STM32)
+        set(gpio_xml "${CMAKE_SOURCE_DIR}/${HALST_XML_GPIO}")
+        set(mcu_xml "${CMAKE_SOURCE_DIR}/${HALST_XML_STM32}")
+    elseif (TARGET_MCU STREQUAL stm32f407)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F417_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F407V(E-G)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f429)
+    elseif (TARGET_MCU STREQUAL stm32f429)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F427_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F429Z(E-G-I)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f746)
+    elseif (TARGET_MCU STREQUAL stm32f746)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F746_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F746Z(E-G)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f767)
+    elseif (TARGET_MCU STREQUAL stm32f767)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F76x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F767Z(G-I)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32g431)
+    elseif (TARGET_MCU STREQUAL stm32g431)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G43x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G431R(6-8-B)Tx.xml")
-    elseif (${TARGET_MCU_VARIANT} STREQUAL stm32wb55rg)
+    elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55rg)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WB55x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55RGVx.xml")
     else()
-        message(FATAL_ERROR "Unknown TARGET_MCU \"${TARGET_MCU}\"")
+        message(FATAL_ERROR "Unknown TARGET_MCU \"${TARGET_MCU}\". Please configure HALST_XML_GPIO and HALST_XML_STM32.")
     endif()
-else()
-    set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F76x_gpio_v1_0_Modes.xml")
-    set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F767Z(G-I)Tx.xml")
+
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl PinoutTableItems.xml
+        --stringparam gpio-document ${gpio_xml} --stringparam mcu-document ${mcu_xml})
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
+
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
+        --stringparam mcu-document ${mcu_xml})
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
+
+    target_sources(hal_st.stm32fxxx PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.cpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.hpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.cpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.hpp"
+    )
 endif()
-
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl PinoutTableItems.xml
-    --stringparam gpio-document ${gpio_xml} --stringparam mcu-document ${mcu_xml})
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
-
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
-    --stringparam mcu-document ${mcu_xml})
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
-
-target_sources(hal_st.stm32fxxx PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.hpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.hpp"
-)
