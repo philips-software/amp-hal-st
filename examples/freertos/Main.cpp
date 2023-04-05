@@ -28,7 +28,7 @@ int main()
 
     osal::Init();
 
-    static main_::NucleoF767ziUi ui;
+    static main_::Nucleo144Ui ui;
     static hal::OutputPin pinGreen{ ui.ledGreen };
 
     static std::thread t1([]()
