@@ -45,7 +45,7 @@
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32wbxx",
         "TARGET_MCU": "stm32wb55",
-        "TARGET_MCU_VARIANT": "stm32wb55cg"
+        "TARGET_MCU_VARIANT": "stm32wb55rg"
       }
     },
     {
