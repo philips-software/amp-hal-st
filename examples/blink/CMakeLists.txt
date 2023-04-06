@@ -1,4 +1,5 @@
 add_executable(hal_st.blink_nucleo144 Main.cpp)
+set_target_properties(hal_st.blink_nucleo144 PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<STREQUAL:${TARGET_MCU_VENDOR},st>>)
 
 target_link_libraries(hal_st.blink_nucleo144 PRIVATE
     services.util
