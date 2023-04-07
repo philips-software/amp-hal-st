@@ -12,15 +12,7 @@ target_link_libraries(hal_st.default_init PUBLIC
 )
 
 target_sources(hal_st.default_init PRIVATE
-    DefaultClock.h
     DefaultInit.cpp
-    $<$<STREQUAL:${TARGET_MCU},stm32f372>:DefaultClockSTM32F372.c>
-    $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockSTM32F407.c>
-    $<$<STREQUAL:${TARGET_MCU},stm32f429>:DefaultClockSTM32F429.c>
-    $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockSTM32F746.c>
-    $<$<STREQUAL:${TARGET_MCU},stm32f767>:DefaultClockSTM32F767.c>
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockSTM32WB55.c>
-    $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockSTM32G431.c>
 )
 
 function(halst_target_default_init target)

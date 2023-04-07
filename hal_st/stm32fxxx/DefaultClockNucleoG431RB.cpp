@@ -1,5 +1,5 @@
 #include DEVICE_HEADER
-#include "DefaultClock.h"
+#include "hal_st/stm32fxxx/DefaultClockNucleoG431RB.hpp"
 
 /* The system Clock is configured as follow :
  *    System Clock source            = PLL (HSI)

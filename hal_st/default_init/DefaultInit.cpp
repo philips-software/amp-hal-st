@@ -1,5 +1,4 @@
 #include DEVICE_HEADER
-#include "hal_st/default_init/DefaultClock.h"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include <errno.h>
 #include <sys/types.h>

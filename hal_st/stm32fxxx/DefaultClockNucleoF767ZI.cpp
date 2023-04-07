@@ -1,5 +1,6 @@
 #include DEVICE_HEADER
-#include "DefaultClock.h"
+#include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
+
 
 /* The system Clock is configured as follow :
  *    System Clock source            = PLL (HSE)
@@ -8,7 +9,7 @@
  *    AHB Prescaler                  = 1
  *    APB1 Prescaler                 = 4
  *    APB2 Prescaler                 = 2
- *    HSE Frequency(Hz)              = 25MHz
+ *    HSE Frequency(Hz)              = 8MHz
  *    VDD(V)                         = 3.3
  *    Main regulator output voltage  = Scale1 mode
  */
@@ -31,10 +32,11 @@ void ConfigureDefaultClock(void)
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 25;              // Divides the 25MHz HSE to 1MHz
-    RCC_OscInitStruct.PLL.PLLN = 432;             // Multiplies the 1MHz to 432MHz
+    RCC_OscInitStruct.PLL.PLLM = 4;               // Divides the 8MHz HSI to 2MHz
+    RCC_OscInitStruct.PLL.PLLN = 216;             // Multiplies the 2MHz to 432MHz
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;   // Divides the 432MHz to 216MHz for SYSCLK
-    RCC_OscInitStruct.PLL.PLLQ = 9;               // Divides the 432MHz to 48MHz for USB, SDMMC and RNG
+    RCC_OscInitStruct.PLL.PLLQ = 9;               // Divides the 432MHz to 48MHz for USB and SDMMC and RNG
+    RCC_OscInitStruct.PLL.PLLR = 7;               // Divides the 432MHz to 62MHz for DSI (No clue what a good frequency would be here...)
     HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
     HAL_PWREx_EnableOverDrive();

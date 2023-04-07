@@ -1,5 +1,5 @@
 #include DEVICE_HEADER
-#include "DefaultClock.h"
+#include "hal_st/stm32fxxx/DefaultClockDiscoveryF407G.hpp"
 
 /**
  *         The system Clock is configured as follow :
@@ -14,7 +14,7 @@
  *            Main regulator output voltage  = Scale1 mode
  *            Flash Latency(WS)              = 5
  */
-void ConfigureDefaultClock(void)
+void ConfigureDefaultClockDiscoveryF407G()
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {};
     RCC_OscInitTypeDef RCC_OscInitStruct = {};
