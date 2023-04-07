@@ -35,7 +35,7 @@ namespace main_
     };
 
     // UM2435: MB1355 reference board with STM32WB55RG
-    struct Nucleo68Ui
+    struct Nucleo64WBUi
     {
         hal::GpioPinStm buttonOne{ hal::Port::C, 4, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
         hal::GpioPinStm buttonTwo{ hal::Port::D, 0, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
