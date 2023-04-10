@@ -31,6 +31,7 @@
 
 .global  g_pfnVectors
 .global  Default_Handler
+.global Default_Handler_Forwarded
 
 /* start address for the initialization values of the .data section. 
 defined in linker script */
@@ -100,6 +101,17 @@ LoopFillZerobss:
   bx  lr    
 .size  Reset_Handler, .-Reset_Handler
 
+/**
+ * @brief  This is the code that gets called when the processor receives an 
+ *         unexpected interrupt.  This simply enters an infinite loop, preserving
+ *         the system state for examination by a debugger.
+ * @param  None     
+ * @retval None       
+*/
+    .section  .text.Default_Handler,"ax",%progbits
+Default_Handler:
+  b  Default_Handler_Forwarded
+  .size  Default_Handler, .-Default_Handler
 /******************************************************************************
 *
 * The minimal vector table for a Cortex M7. Note that the proper constructs

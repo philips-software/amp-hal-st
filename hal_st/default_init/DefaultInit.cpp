@@ -32,7 +32,7 @@ extern "C"
         return HAL_OK;
     }
 
-    void Default_Handler()
+    void Default_Handler_Forwarded()
     {
         hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
     }

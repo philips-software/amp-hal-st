@@ -1,4 +1,4 @@
-add_library(hal_st.default_init ${HALST_EXCLUDE_FROM_ALL} OBJECT)
+add_library(hal_st.default_init ${HALST_EXCLUDE_FROM_ALL} STATIC)
 install(TARGETS hal_st.default_init EXPORT halStTargets)
 
 target_include_directories(hal_st.default_init PUBLIC
@@ -11,8 +11,14 @@ target_link_libraries(hal_st.default_init PUBLIC
     hal_st.cortex
 )
 
+# Assembler does not understand -Werror
+set_target_properties(hal_st.default_init PROPERTIES COMPILE_WARNING_AS_ERROR Off)
+
+get_target_property(startup_source st.hal_driver_${TARGET_MCU_FAMILY} HALST_STARTUP_SOURCE)
+
 target_sources(hal_st.default_init PRIVATE
     DefaultInit.cpp
+    ${startup_source}
 )
 
 function(halst_target_default_init target)

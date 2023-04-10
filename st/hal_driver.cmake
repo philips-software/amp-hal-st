@@ -30,8 +30,6 @@ function(add_hal_driver target_name hal_driver cmsis)
         ${cmsis}/Core/Include/*.h
         ${cmsis}/Device/ST/*/Include/*.h
         ${cmsis}/Device/ST/*/Source/Templates/system_*.c
-        ${cmsis}/Device/ST/*/Source/Templates/gcc/startup_${TARGET_MCU}xx.s
-        ${cmsis}/Device/ST/*/Source/Templates/gcc/startup_${TARGET_MCU}xx_cm4.s
         hal_conf/*_hal_conf.h
     )
     set(sources)
@@ -45,4 +43,15 @@ function(add_hal_driver target_name hal_driver cmsis)
         ${sources}
     )
 
+    file(GLOB startup_source
+        ${cmsis}/Device/ST/*/Source/Templates/gcc/startup_${TARGET_MCU}xx.s
+        ${cmsis}/Device/ST/*/Source/Templates/gcc/startup_${TARGET_MCU}xx_cm4.s
+    )
+
+    if (startup_source)
+        set_target_properties(${target_name} PROPERTIES HALST_STARTUP_SOURCE ${startup_source})
+    endif()
+
 endfunction()
+
+define_property(TARGET PROPERTY HALST_STARTUP_SOURCE  BRIEF_DOCS "Startup source" FULL_DOCS "The source file that contains the startup and interrupt vector code.")

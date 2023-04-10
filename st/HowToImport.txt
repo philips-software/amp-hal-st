@@ -7,9 +7,11 @@ How to import a HAL driver:
     - Copy inc/stm32fxxx_hal_conf_template.h to hal_conf/stm32fxxx_hal_conf.h
         - Add #define HSE_VALUE to an extern unsigned int hse_value
 - From Drivers/CMSIS, copy Core, Device, and top level files to CMSIS_STM32xxxx
-    - Remove Default_Handler implementation from CMSIS_STM32xxxx/Source/Templates/gcc/startup_stm32xxxx.s
+    - In CMSIS_STM32xxxx/Source/Templates/gcc/startup_stm32xxxx.s:
+        - Add declaration of Default_Handler_forwarded
+        - Change Default_Handler to branch to Default_Handler_forwarded
 - Add mem_stm32xxxx.ld files to ldscripts
-- Add DefaultClockSTM32xxxx.c to default_init
+- Add DefaultClockSTM32xxxx.c for Nucleo and/or Discovery boards to hal_st.stm32fxxx
 - Download STM32CubeIDE, install
     - For microcontrollers used in a Nucleo:
         - From STM32CubeIDE_x.xx.x/STM32CubeIDE/plugins/com.st.stm32cube.common.mx_x.x.x.x/db/mcu, copy STM32xxxx(x-x)Ux.xml to hal_st/stm32fxxx/mcu
