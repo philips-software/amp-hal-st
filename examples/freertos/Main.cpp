@@ -18,8 +18,15 @@ extern "C" [[gnu::naked]] void SVC_Handler() { asm("b vPortSVCHandler"); }
 extern "C" [[gnu::naked]] void PendSV_Handler() { asm("b xPortPendSVHandler"); }
 extern "C" [[gnu::naked]] void SysTick_Handler() { asm("b xPortSysTickHandler"); };
 
+unsigned int hse_value = 8000000;
+
 int main()
 {
+    HAL_Init();
+
+    // Configure your clock here
+    //ConfigureDefaultClockNucleo767ZI();
+
     static hal::InterruptTable::WithStorage<128> interruptTable;
     static hal::GpioStm gpio{ hal::pinoutTableDefaultStm, hal::analogTableDefaultStm };
     static hal::TimerServiceFreeRtos timerService;

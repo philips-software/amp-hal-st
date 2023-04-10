@@ -12,7 +12,7 @@
  *    VDD(V)                         = 3.3
  *    Main regulator output voltage  = Scale1 mode
  */
-void ConfigureDefaultClock(void)
+void ConfigureDefaultClockDiscoveryF746G()
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {};
     RCC_OscInitTypeDef RCC_OscInitStruct = {};

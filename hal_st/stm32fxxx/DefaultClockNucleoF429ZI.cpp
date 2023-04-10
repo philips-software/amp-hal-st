@@ -14,7 +14,7 @@
  *            Main regulator output voltage  = Scale1 mode
  *            Flash Latency(WS)              = 5
  */
-void ConfigureDefaultClock(void)
+void ConfigureDefaultClockNucleoF429ZI()
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {};
     RCC_OscInitTypeDef RCC_OscInitStruct = {};

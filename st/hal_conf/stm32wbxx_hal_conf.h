@@ -94,6 +94,8 @@ extern "C" {
   *        This value is used by the RCC HAL module to compute the system frequency
   *        (when HSE is used as system clock source, directly or through the PLL).
   */
+extern unsigned int hse_value;
+#define HSE_VALUE hse_value
 
 #if !defined  (HSE_VALUE)
 #define HSE_VALUE    (32000000UL) /*!< Value of the External oscillator in Hz */

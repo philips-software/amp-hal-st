@@ -46,4 +46,9 @@ extern "C"
 
     void _init()
     {}
+
+    void assert_failed(uint8_t* file, uint32_t line)
+    {
+        std::abort();
+    }
 }
