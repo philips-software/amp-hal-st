@@ -1,7 +1,7 @@
 #include DEVICE_HEADER
 #include "hal_st/stm32fxxx/DefaultClockNucleoWB55RG.hpp"
 
-/* The system Clock is configured as follow :
+/* The system Clock is configured as follows:
  *    System Clock source            = PLL (HSI)
  *    SYSCLK(Hz)                     = 64000000
  *    HCLK1(Hz)                      = 64000000 (max 64000000)

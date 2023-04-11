@@ -36,9 +36,9 @@
       }
     },
     {
-      "name": "stm32wb55rg",
-      "displayName": "stm32wb55rg",
-      "description": "Build for stm32wb55rg",
+      "name": "stm32wb55",
+      "displayName": "stm32wb55",
+      "description": "Build for stm32wb55",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
@@ -118,9 +118,9 @@
       "configurePreset": "host"
     },
     {
-      "name": "stm32wb55rg-RelWithDebInfo",
+      "name": "stm32wb55-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32wb55rg"
+      "configurePreset": "stm32wb55"
     },
     {
       "name": "stm32g431-RelWithDebInfo",

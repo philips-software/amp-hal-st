@@ -1,7 +1,7 @@
 #include DEVICE_HEADER
 #include "hal_st/stm32fxxx/DefaultClockDiscoveryF746G.hpp"
 
-/* The system Clock is configured as follow :
+/* The system Clock is configured as follows:
  *    System Clock source            = PLL (HSE)
  *    SYSCLK(Hz)                     = 216000000
  *    HCLK(Hz)                       = 216000000

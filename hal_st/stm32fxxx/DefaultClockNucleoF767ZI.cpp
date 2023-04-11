@@ -2,7 +2,7 @@
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 
 
-/* The system Clock is configured as follow :
+/* The system Clock is configured as follows:
  *    System Clock source            = PLL (HSE)
  *    SYSCLK(Hz)                     = 216000000
  *    HCLK(Hz)                       = 216000000

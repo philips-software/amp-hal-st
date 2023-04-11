@@ -14,12 +14,17 @@ target_link_libraries(hal_st.default_init PUBLIC
 # Assembler does not understand -Werror
 set_target_properties(hal_st.default_init PROPERTIES COMPILE_WARNING_AS_ERROR Off)
 
-get_target_property(startup_source st.hal_driver_${TARGET_MCU_FAMILY} HALST_STARTUP_SOURCE)
-
 target_sources(hal_st.default_init PRIVATE
     DefaultInit.cpp
-    ${startup_source}
 )
+
+if (TARGET_MCU_VENDOR STREQUAL st)
+    get_target_property(startup_source st.hal_driver_${TARGET_MCU_FAMILY} HALST_STARTUP_SOURCE)
+
+    target_sources(hal_st.default_init PRIVATE
+        ${startup_source}
+    )
+endif()
 
 function(halst_target_default_init target)
     target_link_libraries(${target} PUBLIC
