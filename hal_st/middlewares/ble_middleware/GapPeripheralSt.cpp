@@ -448,6 +448,10 @@ namespace hal
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
 
+        static constexpr auto characteristicValueHandle = [](auto charactericticDeclarationHandle){
+            return charactericticDeclarationHandle + 1;
+        };
+
         //HCI Reset to synchronise BLE Stack
         hci_reset();
 
@@ -459,8 +463,12 @@ namespace hal
 
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
-        aci_gap_init(GAP_PERIPHERAL_ROLE, PRIVACY_ENABLED, 8, &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+
+        aci_gap_init(GAP_PERIPHERAL_ROLE, PRIVACY_ENABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+        
+        aci_gatt_set_access_permission(gapServiceHandle, characteristicValueHandle(gapDevNameCharHandle), ATTR_ACCESS_READ_ONLY);
         aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), (uint8_t*)gapService.deviceName.data());
+        
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&gapService.appearance);
         
         SetIoCapabilities(services::GapIoCapabilities::none);
