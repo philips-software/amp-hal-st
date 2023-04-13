@@ -22,7 +22,13 @@ namespace hal
         const uint8_t maxNumberOfBleLinks = 0x01;
         const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(maxAttMtuSize);
         const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, maxAttMtuSize, maxNumberOfBleLinks);
-        const uint8_t bleStackOptions = ( SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RW | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 );
+        const uint8_t bleStackOptions = (
+            SHCI_C2_BLE_INIT_OPTIONS_LL_HOST 
+            | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC 
+            | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO 
+            | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV 
+            | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 
+            | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 );
 
         SHCI_C2_CONFIG_Cmd_Param_t configParam = {
             SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
@@ -431,6 +437,9 @@ namespace hal
 
             std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
             connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
+
+            for (uint8_t i = 0; i < numberOfBondedAddress; i++)
+                hci_le_set_privacy_mode(bondedDevices[i].Address_Type, bondedDevices[i].Address, HCI_PRIV_MODE_DEVICE);
         }
     }
 
@@ -448,10 +457,6 @@ namespace hal
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
 
-        static constexpr auto characteristicValueHandle = [](auto charactericticDeclarationHandle){
-            return charactericticDeclarationHandle + 1;
-        };
-
         //HCI Reset to synchronise BLE Stack
         hci_reset();
 
@@ -465,10 +470,8 @@ namespace hal
         aci_gatt_init();
 
         aci_gap_init(GAP_PERIPHERAL_ROLE, PRIVACY_ENABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        
-        aci_gatt_set_access_permission(gapServiceHandle, characteristicValueHandle(gapDevNameCharHandle), ATTR_ACCESS_READ_ONLY);
+
         aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), (uint8_t*)gapService.deviceName.data());
-        
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&gapService.appearance);
         
         SetIoCapabilities(services::GapIoCapabilities::none);
