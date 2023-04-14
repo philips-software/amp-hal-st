@@ -19,13 +19,13 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
-        GIT_TAG        modern-cmake
+        GIT_TAG        11f07b8add4d5c45ae930cb4145c2591e7ffbb1d # v3.1.0
     )
 
     FetchContent_MakeAvailable(emil)
 endif()
 
-project(hal_st LANGUAGES C CXX ASM VERSION 1.0.0) # x-release-please-version
+project(hal_st LANGUAGES C CXX ASM VERSION 1.1.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
