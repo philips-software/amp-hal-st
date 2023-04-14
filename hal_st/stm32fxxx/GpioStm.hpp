@@ -1,7 +1,7 @@
 #ifndef HAL_GPIO_STM_HPP
 #define HAL_GPIO_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/MemoryRange.hpp"

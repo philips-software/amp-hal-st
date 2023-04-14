@@ -5,13 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Current target (stm32f767)",
+            "name": "stm32f767",
             "cwd": "${workspaceRoot}",
             "request": "launch",
             "executable": "${command:cmake.launchTargetPath}",
             "type": "cortex-debug",
             "servertype": "jlink",
             "device": "STM32F767ZI"
+        },
+        {
+            "name": "stm32g431",
+            "cwd": "${workspaceRoot}",
+            "request": "launch",
+            "executable": "${command:cmake.launchTargetPath}",
+            "type": "cortex-debug",
+            "servertype": "stlink",
+            "device": "STM32G431RB"
         }
     ]
 }

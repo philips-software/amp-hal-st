@@ -18,8 +18,7 @@ if ("${TARGET_MCU_VENDOR}" STREQUAL st AND "${TARGET_MCU_FAMILY}" STREQUAL stm32
     )
 
     target_link_libraries(hal_st.stm32_wpan PUBLIC
-        hal_st.cmsis_arm
-        hal_st.std_periph_stm32wbxx
+        st.hal_driver
     )
 
     target_sources(hal_st.stm32_wpan PRIVATE

@@ -36,16 +36,28 @@
       }
     },
     {
-      "name": "stm32wb55cg",
-      "displayName": "stm32wb55cg",
-      "description": "Build for stm32wb55cg",
+      "name": "stm32wb55",
+      "displayName": "stm32wb55",
+      "description": "Build for stm32wb55",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32wbxx",
         "TARGET_MCU": "stm32wb55",
-        "TARGET_MCU_VARIANT": "stm32wb55cg"
+        "TARGET_MCU_VARIANT": "stm32wb55rg"
+      }
+    },
+    {
+      "name": "stm32g431",
+      "displayName": "stm32g431",
+      "description": "Build for stm32g431",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m4",
+        "TARGET_MCU_FAMILY": "stm32g4xx",
+        "TARGET_MCU": "stm32g431"
       }
     },
     {
@@ -106,9 +118,14 @@
       "configurePreset": "host"
     },
     {
-      "name": "stm32wb55cg-RelWithDebInfo",
+      "name": "stm32wb55-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32wb55cg"
+      "configurePreset": "stm32wb55"
+    },
+    {
+      "name": "stm32g431-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32g431"
     },
     {
       "name": "stm32f407-RelWithDebInfo",

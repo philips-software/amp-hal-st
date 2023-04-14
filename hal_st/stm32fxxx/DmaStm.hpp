@@ -1,7 +1,7 @@
 #ifndef HAL_DMA_STM_HPP
 #define HAL_DMA_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"

@@ -21,15 +21,15 @@ namespace hal
         peripheralHandle.Instance = peripheralCan[canIndex];
         peripheralHandle.Init.Prescaler = config.prescaler;
         peripheralHandle.Init.Mode = CAN_MODE_NORMAL; // CAN_MODE_SILENT_LOOPBACK
-        peripheralHandle.Init.SJW = CAN_SJW_4TQ;
-        peripheralHandle.Init.BS1 = CAN_BS1_6TQ;
-        peripheralHandle.Init.BS2 = CAN_BS2_8TQ;
-        peripheralHandle.Init.TTCM = DISABLE;
-        peripheralHandle.Init.ABOM = ENABLE;
-        peripheralHandle.Init.AWUM = ENABLE;
-        peripheralHandle.Init.NART = DISABLE;
-        peripheralHandle.Init.RFLM = DISABLE;
-        peripheralHandle.Init.TXFP = DISABLE;
+        peripheralHandle.Init.SyncJumpWidth = CAN_SJW_4TQ;
+        peripheralHandle.Init.TimeSeg1 = CAN_BS1_6TQ;
+        peripheralHandle.Init.TimeSeg2 = CAN_BS2_8TQ;
+        peripheralHandle.Init.TimeTriggeredMode = DISABLE;
+        peripheralHandle.Init.AutoBusOff = ENABLE;
+        peripheralHandle.Init.AutoWakeUp = ENABLE;
+        peripheralHandle.Init.AutoRetransmission = DISABLE;
+        peripheralHandle.Init.ReceiveFifoLocked = DISABLE;
+        peripheralHandle.Init.TransmitFifoPriority = DISABLE;
 
         HAL_CAN_Init(&peripheralHandle);
 
@@ -44,17 +44,17 @@ namespace hal
         // peripheralCan[canIndex]->FA1R |= CAN_FA1R_FACT0;        // Make filter active
         // peripheralCan[canIndex]->FMR &= ~CAN_FMR_FINIT;         // End filter initialization
 
-        CAN_FilterConfTypeDef CAN_FilterStruct;
+        CAN_FilterTypeDef CAN_FilterStruct;
         CAN_FilterStruct.FilterIdHigh = 0x0000;                   /* Upper 16bit filter ID */
         CAN_FilterStruct.FilterIdLow = 0x0000;                    /* Filter lower 16bit ID */
         CAN_FilterStruct.FilterMaskIdHigh = 0x0000;               /* Upper 16bit filter mask */
         CAN_FilterStruct.FilterMaskIdLow = 0x0000;                /* Lower 16bit filter mask */
         CAN_FilterStruct.FilterFIFOAssignment = CAN_FILTER_FIFO0; /* Which FIFO will be assigned to filter */
-        CAN_FilterStruct.FilterNumber = 0;
+        CAN_FilterStruct.FilterBank = 0;
         CAN_FilterStruct.FilterMode = CAN_FILTERMODE_IDMASK;        /* Identifier mask mode */
         CAN_FilterStruct.FilterScale = CAN_FILTERSCALE_32BIT;       /* 32bit ID filter */
         CAN_FilterStruct.FilterActivation = ENABLE;                 /* Enable this filter */
-        CAN_FilterStruct.BankNumber = 14;                           /* Start slave bank filter (?) */
+        CAN_FilterStruct.SlaveStartFilterBank = 14;                           /* Start slave bank filter (?) */
         HAL_CAN_ConfigFilter(&peripheralHandle, &CAN_FilterStruct); /* Initialize filter */
     }
 

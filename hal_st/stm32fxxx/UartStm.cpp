@@ -115,7 +115,7 @@ namespace hal
 
     void UartStm::Invoke()
     {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         if (uartArray[uartIndex]->ISR & USART_ISR_RXNE)
 #else
         if (uartArray[uartIndex]->SR & USART_SR_RXNE)
@@ -123,14 +123,14 @@ namespace hal
         {
             infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
             while (!buffer.full() && (uartArray[uartIndex]->ISR & USART_ISR_RXNE))
 #else
             while (!buffer.full() && (uartArray[uartIndex]->SR & USART_SR_RXNE))
 #endif
             {
                 uint8_t receivedByte =
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
                     uartArray[uartIndex]->RDR;
 #else
                     uartArray[uartIndex]->DR;
@@ -139,7 +139,7 @@ namespace hal
             }
 
             // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
             really_assert(!(uartArray[uartIndex]->ISR & USART_ISR_ORE));
 #else
             really_assert(!(uartArray[uartIndex]->SR & USART_SR_ORE));
@@ -151,13 +151,13 @@ namespace hal
 
         if (sending)
         {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
             while (!sendData.empty() && (uartArray[uartIndex]->ISR & USART_ISR_TXE))
 #else
             while (!sendData.empty() && (uartArray[uartIndex]->SR & USART_SR_TXE))
 #endif
             {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
                 uartArray[uartIndex]->TDR = sendData.front();
 #else
                 uartArray[uartIndex]->DR = sendData.front();

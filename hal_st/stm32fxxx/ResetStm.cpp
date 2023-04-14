@@ -1,5 +1,5 @@
 #include "hal_st/stm32fxxx/ResetStm.hpp"
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 
 namespace hal
 {

@@ -1,7 +1,7 @@
 #ifndef SYNCHRONOUS_HAL_SYNCHRONOUS_GPIO_STM_HPP
 #define SYNCHRONOUS_HAL_SYNCHRONOUS_GPIO_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/synchronous_interfaces/SynchronousGpio.hpp"
 #include <array>
 #include <cstdlib>

@@ -1,7 +1,7 @@
 #ifndef HAL_INTERRUPT_CORTEX_HPP
 #define HAL_INTERRUPT_CORTEX_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
 #include "infra/util/MemoryRange.hpp"

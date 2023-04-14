@@ -8,11 +8,6 @@
 #include <chrono>
 #include <thread>
 
-extern "C" void Default_Handler()
-{
-    hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
-}
-
 using namespace std::chrono_literals;
 
 extern "C" void xPortPendSVHandler();
@@ -23,8 +18,15 @@ extern "C" [[gnu::naked]] void SVC_Handler() { asm("b vPortSVCHandler"); }
 extern "C" [[gnu::naked]] void PendSV_Handler() { asm("b xPortPendSVHandler"); }
 extern "C" [[gnu::naked]] void SysTick_Handler() { asm("b xPortSysTickHandler"); };
 
+unsigned int hse_value = 8000000;
+
 int main()
 {
+    HAL_Init();
+
+    // Configure your clock here
+    //ConfigureDefaultClockNucleo767ZI();
+
     static hal::InterruptTable::WithStorage<128> interruptTable;
     static hal::GpioStm gpio{ hal::pinoutTableDefaultStm, hal::analogTableDefaultStm };
     static hal::TimerServiceFreeRtos timerService;
@@ -33,7 +35,7 @@ int main()
 
     osal::Init();
 
-    static main_::NucleoF767ziUi ui;
+    static main_::Nucleo144Ui ui;
     static hal::OutputPin pinGreen{ ui.ledGreen };
 
     static std::thread t1([]()

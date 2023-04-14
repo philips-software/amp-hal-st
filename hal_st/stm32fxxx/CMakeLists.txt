@@ -7,65 +7,68 @@ target_include_directories(hal_st.stm32fxxx PUBLIC
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
-if (HALST_INCLUDE_DEFAULT_INIT)
-    # hal_st.default_init is an OBJECT library
-    # it is important that this dependency is listed
-    # first.
-    target_link_libraries(hal_st.stm32fxxx PUBLIC
-        $<TARGET_OBJECTS:hal_st.default_init>
-    )
-endif()
-
 target_link_libraries(hal_st.stm32fxxx PUBLIC
     hal.interfaces
     infra.timer
-    hal_st.std_periph
+    st.hal_driver
     hal_st.cortex
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:AnalogToDigitalPinStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:AnalogToDigitalPinStm.hpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.cpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:BackupRamStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:CanStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DacStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:DigitalToAnalogPinStm.hpp>
+    AnalogToDigitalPinStm.cpp
+    AnalogToDigitalPinStm.hpp
+    BackupRamStm.cpp
+    BackupRamStm.hpp
+    CanStm.cpp
+    CanStm.hpp
+    DacStm.cpp
+    DacStm.hpp
+    $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockDiscoveryF746G.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockDiscoveryF746G.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f429>:DefaultClockNucleoF429ZI.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f429>:DefaultClockNucleoF429ZI.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f767>:DefaultClockNucleoF767ZI.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32f767>:DefaultClockNucleoF767ZI.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.hpp>
+    DigitalToAnalogPinStm.cpp
+    DigitalToAnalogPinStm.hpp
     DmaStm.cpp
     DmaStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetMacStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetSmiStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:EthernetSmiStm.hpp>
+    EthernetMacStm.cpp
+    EthernetMacStm.hpp
+    EthernetSmiStm.cpp
+    EthernetSmiStm.hpp
     FlashInternalStm.cpp
     FlashInternalStm.hpp
     GpioStm.cpp
     GpioStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:I2cStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:I2cStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:QuadSpiStmDma.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:RandomDataGeneratorStm.hpp>
+    I2cStm.cpp
+    I2cStm.hpp
+    QuadSpiStm.cpp
+    QuadSpiStm.hpp
+    QuadSpiStmDma.cpp
+    QuadSpiStmDma.hpp
+    RandomDataGeneratorStm.cpp
+    RandomDataGeneratorStm.hpp
     ResetStm.cpp
     ResetStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SdRamStm.hpp>
+    SdRamStm.cpp
+    SdRamStm.hpp
     SpiDataSizeConfiguratorStm.cpp
     SpiDataSizeConfiguratorStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SingleSpeedQuadSpiStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SingleSpeedQuadSpiStmDma.hpp>
+    SingleSpeedQuadSpiStmDma.cpp
+    SingleSpeedQuadSpiStmDma.hpp
     SpiMasterStm.cpp
     SpiMasterStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiMasterStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiMasterStmDma.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiSlaveStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:SpiSlaveStmDma.hpp>
+    SpiMasterStmDma.cpp
+    SpiMasterStmDma.hpp
+    SpiSlaveStmDma.cpp
+    SpiSlaveStmDma.hpp
     SystemTickStm.cpp
     SystemTickStm.hpp
     SystemTickTimerService.cpp
@@ -74,61 +77,58 @@ target_sources(hal_st.stm32fxxx PRIVATE
     UartStm.hpp
     UartStmDma.cpp
     UartStmDma.hpp
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.cpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:UsbLinkLayerStm.hpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>:UartStmDuplexDma.cpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>:UartStmDuplexDma.hpp>
+    UsbLinkLayerStm.cpp
+    UsbLinkLayerStm.hpp
     UniqueDeviceId.cpp
     UniqueDeviceId.hpp
     WatchDogStm.cpp
     WatchDogStm.hpp
 )
 
-if ("${TARGET_MCU_VENDOR}" STREQUAL st)
-    if (${TARGET_MCU} STREQUAL stm32f372)
-        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F373_gpio_v1_0_Modes.xml")
-        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F373C(8-B-C)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f407)
+if (TARGET_MCU_VENDOR STREQUAL st)
+    if (HALST_XML_GPIO AND HALST_XML_STM32)
+        set(gpio_xml "${CMAKE_SOURCE_DIR}/${HALST_XML_GPIO}")
+        set(mcu_xml "${CMAKE_SOURCE_DIR}/${HALST_XML_STM32}")
+    elseif (TARGET_MCU STREQUAL stm32f407)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F417_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F407V(E-G)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f429)
+    elseif (TARGET_MCU STREQUAL stm32f429)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F427_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F429Z(E-G-I)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f746)
+    elseif (TARGET_MCU STREQUAL stm32f746)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F746_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F746Z(E-G)Tx.xml")
-    elseif (${TARGET_MCU} STREQUAL stm32f767)
+    elseif (TARGET_MCU STREQUAL stm32f767)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F76x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F767Z(G-I)Tx.xml")
-    elseif (${TARGET_MCU_VARIANT} STREQUAL stm32wb55cg)
-        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WB55x_gpio_v1_0_Modes.xml")
-        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55CGUx.xml")
-    elseif (${TARGET_MCU_VARIANT} STREQUAL stm32wb55rg)
+    elseif (TARGET_MCU STREQUAL stm32g431)
+        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G43x_gpio_v1_0_Modes.xml")
+        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G431R(6-8-B)Tx.xml")
+    elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55rg)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WB55x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55RGVx.xml")
     else()
-        message(FATAL_ERROR "Unknown TARGET_MCU \"${TARGET_MCU}\"")
+        message(FATAL_ERROR "Unknown TARGET_MCU \"${TARGET_MCU}\". Please configure HALST_XML_GPIO and HALST_XML_STM32.")
     endif()
-else()
-    set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32F76x_gpio_v1_0_Modes.xml")
-    set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32F767Z(G-I)Tx.xml")
+
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl PinoutTableItems.xml
+        --stringparam gpio-document ${gpio_xml} --stringparam mcu-document ${mcu_xml})
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
+
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
+        --stringparam mcu-document ${mcu_xml})
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
+
+    target_sources(hal_st.stm32fxxx PRIVATE
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.cpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.hpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.cpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.hpp"
+    )
 endif()
-
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl PinoutTableItems.xml
-    --stringparam gpio-document ${gpio_xml} --stringparam mcu-document ${mcu_xml})
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
-
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
-    --stringparam mcu-document ${mcu_xml})
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
-generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
-
-target_sources(hal_st.stm32fxxx PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefault.hpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTable.hpp"
-)

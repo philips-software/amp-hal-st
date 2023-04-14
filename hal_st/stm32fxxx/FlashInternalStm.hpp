@@ -1,7 +1,7 @@
 #ifndef HAL_FLASH_INTERNAL_STM_HPP
 #define HAL_FLASH_INTERNAL_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/Flash.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"

@@ -17,7 +17,7 @@ namespace hal
         EnableClockI2c(instance);
 
         i2cHandle.Instance = peripheralI2c[instance];
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         i2cHandle.Init.Timing = config.timing;
         i2cHandle.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
 #endif
@@ -61,7 +61,7 @@ namespace hal
 
         __DMB();
 
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         peripheralI2c[instance]->CR2 = ((address.address << 1) & I2C_CR2_SADD) | (continuingPrevious ? 0 : I2C_CR2_START) | (std::min<uint32_t>(sendData.size(), 255) << 16) | (sendData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
         peripheralI2c[instance]->CR1 |= I2C_CR1_TXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE;
 #else
@@ -89,7 +89,7 @@ namespace hal
 
         __DMB();
 
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         peripheralI2c[instance]->ICR = I2C_ICR_STOPCF;
         peripheralI2c[instance]->CR2 = ((address.address << 1) & I2C_CR2_SADD) | I2C_CR2_RD_WRN | (continuingPrevious ? 0 : I2C_CR2_START) | (std::min<uint32_t>(receiveData.size(), 255) << 16) | (receiveData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
         peripheralI2c[instance]->CR1 |= I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE;
@@ -122,7 +122,7 @@ namespace hal
 
     void I2cStm::EventInterrupt()
     {
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         if ((peripheralI2c[instance]->ISR & I2C_ISR_NACKF) != 0)
         {
             peripheralI2c[instance]->CR1 &= ~(I2C_CR1_TXIE | I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE);
@@ -291,7 +291,7 @@ namespace hal
 
     void I2cStm::ErrorInterrupt()
     {
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         if ((peripheralI2c[instance]->ISR & I2C_ISR_BERR) != 0)
         {
             peripheralI2c[instance]->ICR |= I2C_ISR_BERR;
@@ -350,7 +350,7 @@ namespace hal
 #endif
     }
 
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
     void I2cStm::ReadReceivedData()
     {
         while ((peripheralI2c[instance]->ISR & I2C_ISR_RXNE) != 0)

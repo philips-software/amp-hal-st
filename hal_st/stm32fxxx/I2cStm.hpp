@@ -1,7 +1,7 @@
 #ifndef HAL_I2C_STM_HPP
 #define HAL_I2C_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/I2c.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
@@ -18,7 +18,7 @@ namespace hal
             constexpr Config()
             {}
 
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
             uint32_t timing = 0x00304d4d;
 #endif
 #if defined(STM32F2) || defined(STM32F4)
@@ -40,7 +40,7 @@ namespace hal
     private:
         void EventInterrupt();
         void ErrorInterrupt();
-#if defined(STM32F0) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         void ReadReceivedData();
 #endif
 

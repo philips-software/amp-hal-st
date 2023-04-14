@@ -6,9 +6,10 @@ endif()
 
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
-option(HALST_INCLUDE_DEFAULT_LINKER_SCRIPTS "Include default memory-layout and sections linker scripts; turn off when providing custom linker scripts" ON)
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
+set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
+set(HALST_XML_STM32 "" CACHE STRING "XML STM32 table")
 
 if (HALST_STANDALONE)
     set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})
@@ -18,13 +19,13 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/embeddedinfralib.git
-        GIT_TAG        11f07b8add4d5c45ae930cb4145c2591e7ffbb1d # v3.1.0
+        GIT_TAG        fd93b901fc2882334caf7bfdf54c7d0a4e4de242 # unreleased
     )
 
     FetchContent_MakeAvailable(emil)
 endif()
 
-project(hal_st LANGUAGES C CXX VERSION 1.1.0) # x-release-please-version
+project(hal_st LANGUAGES C CXX ASM VERSION 1.1.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
@@ -39,12 +40,13 @@ else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
+add_subdirectory(st)
+add_subdirectory(hal_st)
+add_subdirectory(hal_st_lwip)
+
 if (HALST_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
-
-add_subdirectory(hal_st)
-add_subdirectory(hal_st_lwip)
 
 emil_clangformat_directories(hal_st DIRECTORIES .)
 

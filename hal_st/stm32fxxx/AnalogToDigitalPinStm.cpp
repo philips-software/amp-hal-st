@@ -16,6 +16,12 @@ namespace hal
         channelConfig.Rank = 1;
 #if defined(STM32F0) || defined(STM32F3)
         channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+#elif defined(STM32WB)
+        channelConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+        channelConfig.Offset = 0;
+#elif defined(STM32G4)
+        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
+        channelConfig.Offset = 0;
 #else
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
         channelConfig.Offset = 0;
@@ -29,7 +35,13 @@ namespace hal
     AdcStm::AdcStm(uint8_t oneBasedIndex)
         : index(oneBasedIndex - 1)
         , handle()
+#if defined(STM32WB)
+        , interruptHandler(ADC1_IRQn, [this]()
+#elif defined(STM32G4)
+        , interruptHandler(ADC1_2_IRQn, [this]()
+#else
         , interruptHandler(ADC_IRQn, [this]()
+#endif
               { MeasurementDone(); })
     {
         EnableClockAdc(index);
@@ -73,7 +85,11 @@ namespace hal
     void AdcStm::MeasurementDone()
     {
         assert(onDone != nullptr);
+#if defined(STM32WB) || defined(STM32G4)
+        handle.Instance->ISR &= ~ADC_ISR_EOC;
+#else
         handle.Instance->SR &= ~ADC_SR_EOC;
+#endif
         interruptHandler.ClearPending();
         onDone(HAL_ADC_GetValue(&handle));
     }
