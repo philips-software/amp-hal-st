@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0](https://github.com/philips-software/amp-hal-st/compare/v1.1.0...v2.0.0) (2023-04-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* update ST hal drivers ([#102](https://github.com/philips-software/amp-hal-st/issues/102))
+
+### Features
+
+* Update ST hal drivers ([#102](https://github.com/philips-software/amp-hal-st/issues/102)) ([6987d83](https://github.com/philips-software/amp-hal-st/commit/6987d83f4e9a78a5fc91b0e93d6788645cb6a49f))
+
 ## [1.1.0](https://github.com/philips-software/amp-hal-st/compare/v1.0.0...v1.1.0) (2023-04-07)
 
 
