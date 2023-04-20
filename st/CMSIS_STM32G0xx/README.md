@@ -117,19 +117,19 @@ In the spirit of openness we will be tagging issues with the following:
 - **bug** – We consider this issue to be a bug that will be investigated.
 
 - **wontfix** - We appreciate this issue but decided not to change the current behavior.
-	
+
 - **enhancement** – Denotes something that will be implemented soon. 
 
 - **future** - Denotes something not yet schedule for implementation.
 
 - **out-of-scope** - We consider this issue loosely related to CMSIS. It might by implemented outside of CMSIS. Let us know about your work.
-	
+
 - **question** – We have further questions to this issue. Please review and provide feedback.
 
 - **documentation** - This issue is a documentation flaw that will be improved in future.
 
 - **review** - This issue is under review. Please be patient.
-	
+
 - **DONE** - We consider this issue as resolved - please review and close it. In case of no further activity this issues will be closed after a week.
 
 - **duplicate** - This issue is already addressed elsewhere, see comment with provided references.
