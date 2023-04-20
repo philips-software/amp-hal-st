@@ -21,6 +21,15 @@
             "type": "cortex-debug",
             "servertype": "stlink",
             "device": "STM32G431RB"
+        },
+        {
+            "name": "stm32g070",
+            "cwd": "${workspaceRoot}",
+            "request": "launch",
+            "executable": "${command:cmake.launchTargetPath}",
+            "type": "cortex-debug",
+            "servertype": "stlink",
+            "device": "STM32G070RB"
         }
     ]
 }
