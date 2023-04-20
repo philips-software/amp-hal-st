@@ -44,7 +44,7 @@ namespace hal
 
         peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
 
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
 #else
         peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
@@ -60,7 +60,7 @@ namespace hal
     {
         for (uint8_t byte : data)
         {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
             while ((peripheralUart[uartIndex]->ISR & USART_ISR_TXE) == 0)
             {}
 
@@ -73,7 +73,7 @@ namespace hal
 #endif
         }
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         while ((peripheralUart[uartIndex]->ISR & USART_ISR_TXE) == 0)
         {}
 #else
@@ -107,13 +107,13 @@ namespace hal
 
     void SynchronousUartStm::Invoke()
     {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
 #else
         while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
 #endif
         {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
             uint8_t received = peripheralUart[uartIndex]->RDR;
 #else
             uint8_t received = peripheralUart[uartIndex]->DR;
@@ -184,7 +184,7 @@ namespace hal
     {
         for (uint8_t byte : data)
         {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
             while ((uartBase->ISR & USART_ISR_TXE) == 0)
             {}
 
@@ -197,7 +197,7 @@ namespace hal
 #endif
         }
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         while ((uartBase->ISR & USART_ISR_TXE) == 0)
         {}
 #else
@@ -232,7 +232,7 @@ namespace hal
 
         uartBase->CR2 &= ~USART_CLOCK_ENABLED;
 
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         uartBase->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
 #else
         uartBase->CR1 |= USART_IT_RXNE & USART_IT_MASK;

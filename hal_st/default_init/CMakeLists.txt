@@ -15,6 +15,7 @@ target_link_libraries(hal_st.default_init PUBLIC
 set_target_properties(hal_st.default_init PROPERTIES COMPILE_WARNING_AS_ERROR Off)
 
 target_sources(hal_st.default_init PRIVATE
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>:Atomic.cpp>
     DefaultInit.cpp
 )
 

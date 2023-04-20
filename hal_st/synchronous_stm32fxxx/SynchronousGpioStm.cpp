@@ -9,8 +9,12 @@ namespace hal
             GPIOB,
             GPIOC,
             GPIOD,
+#if !defined(STM32G0)
             GPIOE,
+#endif
+#if !defined(STM32WB) && !defined(STM32G0)
             GPIOF,
+#endif
 #if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
             GPIOG,
             GPIOH,
@@ -48,12 +52,10 @@ namespace hal
         };
 
         const uint32_t speedToSpeed[] = {
-            GPIO_SPEED_LOW,
-            GPIO_SPEED_MEDIUM,
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
-            GPIO_SPEED_FAST,
-#endif
-            GPIO_SPEED_HIGH
+            GPIO_SPEED_FREQ_LOW,
+            GPIO_SPEED_FREQ_MEDIUM,
+            GPIO_SPEED_FREQ_HIGH,
+            GPIO_SPEED_FREQ_VERY_HIGH
         };
 
         const uint32_t driveToOutputMode[2] = {

@@ -22,6 +22,17 @@ if (TARGET_MCU_FAMILY STREQUAL stm32f7xx)
     )
 endif()
 
+if (TARGET_MCU_FAMILY STREQUAL stm32g0xx)
+    add_hal_driver(st.hal_driver_stm32g0xx STM32G0xx_HAL_Driver CMSIS_STM32G0xx)
+
+    target_compile_definitions(st.hal_driver_stm32g0xx PUBLIC
+        USE_HAL_DRIVER=1
+        STM32G0=1
+        DEVICE_HEADER="stm32g0xx.h"
+        $<$<STREQUAL:${TARGET_MCU},stm32g070>:STM32G070xx=1>
+    )
+endif()
+
 if (TARGET_MCU_FAMILY STREQUAL stm32g4xx)
     add_hal_driver(st.hal_driver_stm32g4xx STM32G4xx_HAL_Driver CMSIS_STM32G4xx)
 

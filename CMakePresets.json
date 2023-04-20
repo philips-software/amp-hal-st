@@ -49,6 +49,18 @@
       }
     },
     {
+      "name": "stm32g070",
+      "displayName": "stm32g070",
+      "description": "Build for stm32g070",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m0plus.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m0+",
+        "TARGET_MCU_FAMILY": "stm32g0xx",
+        "TARGET_MCU": "stm32g070"
+      }
+    },
+    {
       "name": "stm32g431",
       "displayName": "stm32g431",
       "description": "Build for stm32g431",
@@ -121,6 +133,11 @@
       "name": "stm32wb55-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "stm32wb55"
+    },
+    {
+      "name": "stm32g070-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32g070"
     },
     {
       "name": "stm32g431-RelWithDebInfo",

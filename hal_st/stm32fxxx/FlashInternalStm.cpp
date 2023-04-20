@@ -12,7 +12,7 @@ namespace hal
     {
         HAL_FLASH_Unlock();
 
-#if defined(STM32WB) || defined(STM32G4)
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         AlignedWriteBuffer<uint64_t, FLASH_TYPEPROGRAM_DOUBLEWORD>(buffer, address);
 #else
         uint32_t word;
@@ -28,7 +28,7 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3)
         AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD>(buffer, address);
-#elif !defined(STM32WB) && !defined(STM32G4)
+#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0)
         for (uint8_t byte : buffer)
         {
             auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
@@ -52,7 +52,7 @@ namespace hal
     {
         HAL_FLASH_Unlock();
 
-#if defined(STM32WB) || defined(STM32G4)
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         uint32_t pageError = 0;
 
         FLASH_EraseInitTypeDef eraseInitStruct;
