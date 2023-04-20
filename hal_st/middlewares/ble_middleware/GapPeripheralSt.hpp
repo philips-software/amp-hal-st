@@ -42,7 +42,9 @@ namespace hal
         virtual services::GapAddress GetAddress() const override;
         virtual services::GapAddress GetIdentityAddress() const override;
         virtual void SetAdvertisementData(infra::ConstByteRange data) override;
+        virtual infra::ConstByteRange GetAdvertisementData() override;
         virtual void SetScanResponseData(infra::ConstByteRange data) override;
+        virtual infra::ConstByteRange GetScanResponseData() override;
         virtual void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         virtual void Standby() override;
 
