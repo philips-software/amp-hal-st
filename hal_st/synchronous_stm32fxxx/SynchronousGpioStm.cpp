@@ -54,10 +54,8 @@ namespace hal
         const uint32_t speedToSpeed[] = {
             GPIO_SPEED_FREQ_LOW,
             GPIO_SPEED_FREQ_MEDIUM,
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
-            GPIO_SPEED_FREQ_FAST,
-#endif
-            GPIO_SPEED_FREQ_HIGH
+            GPIO_SPEED_FREQ_HIGH,
+            GPIO_SPEED_FREQ_VERY_HIGH
         };
 
         const uint32_t driveToOutputMode[2] = {
