@@ -18,7 +18,7 @@ namespace hal
             constexpr Config()
             {}
 
-#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
             uint32_t timing = 0x00304d4d;
 #endif
 #if defined(STM32F2) || defined(STM32F4)
@@ -40,7 +40,7 @@ namespace hal
     private:
         void EventInterrupt();
         void ErrorInterrupt();
-#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         void ReadReceivedData();
 #endif
 
