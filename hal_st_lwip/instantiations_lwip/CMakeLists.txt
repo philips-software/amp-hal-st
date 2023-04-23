@@ -1,7 +1,5 @@
-add_library(hal_st.instantiations_lwip ${HALST_EXCLUDE_FROM_ALL} STATIC)
-if (EMIL_HOST_BUILD OR "${TARGET_MCU_FAMILY}" STREQUAL stm32wbxx OR "${TARGET_MCU_FAMILY}" STREQUAL stm32g0xx OR "${TARGET_MCU_FAMILY}" STREQUAL stm32g4xx)
-    set_property(TARGET hal_st.instantiations_lwip PROPERTY EXCLUDE_FROM_ALL TRUE)
-endif()
+add_library(hal_st.instantiations_lwip STATIC)
+emil_build_for(hal_st.instantiations_lwip TARGET_MCU_FAMILY stm32f4xx TARGET_MCU_FAMILY stm32f7xx PREREQUISITE_BOOL HALST_STANDALONE)
 install(TARGETS hal_st.instantiations_lwip EXPORT halStLwipTargets)
 
 target_include_directories(hal_st.instantiations_lwip PUBLIC

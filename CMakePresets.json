@@ -30,7 +30,6 @@
         "CMAKE_TOOLCHAIN_FILE": ""
       },
       "cacheVariables": {
-        "emil_DIR": "${sourceDir}/build/host/_deps/emil-build/cmake",
         "EMIL_GENERATE_PACKAGE_CONFIG": false,
         "TARGET_MCU_VENDOR": "st"
       }
