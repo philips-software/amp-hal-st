@@ -1,6 +1,6 @@
 if (${HALST_BUILD_EXAMPLES_FREERTOS})
     add_executable(hal_st.freertos_nucleo144 Main.cpp)
-    set_target_properties(hal_st.freertos_nucleo144 PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<STREQUAL:${TARGET_MCU_VENDOR},st>>)
+    emil_build_for(hal_st.freertos_nucleo144 TARGET_MCU_VENDOR st)
 
     target_link_libraries(hal_st.freertos_nucleo144 PRIVATE
         hal_st.instantiations
