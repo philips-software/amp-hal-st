@@ -15,20 +15,14 @@ namespace hal
         GapPeripheralSt::HandleHciDisconnectEvent(eventPacket);
     }
 
-    void TracingGapPeripheralSt::HandleHciUnknownEvent(hci_event_pckt& eventPacket)
-    {
-        tracer.Trace() << "GapPeripheralSt::HandleHciUnknownEvent " << eventPacket.evt;
-        GapPeripheralSt::HandleHciUnknownEvent(eventPacket);
-    }
-
-    void TracingGapPeripheralSt::HandleHciLeConnectionUpdateEvent(evt_le_meta_event* metaEvent)
+    void TracingGapPeripheralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto evtConnectionUpdate = reinterpret_cast<hci_le_connection_update_complete_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "GapPeripheralSt::HandleHciLeConnectionUpdateEvent";
+        tracer.Trace() << "GapPeripheralSt::HandleHciLeConnectionUpdateCompleteEvent";
         tracer.Trace() << "\tConnection Interval : " << evtConnectionUpdate->Conn_Interval;
         tracer.Trace() << "\tConnection Latency  : " << evtConnectionUpdate->Conn_Latency;
         tracer.Trace() << "\tSupervision Timeout : " << evtConnectionUpdate->Supervision_Timeout;
-        GapPeripheralSt::HandleHciLeConnectionUpdateEvent(metaEvent);
+        GapPeripheralSt::HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
     }
 
     void TracingGapPeripheralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
@@ -37,7 +31,7 @@ namespace hal
         tracer.Trace() << "GapPeripheralSt::HandleHciLePhyUpdateCompleteEvent " << evtLePhyUpdate->Status;
         GapPeripheralSt::HandleHciLePhyUpdateCompleteEvent(metaEvent);
     }
-    
+
     void TracingGapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto enhancedConnectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
@@ -61,12 +55,6 @@ namespace hal
         GapPeripheralSt::HandleHciLeDataLengthUpdateEvent(metaEvent);
     }
 
-    void TracingGapPeripheralSt::HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent)
-    {
-        tracer.Trace() << "GapPeripheralSt::HandleHciLeUnknownEvent " << metaEvent->subevent;
-        GapPeripheralSt::HandleHciLeUnknownEvent(metaEvent);
-    }
-
     void TracingGapPeripheralSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
     {
         tracer.Trace() << "GapPeripheralSt::HandleBondLostEvent";
@@ -80,10 +68,10 @@ namespace hal
         GapPeripheralSt::HandlePairingCompleteEvent(vendorEvent);
     }
 
-    void TracingGapPeripheralSt::HandleMtuExchangeEvent(evt_blecore_aci* vendorEvent)
+    void TracingGapPeripheralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
     {
         const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "GapPeripheralSt::HandleMtuExchangeEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
-        GapPeripheralSt::HandleMtuExchangeEvent(vendorEvent);
+        tracer.Trace() << "GapPeripheralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
+        GapPeripheralSt::HandleMtuExchangeResponseEvent(vendorEvent);
     }
 }

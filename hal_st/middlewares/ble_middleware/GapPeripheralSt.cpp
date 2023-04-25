@@ -11,75 +11,10 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
-        : HciEventSink(hciEventSource)
-        , txPowerLevel(txPowerLevel)
-        , gapService(gapService)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const hal::GapSt::RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
+        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, *bleBondsStorage)
     {
-        really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
-        // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
-
-        const uint8_t maxNumberOfBleLinks = 0x01;
-        const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(maxAttMtuSize);
-        const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, maxAttMtuSize, maxNumberOfBleLinks);
-        const uint8_t bleStackOptions = (
-            SHCI_C2_BLE_INIT_OPTIONS_LL_HOST 
-            | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC 
-            | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO 
-            | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV 
-            | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 
-            | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 );
-
-        SHCI_C2_CONFIG_Cmd_Param_t configParam = {
-            SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
-            SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
-            SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
-            0,
-            reinterpret_cast<uint32_t>(bleBondsStorage),
-            0,
-            0,
-        };
-
-        if (SHCI_C2_Config(&configParam) != SHCI_Success)
-            std::abort();
-
-        SHCI_C2_Ble_Init_Cmd_Packet_t bleInitCmdPacket =
-            {
-            {{0,0,0}},      // Header (unused)
-            {
-                0x00,       // BLE buffer address (unused)
-                0x00,       // BLE buffer size (unused)
-                0x44,       // Maximum number of GATT Attributes
-                0x08,       // Maximum number of Services that can be stored in the GATT database
-                0x540,      // Size of the storage area for Attribute values
-                maxNumberOfBleLinks,
-                0x01,       // Enable or disable the Extended Packet length feature
-                prepareWriteListSize,
-                numberOfBleMemoryBlocks,
-                maxAttMtuSize,
-                0x1FA,      // Sleep clock accuracy in Slave mode
-                0x00,       // Sleep clock accuracy in Master mode
-                0x00,       // Source for the low speed clock for RF wake-up
-                0xFFFFFFFF, // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
-                0x148,      // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
-                0x01,       // Viterbi Mode
-                bleStackOptions,
-                0x00,       // HW version (unused)
-                0x00,       // Maximum number of connection-oriented channels in initiator mode
-                0x00,       // Minimum transmit power in dBm supported by the Controller
-                0x00,       // Maximum transmit power in dBm supported by the Controller
-                SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY // BLE Rx model configuration flags
-            }
-        };
-
-        if (SHCI_C2_BLE_Init(&bleInitCmdPacket) != SHCI_Success)
-            std::abort();
-
-        HciGapGattInit(rootKeys.identity, rootKeys.encryption);
-        SVCCTL_Init();
-        hci_le_write_suggested_default_data_length(connectionInitialMaxTxOctets, connectionInitialMaxTxTime);
-
-        SetPublicAddress(address);
+        Initialize(gapService);
         bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
     }
 
@@ -108,11 +43,6 @@ namespace hal
         aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
 
         return numberOfBondedAddress;
-    }
-
-    void GapPeripheralSt::SetPublicAddress(const hal::MacAddress& address)
-    {
-        aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
     }
 
     services::GapAddress GapPeripheralSt::GetAddress() const
@@ -174,11 +104,6 @@ namespace hal
     {
         state = newState;
         infra::EventDispatcher::Instance().Schedule([this]() { GapPeripheral::NotifyObservers([this](auto& obs) { obs.StateChanged(state); }); });
-    }
-
-    void GapPeripheralSt::RequestConnectionParameterUpdate()
-    {
-        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle, minConnectionInterval, maxConnectionInterval, slaveLatency, supervisionTimeout);
     }
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
@@ -270,162 +195,6 @@ namespace hal
         std::abort();
     }
 
-    void GapPeripheralSt::HciEvent(hci_event_pckt& event)
-    {
-        switch (event.evt)
-        {
-        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-            HandleHciDisconnectEvent(event);
-            break;
-        case HCI_LE_META_EVT_CODE:
-            HandleHciLeMetaEvent(event);
-            break;
-        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-            HandleHciVendorSpecificDebugEvent(event);
-            break;
-        default:
-            HandleHciUnknownEvent(event);
-            break;
-        }
-    }
-
-    uint16_t GapPeripheralSt::EffectiveMaxAttMtuSize() const
-    {
-        return maxAttMtu;
-    }
-
-    void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
-    {
-        auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
-
-        if (disconnectEvt->Connection_Handle == connectionContext.connectionHandle)
-        {
-            connectionContext.connectionHandle = 0;
-            UpdateState(services::GapState::standby);
-        }
-    }
-
-    void GapPeripheralSt::HandleHciLeConnectionUpdateEvent(evt_le_meta_event* metaEvent)
-    {}
-
-    void GapPeripheralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
-    {}
-
-    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
-    {
-        static constexpr auto deducePeerAddressType = [](auto peerAddressType){
-            enum class PeerAddressType : uint8_t
-            {
-                PUBLIC,
-                RANDOM,
-                RESOLVED_PUBLIC_IDENTITY,
-                RESOLVED_RANDOM_STATIC_IDENTITY
-            };
-
-            switch (static_cast<PeerAddressType>(peerAddressType))
-            {
-                case PeerAddressType::PUBLIC:
-                case PeerAddressType::RANDOM:
-                    return peerAddressType;
-
-                case PeerAddressType::RESOLVED_PUBLIC_IDENTITY:
-                    return infra::enum_cast(PeerAddressType::PUBLIC);
-
-                case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY:
-                    return infra::enum_cast(PeerAddressType::RANDOM);
-
-                default:
-                    std::abort();
-            }
-        };
-
-        auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
-
-        connectionContext.connectionHandle = connectionCompleteEvt->Connection_Handle;
-
-        RequestConnectionParameterUpdate();
-
-        connectionContext.peerAddressType = deducePeerAddressType(connectionCompleteEvt->Peer_Address_Type);
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(connectionContext.peerAddress));
-
-        maxAttMtu = defaultMaxAttMtuSize;
-        UpdateState(services::GapState::connected);
-    }
-
-    void GapPeripheralSt::HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent)
-    {}
-
-    void GapPeripheralSt::HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent)
-    {}
-
-    void GapPeripheralSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
-    {
-        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
-
-        switch (metaEvent->subevent)
-        {
-        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionUpdateEvent(metaEvent);
-            break;
-        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
-            HandleHciLePhyUpdateCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
-            HandleHciLeDataLengthUpdateEvent(metaEvent);
-            break;
-        default:
-            HandleHciLeUnknownEvent(metaEvent);
-            break;
-        }
-    }
-
-    void GapPeripheralSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
-    {
-        aci_gap_allow_rebond(connectionContext.connectionHandle);
-    }
-
-    void GapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
-    {
-        auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
-
-        if (pairingComplete->Connection_Handle == connectionContext.connectionHandle
-            && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
-            {
-                hal::MacAddress address = connectionContext.peerAddress;
-                aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-                (*bondStorageSynchronizer)->UpdateBondedDevice(address);
-            }
-        }
-
-    void GapPeripheralSt::HandleMtuExchangeEvent(evt_blecore_aci* vendorEvent)
-    {
-        maxAttMtu = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data)->Server_RX_MTU;
-        AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
-    }
-
-    void GapPeripheralSt::HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket)
-    {
-        auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(eventPacket.data);
-
-        switch (vendorEvent->ecode)
-        {
-        case ACI_GAP_BOND_LOST_VSEVT_CODE:
-            HandleBondLostEvent(vendorEvent);
-            break;
-        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
-            HandlePairingCompleteEvent(vendorEvent);
-            break;
-        case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
-            HandleMtuExchangeEvent(vendorEvent);
-            break;
-        default:
-            break;
-        }
-    }
-
     void GapPeripheralSt::UpdateResolvingList()
     {
         aci_gap_configure_whitelist();
@@ -447,9 +216,6 @@ namespace hal
 
             std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
             connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
-
-            for (uint8_t i = 0; i < numberOfBondedAddress; i++)
-                hci_le_set_privacy_mode(bondedDevices[i].Address_Type, bondedDevices[i].Address, HCI_PRIV_MODE_DEVICE);
         }
     }
 
@@ -460,30 +226,109 @@ namespace hal
         aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
-    void GapPeripheralSt::HandleHciUnknownEvent(hci_event_pckt& eventPacket)
-    {}
+    void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& metaEvent)
+    {
+        auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(metaEvent.data);
 
-    void GapPeripheralSt::HciGapGattInit(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey)
+        if (disconnectEvt->Connection_Handle == connectionContext.connectionHandle)
+        {
+            connectionContext.connectionHandle = 0;
+
+            UpdateState(services::GapState::standby);
+        }
+    }
+
+    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        RequestConnectionParameterUpdate();
+
+        UpdateState(services::GapState::connected);
+    }
+
+    void GapPeripheralSt::RequestConnectionParameterUpdate()
+    {
+        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
+            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
+            connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
+    }
+
+    void GapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
+    {
+        auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
+
+        if (pairingComplete->Connection_Handle == connectionContext.connectionHandle && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
+        {
+            hal::MacAddress address = connectionContext.peerAddress;
+            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
+            (*bondStorageSynchronizer)->UpdateBondedDevice(address);
+        }
+    }
+
+    void GapPeripheralSt::HciEvent(hci_event_pckt& event)
+    {
+        GapSt::HciEvent(event);
+
+        switch (event.evt)
+        {
+        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
+            HandleHciDisconnectEvent(event);
+            break;
+        case HCI_LE_META_EVT_CODE:
+            HandleHciLeMetaEvent(event);
+            break;
+        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
+            HandleHciVendorSpecificDebugEvent(event);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void GapPeripheralSt::HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket)
+    {
+        auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(eventPacket.data);
+
+        switch (vendorEvent->ecode)
+        {
+        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
+            HandlePairingCompleteEvent(vendorEvent);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void GapPeripheralSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
+    {
+        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
+
+        switch (metaEvent->subevent)
+        {
+        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
+            HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
+            HandleHciLePhyUpdateCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
+            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
+            HandleHciLeDataLengthUpdateEvent(metaEvent);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void GapPeripheralSt::Initialize(const GapService& gapService)
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
 
-        //HCI Reset to synchronise BLE Stack
-        hci_reset();
-
-        // Write Identity root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, identityRootKey.data());
-
-        // Write Encryption root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, encryptionRootKey.data());
-
-        aci_hal_set_tx_power_level(1, txPowerLevel);
-        aci_gatt_init();
-
         aci_gap_init(GAP_PERIPHERAL_ROLE, PRIVACY_ENABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
+        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), (uint8_t*)gapService.deviceName.data());
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, 2, (uint8_t*)&gapService.appearance);
-        
         SetIoCapabilities(services::GapIoCapabilities::none);
         SetSecurityMode(services::GapSecurityMode::mode1, services::GapSecurityLevel::level1);
     }
