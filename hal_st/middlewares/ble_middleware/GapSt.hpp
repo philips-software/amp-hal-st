@@ -1,7 +1,6 @@
 #ifndef HAL_ST_GAP_ST_HPP
 #define HAL_ST_GAP_ST_HPP
 
-#include "BleReference/central_controllers/BleCentralGap.hpp"
 #include "ble/ble.h"
 #include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
