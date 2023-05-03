@@ -9,7 +9,9 @@
 namespace hal
 {
 #if defined(STM32WB)
-    struct LpUart {};
+    struct LpUart
+    {};
+
     extern const LpUart lpUart;
 #endif
     class UartStm
@@ -27,7 +29,7 @@ namespace hal
             uint32_t parity = USART_PARITY_NONE;
             infra::Optional<InterruptPriority> priority;
         };
-        
+
         UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
         UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
 #if defined(STM32WB)
@@ -51,7 +53,6 @@ namespace hal
         hal::PeripheralPinStm uartRx;
         infra::Optional<hal::PeripheralPinStm> uartRts;
         infra::Optional<hal::PeripheralPinStm> uartCts;
-
 
         UART_HandleTypeDef uartHandle = {};
 

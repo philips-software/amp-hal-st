@@ -54,7 +54,7 @@ namespace hal
         CAN_FilterStruct.FilterMode = CAN_FILTERMODE_IDMASK;        /* Identifier mask mode */
         CAN_FilterStruct.FilterScale = CAN_FILTERSCALE_32BIT;       /* 32bit ID filter */
         CAN_FilterStruct.FilterActivation = ENABLE;                 /* Enable this filter */
-        CAN_FilterStruct.SlaveStartFilterBank = 14;                           /* Start slave bank filter (?) */
+        CAN_FilterStruct.SlaveStartFilterBank = 14;                 /* Start slave bank filter (?) */
         HAL_CAN_ConfigFilter(&peripheralHandle, &CAN_FilterStruct); /* Initialize filter */
     }
 

@@ -91,7 +91,7 @@ namespace hal
     {
         uint32_t ccr = QUADSPI->CCR & QUADSPI_CCR_DDRM
 #if !defined(STM32WB)
-            | QUADSPI_CCR_DHHC
+                       | QUADSPI_CCR_DHHC
 #endif
             ;
 

@@ -27,7 +27,7 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3)
         AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD>(buffer, address);
-#elif !defined(STM32WB) &&  !defined(STM32G4) && !defined(STM32G0)
+#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0)
         for (uint8_t byte : buffer)
         {
             auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
@@ -52,20 +52,20 @@ namespace hal
         uint32_t pageError = 0;
 
         FLASH_EraseInitTypeDef eraseInitStruct;
-        eraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
-        eraseInitStruct.Page        = beginIndex;
-        eraseInitStruct.NbPages     = endIndex - beginIndex;
+        eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+        eraseInitStruct.Page = beginIndex;
+        eraseInitStruct.NbPages = endIndex - beginIndex;
 
         auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
         really_assert(result == HAL_OK);
 #else
         for (uint32_t index = beginIndex; index != endIndex; ++index)
         {
-    #if defined(STM32F0) || defined(STM32F3)
-            abort();    // Not implemented
-    #else
+#if defined(STM32F0) || defined(STM32F3)
+            abort(); // Not implemented
+#else
             FLASH_Erase_Sector(index, VOLTAGE_RANGE_3);
-    #endif
+#endif
 
             while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY))
             {}

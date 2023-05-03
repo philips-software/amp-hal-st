@@ -27,10 +27,10 @@ namespace hal
 
 #if defined(STM32WB)
     UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config)
-    : uartIndex(aUartIndex - 1)
-    , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, aUartIndex)
-    , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, aUartIndex)
-    , uartHandle()
+        : uartIndex(aUartIndex - 1)
+        , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, aUartIndex)
+        , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, aUartIndex)
+        , uartHandle()
     {
         uartArray = peripheralLpuart;
         uartIrqArray = peripheralLpuartIrq;
@@ -40,7 +40,7 @@ namespace hal
     }
 
     UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config)
-    : UartStm(aUartIndex, uartTxPin, uartRxPin, lpUart, config)
+        : UartStm(aUartIndex, uartTxPin, uartRxPin, lpUart, config)
     {
         uartRts.Emplace(uartRtsPin, PinConfigTypeStm::lpuartRts, aUartIndex);
         uartCts.Emplace(uartCtsPin, PinConfigTypeStm::lpuartCts, aUartIndex);

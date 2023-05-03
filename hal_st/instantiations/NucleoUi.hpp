@@ -30,7 +30,7 @@ namespace main_
 #if defined(STM32L412RB_P) || defined(STM32L433RC_P) || defined(STM32L452RE_P) // Which other targets? UM1724 does not specify which targets use PA5 and which PB13
         hal::GpioPinStm ledGreen{ hal::Port::B, 13 };
 #else
-        hal::GpioPinStm ledGreen{ hal::Port::A, 5 };    // STM32G0, STM32G4
+        hal::GpioPinStm ledGreen{ hal::Port::A, 5 }; // STM32G0, STM32G4
 #endif
     };
 
