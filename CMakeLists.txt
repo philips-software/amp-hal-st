@@ -19,7 +19,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        feature/merge-tfs
+        GIT_TAG        9856f2304b818f69926db810aabadbd2c1a82659 # Unreleased
     )
 
     FetchContent_MakeAvailable(emil)
