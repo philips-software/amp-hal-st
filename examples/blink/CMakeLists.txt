@@ -1,5 +1,5 @@
 add_executable(hal_st.blink_nucleo144 Main.cpp)
-emil_build_for(hal_st.blink_nucleo144 PREREQUISITE_BOOL HALST_BUILD_EXAMPLES)
+emil_build_for(hal_st.blink_nucleo144 BOOL HALST_BUILD_EXAMPLES)
 set_target_properties(hal_st.blink_nucleo144 PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<STREQUAL:${TARGET_MCU_VENDOR},st>>)
 
 target_compile_definitions(hal_st.blink_nucleo144 PUBLIC
@@ -19,7 +19,7 @@ emil_generate_artifacts(TARGET hal_st.blink_nucleo144 LST MAP BIN HEX)
 ######################################################################
 
 add_executable(hal_st.blink_nucleo64 Main.cpp)
-emil_build_for(hal_st.blink_nucleo64 PREREQUISITE_BOOL HALST_BUILD_EXAMPLES)
+emil_build_for(hal_st.blink_nucleo64 BOOL HALST_BUILD_EXAMPLES)
 set_target_properties(hal_st.blink_nucleo64 PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<STREQUAL:${TARGET_MCU_VENDOR},st>>)
 
 target_compile_definitions(hal_st.blink_nucleo64 PUBLIC
