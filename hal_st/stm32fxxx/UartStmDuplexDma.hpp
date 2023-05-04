@@ -1,12 +1,11 @@
 #ifndef HAL_UART_STM_DUPLEX_DMA_HPP
 #define HAL_UART_STM_DUPLEX_DMA_HPP
 
-#include <atomic>
-
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include <atomic>
 
 namespace hal
 {
@@ -17,7 +16,8 @@ namespace hal
     public:
         struct Config
         {
-            constexpr Config() {}
+            constexpr Config()
+            {}
 
             uint32_t baudrate = 115200;
             uint32_t hwFlowControl = UART_HWCONTROL_NONE;
@@ -27,7 +27,7 @@ namespace hal
         };
 
         template<std::size_t RxBufferSize>
-            using WithRxBuffer = infra::WithStorage<UartStmDuplexDma, std::array<uint8_t, RxBufferSize>>;
+        using WithRxBuffer = infra::WithStorage<UartStmDuplexDma, std::array<uint8_t, RxBufferSize>>;
 
         UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
         UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());

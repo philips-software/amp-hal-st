@@ -160,7 +160,7 @@ namespace hal
 #if defined(STM32WB)
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate)
         : SynchronousUartStmSendOnly(aUartIndex, uartTx, uartTx, lpUart, HwFlowControl::hwControlDisable, baudrate)
-    { }
+    {}
 
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl, uint32_t baudrate)
         : uartBase(peripheralLpuart[aUartIndex - 1])

@@ -1,5 +1,5 @@
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
 
@@ -7,38 +7,30 @@ namespace hal
 {
     namespace
     {
-    uint16_t defaultRxTimeout = 16;
+        uint16_t defaultRxTimeout = 16;
 
 #if defined(STM32WB)
-    const std::array<DmaChannelId, 1> defaultTxDmaChannelId = {{
-        DmaChannelId{ 1, 0, DMA_REQUEST_USART1_TX }
-    }};
+        const std::array<DmaChannelId, 1> defaultTxDmaChannelId = { { DmaChannelId{ 1, 0, DMA_REQUEST_USART1_TX } } };
 
-    const std::array<DmaChannelId, 1> defaultRxDmaChannelId = {{
-        DmaChannelId{ 1, 0, DMA_REQUEST_USART1_RX }
-    }};
+        const std::array<DmaChannelId, 1> defaultRxDmaChannelId = { { DmaChannelId{ 1, 0, DMA_REQUEST_USART1_RX } } };
 #else
-    const std::array<DmaChannelId, 8> defaultTxDmaChannelId = {{
-        DmaChannelId{ 2, 7, 4 },
-        DmaChannelId{ 1, 6, 4 },
-        DmaChannelId{ 1, 3, 4 },
-        DmaChannelId{ 1, 4, 4 },
-        DmaChannelId{ 1, 7, 4 },
-        DmaChannelId{ 2, 6, 5 },
-        DmaChannelId{ 1, 1, 5 },
-        DmaChannelId{ 1, 0, 5 }
-    }};
+        const std::array<DmaChannelId, 8> defaultTxDmaChannelId = { { DmaChannelId{ 2, 7, 4 },
+            DmaChannelId{ 1, 6, 4 },
+            DmaChannelId{ 1, 3, 4 },
+            DmaChannelId{ 1, 4, 4 },
+            DmaChannelId{ 1, 7, 4 },
+            DmaChannelId{ 2, 6, 5 },
+            DmaChannelId{ 1, 1, 5 },
+            DmaChannelId{ 1, 0, 5 } } };
 
-    const std::array<DmaChannelId, 8> defaultRxDmaChannelId = {{
-        DmaChannelId{ 2, 7, 4 },
-        DmaChannelId{ 1, 6, 4 },
-        DmaChannelId{ 1, 3, 4 },
-        DmaChannelId{ 1, 4, 4 },
-        DmaChannelId{ 1, 7, 4 },
-        DmaChannelId{ 2, 6, 5 },
-        DmaChannelId{ 1, 1, 5 },
-        DmaChannelId{ 1, 0, 5 }
-    }};
+        const std::array<DmaChannelId, 8> defaultRxDmaChannelId = { { DmaChannelId{ 2, 2, 4 },
+            DmaChannelId{ 1, 5, 4 },
+            DmaChannelId{ 1, 1, 4 },
+            DmaChannelId{ 1, 2, 4 },
+            DmaChannelId{ 1, 0, 4 },
+            DmaChannelId{ 2, 7, 5 },
+            DmaChannelId{ 1, 3, 5 },
+            DmaChannelId{ 1, 6, 5 } } };
 #endif
 
     }
@@ -51,18 +43,27 @@ namespace hal
         , uartHandle()
         , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]() { TransferComplete(); })
-        , receiveDmaChannel(dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]() { ReceiveComplete(this->rxBuffer.size()/2); }, [this]() { ReceiveComplete(this->rxBuffer.size()); })
+        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
+              { TransferComplete(); })
+        , receiveDmaChannel(
+              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
+              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              [this]()
+              { ReceiveComplete(this->rxBuffer.size()); })
 #else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]() { TransferComplete(); })
-        , receiveDmaChannel(dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]() { ReceiveComplete(this->rxBuffer.size()/2); }, [this]() { ReceiveComplete(this->rxBuffer.size()); })
+        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
+              { TransferComplete(); })
+        , receiveDmaChannel(
+              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
+              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              [this]()
+              { ReceiveComplete(this->rxBuffer.size()); })
 #endif
     {
         Configure(config);
     }
 
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx
-        , GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : rxBuffer(rxBuffer)
         , uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
@@ -72,11 +73,21 @@ namespace hal
         , uartHandle()
         , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]() { TransferComplete(); })
-        , receiveDmaChannel(dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]() { ReceiveComplete(this->rxBuffer.size()/2); }, [this]() { ReceiveComplete(this->rxBuffer.size()); })
+        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
+              { TransferComplete(); })
+        , receiveDmaChannel(
+              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
+              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              [this]()
+              { ReceiveComplete(this->rxBuffer.size()); })
 #else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]() { TransferComplete(); })
-        , receiveDmaChannel(dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]() { ReceiveComplete(this->rxBuffer.size()/2); }, [this]() { ReceiveComplete(this->rxBuffer.size()); })
+        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
+              { TransferComplete(); })
+        , receiveDmaChannel(
+              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
+              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              [this]()
+              { ReceiveComplete(this->rxBuffer.size()); })
 #endif
     {
         Configure(config);
@@ -84,6 +95,7 @@ namespace hal
 
     UartStmDuplexDma::~UartStmDuplexDma()
     {
+        receiveDmaChannel.StopTransfer();
         peripheralUart[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
         DisableClockUart(uartIndex);
     }
@@ -95,7 +107,7 @@ namespace hal
             transferDataComplete = actionOnCompletion;
             transmitDmaChannel.StartTransmit(data);
         }
-        else 
+        else
             infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
     }
 
@@ -135,7 +147,6 @@ namespace hal
         peripheralUart[uartIndex]->CR1 &= ~USART_CR1_RE;
         peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
         peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
-
     }
 
     void UartStmDuplexDma::ReceiveComplete(size_t currentPosition)
@@ -143,9 +154,9 @@ namespace hal
         if (currentPosition == lastReceivedPosition)
             return;
 
-        if(dataReceived)
+        if (dataReceived)
         {
-            infra::ConstByteRange receivedData( rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
+            infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
             lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
             dataReceived(receivedData);
         }

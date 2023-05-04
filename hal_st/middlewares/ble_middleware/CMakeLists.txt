@@ -18,13 +18,19 @@ if ("${TARGET_MCU_VENDOR}" STREQUAL st AND "${TARGET_MCU_FAMILY}" STREQUAL stm32
     target_sources(hal_st.ble_middleware PRIVATE
         BondStorageSt.cpp
         BondStorageSt.hpp
+        GapCentralSt.cpp
+        GapCentralSt.hpp
         GapPeripheralSt.cpp
         GapPeripheralSt.hpp
+        GapSt.cpp
+        GapSt.hpp
         GattServerSt.cpp
         GattServerSt.hpp
         HciEventObserver.hpp
         SystemTransportLayer.cpp
         SystemTransportLayer.hpp
+        TracingGapCentralSt.cpp
+        TracingGapCentralSt.hpp
         TracingGapPeripheralSt.cpp
         TracingGapPeripheralSt.hpp
         TracingGattServerSt.cpp

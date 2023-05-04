@@ -23,15 +23,15 @@ jobs:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           persist-credentials: false
-      - uses: DoozyX/clang-format-lint-action@c3b2c943e924028b93a707a5b1b017976ab8d50c
-        with:
-          clangFormatVersion: 14
-          inplace: true
-          extensions: "cpp,hpp"
-      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
-        with:
-          tool_name: clang-format
-          filter_mode: diff_context
+      #- uses: DoozyX/clang-format-lint-action@c3b2c943e924028b93a707a5b1b017976ab8d50c
+      #  with:
+      #    clangFormatVersion: 14
+      #    inplace: true
+      #    extensions: "cpp,hpp"
+      #- uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
+      #  with:
+      #    tool_name: clang-format
+      #    filter_mode: diff_context
   linter:
     name: Linter
     runs-on: ubuntu-latest

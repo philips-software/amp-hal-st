@@ -19,7 +19,7 @@ namespace hal
 
     private:
         template<typename alignment, uint32_t flashType>
-            void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
+        void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
 
     private:
         infra::ConstByteRange flashMemory;
