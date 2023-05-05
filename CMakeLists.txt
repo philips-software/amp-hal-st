@@ -43,10 +43,7 @@ endif()
 add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
-
-if (HALST_BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif()
+add_subdirectory(examples)
 
 emil_clangformat_directories(hal_st DIRECTORIES .)
 
