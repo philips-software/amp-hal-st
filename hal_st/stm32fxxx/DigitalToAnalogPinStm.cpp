@@ -1,7 +1,8 @@
 #include "hal_st/stm32fxxx/DigitalToAnalogPinStm.hpp"
-#include "cmsis_device.h"
-#include "generated/stm32fxxx/PeripheralTable.hpp"
+#include DEVICE_HEADER
 #include "infra/util/BitLogic.hpp"
+
+#ifdef HAS_PERIPHERAL_DAC
 
 namespace hal
 {
@@ -49,3 +50,5 @@ namespace hal
         assert(result == HAL_OK);
     }
 }
+
+#endif

@@ -1,5 +1,5 @@
 #include "hal_st/cortex/EventDispatcherCortex.hpp"
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 
 namespace hal
 {

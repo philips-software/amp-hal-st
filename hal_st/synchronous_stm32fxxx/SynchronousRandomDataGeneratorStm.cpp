@@ -1,5 +1,5 @@
 #include "hal_st/synchronous_stm32fxxx/SynchronousRandomDataGeneratorStm.hpp"
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_RNG)
 

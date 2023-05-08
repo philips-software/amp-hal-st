@@ -23,7 +23,11 @@ namespace hal
 #endif
         HAL_WWDG_Init(&handle);
 
-        SCB->AIRCR = (0x5FAUL << SCB_AIRCR_VECTKEY_Pos) | (0 << SCB_AIRCR_PRIGROUP_Pos);
+        SCB->AIRCR = (0x5FAUL << SCB_AIRCR_VECTKEY_Pos)
+#ifndef STM32G0
+                     | (0 << SCB_AIRCR_PRIGROUP_Pos)
+#endif
+            ;
         NVIC_SetPriority(WWDG_IRQn, 0);
         WWDG->CFR |= WWDG_CFR_EWI;
 
@@ -33,11 +37,7 @@ namespace hal
 
     void WatchDogStm::Interrupt()
     {
-#if defined(STM32F7) || defined(STM32WB)
         HAL_WWDG_Refresh(&handle);
-#else
-        HAL_WWDG_Refresh(&handle, WWDG_CR_T);
-#endif
         WWDG->SR = 0;
         if (++delay == 41) // 41 * 36ms = 1.5s
             onExpired();

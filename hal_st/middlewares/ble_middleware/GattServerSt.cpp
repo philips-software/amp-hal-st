@@ -7,23 +7,23 @@ extern "C"
 
 namespace
 {
-    uint8_t UuidToType(const services::GattAttribute::Uuid& uuid)
+    uint8_t UuidToType(const services::AttAttribute::Uuid& uuid)
     {
-        if (uuid.Is<services::GattAttribute::Uuid16>())
+        if (uuid.Is<services::AttAttribute::Uuid16>())
             return 0x01;
-        else if (uuid.Is<services::GattAttribute::Uuid128>())
+        else if (uuid.Is<services::AttAttribute::Uuid128>())
             return 0x02;
-        
+
         std::abort(); // Unsupported uuid type
     }
 
     template<class UuidType>
-    const auto* ConvertUuid(const services::GattAttribute::Uuid& uuid)
+    const auto* ConvertUuid(const services::AttAttribute::Uuid& uuid)
     {
-        if (uuid.Is<services::GattAttribute::Uuid16>())
-            return reinterpret_cast<const UuidType*>(&uuid.Get<services::GattAttribute::Uuid16>());
-        else if (uuid.Is<services::GattAttribute::Uuid128>())
-            return reinterpret_cast<const UuidType*>(&uuid.Get<services::GattAttribute::Uuid128>());
+        if (uuid.Is<services::AttAttribute::Uuid16>())
+            return reinterpret_cast<const UuidType*>(&uuid.Get<services::AttAttribute::Uuid16>());
+        else if (uuid.Is<services::AttAttribute::Uuid128>())
+            return reinterpret_cast<const UuidType*>(&uuid.Get<services::AttAttribute::Uuid128>());
 
         std::abort(); // Unsupported uuid type
     }
@@ -33,7 +33,7 @@ namespace
         return infra::enum_cast(properties);
     }
 
-    uint8_t ConvertPermissions(services::GattCharacteristic::PermissionFlags permissions)
+    uint8_t ConvertPermissions(services::GattServerCharacteristic::PermissionFlags permissions)
     {
         return infra::enum_cast(permissions);
     }
@@ -45,7 +45,7 @@ namespace hal
         : hal::HciEventSink(hciEventSource)
     {}
 
-    void GattServerSt::AddService(services::GattService& service)
+    void GattServerSt::AddService(services::GattServerService& service)
     {
         constexpr uint8_t gattPrimaryService = 0x01;
 
@@ -61,7 +61,7 @@ namespace hal
         services.push_front(service);
     }
 
-    services::GattCharacteristicClientOperations::UpdateStatus GattServerSt::Update(const services::GattCharacteristicClientOperationsObserver& characteristic, infra::ConstByteRange data) const
+    services::GattServerCharacteristicOperations::UpdateStatus GattServerSt::Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const
     {
         constexpr uint8_t valueOffset = 0;
         auto result = aci_gatt_update_char_value(characteristic.ServiceHandle(),
@@ -98,7 +98,7 @@ namespace hal
         }
     }
 
-    void GattServerSt::AddCharacteristic(services::GattCharacteristic& characteristic)
+    void GattServerSt::AddCharacteristic(services::GattServerCharacteristic& characteristic)
     {
         constexpr uint8_t encryptionKeySize = 0x10;
         constexpr uint8_t notifyAttributeWrite = 0x01;

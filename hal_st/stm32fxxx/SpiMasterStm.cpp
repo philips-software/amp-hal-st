@@ -59,7 +59,8 @@ namespace hal
             dummyToReceive = sendData.size();
 
         really_assert(!spiInterruptRegistration);
-        spiInterruptRegistration.Emplace(peripheralSpiIrq[spiInstance], [this]() { HandleInterrupt(); });
+        spiInterruptRegistration.Emplace(peripheralSpiIrq[spiInstance], [this]()
+            { HandleInterrupt(); });
 
         peripheralSpi[spiInstance]->CR2 |= SPI_IT_TXE;
         peripheralSpi[spiInstance]->CR2 |= SPI_IT_RXNE;
@@ -135,7 +136,8 @@ namespace hal
             spiInterruptRegistration = infra::none;
             if (chipSelectConfigurator && !continuedSession)
                 chipSelectConfigurator->EndSession();
-            infra::EventDispatcher::Instance().Schedule([this]() { onDone(); });
+            infra::EventDispatcher::Instance().Schedule([this]()
+                { onDone(); });
         }
     }
 }

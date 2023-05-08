@@ -11,7 +11,9 @@
 namespace hal
 {
 #if defined(STM32WB)
-    struct SyncLpUart {};
+    struct SyncLpUart
+    {};
+
     extern const SyncLpUart syncLpUart;
 #endif
     class SynchronousUartStm

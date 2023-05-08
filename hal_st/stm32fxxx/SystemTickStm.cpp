@@ -1,5 +1,5 @@
 #include "hal_st/stm32fxxx/SystemTickStm.hpp"
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/Gpio.hpp"
 
 namespace hal
