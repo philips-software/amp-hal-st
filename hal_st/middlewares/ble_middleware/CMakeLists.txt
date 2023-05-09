@@ -23,6 +23,8 @@ target_sources(hal_st.ble_middleware PRIVATE
     GapPeripheralSt.hpp
     GapSt.cpp
     GapSt.hpp
+    GattClientSt.cpp
+    GattClientSt.hpp
     GattServerSt.cpp
     GattServerSt.hpp
     HciEventObserver.hpp
@@ -32,6 +34,8 @@ target_sources(hal_st.ble_middleware PRIVATE
     TracingGapCentralSt.hpp
     TracingGapPeripheralSt.cpp
     TracingGapPeripheralSt.hpp
+    TracingGattClientSt.cpp
+    TracingGattClientSt.hpp
     TracingGattServerSt.cpp
     TracingGattServerSt.hpp
     TracingSystemTransportLayer.cpp
