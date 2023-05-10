@@ -12,6 +12,8 @@ namespace hal
 {
     class GattClientSt
         : public services::GattClientDiscovery
+        , public services::GattClientCharacteristicOperations
+        , public services::GattClientStackUpdate
         , public hal::HciEventSink
     {
     public:
@@ -21,6 +23,16 @@ namespace hal
         virtual void StartServiceDiscovery() override;
         virtual void StartCharacteristicDiscovery(const services::GattService& service) override;
         virtual void StartDescriptorDiscovery(const services::GattService& service) override;
+
+        // Implementation of services::GattClientCharacteristicOperations
+        virtual void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onDone) const override;
+        virtual void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) const override;
+        virtual void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
+
+        virtual void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        virtual void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        virtual void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        virtual void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
 
         // Implementation of hal::HciEventSink
         virtual void HciEvent(hci_event_pckt& event) override;
@@ -33,8 +45,12 @@ namespace hal
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
 
+        virtual void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleGattConfirmIndication(services::AttAttribute::Handle handle);
         virtual void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent);
 
+        virtual void HandleAttReadResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttReadByGroupTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent);
@@ -60,6 +76,8 @@ namespace hal
         static constexpr uint16_t invalidConnection = 0xffff;
 
         infra::Function<void(services::GattClientDiscoveryObserver&)> onDiscoveryCompletion;
+        mutable infra::AutoResetFunction<void(const infra::ConstByteRange&)> onResponse;
+        mutable infra::AutoResetFunction<void()> onDone;
     };
 }
 

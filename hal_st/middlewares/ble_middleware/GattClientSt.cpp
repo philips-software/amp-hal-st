@@ -38,6 +38,66 @@ namespace hal
         aci_gatt_disc_all_char_desc(connectionHandle, service.Handle(), service.EndHandle());
     }
 
+    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse) const
+    {
+        this->onResponse = onResponse;
+
+        aci_gatt_read_char_value(connectionHandle, characteristic.CharacteristicValueHandle());
+    }
+
+    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) const
+    {
+        this->onDone = onDone;
+
+        aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+    }
+
+    void GattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const
+    {
+        aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+    }
+
+    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    {
+        this->onDone = onDone;
+
+        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification;
+
+        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::notify) == services::GattCharacteristic::PropertyFlags::notify)
+            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+    }
+
+    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    {
+        this->onDone = onDone;
+
+        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable;
+
+        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::notify) == services::GattCharacteristic::PropertyFlags::notify)
+            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+    }
+
+    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    {
+        this->onDone = onDone;
+
+        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication;
+
+        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::indicate) == services::GattCharacteristic::PropertyFlags::indicate)
+            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+    }
+
+    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    {
+        this->onDone = onDone;
+
+        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable;
+
+        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::indicate) == services::GattCharacteristic::PropertyFlags::indicate)
+            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+    }
+
+
     void GattClientSt::HciEvent(hci_event_pckt& event)
     {
         switch (event.evt)
@@ -91,6 +151,12 @@ namespace hal
         case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
             HandleGattCompleteResponse(vendorEvent);
             break;
+        case ACI_GATT_INDICATION_VSEVT_CODE:
+            HandleGattIndicationEvent(vendorEvent);
+            break;
+        case ACI_GATT_NOTIFICATION_VSEVT_CODE:
+            HandleGattNotificationEvent(vendorEvent);
+            break;
         default:
             break;
         }
@@ -143,6 +209,9 @@ namespace hal
 
         if (onDiscoveryCompletion)
             infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
+
+        if (onDone)
+            onDone();
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -171,6 +240,47 @@ namespace hal
         really_assert(disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
 
         connectionHandle = GattClientSt::invalidConnection;
+    }
+
+    void GattClientSt::HandleAttReadResponse(evt_blecore_aci* vendorEvent)
+    {
+        auto attReadResponse = *reinterpret_cast<aci_att_read_resp_event_rp0*>(vendorEvent->data);
+
+        infra::ByteRange data(&attReadResponse.Attribute_Value[0], &attReadResponse.Attribute_Value[0] + attReadResponse.Event_Data_Length);
+
+        really_assert(attReadResponse.Connection_Handle == connectionHandle);
+
+        if (onResponse)
+            onResponse(data);
+    }
+
+    void GattClientSt::HandleGattIndicationEvent(evt_blecore_aci* vendorEvent)
+    {
+        auto gattIndicationEvent = *reinterpret_cast<aci_gatt_indication_event_rp0*>(vendorEvent->data);
+
+        infra::ByteRange data(&gattIndicationEvent.Attribute_Value[0], &gattIndicationEvent.Attribute_Value[0] + gattIndicationEvent.Attribute_Value_Length);
+
+        really_assert(gattIndicationEvent.Connection_Handle == connectionHandle);
+
+        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattIndicationEvent, &data](auto& observer) { observer.UpdateReceived(gattIndicationEvent.Attribute_Handle, data); });
+
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, &gattIndicationEvent]() { this->HandleGattConfirmIndication(gattIndicationEvent.Attribute_Handle); });
+    }
+
+    void GattClientSt::HandleGattNotificationEvent(evt_blecore_aci* vendorEvent)
+    {
+        auto gattNotificationEvent = *reinterpret_cast<aci_gatt_notification_event_rp0*>(vendorEvent->data);
+
+        infra::ByteRange data(&gattNotificationEvent.Attribute_Value[0], &gattNotificationEvent.Attribute_Value[0] + gattNotificationEvent.Attribute_Value_Length);
+
+        really_assert(gattNotificationEvent.Connection_Handle == connectionHandle);
+
+        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattNotificationEvent, &data](auto& observer) { observer.UpdateReceived(gattNotificationEvent.Attribute_Handle, data); });
+    }
+
+    void GattClientSt::HandleGattConfirmIndication(services::AttAttribute::Handle handle)
+    {
+        aci_gatt_confirm_indication(handle);
     }
 
     void GattClientSt::HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16)
