@@ -210,8 +210,10 @@ namespace hal
         if (onDiscoveryCompletion)
             infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
 
-        if (onDone)
-            onDone();
+        auto onDoneCopy = std::exchange(onDone, nullptr);
+
+        if (onDoneCopy)
+            onDoneCopy();
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -250,8 +252,10 @@ namespace hal
 
         really_assert(attReadResponse.Connection_Handle == connectionHandle);
 
-        if (onResponse)
-            onResponse(data);
+        auto onResponseCopy = std::exchange(onResponse, nullptr);
+
+        if (onResponseCopy)
+            onResponseCopy(data);
     }
 
     void GattClientSt::HandleGattIndicationEvent(evt_blecore_aci* vendorEvent)
