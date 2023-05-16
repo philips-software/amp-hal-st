@@ -44,7 +44,7 @@ namespace hal
         const uint32_t streamToHTIF[8] = { DMA_FLAG_HTIF0_4, DMA_FLAG_HTIF1_5, DMA_FLAG_HTIF2_6, DMA_FLAG_HTIF3_7, DMA_FLAG_HTIF0_4, DMA_FLAG_HTIF1_5, DMA_FLAG_HTIF2_6, DMA_FLAG_HTIF3_7 };
         const uint32_t streamToTEIF[8] = { DMA_FLAG_TEIF0_4, DMA_FLAG_TEIF1_5, DMA_FLAG_TEIF2_6, DMA_FLAG_TEIF3_7, DMA_FLAG_TEIF0_4, DMA_FLAG_TEIF1_5, DMA_FLAG_TEIF2_6, DMA_FLAG_TEIF3_7 };
 
-#elif defined(STM32WB) || defined(STM32G4)
+#elif defined(STM32WB)
         volatile uint32_t* const dmaISR[2][7] = {
             { &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR },
             { &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR }
@@ -54,6 +54,28 @@ namespace hal
             { &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR },
             { &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR }
         };
+#elif defined(STM32G4)
+#if defined(STM32G474xx)
+        volatile uint32_t* const dmaISR[2][8] = {
+            { &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR },
+            { &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR }
+        };
+
+        volatile uint32_t* const dmaIFCR[2][8] = {
+            { &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR },
+            { &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR }
+        };
+#else
+        volatile uint32_t* const dmaISR[2][6] = {
+            { &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR, &DMA1->ISR },
+            { &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR, &DMA2->ISR }
+        };
+
+        volatile uint32_t* const dmaIFCR[2][6] = {
+            { &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR, &DMA1->IFCR },
+            { &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR, &DMA2->IFCR }
+        };
+#endif
 #endif
 
 #if defined(STM32WB)
@@ -70,19 +92,35 @@ namespace hal
         const uint32_t streamToHTIF[7] = { DMA_FLAG_HT1, DMA_FLAG_HT2, DMA_FLAG_HT3, DMA_FLAG_HT4, DMA_FLAG_HT5, DMA_FLAG_HT6, DMA_FLAG_HT7 };
         const uint32_t streamToTEIF[7] = { DMA_FLAG_TE1, DMA_FLAG_TE2, DMA_FLAG_TE3, DMA_FLAG_TE4, DMA_FLAG_TE5, DMA_FLAG_TE6, DMA_FLAG_TE7 };
 #elif defined(STM32G4)
+#if defined(STM32G474xx)
+        DMA_Channel_TypeDef* const dmaStream[2][8] = {
+            { DMA1_Channel1, DMA1_Channel2, DMA1_Channel3, DMA1_Channel4, DMA1_Channel5, DMA1_Channel6, DMA1_Channel7, DMA1_Channel8 },
+            { DMA2_Channel1, DMA2_Channel2, DMA2_Channel3, DMA2_Channel4, DMA2_Channel5, DMA2_Channel6, DMA2_Channel7, DMA2_Channel8 }
+        };
+
+        const IRQn_Type dmaIrq[2][8] = {
+            { DMA1_Channel1_IRQn, DMA1_Channel2_IRQn, DMA1_Channel3_IRQn, DMA1_Channel4_IRQn, DMA1_Channel5_IRQn, DMA1_Channel6_IRQn, DMA1_Channel7_IRQn, DMA1_Channel8_IRQn },
+            { DMA2_Channel1_IRQn, DMA2_Channel2_IRQn, DMA2_Channel3_IRQn, DMA2_Channel4_IRQn, DMA2_Channel5_IRQn, DMA2_Channel6_IRQn, DMA2_Channel7_IRQn, DMA2_Channel8_IRQn }
+        };
+
+        const uint32_t streamToTCIF[8] = { DMA_FLAG_TC1, DMA_FLAG_TC2, DMA_FLAG_TC3, DMA_FLAG_TC4, DMA_FLAG_TC5, DMA_FLAG_TC6, DMA_FLAG_TC7, DMA_FLAG_TC8 };
+        const uint32_t streamToHTIF[8] = { DMA_FLAG_HT1, DMA_FLAG_HT2, DMA_FLAG_HT3, DMA_FLAG_HT4, DMA_FLAG_HT5, DMA_FLAG_HT6, DMA_FLAG_HT7, DMA_FLAG_HT8 };
+        const uint32_t streamToTEIF[8] = { DMA_FLAG_TE1, DMA_FLAG_TE2, DMA_FLAG_TE3, DMA_FLAG_TE4, DMA_FLAG_TE5, DMA_FLAG_TE6, DMA_FLAG_TE7, DMA_FLAG_TE8 };
+#else
         DMA_Channel_TypeDef* const dmaStream[2][6] = {
             { DMA1_Channel1, DMA1_Channel2, DMA1_Channel3, DMA1_Channel4, DMA1_Channel5, DMA1_Channel6 },
             { DMA2_Channel1, DMA2_Channel2, DMA2_Channel3, DMA2_Channel4, DMA2_Channel5, DMA2_Channel6 }
         };
 
-        const IRQn_Type dmaIrq[2][7] = {
+        const IRQn_Type dmaIrq[2][6] = {
             { DMA1_Channel1_IRQn, DMA1_Channel2_IRQn, DMA1_Channel3_IRQn, DMA1_Channel4_IRQn, DMA1_Channel5_IRQn, DMA1_Channel6_IRQn },
             { DMA2_Channel1_IRQn, DMA2_Channel2_IRQn, DMA2_Channel3_IRQn, DMA2_Channel4_IRQn, DMA2_Channel5_IRQn, DMA2_Channel6_IRQn }
         };
 
-        const uint32_t streamToTCIF[7] = { DMA_FLAG_TC1, DMA_FLAG_TC2, DMA_FLAG_TC3, DMA_FLAG_TC4, DMA_FLAG_TC5, DMA_FLAG_TC6 };
-        const uint32_t streamToHTIF[7] = { DMA_FLAG_HT1, DMA_FLAG_HT2, DMA_FLAG_HT3, DMA_FLAG_HT4, DMA_FLAG_HT5, DMA_FLAG_HT6 };
-        const uint32_t streamToTEIF[7] = { DMA_FLAG_TE1, DMA_FLAG_TE2, DMA_FLAG_TE3, DMA_FLAG_TE4, DMA_FLAG_TE5, DMA_FLAG_TE6 };
+        const uint32_t streamToTCIF[6] = { DMA_FLAG_TC1, DMA_FLAG_TC2, DMA_FLAG_TC3, DMA_FLAG_TC4, DMA_FLAG_TC5, DMA_FLAG_TC6 };
+        const uint32_t streamToHTIF[6] = { DMA_FLAG_HT1, DMA_FLAG_HT2, DMA_FLAG_HT3, DMA_FLAG_HT4, DMA_FLAG_HT5, DMA_FLAG_HT6 };
+        const uint32_t streamToTEIF[6] = { DMA_FLAG_TE1, DMA_FLAG_TE2, DMA_FLAG_TE3, DMA_FLAG_TE4, DMA_FLAG_TE5, DMA_FLAG_TE6 };
+#endif
 #endif
 
         uint32_t dummy;
