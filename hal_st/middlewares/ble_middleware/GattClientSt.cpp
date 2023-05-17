@@ -61,42 +61,29 @@ namespace hal
     {
         this->onDone = onDone;
 
-        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification;
-
-        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::notify) == services::GattCharacteristic::PropertyFlags::notify)
-            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification);
     }
 
     void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
     {
         this->onDone = onDone;
 
-        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable;
-
-        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::notify) == services::GattCharacteristic::PropertyFlags::notify)
-            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
     }
 
     void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
     {
         this->onDone = onDone;
 
-        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication;
-
-        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::indicate) == services::GattCharacteristic::PropertyFlags::indicate)
-            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication);
     }
 
     void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
     {
         this->onDone = onDone;
 
-        auto characteristicValue = services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable;
-
-        if ((characteristic.CharacteristicProperties() & services::GattCharacteristic::PropertyFlags::indicate) == services::GattCharacteristic::PropertyFlags::indicate)
-            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + 1, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
     }
-
 
     void GattClientSt::HciEvent(hci_event_pckt& event)
     {
@@ -209,11 +196,8 @@ namespace hal
 
         if (onDiscoveryCompletion)
             infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
-
-        auto onDoneCopy = std::exchange(onDone, nullptr);
-
-        if (onDoneCopy)
-            onDoneCopy();
+        else if (onDone)
+            std::exchange(onDone, nullptr)();
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -252,10 +236,8 @@ namespace hal
 
         really_assert(attReadResponse.Connection_Handle == connectionHandle);
 
-        auto onResponseCopy = std::exchange(onResponse, nullptr);
-
-        if (onResponseCopy)
-            onResponseCopy(data);
+        if (onResponse)
+            std::exchange(onResponse, nullptr)(data);
     }
 
     void GattClientSt::HandleGattIndicationEvent(evt_blecore_aci* vendorEvent)
@@ -345,5 +327,13 @@ namespace hal
         {
             stream >> type.Emplace<services::AttAttribute::Uuid128>();
         }
+    }
+
+    void GattClientSt::WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const
+    {
+        const uint16_t offsetCccd = 1;
+
+        if ((characteristic.CharacteristicProperties() & property) == property)
+            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
     }
 }

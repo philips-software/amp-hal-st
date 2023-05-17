@@ -61,6 +61,8 @@ namespace hal
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
 
+        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
+
     private:
         struct Atttributes
         {
