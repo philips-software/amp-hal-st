@@ -55,8 +55,6 @@ namespace hal
     {
         Initialize(gapService);
 
-        UpdateResolvingList();
-
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
     }
 

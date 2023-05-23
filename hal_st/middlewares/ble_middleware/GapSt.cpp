@@ -94,30 +94,6 @@ namespace hal
         aci_hal_write_config_data(offset, CONFIG_DATA_PUBADDR_LEN, address.data());
     }
 
-    void GapSt::UpdateResolvingList()
-    {
-        aci_gap_configure_whitelist();
-
-        uint8_t numberOfBondedAddress;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
-
-        if (numberOfBondedAddress == 0)
-        {
-            aci_gap_add_devices_to_resolving_list(1, &dummyPeer, 1);
-
-            std::copy(std::begin(dummyPeer.Peer_Identity_Address), std::end(dummyPeer.Peer_Identity_Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = dummyPeer.Peer_Identity_Address_Type;
-        }
-        else
-        {
-            aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
-
-            std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
-        }
-    }
-
     void GapSt::HciEvent(hci_event_pckt& event)
     {
         switch (event.evt)
