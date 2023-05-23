@@ -6,8 +6,8 @@ namespace hal
 {
     const services::GapConnectionParameters GapCentralSt::connectionUpdateParameters
     {
-        320, // 400 ms
-        320, // 400 ms
+        6, // 7.5 ms
+        6, // 7.5 ms
         0,
         500,
     };
@@ -55,6 +55,8 @@ namespace hal
     {
         Initialize(gapService);
 
+        UpdateResolvingList();
+
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
     }
 
@@ -66,7 +68,8 @@ namespace hal
             leScanInterval, leScanWindow, peerAddress, macAddress.data(), RESOLVABLE_PRIVATE_ADDR,
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
-            minConnectionEventLength, connectionMaxCeLength);
+            minConnectionEventLength, maxConnectionEventLength);
+
     }
 
     void GapCentralSt::Disconnect()
@@ -83,7 +86,7 @@ namespace hal
     {
         if (!discovering)
         {
-            aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, GAP_NON_RESOLVABLE_PRIVATE_ADDR, filterDuplicatesEnabled);
+            aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, GAP_RESOLVABLE_PRIVATE_ADDR, filterDuplicatesEnabled);
             discovering = true;
             infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::scanning); });
         }
@@ -105,29 +108,10 @@ namespace hal
             connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
-    void GapCentralSt::SetPhy()
-    {
-        if (hci_le_set_phy(connectionContext.connectionHandle, allPhys, speed1Mbps | speed2Mbps, speed1Mbps | speed2Mbps, 0) != BLE_STATUS_SUCCESS)
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->SetPhy(); });
-        else
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
-    }
-
     void GapCentralSt::DataLengthUpdate()
     {
         if (hci_le_set_data_length(connectionContext.connectionHandle, transmissionOctets, transmissionTime) != BLE_STATUS_SUCCESS)
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
-        else
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->ConnectionUpdate(); });
-    }
-
-    void GapCentralSt::ConnectionUpdate()
-    {
-        if (aci_gap_start_connection_update(connectionContext.connectionHandle,
-                connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
-                connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
-                minConnectionEventLength, maxConnectionEventLength) != BLE_STATUS_SUCCESS)
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->ConnectionUpdate(); });
         else
             infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::connected); });
     }
@@ -219,7 +203,7 @@ namespace hal
 
     void GapCentralSt::HandleGapDirectConnectionEstablishmentEvent()
     {
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->SetPhy(); });
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
     }
 
     void GapCentralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
@@ -300,6 +284,5 @@ namespace hal
 
         aci_gap_set_io_capability(ioCapability);
         aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
-        aci_gap_configure_whitelist();
     }
 }

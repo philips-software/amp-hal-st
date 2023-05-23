@@ -16,6 +16,8 @@ namespace hal
     {
         Initialize(gapService);
         bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
+
+        UpdateResolvingList();
     }
 
     void GapPeripheralSt::RemoveAllBonds()
@@ -112,8 +114,6 @@ namespace hal
 
         auto advTypeSt = ConvertAdvertisementType(type);
 
-        UpdateResolvingList();
-
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
         if (allowPairing)
             ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
@@ -193,37 +193,6 @@ namespace hal
     void GapPeripheralSt::NumericComparisonConfirm(bool accept)
     {
         std::abort();
-    }
-
-    void GapPeripheralSt::UpdateResolvingList()
-    {
-        aci_gap_configure_whitelist();
-
-        uint8_t numberOfBondedAddress;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
-
-        if (numberOfBondedAddress == 0)
-        {
-            aci_gap_add_devices_to_resolving_list(1, &dummyPeer, 1);
-
-            std::copy(std::begin(dummyPeer.Peer_Identity_Address), std::end(dummyPeer.Peer_Identity_Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = dummyPeer.Peer_Identity_Address_Type;
-        }
-        else
-        {
-            aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
-
-            std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
-        }
-    }
-
-    void GapPeripheralSt::ClearResolvingList()
-    {
-        aci_gap_configure_whitelist();
-
-        aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
     void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& metaEvent)

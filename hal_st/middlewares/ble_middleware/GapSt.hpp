@@ -73,6 +73,7 @@ namespace hal
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
+        void UpdateResolvingList();
 
     private:
         void RequestConnectionParameterUpdate();
@@ -86,6 +87,8 @@ namespace hal
     private:
         uint8_t& txPowerLevel;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+
+        const Whitelist_Identity_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
     };
 }
 

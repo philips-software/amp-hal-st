@@ -66,8 +66,6 @@ namespace hal
         void RequestConnectionParameterUpdate();
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);
-        void UpdateResolvingList();
-        void ClearResolvingList();
         void Initialize(const GapService& gapService);
 
     private:
@@ -77,8 +75,6 @@ namespace hal
 
         infra::BoundedVector<uint8_t>::WithMaxSize<maxAdvertisementDataSize> advertisementData;
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;
-
-        const Whitelist_Identity_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
     };
 }
 
