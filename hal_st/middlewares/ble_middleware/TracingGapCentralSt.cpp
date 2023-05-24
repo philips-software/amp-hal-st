@@ -1,18 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/TracingGapCentralSt.hpp"
 
-namespace services
-{
-    infra::TextOutputStream& operator<<(infra::TextOutputStream& stream, const GapDeviceAddressType& addressType)
-    {
-        if (addressType == services::GapDeviceAddressType::publicAddress)
-            stream << "public";
-        else
-            stream << "random";
-
-        return stream;
-    }
-}
-
 namespace hal
 {
     TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, uint32_t* bleBondsStorage, services::Tracer& tracer)

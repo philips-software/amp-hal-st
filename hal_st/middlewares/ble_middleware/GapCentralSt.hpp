@@ -59,9 +59,6 @@ namespace hal
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
 
-        const uint16_t transmissionOctets = 251;
-        const uint16_t transmissionTime = 2120;
-
         // Create connection parameters
         const uint16_t leScanInterval = 0x320;
         const uint16_t leScanWindow = 0x320;

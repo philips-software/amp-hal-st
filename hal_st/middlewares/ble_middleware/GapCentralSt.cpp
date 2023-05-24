@@ -14,31 +14,6 @@ namespace hal
 
     namespace
     {
-        infra::ConstByteRange GetLocalNameFromAdvertising(infra::ConstByteRange advertisingIndication)
-        {
-            infra::ByteInputStream stream(advertisingIndication, infra::noFail);
-
-            while (!stream.Empty())
-            {
-                uint8_t length = 0;
-                uint8_t adType = 0;
-
-                stream >> length;
-
-                if (length > 0)
-                {
-                    stream >> adType;
-
-                    if (adType == AD_TYPE_COMPLETE_LOCAL_NAME || adType == AD_TYPE_SHORTENED_LOCAL_NAME)
-                        return stream.ContiguousRange(length - 1);
-
-                    stream.Consume(length - 1);
-                }
-            }
-
-            return infra::ConstByteRange();
-        }
-
         services::GapAdvertisingEventType ToAdvertisingEventType(uint8_t eventType)
         {
             return static_cast<services::GapAdvertisingEventType>(eventType);
@@ -115,7 +90,7 @@ namespace hal
 
     void GapCentralSt::DataLengthUpdate()
     {
-        if (hci_le_set_data_length(connectionContext.connectionHandle, transmissionOctets, transmissionTime) != BLE_STATUS_SUCCESS)
+        if (hci_le_set_data_length(connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime) != BLE_STATUS_SUCCESS)
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
         else
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->ConnectionUpdate(); });
@@ -163,7 +138,7 @@ namespace hal
 
         auto advertisementData = reinterpret_cast<const uint8_t*>(&advertisingReport.Length_Data) + 1;
 
-        discoveredDevice.data = GetLocalNameFromAdvertising(infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data));
+        discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer) { observer.DeviceDiscovered(discoveredDevice); });
     }
