@@ -108,10 +108,11 @@ namespace hal
 
     void GapCentralSt::DataLengthUpdate()
     {
-        if (hci_le_set_data_length(connectionContext.connectionHandle, transmissionOctets, transmissionTime) != BLE_STATUS_SUCCESS)
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
-        else
-            infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::connected); });
+        [[maybe_unused]] auto status = hci_le_set_data_length(connectionContext.connectionHandle, transmissionOctets, transmissionTime);
+
+        assert(status == BLE_STATUS_SUCCESS);
+
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::connected); });
     }
 
     void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
