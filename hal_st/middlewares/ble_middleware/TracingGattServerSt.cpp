@@ -1,14 +1,14 @@
 #include "hal_st/middlewares/ble_middleware/TracingGattServerSt.hpp"
 #include "infra/stream/StringOutputStream.hpp"
 
-namespace
+namespace infra
 {
-    infra::TextOutputStream& operator<<(infra::TextOutputStream& stream, const services::AttAttribute::Uuid& uuid)
+    TextOutputStream& operator<<(TextOutputStream& stream, const services::AttAttribute::Uuid& uuid)
     {
         if (uuid.Is<services::AttAttribute::Uuid16>())
-            stream << "0x" << infra::hex << uuid.Get<services::AttAttribute::Uuid16>();
+            stream << "0x" << hex << uuid.Get<services::AttAttribute::Uuid16>();
         else
-            stream << "[" << infra::AsHex(infra::MakeByteRange(uuid.Get<services::AttAttribute::Uuid128>())) << "]";
+            stream << "[" << AsHex(MakeByteRange(uuid.Get<services::AttAttribute::Uuid128>())) << "]";
 
         return stream;
     }

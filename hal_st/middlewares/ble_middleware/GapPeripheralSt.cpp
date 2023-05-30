@@ -74,9 +74,9 @@ namespace hal
         advertisementData.assign(data);
     }
 
-    infra::ConstByteRange GapPeripheralSt::GetAdvertisementData()
+    infra::ConstByteRange GapPeripheralSt::GetAdvertisementData() const
     {
-        return infra::MakeConstByteRange(advertisementData);
+        return infra::MakeRange(advertisementData);
     }
 
     void GapPeripheralSt::SetScanResponseData(infra::ConstByteRange data)
@@ -84,9 +84,9 @@ namespace hal
         scanResponseData.assign(data);
     }
 
-    infra::ConstByteRange GapPeripheralSt::GetScanResponseData()
+    infra::ConstByteRange GapPeripheralSt::GetScanResponseData() const
     {
-        return infra::MakeConstByteRange(scanResponseData);
+        return infra::MakeRange(scanResponseData);
     }
 
     void GapPeripheralSt::UpdateAdvertisementData()
