@@ -30,22 +30,15 @@ namespace hal
         virtual void StopDeviceDiscovery() override;
 
     protected:
-        // Implementation of GapSt
-        virtual void HciEvent(hci_event_pckt& event);
-
-    protected:
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
-        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
-        void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent);
-
         void HandleGapDiscoveryProcedureEvent();
         void HandleGapDirectConnectionEstablishmentEvent();
 
