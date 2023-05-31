@@ -84,6 +84,7 @@ namespace hal
         SVCCTL_Init();
 
         hci_le_write_suggested_default_data_length(services::GapPeripheral::connectionInitialMaxTxOctets, services::GapPeripheral::connectionInitialMaxTxTime);
+        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
