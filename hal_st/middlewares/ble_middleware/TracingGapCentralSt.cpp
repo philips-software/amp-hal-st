@@ -77,6 +77,10 @@ namespace hal
     {
         const auto dataLengthChangeEvent = *reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
         tracer.Trace() << "TracingGapCentralSt::HandleHciLeDataLengthChangeEvent, Handle - 0x" << infra::hex << dataLengthChangeEvent.Connection_Handle;
+        tracer.Trace() << "\tMax TX octets : " << dataLengthChangeEvent.MaxTxOctets;
+        tracer.Trace() << "\tMax TX time   : " << dataLengthChangeEvent.MaxTxTime;
+        tracer.Trace() << "\tMax RX octets : " << dataLengthChangeEvent.MaxRxOctets;
+        tracer.Trace() << "\tMax RX time   : " << dataLengthChangeEvent.MaxRxTime;
         GapCentralSt::HandleHciLeDataLengthChangeEvent(metaEvent);
     }
 
