@@ -44,9 +44,7 @@ namespace hal
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetConnectionInterval(uint16_t connectionInterval, uint16_t slaveLatency, uint16_t timeoutMultiplier);
-        void SetPhy();
         void DataLengthUpdate();
-        void ConnectionUpdate();
         void Initialize(const GapService& gapService);
 
     private:
@@ -58,11 +56,10 @@ namespace hal
         // Create connection parameters
         const uint16_t leScanInterval = 0x320;
         const uint16_t leScanWindow = 0x320;
-        const uint16_t connectionMaxCeLength = 0x3e8;
 
         // Connection Interval parameters
         const uint16_t minConnectionEventLength = 0;
-        const uint16_t maxConnectionEventLength = 0x280;
+        const uint16_t maxConnectionEventLength = 0x280; // 400 ms
 
         // Terminate connection
         const uint8_t remoteUserTerminatedConnection = 0x13;
