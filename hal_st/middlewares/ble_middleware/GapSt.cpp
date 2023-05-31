@@ -77,7 +77,17 @@ namespace hal
         if (SHCI_C2_BLE_Init(&bleInitCmdPacket) != SHCI_Success)
             std::abort();
 
-        Initialization(rootKeys.identity, rootKeys.encryption);
+        // HCI Reset to synchronise BLE Stack
+        hci_reset();
+
+        // Write Identity root key used to derive LTK and CSRK
+        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, rootKeys.identity.data());
+
+        // Write Encryption root key used to derive LTK and CSRK
+        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, rootKeys.encryption.data());
+
+        aci_hal_set_tx_power_level(1, txPowerLevel);
+        aci_gatt_init();
 
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
 
@@ -85,28 +95,6 @@ namespace hal
 
         hci_le_write_suggested_default_data_length(services::GapPeripheral::connectionInitialMaxTxOctets, services::GapPeripheral::connectionInitialMaxTxTime);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
-    }
-
-    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
-    {
-        auto offset = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
-
-        aci_hal_write_config_data(offset, CONFIG_DATA_PUBADDR_LEN, address.data());
-    }
-
-    void GapSt::HciEvent(hci_event_pckt& event)
-    {
-        switch (event.evt)
-        {
-        case HCI_LE_META_EVT_CODE:
-            HandleHciLeMetaEvent(event);
-            break;
-        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-            HandleHciVendorSpecificDebugEvent(event);
-            break;
-        default:
-            break;
-        }
     }
 
     uint16_t GapSt::EffectiveMaxAttMtuSize() const
@@ -132,23 +120,6 @@ namespace hal
         maxAttMtu = defaultMaxAttMtuSize;
     }
 
-    void GapSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
-    {
-        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
-
-        switch (metaEvent->subevent)
-        {
-        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionCompleteEvent(metaEvent);
-            break;
-        default:
-            break;
-        }
-    }
-
     void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
     {
         aci_gap_allow_rebond(connectionContext.connectionHandle);
@@ -160,14 +131,78 @@ namespace hal
         AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
     }
 
+    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
+    {
+        uint8_t offset = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
+        uint8_t length = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_LEN : CONFIG_DATA_RANDOM_ADDRESS_LEN;
+
+        aci_hal_write_config_data(offset, length, address.data());
+    }
+
+    void GapSt::HciEvent(hci_event_pckt& event)
+    {
+        switch (event.evt)
+        {
+        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
+            HandleHciDisconnectEvent(event);
+            break;
+        case HCI_LE_META_EVT_CODE:
+            HandleHciLeMetaEvent(event);
+            break;
+        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
+            HandleHciVendorSpecificDebugEvent(event);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void GapSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
+    {
+        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
+
+        switch (metaEvent->subevent)
+        {
+        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
+            HandleHciLeConnectionCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_ADVERTISING_REPORT_SUBEVT_CODE:
+            HandleHciLeAdvertisingReportEvent(metaEvent);
+            break;
+        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
+            HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
+            HandleHciLeDataLengthChangeEvent(metaEvent);
+            break;
+        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
+            HandleHciLePhyUpdateCompleteEvent(metaEvent);
+            break;
+        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
+            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+            break;
+        default:
+            break;
+        }
+    }
+
     void GapSt::HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket)
     {
         auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(eventPacket.data);
 
         switch (vendorEvent->ecode)
         {
+        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
+            HandlePairingCompleteEvent(vendorEvent);
+            break;
         case ACI_GAP_BOND_LOST_VSEVT_CODE:
             HandleBondLostEvent(vendorEvent);
+            break;
+        case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
+            HandleGapProcedureCompleteEvent(vendorEvent);
+            break;
+        case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE:
+            HandleL2capConnectionUpdateRequestEvent(vendorEvent);
             break;
         case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
             HandleMtuExchangeResponseEvent(vendorEvent);
@@ -177,49 +212,35 @@ namespace hal
         }
     }
 
-    void GapSt::SetConnectionContext(uint16_t connectionHandle, uint8_t perrAddressType, uint8_t* perAddress)
+    void GapSt::SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress)
     {
-        static constexpr auto deducePeerAddressType = [](auto peerAddressType) {
-            enum class PeerAddressType : uint8_t
+        static constexpr auto deducePeerAddressType = [](auto peerAddressType)
             {
-                PUBLIC,
-                RANDOM,
-                RESOLVED_PUBLIC_IDENTITY,
-                RESOLVED_RANDOM_STATIC_IDENTITY
+                enum class PeerAddressType : uint8_t
+                {
+                    PUBLIC,
+                    RANDOM,
+                    RESOLVED_PUBLIC_IDENTITY,
+                    RESOLVED_RANDOM_STATIC_IDENTITY
+                };
+
+                switch (static_cast<PeerAddressType>(peerAddressType))
+                {
+                case PeerAddressType::PUBLIC:
+                case PeerAddressType::RANDOM:
+                    return peerAddressType;
+
+                case PeerAddressType::RESOLVED_PUBLIC_IDENTITY:
+                    return infra::enum_cast(PeerAddressType::PUBLIC);
+
+                case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY:
+                default:
+                    return infra::enum_cast(PeerAddressType::RANDOM);
+                }
             };
 
-            switch (static_cast<PeerAddressType>(peerAddressType))
-            {
-            case PeerAddressType::PUBLIC:
-            case PeerAddressType::RANDOM:
-                return peerAddressType;
-
-            case PeerAddressType::RESOLVED_PUBLIC_IDENTITY:
-                return infra::enum_cast(PeerAddressType::PUBLIC);
-
-            case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY:
-            default:
-                return infra::enum_cast(PeerAddressType::RANDOM);
-            }
-        };
-
         connectionContext.connectionHandle = connectionHandle;
-        connectionContext.peerAddressType = deducePeerAddressType(perrAddressType);
-        std::copy_n(perAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
-    }
-
-    void GapSt::Initialization(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey)
-    {
-        // HCI Reset to synchronise BLE Stack
-        hci_reset();
-
-        // Write Identity root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, identityRootKey.data());
-
-        // Write Encryption root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, encryptionRootKey.data());
-
-        aci_hal_set_tx_power_level(1, txPowerLevel);
-        aci_gatt_init();
+        connectionContext.peerAddressType = deducePeerAddressType(peerAddressType);
+        std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
     }
 }

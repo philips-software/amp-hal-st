@@ -63,6 +63,18 @@ namespace hal
         GapCentralSt::HandleHciDisconnectEvent(eventPacket);
     }
 
+    void TracingGapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        const auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
+        tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent Handle - 0x" << infra::hex << connectionCompleteEvt->Connection_Handle;
+
+        hal::MacAddress mac;
+        std::copy(std::begin(connectionCompleteEvt->Peer_Address),
+            std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
+        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << connectionCompleteEvt->Peer_Address_Type;
+        GapCentralSt::HandleHciLeConnectionCompleteEvent(metaEvent);
+    }
+
     void TracingGapCentralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto evtConnectionUpdate = reinterpret_cast<hci_le_connection_update_complete_event_rp0*>(metaEvent->data);
@@ -103,25 +115,6 @@ namespace hal
         GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
     }
 
-    void TracingGapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
-    {
-        const auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent Handle - 0x" << infra::hex << connectionCompleteEvt->Connection_Handle;
-
-        hal::MacAddress mac;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address),
-            std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
-        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << connectionCompleteEvt->Peer_Address_Type;
-        GapCentralSt::HandleHciLeConnectionCompleteEvent(metaEvent);
-    }
-
-    void TracingGapCentralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
-        GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
-    }
-
     void TracingGapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
     {
         auto gapProcedureEvent = *reinterpret_cast<aci_gap_proc_complete_event_rp0*>(vendorEvent->data);
@@ -145,5 +138,12 @@ namespace hal
         tracer.Trace() << "\tSlave latency       : " << connectionUpdateEvent.Slave_Latency;
 
         GapCentralSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
+    }
+
+    void TracingGapCentralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
+    {
+        const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
+        tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
+        GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
     }
 }

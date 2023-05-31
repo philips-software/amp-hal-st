@@ -16,7 +16,7 @@ namespace hal
 {
     class GapSt
         : public services::AttMtuExchange
-        , protected hal::HciEventSink
+        , private hal::HciEventSink
     {
     public:
         struct GapService
@@ -34,11 +34,34 @@ namespace hal
     protected:
         GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, uint32_t& bleBondsStorage);
 
+        // Implementation of AttMtuExchange
+        virtual uint16_t EffectiveMaxAttMtuSize() const override;
+
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) {};
+
+        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
+
+        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
+
+        void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
+
+    private:
         // Implementation of HciEventSink
         virtual void HciEvent(hci_event_pckt& event);
 
-        // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override;
+        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
+        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
+
+        void SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress);
 
     protected:
         struct ConnectionContext
@@ -65,23 +88,6 @@ namespace hal
         const uint8_t secureConnectionSupport = 0x01; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
-
-    protected:
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-
-        void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
-
-    private:
-        void RequestConnectionParameterUpdate();
-
-        void Initialization(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey);
-        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
-
-        void SetConnectionContext(uint16_t connectionHandle, uint8_t perrAddressType, uint8_t* perAddress);
 
     private:
         uint8_t& txPowerLevel;

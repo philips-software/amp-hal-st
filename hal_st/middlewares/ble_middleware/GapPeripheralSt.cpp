@@ -226,9 +226,11 @@ namespace hal
         aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
-    void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& metaEvent)
+    void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
-        auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(metaEvent.data);
+        GapSt::HandleHciDisconnectEvent(eventPacket);
+
+        auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
 
         if (disconnectEvt->Connection_Handle == connectionContext.connectionHandle)
         {
@@ -240,20 +242,17 @@ namespace hal
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+
         RequestConnectionParameterUpdate();
 
         UpdateState(services::GapState::connected);
     }
 
-    void GapPeripheralSt::RequestConnectionParameterUpdate()
-    {
-        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
-            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
-            connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
-    }
-
     void GapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
     {
+        GapSt::HandlePairingCompleteEvent(vendorEvent);
+
         auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
 
         if (pairingComplete->Connection_Handle == connectionContext.connectionHandle && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
@@ -264,61 +263,11 @@ namespace hal
         }
     }
 
-    void GapPeripheralSt::HciEvent(hci_event_pckt& event)
+    void GapPeripheralSt::RequestConnectionParameterUpdate()
     {
-        GapSt::HciEvent(event);
-
-        switch (event.evt)
-        {
-        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-            HandleHciDisconnectEvent(event);
-            break;
-        case HCI_LE_META_EVT_CODE:
-            HandleHciLeMetaEvent(event);
-            break;
-        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-            HandleHciVendorSpecificDebugEvent(event);
-            break;
-        default:
-            break;
-        }
-    }
-
-    void GapPeripheralSt::HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket)
-    {
-        auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(eventPacket.data);
-
-        switch (vendorEvent->ecode)
-        {
-        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
-            HandlePairingCompleteEvent(vendorEvent);
-            break;
-        default:
-            break;
-        }
-    }
-
-    void GapPeripheralSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
-    {
-        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
-
-        switch (metaEvent->subevent)
-        {
-        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
-            HandleHciLePhyUpdateCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
-            HandleHciLeDataLengthUpdateEvent(metaEvent);
-            break;
-        default:
-            break;
-        }
+        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
+            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
+            connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
     void GapPeripheralSt::Initialize(const GapService& gapService)

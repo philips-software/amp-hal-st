@@ -25,6 +25,17 @@ namespace hal
         GapPeripheralSt::HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
     }
 
+    void TracingGapPeripheralSt::HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent)
+    {
+        const auto dataLengthUpdate = reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
+        tracer.Trace() << "GapPeripheralSt::HandleHciLeDataLengthChangeEvent";
+        tracer.Trace() << "\tMaxTxOctets : " << dataLengthUpdate->MaxTxOctets;
+        tracer.Trace() << "\tMaxTxTime   : " << dataLengthUpdate->MaxTxTime;
+        tracer.Trace() << "\tMaxRxOctets : " << dataLengthUpdate->MaxRxOctets;
+        tracer.Trace() << "\tMaxRxTime   : " << dataLengthUpdate->MaxRxTime;
+        GapPeripheralSt::HandleHciLeDataLengthChangeEvent(metaEvent);
+    }
+
     void TracingGapPeripheralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto evtLePhyUpdate = reinterpret_cast<hci_le_phy_update_complete_event_rp0*>(metaEvent->data);
@@ -44,28 +55,17 @@ namespace hal
         GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
     }
 
-    void TracingGapPeripheralSt::HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent)
+    void TracingGapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
     {
-        const auto dataLengthUpdate = reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "GapPeripheralSt::HandleHciLeDataLengthUpdateEvent";
-        tracer.Trace() << "\tMaxTxOctets : " << dataLengthUpdate->MaxTxOctets;
-        tracer.Trace() << "\tMaxTxTime   : " << dataLengthUpdate->MaxTxTime;
-        tracer.Trace() << "\tMaxRxOctets : " << dataLengthUpdate->MaxRxOctets;
-        tracer.Trace() << "\tMaxRxTime   : " << dataLengthUpdate->MaxRxTime;
-        GapPeripheralSt::HandleHciLeDataLengthUpdateEvent(metaEvent);
+        const auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
+        tracer.Trace() << "GapPeripheralSt::HandlePairingCompleteEvent " << pairingComplete->Status;
+        GapPeripheralSt::HandlePairingCompleteEvent(vendorEvent);
     }
 
     void TracingGapPeripheralSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
     {
         tracer.Trace() << "GapPeripheralSt::HandleBondLostEvent";
         GapPeripheralSt::HandleBondLostEvent(vendorEvent);
-    }
-
-    void TracingGapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
-    {
-        const auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "GapPeripheralSt::HandlePairingCompleteEvent " << pairingComplete->Status;
-        GapPeripheralSt::HandlePairingCompleteEvent(vendorEvent);
     }
 
     void TracingGapPeripheralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
