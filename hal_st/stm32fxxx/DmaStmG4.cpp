@@ -316,7 +316,7 @@ namespace hal
     {
         if (*dmaISR[dmaIndex] & streamToTCIF[channelIndex])
         {
-            *dmaIFCR[dmaIndex] |= streamToTCIF[channelIndex];
+            *dmaIFCR[dmaIndex] = streamToTCIF[channelIndex];
             Disable();
 
             __DMB();

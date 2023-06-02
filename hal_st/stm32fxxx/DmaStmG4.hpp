@@ -91,6 +91,7 @@ namespace hal
 
         private:
             DispatchedInterruptHandler interruptHandler;
+
             infra::Function<void()> actionOnTransferComplete;
         };
 

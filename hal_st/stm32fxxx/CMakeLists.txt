@@ -82,10 +82,19 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SystemTickTimerService.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.hpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStmDma.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStmDma.hpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>:UartStmDuplexDma.cpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>:UartStmDuplexDma.hpp>
+
+    $<$<NOT:$<OR:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>>:UartStmDma.cpp>
+    $<$<NOT:$<OR:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>>:UartStmDma.hpp>
+
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>:UartStmDmaG4.hpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>:UartStmDmaG4.cpp>
+
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.cpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>>:UartStmDuplexDma.hpp>
+
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>:UartStmDuplexDmaG4.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>:UartStmDuplexDmaG4.hpp>
+
     UsbLinkLayerStm.cpp
     UsbLinkLayerStm.hpp
     UniqueDeviceId.cpp
