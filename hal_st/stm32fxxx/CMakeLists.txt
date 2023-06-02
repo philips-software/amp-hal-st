@@ -39,8 +39,13 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.hpp>
     DigitalToAnalogPinStm.cpp
     DigitalToAnalogPinStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.hpp>
+
+    $<$<NOT:$<OR:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>>:DmaStm.cpp>
+    $<$<NOT:$<OR:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>>>:DmaStm.hpp>
+
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>:DmaStmG4.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>:DmaStmG4.hpp>
+
     EthernetMacStm.cpp
     EthernetMacStm.hpp
     EthernetSmiStm.cpp
