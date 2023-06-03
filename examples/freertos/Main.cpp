@@ -14,9 +14,20 @@ extern "C" void xPortPendSVHandler();
 extern "C" void xPortSysTickHandler();
 extern "C" void vPortSVCHandler();
 
-extern "C" [[gnu::naked]] void SVC_Handler() { asm("b vPortSVCHandler"); }
-extern "C" [[gnu::naked]] void PendSV_Handler() { asm("b xPortPendSVHandler"); }
-extern "C" [[gnu::naked]] void SysTick_Handler() { asm("b xPortSysTickHandler"); };
+extern "C" [[gnu::naked]] void SVC_Handler()
+{
+    asm("b vPortSVCHandler");
+}
+
+extern "C" [[gnu::naked]] void PendSV_Handler()
+{
+    asm("b xPortPendSVHandler");
+}
+
+extern "C" [[gnu::naked]] void SysTick_Handler()
+{
+    asm("b xPortSysTickHandler");
+};
 
 unsigned int hse_value = 8000000;
 
@@ -25,7 +36,7 @@ int main()
     HAL_Init();
 
     // Configure your clock here
-    //ConfigureDefaultClockNucleo767ZI();
+    // ConfigureDefaultClockNucleo767ZI();
 
     static hal::InterruptTable::WithStorage<128> interruptTable;
     static hal::GpioStm gpio{ hal::pinoutTableDefaultStm, hal::analogTableDefaultStm };
@@ -48,8 +59,7 @@ int main()
                 pin.Set(true);
                 std::this_thread::sleep_for(200ms);
                 pin.Set(false);
-            }
-        });
+            } });
 
     static std::thread t2([]()
         {
@@ -60,8 +70,7 @@ int main()
                 pin.Set(!pin.GetOutputLatch());
             });
 
-            eventDispatcher.Run();
-        });
+            eventDispatcher.Run(); });
 
     osal::Run();
     __builtin_unreachable();
