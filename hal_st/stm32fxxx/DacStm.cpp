@@ -1,5 +1,4 @@
 #include "hal_st/stm32fxxx/DacStm.hpp"
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include <type_traits>
 

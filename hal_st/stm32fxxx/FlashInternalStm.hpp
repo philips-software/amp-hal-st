@@ -1,7 +1,7 @@
 #ifndef HAL_FLASH_INTERNAL_STM_HPP
 #define HAL_FLASH_INTERNAL_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/Flash.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
@@ -20,7 +20,7 @@ namespace hal
 
     private:
         template<typename alignment, uint32_t flashType>
-            void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
+        void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
 
     private:
         infra::ConstByteRange flashMemory;

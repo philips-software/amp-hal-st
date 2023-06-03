@@ -89,7 +89,11 @@ namespace hal
 
     void QuadSpiStmDma::SetConfig(const Header& header, uint32_t dataSize, Lines lines, FunctionalMode mode)
     {
-        uint32_t ccr = QUADSPI->CCR & QUADSPI_CCR_DDRM | QUADSPI_CCR_DHHC;
+        uint32_t ccr = QUADSPI->CCR & QUADSPI_CCR_DDRM
+#if !defined(STM32WB)
+                       | QUADSPI_CCR_DHHC
+#endif
+            ;
 
         if (mode == FunctionalMode::read)
             ccr |= QUADSPI_CCR_FMODE_0;

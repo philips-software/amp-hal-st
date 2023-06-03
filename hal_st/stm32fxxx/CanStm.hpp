@@ -1,7 +1,7 @@
 #ifndef HAL_CAN_STM_HPP
 #define HAL_CAN_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/Can.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"

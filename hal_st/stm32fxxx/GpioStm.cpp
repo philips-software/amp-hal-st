@@ -12,8 +12,10 @@ namespace hal
             GPIOB,
             GPIOC,
             GPIOD,
+#if !defined(STM32G0)
             GPIOE,
-#if !defined(STM32WB)
+#endif
+#if !defined(STM32WB) && !defined(STM32G0)
             GPIOF,
 #endif
 #if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
@@ -53,12 +55,10 @@ namespace hal
         };
 
         const uint32_t speedToSpeed[] = {
-            GPIO_SPEED_LOW,
-            GPIO_SPEED_MEDIUM,
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
-            GPIO_SPEED_FAST,
-#endif
-            GPIO_SPEED_HIGH
+            GPIO_SPEED_FREQ_LOW,
+            GPIO_SPEED_FREQ_MEDIUM,
+            GPIO_SPEED_FREQ_HIGH,
+            GPIO_SPEED_FREQ_VERY_HIGH
         };
 
         const uint32_t driveToAFMode[2] = {
@@ -341,7 +341,7 @@ namespace hal
         : pinoutTable(pinoutTable)
         , analogTable(analogTable)
         , assignedPins()
-#if defined(STM32F0)
+#if defined(STM32F0) | defined(STM32G0)
         , interruptDispatcher0_1(EXTI0_1_IRQn, [this]()
               { ExtiInterrupt(EXTI0_1_IRQn, 0, 2); })
         , interruptDispatcher2_3(EXTI2_3_IRQn, [this]()
@@ -377,8 +377,10 @@ namespace hal
         __GPIOB_CLK_ENABLE();
         __GPIOC_CLK_ENABLE();
         __GPIOD_CLK_ENABLE();
+#if !defined(STM32G0)
         __GPIOE_CLK_ENABLE();
-#if !defined(STM32WB)
+#endif
+#if !defined(STM32WB) && !defined(STM32G0)
         __GPIOF_CLK_ENABLE();
 #endif
 #if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
@@ -426,9 +428,13 @@ namespace hal
     {
         uint32_t extiMask = 0xf << ((index & 0x03) << 2);
         uint32_t extiValue = static_cast<uint8_t>(port) << ((index & 0x03) << 2);
+#if defined(STM32G0)
+        EXTI->EXTICR[index >> 2] = (EXTI->EXTICR[index >> 2] & ~extiMask) | extiValue;
+#else
         SYSCFG->EXTICR[index >> 2] = (SYSCFG->EXTICR[index >> 2] & ~extiMask) | extiValue;
+#endif
 
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         if (trigger != InterruptTrigger::fallingEdge)
             EXTI->RTSR1 |= 1 << index;
         else
@@ -459,7 +465,7 @@ namespace hal
 
     void GpioStm::DisableInterrupt(Port port, uint8_t index)
     {
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         EXTI->IMR1 &= ~(1 << index);
 #else
         EXTI->IMR &= ~(1 << index);
@@ -471,10 +477,15 @@ namespace hal
     {
         for (std::size_t line = from; line != to; ++line)
         {
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4)
             if (EXTI->PR1 & (1 << line))
             {
                 EXTI->PR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it
+#elif defined(STM32G0)
+            if ((EXTI->RPR1 & (1 << line)) || (EXTI->FPR1 & (1 << line)))
+            {
+                EXTI->RPR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it
+                EXTI->FPR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it
 #else
             if (EXTI->PR & (1 << line))
             {

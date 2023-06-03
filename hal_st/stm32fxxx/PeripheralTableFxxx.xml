@@ -41,9 +41,13 @@
     <item name="ETH"/>
     <interrupt/>
   </peripheral>
+  <peripheral name="USB" type="USB_OTG_GlobalTypeDef*" base="USB_OTG_HS_PERIPH_BASE">
+    <item name="USB_OTG_FS"/>
+  </peripheral>
   <peripheral name="QuadSpi" type="QUADSPI_TypeDef*" base="QSPI_R_BASE">
     <item name="QUADSPI"/>
     <interrupt/>
   </peripheral>
   <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral>
+  <peripheral name="Rtc" type="RTC_TypeDef*"><item name="RTC"/></peripheral>
 </peripherals>

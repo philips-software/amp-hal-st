@@ -3,6 +3,7 @@
 
 #include "ble/ble.h"
 #include "ble/svc/Inc/svc_ctl.h"
+#include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "hci_tl.h"
 #include "infra/util/BoundedString.hpp"
@@ -17,109 +18,57 @@ namespace hal
 {
     class GapPeripheralSt
         : public services::GapPeripheral
-        , public services::AttMtuExchange
         , public services::GapPeripheralBonding
         , public services::GapPeripheralPairing
-        , public hal::HciEventSink
+        , public GapSt
     {
     public:
-        struct GapService
-        {
-            infra::BoundedString::WithStorage<32> deviceName;
-            uint16_t appearance;
-        };
-
-        struct RootKeys
-        {
-            std::array<uint8_t, 16> identity;
-            std::array<uint8_t, 16> encryption;
-        };
-
-    public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const hal::GapSt::RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
-        virtual hal::MacAddress GetResolvableAddress() const override;
+        virtual services::GapAddress GetAddress() const override;
+        virtual services::GapAddress GetIdentityAddress() const override;
         virtual void SetAdvertisementData(infra::ConstByteRange data) override;
+        virtual infra::ConstByteRange GetAdvertisementData() const override;
         virtual void SetScanResponseData(infra::ConstByteRange data) override;
-        virtual void Advertise(AdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
+        virtual infra::ConstByteRange GetScanResponseData() const override;
+        virtual void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         virtual void Standby() override;
 
         // Implementation of GapPeripheralBonding
-        virtual void RemoveAllBonds();
+        virtual void RemoveAllBonds() override;
+        virtual void RemoveOldestBond() override;
+        virtual std::size_t GetMaxNumberOfBonds() const override;
+        virtual std::size_t GetNumberOfBonds() const override;
 
         // Implementation of GapPeripheralPairing
         virtual void AllowPairing(bool allow) override;
-
-        // Implementation of HciEventSink
-        virtual void HciEvent(hci_event_pckt& event);
-
-        // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override; 
-
-    private:
-        void UpdateAdvertisementData();
-
-        void SetPublicAddress(const hal::MacAddress& address);
-        void UpdateState(services::GapPeripheralState newstate);
-        void RequestConnectionParameterUpdate();
-
-        void HciGapGattInit(const std::array<uint8_t, 16>& identityRootKey, const std::array<uint8_t, 16>& encryptionRootKey);
-        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
-
-        void UpdateResolvingList();
-        void ClearResolvingList();
+        virtual void SetSecurityMode(services::GapSecurityMode mode, services::GapSecurityLevel level) override;
+        virtual void SetIoCapabilities(services::GapIoCapabilities caps) override;
+        virtual void AuthenticateWithPasskey(uint32_t passkey) override;
+        virtual void NumericComparisonConfirm(bool accept) override;
 
     protected:
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
-        virtual void HandleHciUnknownEvent(hci_event_pckt& eventPacket);
-
-        virtual void HandleHciLeConnectionUpdateEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeUnknownEvent(evt_le_meta_event* metaEvent);
-
-        virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleMtuExchangeEvent(evt_blecore_aci* vendorEvent);
+        // Implementation of GapSt
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
-        struct ConnectionContext
-        {
-            uint16_t connectionHandle;
-            uint8_t peerAddressType;
-            std::array<uint8_t, 6> peerAddress;
-        };
+        void RequestConnectionParameterUpdate();
+        void UpdateAdvertisementData();
+        void UpdateState(services::GapState newstate);
+        void UpdateResolvingList();
+        void ClearResolvingList();
+        void Initialize(const GapService& gapService);
 
     private:
         infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
-        services::GapPeripheralState state = services::GapPeripheralState::Standby;
+        services::GapState state = services::GapState::standby;
         bool allowPairing = true;
-
-        ConnectionContext connectionContext;
-
-        uint8_t txPowerLevel;
-
-        const GapService gapService;
-
-        const uint8_t bondingMode = 0x01;
-        const uint8_t ioCapability = 0x03;
-        const uint8_t mitmMode = 0x00;
-        const uint8_t secureConnectionSupport = 0x01;
-        const uint8_t keypressNotificationSupport = 0x00;
-        static constexpr uint8_t maxNumberOfBonds = 10;
-
-        const uint16_t minConnectionInterval = 0x0006;
-        const uint16_t maxConnectionInterval = minConnectionInterval;
-        const uint16_t slaveLatency = 0;
-        const uint16_t supervisionTimeout = 500;
 
         infra::BoundedVector<uint8_t>::WithMaxSize<maxAdvertisementDataSize> advertisementData;
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;
-
-        uint16_t maxAttMtu = defaultMaxAttMtuSize;
 
         const Whitelist_Identity_Entry_t dummyPeer {0x01, {0x00, 0x00, 0x00, 0x00, 0x00, 0xFF}};
     };

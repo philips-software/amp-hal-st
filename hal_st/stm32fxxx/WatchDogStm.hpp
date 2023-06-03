@@ -1,7 +1,7 @@
 #ifndef HAL_WATCHDOG_STM_HPP
 #define HAL_WATCHDOG_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/timer/Timer.hpp"
 #include <atomic>

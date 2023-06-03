@@ -23,7 +23,7 @@ namespace hal
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
         , uartHandle()
         , dma(dma)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
               { TransferComplete(); })
 #else
@@ -41,7 +41,7 @@ namespace hal
         uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
         uartHandle.Init.HwFlowCtl = config.hwFlowControl;
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
 #else
@@ -61,7 +61,7 @@ namespace hal
         , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
         , uartHandle()
         , dma(dma)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
               { TransferComplete(); })
 #else
@@ -79,7 +79,7 @@ namespace hal
         uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
         uartHandle.Init.HwFlowCtl = config.hwFlowControl;
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
 #else
@@ -112,7 +112,7 @@ namespace hal
     {
         this->dataReceived = dataReceived;
 
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
 #else
         peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
@@ -141,14 +141,14 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
 #else
         while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
 #endif
         {
             uint8_t receivedByte =
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
                 peripheralUart[uartIndex]->RDR;
 #else
                 peripheralUart[uartIndex]->DR;
@@ -157,7 +157,7 @@ namespace hal
         }
 
         // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
 #else
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));

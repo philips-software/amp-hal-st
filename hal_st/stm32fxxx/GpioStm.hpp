@@ -1,7 +1,7 @@
 #ifndef HAL_GPIO_STM_HPP
 #define HAL_GPIO_STM_HPP
 
-#include "cmsis_device.h"
+#include DEVICE_HEADER
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/MemoryRange.hpp"
@@ -261,7 +261,7 @@ namespace hal
         std::array<infra::Function<void()>, 16> handlers;
         std::array<uint32_t, 11> assignedPins;
 
-#if defined(STM32F0)
+#if defined(STM32F0) || defined(STM32G0)
         DispatchedInterruptHandler interruptDispatcher0_1;
         DispatchedInterruptHandler interruptDispatcher2_3;
         DispatchedInterruptHandler interruptDispatcher4_15;
