@@ -216,6 +216,7 @@ namespace hal
 
             std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
             connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
+
             for (uint8_t i = 0; i < numberOfBondedAddress; i++)
                 hci_le_set_privacy_mode(bondedDevices[i].Address_Type, bondedDevices[i].Address, HCI_PRIV_MODE_DEVICE);
         }
