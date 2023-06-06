@@ -130,11 +130,9 @@ namespace hal
     {
         if (connectionContext.connectionHandle != 0)
             aci_gap_terminate(connectionContext.connectionHandle, 0x13);
-        else
-        {
-            aci_gap_set_non_discoverable();
-            UpdateState(services::GapState::standby);
-        }
+
+        aci_gap_set_non_discoverable();
+        UpdateState(services::GapState::standby);
     }
 
     void GapPeripheralSt::AllowPairing(bool allow)
