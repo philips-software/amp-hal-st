@@ -50,6 +50,18 @@ namespace hal
         GapCentralSt::HandleHciDisconnectEvent(eventPacket);
     }
 
+    void TracingGapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        const auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
+        tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent Handle - 0x" << infra::hex << connectionCompleteEvt->Connection_Handle;
+
+        hal::MacAddress mac;
+        std::copy(std::begin(connectionCompleteEvt->Peer_Address),
+            std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
+        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << connectionCompleteEvt->Peer_Address_Type;
+        GapCentralSt::HandleHciLeConnectionCompleteEvent(metaEvent);
+    }
+
     void TracingGapCentralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto evtConnectionUpdate = reinterpret_cast<hci_le_connection_update_complete_event_rp0*>(metaEvent->data);
@@ -64,6 +76,10 @@ namespace hal
     {
         const auto dataLengthChangeEvent = *reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
         tracer.Trace() << "TracingGapCentralSt::HandleHciLeDataLengthChangeEvent, Handle - 0x" << infra::hex << dataLengthChangeEvent.Connection_Handle;
+        tracer.Trace() << "\tMax TX octets : " << dataLengthChangeEvent.MaxTxOctets;
+        tracer.Trace() << "\tMax TX time   : " << dataLengthChangeEvent.MaxTxTime;
+        tracer.Trace() << "\tMax RX octets : " << dataLengthChangeEvent.MaxRxOctets;
+        tracer.Trace() << "\tMax RX time   : " << dataLengthChangeEvent.MaxRxTime;
         GapCentralSt::HandleHciLeDataLengthChangeEvent(metaEvent);
     }
 
@@ -84,25 +100,6 @@ namespace hal
             std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
         tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << enhancedConnectionCompleteEvt->Peer_Address_Type;
         GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-    }
-
-    void TracingGapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
-    {
-        const auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent Handle - 0x" << infra::hex << connectionCompleteEvt->Connection_Handle;
-
-        hal::MacAddress mac;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address),
-            std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
-        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << connectionCompleteEvt->Peer_Address_Type;
-        GapCentralSt::HandleHciLeConnectionCompleteEvent(metaEvent);
-    }
-
-    void TracingGapCentralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
-        GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
     }
 
     void TracingGapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -128,5 +125,12 @@ namespace hal
         tracer.Trace() << "\tSlave latency       : " << connectionUpdateEvent.Slave_Latency;
 
         GapCentralSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
+    }
+
+    void TracingGapCentralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
+    {
+        const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
+        tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
+        GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
     }
 }

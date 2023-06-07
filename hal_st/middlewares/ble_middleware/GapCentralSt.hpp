@@ -30,30 +30,21 @@ namespace hal
         virtual void StopDeviceDiscovery() override;
 
     protected:
-        // Implementation of GapSt
-        virtual void HciEvent(hci_event_pckt& event);
-
-    protected:
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
-        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
-        void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent);
-
         void HandleGapDiscoveryProcedureEvent();
         void HandleGapDirectConnectionEstablishmentEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetConnectionInterval(uint16_t connectionInterval, uint16_t slaveLatency, uint16_t timeoutMultiplier);
-        void SetPhy();
         void DataLengthUpdate();
-        void ConnectionUpdate();
         void Initialize(const GapService& gapService);
 
     private:
@@ -62,11 +53,10 @@ namespace hal
         // Create connection parameters
         const uint16_t leScanInterval = 0x320;
         const uint16_t leScanWindow = 0x320;
-        const uint16_t connectionMaxCeLength = 0x3e8;
 
         // Connection Interval parameters
         const uint16_t minConnectionEventLength = 0;
-        const uint16_t maxConnectionEventLength = 0x280;
+        const uint16_t maxConnectionEventLength = 0x280; // 400 ms
 
         // Terminate connection
         const uint8_t remoteUserTerminatedConnection = 0x13;
