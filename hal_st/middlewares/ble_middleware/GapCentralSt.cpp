@@ -103,13 +103,6 @@ namespace hal
     {
         GapSt::HandleHciDisconnectEvent(eventPacket);
 
-        auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
-
-        really_assert(disconnectionCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-        really_assert(disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
-
-        connectionContext.connectionHandle = GapSt::invalidConnection;
-
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
     }
 

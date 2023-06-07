@@ -37,7 +37,7 @@ namespace hal
         // Implementation of AttMtuExchange
         virtual uint16_t EffectiveMaxAttMtuSize() const override;
 
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) {};
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};
