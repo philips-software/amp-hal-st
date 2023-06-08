@@ -343,31 +343,53 @@ namespace hal
         , assignedPins()
 #if defined(STM32F0) | defined(STM32G0)
         , interruptDispatcher0_1(EXTI0_1_IRQn, [this]()
-              { ExtiInterrupt(EXTI0_1_IRQn, 0, 2); })
+              {
+                  ExtiInterrupt(EXTI0_1_IRQn, 0, 2);
+              })
         , interruptDispatcher2_3(EXTI2_3_IRQn, [this]()
-              { ExtiInterrupt(EXTI2_3_IRQn, 2, 4); })
+              {
+                  ExtiInterrupt(EXTI2_3_IRQn, 2, 4);
+              })
         , interruptDispatcher4_15(EXTI4_15_IRQn, [this]()
-              { ExtiInterrupt(EXTI4_15_IRQn, 4, 16); })
+              {
+                  ExtiInterrupt(EXTI4_15_IRQn, 4, 16);
+              })
 #else
         , interruptDispatcher0(EXTI0_IRQn, [this]()
-              { ExtiInterrupt(EXTI0_IRQn, 0, 1); })
+              {
+                  ExtiInterrupt(EXTI0_IRQn, 0, 1);
+              })
         , interruptDispatcher1(EXTI1_IRQn, [this]()
-              { ExtiInterrupt(EXTI1_IRQn, 1, 2); })
+              {
+                  ExtiInterrupt(EXTI1_IRQn, 1, 2);
+              })
 #if defined(STM32F3)
         , interruptDispatcher2(EXTI2_TSC_IRQn, [this]()
-              { ExtiInterrupt(EXTI2_TSC_IRQn, 2, 3); })
+              {
+                  ExtiInterrupt(EXTI2_TSC_IRQn, 2, 3);
+              })
 #else
         , interruptDispatcher2(EXTI2_IRQn, [this]()
-              { ExtiInterrupt(EXTI2_IRQn, 2, 3); })
+              {
+                  ExtiInterrupt(EXTI2_IRQn, 2, 3);
+              })
 #endif
         , interruptDispatcher3(EXTI3_IRQn, [this]()
-              { ExtiInterrupt(EXTI3_IRQn, 3, 4); })
+              {
+                  ExtiInterrupt(EXTI3_IRQn, 3, 4);
+              })
         , interruptDispatcher4(EXTI4_IRQn, [this]()
-              { ExtiInterrupt(EXTI4_IRQn, 4, 5); })
+              {
+                  ExtiInterrupt(EXTI4_IRQn, 4, 5);
+              })
         , interruptDispatcher9_5(EXTI9_5_IRQn, [this]()
-              { ExtiInterrupt(EXTI9_5_IRQn, 5, 10); })
+              {
+                  ExtiInterrupt(EXTI9_5_IRQn, 5, 10);
+              })
         , interruptDispatcher15_10(EXTI15_10_IRQn, [this]()
-              { ExtiInterrupt(EXTI15_10_IRQn, 10, 16); })
+              {
+                  ExtiInterrupt(EXTI15_10_IRQn, 10, 16);
+              })
 #endif
     {
 #if !defined(STM32WB)

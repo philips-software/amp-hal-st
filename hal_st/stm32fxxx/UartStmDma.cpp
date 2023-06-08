@@ -25,10 +25,14 @@ namespace hal
         , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
 #else
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
 #endif
     {
         RegisterInterrupt(config);
@@ -63,10 +67,14 @@ namespace hal
         , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
 #else
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
 #endif
     {
         RegisterInterrupt(config);
