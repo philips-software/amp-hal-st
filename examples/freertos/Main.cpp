@@ -14,9 +14,20 @@ extern "C" void xPortPendSVHandler();
 extern "C" void xPortSysTickHandler();
 extern "C" void vPortSVCHandler();
 
-extern "C" [[gnu::naked]] void SVC_Handler() { asm("b vPortSVCHandler"); }
-extern "C" [[gnu::naked]] void PendSV_Handler() { asm("b xPortPendSVHandler"); }
-extern "C" [[gnu::naked]] void SysTick_Handler() { asm("b xPortSysTickHandler"); };
+extern "C" [[gnu::naked]] void SVC_Handler()
+{
+    asm("b vPortSVCHandler");
+}
+
+extern "C" [[gnu::naked]] void PendSV_Handler()
+{
+    asm("b xPortPendSVHandler");
+}
+
+extern "C" [[gnu::naked]] void SysTick_Handler()
+{
+    asm("b xPortSysTickHandler");
+};
 
 unsigned int hse_value = 8000000;
 
@@ -25,7 +36,7 @@ int main()
     HAL_Init();
 
     // Configure your clock here
-    //ConfigureDefaultClockNucleo767ZI();
+    // ConfigureDefaultClockNucleo767ZI();
 
     static hal::InterruptTable::WithStorage<128> interruptTable;
     static hal::GpioStm gpio{ hal::pinoutTableDefaultStm, hal::analogTableDefaultStm };
@@ -56,9 +67,9 @@ int main()
             hal::OutputPin pin(ui.ledRed);
 
             infra::TimerRepeating toggle(500ms, [&]()
-            {
-                pin.Set(!pin.GetOutputLatch());
-            });
+                {
+                    pin.Set(!pin.GetOutputLatch());
+                });
 
             eventDispatcher.Run();
         });

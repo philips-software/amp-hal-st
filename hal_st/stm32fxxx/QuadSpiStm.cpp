@@ -54,7 +54,9 @@ namespace hal
         }
 
         infra::EventDispatcher::Instance().Schedule([this]()
-            { onDone(); });
+            {
+                onDone();
+            });
     }
 
     void QuadSpiStm::ReceiveData(const Header& header, infra::ByteRange data, Lines lines, const infra::Function<void()>& actionOnCompletion)
@@ -73,7 +75,9 @@ namespace hal
         }
 
         infra::EventDispatcher::Instance().Schedule([this]()
-            { onDone(); });
+            {
+                onDone();
+            });
     }
 
     void QuadSpiStm::PollStatus(const Header& header, uint8_t nofBytes, uint32_t match, uint32_t mask, Lines lines, const infra::Function<void()>& actionOnCompletion)
@@ -94,7 +98,9 @@ namespace hal
         assert(status == HAL_OK);
 
         infra::EventDispatcher::Instance().Schedule([this]()
-            { onDone(); });
+            {
+                onDone();
+            });
     }
 
     QSPI_CommandTypeDef QuadSpiStm::CreateConfig(const Header& header, uint32_t dataSize, Lines lines)
