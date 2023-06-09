@@ -45,6 +45,16 @@ namespace hal
         : hal::HciEventSink(hciEventSource)
     {}
 
+    uint16_t GattServerSt::EffectiveMaxAttMtuSize() const
+    {
+        return maxAttMtu;
+    }
+
+    void GattServerSt::RequestMtuExchange()
+    {
+        std::abort();
+    }
+
     void GattServerSt::AddService(services::GattServerService& service)
     {
         constexpr uint8_t gattPrimaryService = 0x01;
@@ -85,17 +95,26 @@ namespace hal
     {
         if (event.evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE)
         {
-            assert(event.data != nullptr);
+            auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(event.data);
 
-            auto& coreEvent = *reinterpret_cast<evt_blecore_aci*>(event.data);
-            if (coreEvent.ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE)
+            switch (vendorEvent->ecode)
             {
-                assert(coreEvent.data != nullptr);
-
-                auto& attributeModifiedEvent = *reinterpret_cast<aci_gatt_attribute_modified_event_rp0*>(coreEvent.data);
-                HandleGattAttributeModified(attributeModifiedEvent);
+                case ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE:
+                    HandleGattAttributeModifiedResponseEvent(vendorEvent);
+                    break;
+                case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
+                    HandleAttExchangeMtuResponseEvent(vendorEvent);
+                    break;
+                default:
+                    break;
             }
         }
+    }
+
+    void GattServerSt::HandleAttExchangeMtuResponseEvent(evt_blecore_aci* vendorEvent)
+    {
+        maxAttMtu = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data)->Server_RX_MTU;
+        AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
     }
 
     void GattServerSt::AddCharacteristic(services::GattServerCharacteristic& characteristic)
@@ -121,14 +140,16 @@ namespace hal
             ReportError(result);
     }
 
-    void GattServerSt::HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event)
+    void GattServerSt::HandleGattAttributeModifiedResponseEvent(evt_blecore_aci* vendorEvent)
     {
+        auto attributeModifiedEvent = *reinterpret_cast<aci_gatt_attribute_modified_event_rp0*>(vendorEvent->data);
+
         constexpr uint16_t valueAttributeOffset = 1;
-        infra::ByteRange data{event.Attr_Data, event.Attr_Data + event.Attr_Data_Length};
+        infra::ByteRange data{attributeModifiedEvent.Attr_Data, attributeModifiedEvent.Attr_Data + attributeModifiedEvent.Attr_Data_Length};
 
         for (auto& service : services)
             for (auto& characteristic : service.Characteristics())
-                if (event.Attr_Handle == characteristic.Handle() + valueAttributeOffset)
+                if (attributeModifiedEvent.Attr_Handle == characteristic.Handle() + valueAttributeOffset)
                     characteristic.NotifyObservers([data](auto& observer) { observer.DataReceived(data); });
     }
 

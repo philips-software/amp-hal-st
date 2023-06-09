@@ -11,30 +11,35 @@
 namespace hal
 {
     class GattClientSt
-        : public services::GattClientDiscovery
+        : public services::AttMtuExchange
+        , public services::GattClientDiscovery
         , public services::GattClientCharacteristicOperations
         , public hal::HciEventSink
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
 
+        // Implementation of AttMtuExchange
+        uint16_t EffectiveMaxAttMtuSize() const override;
+        void RequestMtuExchange() override;
+
         // Implementation of services::GattClientDiscovery
-        virtual void StartServiceDiscovery() override;
-        virtual void StartCharacteristicDiscovery(const services::GattService& service) override;
-        virtual void StartDescriptorDiscovery(const services::GattService& service) override;
+        void StartServiceDiscovery() override;
+        void StartCharacteristicDiscovery(const services::GattService& service) override;
+        void StartDescriptorDiscovery(const services::GattService& service) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        virtual void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onDone) const override;
-        virtual void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) const override;
-        virtual void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
+        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onDone) const override;
+        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) const override;
+        void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
 
-        virtual void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
-        virtual void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
-        virtual void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
-        virtual void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
+        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const override;
 
         // Implementation of hal::HciEventSink
-        virtual void HciEvent(hci_event_pckt& event) override;
+        void HciEvent(hci_event_pckt& event) override;
 
     protected:
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
@@ -53,6 +58,7 @@ namespace hal
         virtual void HandleAttReadByGroupTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent);
+        virtual void HandleAttExchangeMtuResponseEvent(evt_blecore_aci* vendorEvent);
 
     private:
         void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
@@ -72,9 +78,10 @@ namespace hal
         };
 
     private:
-        uint16_t connectionHandle;
-
         static constexpr uint16_t invalidConnection = 0xffff;
+
+        uint16_t connectionHandle = invalidConnection;
+        uint16_t maxAttMtu = defaultMaxAttMtuSize;
 
         infra::Function<void(services::GattClientDiscoveryObserver&)> onDiscoveryCompletion;
         mutable infra::AutoResetFunction<void(const infra::ConstByteRange&)> onResponse;

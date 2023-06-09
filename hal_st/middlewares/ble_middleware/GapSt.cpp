@@ -1,5 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
-#include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "shci.h"
 #include "stm32wbxx_ll_system.h"
 
 namespace hal
@@ -97,11 +97,6 @@ namespace hal
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
-    uint16_t GapSt::EffectiveMaxAttMtuSize() const
-    {
-        return maxAttMtu;
-    }
-
     void GapSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
@@ -116,19 +111,11 @@ namespace hal
         auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
         SetConnectionContext(connectionCompleteEvt->Connection_Handle, connectionCompleteEvt->Peer_Address_Type, &connectionCompleteEvt->Peer_Address[0]);
-
-        maxAttMtu = defaultMaxAttMtuSize;
     }
 
     void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
     {
         aci_gap_allow_rebond(connectionContext.connectionHandle);
-    }
-
-    void GapSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        maxAttMtu = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data)->Server_RX_MTU;
-        AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
@@ -203,9 +190,6 @@ namespace hal
             break;
         case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE:
             HandleL2capConnectionUpdateRequestEvent(vendorEvent);
-            break;
-        case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
-            HandleMtuExchangeResponseEvent(vendorEvent);
             break;
         default:
             break;

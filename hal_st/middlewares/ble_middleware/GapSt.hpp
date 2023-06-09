@@ -2,21 +2,14 @@
 #define HAL_ST_GAP_ST_HPP
 
 #include "ble/ble.h"
-#include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
-#include "hci_tl.h"
 #include "infra/util/BoundedString.hpp"
-#include "infra/util/BoundedVector.hpp"
-#include "infra/util/Function.hpp"
 #include "services/ble/Gap.hpp"
-#include "services/ble/Gatt.hpp"
-#include "shci.h"
 
 namespace hal
 {
     class GapSt
-        : public services::AttMtuExchange
-        , private hal::HciEventSink
+        : private hal::HciEventSink
     {
     public:
         struct GapService
@@ -34,9 +27,6 @@ namespace hal
     protected:
         GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, uint32_t& bleBondsStorage);
 
-        // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override;
-
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) {};
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
@@ -50,7 +40,6 @@ namespace hal
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
         virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
-        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
 
@@ -91,7 +80,6 @@ namespace hal
 
     private:
         uint8_t& txPowerLevel;
-        uint16_t maxAttMtu = defaultMaxAttMtuSize;
     };
 }
 

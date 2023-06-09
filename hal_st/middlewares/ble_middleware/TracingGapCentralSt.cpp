@@ -126,11 +126,4 @@ namespace hal
 
         GapCentralSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
     }
-
-    void TracingGapCentralSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
-        GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
-    }
 }
