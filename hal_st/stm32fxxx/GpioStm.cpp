@@ -394,6 +394,7 @@ namespace hal
         __GPIOK_CLK_ENABLE();
 #endif
     }
+
     // clang-format on
 
     std::pair<const GpioStm::PinPosition&, const GpioStm::PinoutTable&> GpioStm::GetPeripheralPinConfig(Port port, uint8_t index, PinConfigTypeStm pinConfigType, uint8_t peripheral) const
