@@ -128,7 +128,7 @@ namespace hal
 
     void GapPeripheralSt::Standby()
     {
-        if (connectionContext.connectionHandle != 0)
+        if (connectionContext.connectionHandle != GapSt::invalidConnection)
             aci_gap_terminate(connectionContext.connectionHandle, 0x13);
         else
         {
@@ -232,15 +232,7 @@ namespace hal
     void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
         GapSt::HandleHciDisconnectEvent(eventPacket);
-
-        auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
-
-        if (disconnectEvt->Connection_Handle == connectionContext.connectionHandle)
-        {
-            connectionContext.connectionHandle = 0;
-
-            UpdateState(services::GapState::standby);
-        }
+        UpdateState(services::GapState::standby);
     }
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)

@@ -325,7 +325,9 @@ namespace hal
         : StreamBase(dma, channelId, peripheralAddress)
         , actionOnTransferComplete(actionOnTransferComplete)
         , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
     {
         DMA_HandleTypeDef dmaStreamHandle = {};
 
@@ -354,7 +356,9 @@ namespace hal
     DmaStm::Stream::Stream(Stream&& other)
         : StreamBase(std::move(other))
         , interruptHandler(std::move(other.interruptHandler), [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
         , actionOnTransferComplete(other.actionOnTransferComplete)
     {
         other.actionOnTransferComplete = nullptr;
@@ -366,7 +370,9 @@ namespace hal
 
         actionOnTransferComplete = other.actionOnTransferComplete;
         interruptHandler.Assign(std::move(other.interruptHandler), [this]()
-            { OnInterrupt(); });
+            {
+                OnInterrupt();
+            });
 
         other.actionOnTransferComplete = nullptr;
 
@@ -437,7 +443,9 @@ namespace hal
         , actionOnFirstHalfDone(actionOnFirstHalfDone)
         , actionOnSecondHalfDone(actionOnSecondHalfDone)
         , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
     {
         DMA_HandleTypeDef dmaStreamHandle = {};
 

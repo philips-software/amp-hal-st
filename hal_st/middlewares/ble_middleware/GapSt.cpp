@@ -97,6 +97,16 @@ namespace hal
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
+    void GapSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
+    {
+        auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
+
+        really_assert(disconnectionCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+        really_assert(disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
+
+        connectionContext.connectionHandle = GapSt::invalidConnection;
+    }
+
     void GapSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);

@@ -10,7 +10,9 @@ namespace hal
         : ethernetSmi(ethernetSmi)
         , macAddress(macAddress)
         , interrupt(peripheralEthernetIrq[0], [this]()
-              { Interrupt(); })
+              {
+                  Interrupt();
+              })
         , receiveDescriptors(*this)
         , sendDescriptors(*this)
     {
@@ -155,8 +157,9 @@ namespace hal
 
         infra::EventDispatcher::Instance().Schedule([this]()
             {
-            // This is scheduled so that the observer is instantiated
-            RequestReceiveBuffers(); });
+                // This is scheduled so that the observer is instantiated
+                RequestReceiveBuffers();
+            });
     }
 
     void EthernetMacStm::ReceiveDescriptors::ReceivedFrame()

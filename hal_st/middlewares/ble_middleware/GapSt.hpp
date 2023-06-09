@@ -27,7 +27,7 @@ namespace hal
     protected:
         GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, uint32_t& bleBondsStorage);
 
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) {};
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};

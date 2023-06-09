@@ -5,7 +5,9 @@ namespace hal
     WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired)
         : onExpired(onExpired)
         , interruptRegistration(WWDG_IRQn, [this]()
-              { Interrupt(); })
+              {
+                  Interrupt();
+              })
     {
         __WWDG_CLK_ENABLE();
 
@@ -32,7 +34,9 @@ namespace hal
         WWDG->CFR |= WWDG_CFR_EWI;
 
         feedingTimer.Start(std::chrono::milliseconds(25), [this]()
-            { Feed(); });
+            {
+                Feed();
+            });
     }
 
     void WatchDogStm::Interrupt()
