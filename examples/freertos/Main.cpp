@@ -66,9 +66,9 @@ int main()
             hal::OutputPin pin(ui.ledRed);
 
             infra::TimerRepeating toggle(500ms, [&]()
-            {
-                pin.Set(!pin.GetOutputLatch());
-            });
+                {
+                    pin.Set(!pin.GetOutputLatch());
+                });
 
             eventDispatcher.Run(); });
 

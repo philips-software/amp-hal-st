@@ -60,7 +60,9 @@ namespace hal
 
         really_assert(!spiInterruptRegistration);
         spiInterruptRegistration.Emplace(peripheralSpiIrq[spiInstance], [this]()
-            { HandleInterrupt(); });
+            {
+                HandleInterrupt();
+            });
 
         peripheralSpi[spiInstance]->CR2 |= SPI_IT_TXE;
         peripheralSpi[spiInstance]->CR2 |= SPI_IT_RXNE;
@@ -137,7 +139,9 @@ namespace hal
             if (chipSelectConfigurator && !continuedSession)
                 chipSelectConfigurator->EndSession();
             infra::EventDispatcher::Instance().Schedule([this]()
-                { onDone(); });
+                {
+                    onDone();
+                });
         }
     }
 }

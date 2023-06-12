@@ -20,9 +20,13 @@ namespace hal
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
         , rx(dmaStm, config.dmaChannelRx.ValueOr(defaultDmaChannelId[spiInstance].second), &peripheralSpi[spiInstance]->DR, [this]()
-              { ReceiveDone(); })
+              {
+                  ReceiveDone();
+              })
         , tx(dmaStm, config.dmaChannelTx.ValueOr(defaultDmaChannelId[spiInstance].first), &peripheralSpi[spiInstance]->DR, [this]()
-              { SendDone(); })
+              {
+                  SendDone();
+              })
     {
         EnableClockSpi(spiInstance);
 

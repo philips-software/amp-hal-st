@@ -23,15 +23,15 @@ jobs:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           persist-credentials: false
-      #- uses: DoozyX/clang-format-lint-action@a83a8fb7d371f66da7dd1c4f33a193023899494b # v0.16
-      #  with:
-      #    clangFormatVersion: 14
-      #    inplace: true
-      #    extensions: "cpp,hpp"
-      #- uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
-      #  with:
-      #    tool_name: clang-format
-      #    filter_mode: diff_context
+      - uses: DoozyX/clang-format-lint-action@a83a8fb7d371f66da7dd1c4f33a193023899494b # v0.16
+        with:
+          clangFormatVersion: 15
+          inplace: true
+          extensions: "cpp,hpp"
+      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
+        with:
+          tool_name: clang-format
+          filter_mode: diff_context
   linter:
     name: Linter
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@2b1998e443e5757ace627e9af2094d0f1a2f80b4 # v7.0.3
+        uses: oxsecurity/megalinter@0d014ffdef3307ca4a4cd1ddf482fc4f05733d7c # v7.0.4
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true

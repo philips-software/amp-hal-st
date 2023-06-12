@@ -10,9 +10,13 @@ namespace hal
         , scl(scl, PinConfigTypeStm::i2cScl, oneBasedI2cIndex)
         , sda(sda, PinConfigTypeStm::i2cSda, oneBasedI2cIndex)
         , evInterruptHandler(peripheralI2cEvIrq[instance], [this]()
-              { EventInterrupt(); })
+              {
+                  EventInterrupt();
+              })
         , erInterruptHandler(peripheralI2cErIrq[instance], [this]()
-              { ErrorInterrupt(); })
+              {
+                  ErrorInterrupt();
+              })
     {
         EnableClockI2c(instance);
 
@@ -140,7 +144,8 @@ namespace hal
                     {
                         receiveData.clear();
                         onReceived(hal::Result::partialComplete);
-                    } });
+                    }
+                });
         }
 
         if ((peripheralI2c[instance]->ISR & I2C_ISR_TXIS) != 0)
@@ -162,7 +167,9 @@ namespace hal
                     peripheralI2c[instance]->CR2 = I2C_CR2_STOP;
                 continuingPrevious = nextAction == Action::continueSession;
                 infra::EventDispatcher::Instance().Schedule([this]()
-                    { onSent(hal::Result::complete, sent); });
+                    {
+                        onSent(hal::Result::complete, sent);
+                    });
             }
             else if (!receiveData.empty())
                 peripheralI2c[instance]->CR2 = (std::min<uint32_t>(receiveData.size(), 255) << 16) | (receiveData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
@@ -181,10 +188,14 @@ namespace hal
             continuingPrevious = nextAction == Action::continueSession;
             if (onSent != nullptr)
                 infra::EventDispatcher::Instance().Schedule([this]()
-                    { onSent(hal::Result::complete, sent); });
+                    {
+                        onSent(hal::Result::complete, sent);
+                    });
             else
                 infra::EventDispatcher::Instance().Schedule([this]()
-                    { onReceived(hal::Result::complete); });
+                    {
+                        onReceived(hal::Result::complete);
+                    });
         }
 #else
         auto sr1 = peripheralI2c[instance]->SR1;
@@ -240,7 +251,9 @@ namespace hal
             ++received;
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                { onReceived(hal::Result::complete); });
+                {
+                    onReceived(hal::Result::complete);
+                });
         }
         else if ((sr1 & I2C_SR1_RXNE) != 0 && receiveData.size() == 1)
         {
@@ -252,7 +265,9 @@ namespace hal
             ++received;
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                { onReceived(hal::Result::complete); });
+                {
+                    onReceived(hal::Result::complete);
+                });
         }
         else if ((sr1 & I2C_SR1_RXNE) != 0 && !receiveData.empty())
         {
@@ -282,7 +297,9 @@ namespace hal
             continuingPrevious = nextAction == Action::continueSession;
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                { onSent(hal::Result::complete, sent); });
+                {
+                    onSent(hal::Result::complete, sent);
+                });
         }
         else
             std::abort();
@@ -326,7 +343,8 @@ namespace hal
                     {
                         receiveData.clear();
                         onReceived(hal::Result::partialComplete);
-                    } });
+                    }
+                });
         }
         else if ((peripheralI2c[instance]->SR1 & I2C_SR1_BERR) != 0)
         {
@@ -335,7 +353,9 @@ namespace hal
             peripheralI2c[instance]->CR1 |= I2C_CR1_STOP;
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                { BusError(); });
+                {
+                    BusError();
+                });
         }
         else if ((peripheralI2c[instance]->SR1 & I2C_SR1_ARLO) != 0)
         {
@@ -343,7 +363,9 @@ namespace hal
             peripheralI2c[instance]->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITERREN | I2C_CR2_ITBUFEN);
 
             infra::EventDispatcher::Instance().Schedule([this]()
-                { ArbitrationLost(); });
+                {
+                    ArbitrationLost();
+                });
         }
         else
             std::abort();

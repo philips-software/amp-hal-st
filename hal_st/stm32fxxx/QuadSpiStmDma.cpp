@@ -21,9 +21,13 @@ namespace hal
         , data2(data2, PinConfigTypeStm::quadSpiData2, 0)
         , data3(data3, PinConfigTypeStm::quadSpiData3, 0)
         , dmaStream(dma, quadSpiDmaChannel, &QUADSPI->DR, [this]()
-              { OnDmaTransferDone(); })
+              {
+                  OnDmaTransferDone();
+              })
         , interruptHandler(QUADSPI_IRQn, [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
     {
         EnableClockQuadSpi(0);
 
