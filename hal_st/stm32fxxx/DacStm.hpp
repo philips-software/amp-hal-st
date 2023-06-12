@@ -10,16 +10,18 @@
 
 namespace hal
 {
-    class DacStm
+    class DacSingleStm
         : DacImplBase
     {
     public:
-        DacStm(GpioPinStm& pin);
-        ~DacStm();
+        DacSingleStm(GpioPinStm& pin, uint32_t oneBasedIndex);
+        ~DacSingleStm();
 
         virtual void SetOutput(uint16_t value) override;
 
     private:
+        uint32_t zeroBasedIndex;
+
         AnalogPinStm pin;
         DAC_HandleTypeDef dacHandle;
     };

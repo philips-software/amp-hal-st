@@ -164,12 +164,6 @@ namespace hal
 
         HAL_StatusTypeDef result = HAL_ADC_Init(&handle);
         assert(result == HAL_OK);
-
-#if defined(STM32G4)
-        ADC_MultiModeTypeDef multimode = {};
-        multimode.Mode = ADC_MODE_INDEPENDENT;
-        HAL_ADCEx_MultiModeConfigChannel(&handle, &multimode);
-#endif
     }
 
     AdcStm::~AdcStm()

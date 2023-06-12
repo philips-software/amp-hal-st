@@ -6,25 +6,26 @@
 
 namespace hal
 {
-    DacStm::DacStm(GpioPinStm& pin)
-        : pin(pin)
+    DacSingleStm::DacSingleStm(GpioPinStm& pin, uint32_t oneBasedIndex)
+        : zeroBasedIndex{ oneBasedIndex - 1 }
+        , pin(pin)
         , dacHandle()
     {
-        EnableClockDac(0);
+        EnableClockDac(zeroBasedIndex);
 
-        dacHandle.Instance = peripheralDac[0];
+        dacHandle.Instance = peripheralDac[zeroBasedIndex];
         HAL_DAC_Init(&dacHandle);
 
-        SetOutput(0);
+        SetOutput(zeroBasedIndex);
         HAL_DAC_Start(&dacHandle, DAC_CHANNEL_1);
     }
 
-    DacStm::~DacStm()
+    DacSingleStm::~DacSingleStm()
     {
-        DisableClockDac(0);
+        DisableClockDac(zeroBasedIndex);
     }
 
-    void DacStm::SetOutput(uint16_t value)
+    void DacSingleStm::SetOutput(uint16_t value)
     {
         HAL_DAC_SetValue(&dacHandle, DAC_CHANNEL_1, DAC_ALIGN_12B_R, value);
     }

@@ -22,7 +22,7 @@ namespace hal
     private:
         AnalogPinStm pin;
         DacStm& dac;
-        uint32_t channel;
+        uint32_t pinChannel;
     };
 
     class DacStm
