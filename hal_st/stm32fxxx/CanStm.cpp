@@ -10,11 +10,17 @@ namespace hal
         , tx(tx, hal::PinConfigTypeStm::canTx, oneBasedCanIndex)
         , rx(rx, hal::PinConfigTypeStm::canRx, oneBasedCanIndex)
         , canTxInterruptDispatcher(peripheralCanTxIrq[canIndex], [this]()
-              { HandleTxInterrupt(); })
+              {
+                  HandleTxInterrupt();
+              })
         , canRxInterruptDispatcher(peripheralCanRx0Irq[canIndex], [this]()
-              { HandleRxInterrupt(); })
+              {
+                  HandleRxInterrupt();
+              })
         , canErrorInterruptDispatcher(peripheralCanSceIrq[canIndex], [this]()
-              { HandleErrorInterrupt(); })
+              {
+                  HandleErrorInterrupt();
+              })
     {
         EnableClockCan(canIndex);
 

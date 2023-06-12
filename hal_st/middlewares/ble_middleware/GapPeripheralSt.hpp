@@ -50,19 +50,11 @@ namespace hal
 
     protected:
         // Implementation of GapSt
-        virtual void HciEvent(hci_event_pckt& event);
-
-    protected:
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& metaEvent);
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
-        virtual void HandleHciLeDataLengthUpdateEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
-        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
         void RequestConnectionParameterUpdate();
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);

@@ -21,14 +21,14 @@ namespace hal
     protected:
         // Implementation of GapCentralSt
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
         virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
+        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
         services::Tracer& tracer;

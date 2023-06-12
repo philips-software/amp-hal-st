@@ -19,10 +19,14 @@ namespace hal
 
         if (!sendData.empty())
             quadSpi.SendData(QuadSpi::Header{ infra::none, {}, {}, 0 }, sendData, QuadSpi::Lines::SingleSpeed(), [this]()
-                { Done(); });
+                {
+                    Done();
+                });
         else
             quadSpi.ReceiveData(QuadSpi::Header{ infra::none, {}, {}, 0 }, receiveData, QuadSpi::Lines::SingleSpeed(), [this]()
-                { Done(); });
+                {
+                    Done();
+                });
     }
 
     void SingleSpeedQuadSpiStmDma::SetChipSelectConfigurator(ChipSelectConfigurator& configurator)
