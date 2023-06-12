@@ -95,9 +95,7 @@ namespace hal
     {
         auto attExchangeMtuResponse = *reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
 
-        tracer.Trace() << "TracingGattClientSt::HandleAttExchangeMtuResponseEvent";
-        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << attExchangeMtuResponse.Connection_Handle;
-        tracer.Trace() << "\tserver RX MTU       : " << attExchangeMtuResponse.Server_RX_MTU;
+        tracer.Trace() << "TracingGattClientSt::Exchange MTU, connection handle: " << infra::hex << attExchangeMtuResponse.Connection_Handle << ", server RX MTU: " << attExchangeMtuResponse.Server_RX_MTU;
 
         GattClientSt::HandleAttExchangeMtuResponseEvent(vendorEvent);
     }
