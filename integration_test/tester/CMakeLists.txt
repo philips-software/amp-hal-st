@@ -6,8 +6,7 @@ target_sources(integration_test.tester PRIVATE
 )
 
 target_link_libraries(integration_test.tester PRIVATE
-    integration_test.logic
-    hal_st.instantiations
+    integration_test.instantiations_st
 )
 
 halst_target_default_linker_scripts(integration_test.tester)

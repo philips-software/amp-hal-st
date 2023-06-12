@@ -1,25 +1,24 @@
-#include "generated/echo/Tester.pb.hpp"
-#include "hal/interfaces/Gpio.hpp"
+#include "generated/echo/Testing.pb.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "infra/timer/Timer.hpp"
-#include "protobuf/echo/EchoInstantiation.hpp"
+#include "integration_test/instantiations_st/EchoOnSesame.hpp"
 #include "services/util/DebouncedButton.hpp"
 #include "services/util/DebugLed.hpp"
 #include "services/util/GpioPinInverted.hpp"
 
-// Tester    Stim   Function
+// Tester    Tested Function
 // ------    ------ --------
 // CN8-9  -> CN8-9  E5V (NOTE: set JP3 on the Stim to E5V)
 // CN8-11 -- CN8-11 ground
+// CN8-10 <- CN8-12 ECHO on SESAME
+// CN8-12 -> CN8-10 ECHO on SESAME
 // CN9-20 -> CN8-5  nRst of Stim
-// CN9-22 <> CN9-22 open drain "#booted" signal (pulled up by Tester)
-// CN9-24 <- CN9-24 non-inverted GPIO
+// CN9-24 <- CN9-24 GPIO set by Tester
 // CN9-26 -> CN9-26 Tester GPIO control
-// CN9-28 <- CN9-28 inverted GPIO
 
 // Connect debug session to GDB, bring up with:
 // JLinkGDBServer -select USB -device STM32F767ZI -endian little -if JTAG -speed auto -noir -LocalhostOnly -nologtofile
@@ -75,7 +74,7 @@ class EchoReport
     : public Report
 {
 public:
-    EchoReport(tester::ReponseProxy& response)
+    EchoReport(testing::ReponseProxy& response)
         : response(response)
     {}
 
@@ -86,7 +85,7 @@ public:
     }
 
 private:
-    tester::ReponseProxy& response;
+    testing::ReponseProxy& response;
 
     static constexpr struct
     {
@@ -104,13 +103,10 @@ private:
 class Tester
 {
 public:
-    Tester(hal::GpioPin& resetPin, hal::GpioPin& bootedPin, hal::GpioPin& outPin, hal::GpioPin& inPin, hal::GpioPin& inNPin, Report& report)
-        : ready(false)
-        , reset(resetPin, false)
-        , booted(bootedPin)
+    Tester(hal::GpioPin& resetPin, hal::GpioPin& outPin, hal::GpioPin& inPin, Report& report)
+        : reset(resetPin, false)
         , out(outPin, false)
         , in(inPin)
-        , inN(inNPin)
         , report(report)
     {}
 
@@ -122,12 +118,9 @@ private:
     void Triggered();
 
 private:
-    volatile bool ready;
     hal::OutputPin reset;
-    hal::InputPin booted;
     hal::OutputPin out;
     hal::InputPin in;
-    hal::InputPin inN;
     Report& report;
     infra::TimerSingleShot gpioTimeout;
     infra::TimerSingleShot resetTimer;
@@ -135,24 +128,16 @@ private:
 
 void Tester::ResetStim()
 {
-    ready = false;
     reset.Set(true);
 
     resetTimer.Start(std::chrono::milliseconds(3000), [this]()
         {
-        assert(booted.Get());
-        booted.EnableInterrupt([this]() {
-            report.State(Report::Condition::Ready);
-            ready = true;
-        }, hal::InterruptTrigger::risingEdge);
-        reset.Set(false); });
+           reset.Set(false);
+        });
 }
 
 void Tester::Run()
 {
-    if (!ready)
-        return;
-
     if (in.Get())
     {
         report.State(Report::Condition::FailedPrecondition);
@@ -178,19 +163,16 @@ void Tester::Timeout()
 void Tester::Triggered()
 {
     gpioTimeout.Cancel();
-    if (in.Get() != inN.Get())
-        report.State(Report::Condition::Success);
-    else
-        report.State(Report::Condition::Failed);
+    report.State(Report::Condition::Success);
 }
 
 class Command
-    : public tester::Command
+    : public testing::Command
 {
 public:
-    Command(services::Echo& echo, Tester& tester, hal::GpioPin& led)
-        : tester::Command(echo)
-        , tester(tester)
+    Command(services::Echo& echo, Tester& testing, hal::GpioPin& led)
+        : testing::Command(echo)
+        , testing(testing)
         , led(led)
     {
     }
@@ -198,12 +180,12 @@ public:
     void RunGpioTest(bool value) override
     {
         led.Set(true);
-        tester.Run();
+        testing.Run();
         MethodDone();
     }
 
 private:
-    Tester& tester;
+    Tester& testing;
     hal::OutputPin led;
 };
 
@@ -221,12 +203,8 @@ int main()
     static hal::GpioPinStm nResetStimPin(hal::Port::E, 6, hal::Drive::OpenDrain);
     static services::GpioPinInverted nResetStimPinInverted(nResetStimPin); // false: HiZ, true: Low
 
-    static hal::GpioPinStm nBootedPin(hal::Port::E, 3, hal::Drive::OpenDrain, hal::Speed::Default, hal::WeakPull::Up);
-    static services::GpioPinInverted nBootedPinInverted(nBootedPin);
-
     static hal::GpioPinStm outPin(hal::Port::F, 7);
     static hal::GpioPinStm inPin(hal::Port::F, 8);
-    static hal::GpioPinStm inNPin(hal::Port::F, 9);
 
     // Echo infrastructure
     static hal::GpioPinStm hostUartTxPin(hal::Port::C, 10);
@@ -234,12 +212,12 @@ int main()
     static hal::DmaStm dma;
     static hal::UartStmDma hostUart(dma, 4, hostUartTxPin, hostUartRxPin);
     static main_::EchoOnSerialCommunication<60> echo(hostUart);
-    static tester::ReponseProxy response(echo);
+    static testing::ReponseProxy response(echo);
 
     // Tester infrastucture
     static LedReport ledReport(ui.ledRed, ui.ledGreen);
     static EchoReport echoReport(response);
-    static Tester tester(nResetStimPinInverted, nBootedPinInverted, outPin, inPin, inNPin, echoReport);
+    static Tester tester(nResetStimPinInverted, outPin, inPin, echoReport);
     tester.ResetStim();
     static services::DebouncedButton button(ui.buttonOne, []()
         { tester.Run(); });
@@ -247,6 +225,9 @@ int main()
     // Event infrastructure
     static Command command(echo, tester, ui.ledGreen);
     static services::DebugLed debugLed(ui.ledBlue);
+
+    static main_::EchoBetweenTesterAndTested echoToTested;
+
     eventInfrastructure.Run();
     __builtin_unreachable();
 }
