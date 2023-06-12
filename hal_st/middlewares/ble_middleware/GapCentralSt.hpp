@@ -7,6 +7,7 @@
 #include "hci_tl.h"
 #include "infra/util/BoundedString.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/Function.hpp"
 #include "infra/util/ProxyCreator.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
@@ -36,6 +37,7 @@ namespace hal
         virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
         virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) override;
         virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
@@ -43,8 +45,9 @@ namespace hal
         void HandleGapDirectConnectionEstablishmentEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
-        void SetConnectionInterval(uint16_t connectionInterval, uint16_t slaveLatency, uint16_t timeoutMultiplier);
+        void SetConnectionInterval() const;
         void DataLengthUpdate();
+        void MtuExchange();
         void Initialize(const GapService& gapService);
 
     private:
@@ -67,6 +70,7 @@ namespace hal
 
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
+        infra::Function<void(services::GapCentralObserver&)> onConnection;
     };
 }
 
