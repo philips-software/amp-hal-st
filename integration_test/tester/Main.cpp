@@ -2,6 +2,7 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
+#include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "infra/timer/Timer.hpp"
@@ -22,11 +23,6 @@
 
 // Connect debug session to GDB, bring up with:
 // JLinkGDBServer -select USB -device STM32F767ZI -endian little -if JTAG -speed auto -noir -LocalhostOnly -nologtofile
-
-extern "C" void Default_Handler()
-{
-    hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
-}
 
 class Report
 {
@@ -79,7 +75,7 @@ class EchoReport
     : public Report
 {
 public:
-    EchoReport(tester_echo::ReponseProxy& response)
+    EchoReport(tester::ReponseProxy& response)
         : response(response)
     {}
 
@@ -90,7 +86,7 @@ public:
     }
 
 private:
-    tester_echo::ReponseProxy& response;
+    tester::ReponseProxy& response;
 
     static constexpr struct
     {
@@ -189,11 +185,11 @@ void Tester::Triggered()
 }
 
 class Command
-    : public tester_echo::Command
+    : public tester::Command
 {
 public:
     Command(services::Echo& echo, Tester& tester, hal::GpioPin& led)
-        : tester_echo::Command(echo)
+        : tester::Command(echo)
         , tester(tester)
         , led(led)
     {
@@ -211,10 +207,15 @@ private:
     hal::OutputPin led;
 };
 
+unsigned int hse_value = 8000000;
+
 int main()
 {
+    HAL_Init();
+    ConfigureDefaultClockNucleo767ZI();
+
     static main_::StmEventInfrastructure eventInfrastructure;
-    static main_::NucleoF767ziUi ui;
+    static main_::Nucleo144Ui ui;
 
     // I/O towards Stim
     static hal::GpioPinStm nResetStimPin(hal::Port::E, 6, hal::Drive::OpenDrain);
@@ -233,14 +234,14 @@ int main()
     static hal::DmaStm dma;
     static hal::UartStmDma hostUart(dma, 4, hostUartTxPin, hostUartRxPin);
     static main_::EchoOnSerialCommunication<60> echo(hostUart);
-    static tester_echo::ReponseProxy response(echo);
+    static tester::ReponseProxy response(echo);
 
     // Tester infrastucture
     static LedReport ledReport(ui.ledRed, ui.ledGreen);
     static EchoReport echoReport(response);
     static Tester tester(nResetStimPinInverted, nBootedPinInverted, outPin, inPin, inNPin, echoReport);
     tester.ResetStim();
-    static services::DebouncedButton button(ui.userButtonPin, []()
+    static services::DebouncedButton button(ui.buttonOne, []()
         { tester.Run(); });
 
     // Event infrastructure

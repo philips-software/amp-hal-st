@@ -1,13 +1,9 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
+#include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 #include "services/util/DebugLed.hpp"
 #include "services/util/GpioPinInverted.hpp"
-
-extern "C" void Default_Handler()
-{
-    hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
-}
 
 class StimGpio
 {
@@ -43,14 +39,19 @@ void StimGpio::Update()
     outN.Set(value);
 }
 
+unsigned int hse_value = 8000000;
+
 int main()
 {
+    HAL_Init();
+    ConfigureDefaultClockNucleo767ZI();
+
     static hal::GpioPinStm nBootedPin(hal::Port::E, 3);
     static services::GpioPinInverted bootedPin(nBootedPin);
     static hal::OutputPin booted(bootedPin, false);
 
     static main_::StmEventInfrastructure eventInfrastructure;
-    static main_::NucleoF767ziUi ui;
+    static main_::Nucleo144Ui ui;
     static services::DebugLed debugLed(ui.ledBlue);
 
     static hal::GpioPinStm inPin(hal::Port::F, 7);
