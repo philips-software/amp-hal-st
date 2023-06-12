@@ -14,17 +14,8 @@ namespace hal
 {
     GattClientSt::GattClientSt(hal::HciEventSource& hciEventSource)
         : hal::HciEventSink(hciEventSource)
+        , connectionHandle(invalidConnection)
     {}
-
-    uint16_t GattClientSt::EffectiveMaxAttMtuSize() const
-    {
-        return maxAttMtu;
-    }
-
-    void GattClientSt::RequestMtuExchange()
-    {
-        aci_gatt_exchange_config(connectionHandle);
-    }
 
     void GattClientSt::StartServiceDiscovery()
     {
@@ -144,9 +135,6 @@ namespace hal
         case ACI_ATT_FIND_INFO_RESP_VSEVT_CODE:
             HandleAttFindInfoResponse(vendorEvent);
             break;
-        case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
-            HandleAttExchangeMtuResponseEvent(vendorEvent);
-            break;
         case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
             HandleGattCompleteResponse(vendorEvent);
             break;
@@ -159,16 +147,6 @@ namespace hal
         default:
             break;
         }
-    }
-
-    void GattClientSt::HandleAttExchangeMtuResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        auto attExchangeMtuResponse = *reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-
-        really_assert(attExchangeMtuResponse.Connection_Handle == connectionHandle);
-        maxAttMtu = attExchangeMtuResponse.Server_RX_MTU;
-
-        AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
     }
 
     void GattClientSt::HandleAttReadByGroupTypeResponse(evt_blecore_aci* vendorEvent)
@@ -229,7 +207,6 @@ namespace hal
         really_assert(connectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
 
         connectionHandle = connectionCompleteEvent.Connection_Handle;
-        maxAttMtu = defaultMaxAttMtuSize;
     }
 
     void GattClientSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -239,7 +216,6 @@ namespace hal
         really_assert(enhancedConnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
 
         connectionHandle = enhancedConnectionCompleteEvent.Connection_Handle;
-        maxAttMtu = defaultMaxAttMtuSize;
     }
 
     void GattClientSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)

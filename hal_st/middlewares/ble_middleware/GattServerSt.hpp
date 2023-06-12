@@ -8,37 +8,29 @@
 namespace hal
 {
     class GattServerSt
-        : public services::AttMtuExchange
-        , public services::GattServer
+        : public services::GattServer
         , public services::GattServerCharacteristicOperations
         , public hal::HciEventSink
     {
     public:
         explicit GattServerSt(hal::HciEventSource& hciEventSource);
 
-        // Implementation of AttMtuExchange
-        uint16_t EffectiveMaxAttMtuSize() const override;
-        void RequestMtuExchange() override;
-
         // Implementation of services::GattServer
-        void AddService(services::GattServerService& service) override;
+        virtual void AddService(services::GattServerService& service);
 
         // Implementation of services::GattCharacteristicClientOperations
-        UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
+        virtual UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const;
 
         // Implementation of hal::HciEventSink
-        void HciEvent(hci_event_pckt& event) override;
+        virtual void HciEvent(hci_event_pckt& event);
 
     protected:
         virtual void AddCharacteristic(services::GattServerCharacteristic& characteristic);
-        virtual void HandleAttExchangeMtuResponseEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGattAttributeModifiedResponseEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event);
         virtual void ReportError(tBleStatus status) const;
 
     private:
         infra::IntrusiveForwardList<services::GattServerService> services;
-
-        uint16_t maxAttMtu = defaultMaxAttMtuSize;
     };
 }
 

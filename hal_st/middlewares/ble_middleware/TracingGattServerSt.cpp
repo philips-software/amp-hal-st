@@ -27,21 +27,12 @@ namespace hal
         tracer.Trace() << "GattServerSt::AddCharacteristic [" << characteristic.Handle() << "] " << characteristic.Type();
     }
 
-    void TracingGattServerSt::HandleAttExchangeMtuResponseEvent(evt_blecore_aci* vendorEvent)
+    void TracingGattServerSt::HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event)
     {
-        const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "GattServerSt::HandleAttExchangeMtuResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
-        GattServerSt::HandleAttExchangeMtuResponseEvent(vendorEvent);
-    }
+        infra::ByteRange data{ event.Attr_Data, event.Attr_Data + event.Attr_Data_Length };
+        tracer.Trace() << "GattServerSt::HandleGattAttributeModified [" << event.Attr_Handle << "] L:" << event.Attr_Data_Length << " 0x" << infra::AsHex(data);
 
-    void TracingGattServerSt::HandleGattAttributeModifiedResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        auto attributeModifiedEvent = *reinterpret_cast<aci_gatt_attribute_modified_event_rp0*>(vendorEvent->data);
-
-        infra::ByteRange data{ attributeModifiedEvent.Attr_Data, attributeModifiedEvent.Attr_Data + attributeModifiedEvent.Attr_Data_Length };
-        tracer.Trace() << "GattServerSt::HandleGattAttributeModified [" << attributeModifiedEvent.Attr_Handle << "] L:" << attributeModifiedEvent.Attr_Data_Length << " 0x" << infra::AsHex(data);
-
-        GattServerSt::HandleGattAttributeModifiedResponseEvent(vendorEvent);
+        GattServerSt::HandleGattAttributeModified(event);
     }
 
     void TracingGattServerSt::ReportError(tBleStatus status) const

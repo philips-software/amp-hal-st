@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/stream/ByteInputStream.hpp"
 
 namespace hal
 {
@@ -173,7 +174,7 @@ namespace hal
 
         auto advertisementData = reinterpret_cast<const uint8_t*>(&advertisingReport.Length_Data) + 1;
 
-        discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
+        discoveredDevice.data = GetLocalNameFromAdvertising(infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data));
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer) { observer.DeviceDiscovered(discoveredDevice); });
     }
@@ -187,7 +188,7 @@ namespace hal
 
     void GapCentralSt::DataLengthUpdate()
     {
-        [[maybe_unused]] auto status = hci_le_set_data_length(connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
+        [[maybe_unused]] auto status = hci_le_set_data_length(connectionContext.connectionHandle, transmissionOctets, transmissionTime);
 
         assert(status == BLE_STATUS_SUCCESS);
 

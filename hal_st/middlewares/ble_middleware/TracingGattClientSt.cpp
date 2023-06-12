@@ -90,13 +90,4 @@ namespace hal
 
         GattClientSt::HandleGattNotificationEvent(vendorEvent);
     }
-
-    void TracingGattClientSt::HandleAttExchangeMtuResponseEvent(evt_blecore_aci* vendorEvent)
-    {
-        auto attExchangeMtuResponse = *reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-
-        tracer.Trace() << "TracingGattClientSt::Exchange MTU, connection handle: " << infra::hex << attExchangeMtuResponse.Connection_Handle << ", server RX MTU: " << attExchangeMtuResponse.Server_RX_MTU;
-
-        GattClientSt::HandleAttExchangeMtuResponseEvent(vendorEvent);
-    }
 }
