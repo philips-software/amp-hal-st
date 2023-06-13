@@ -191,6 +191,55 @@ private:
 
 unsigned int hse_value = 8000000;
 
+class GpioTester
+    : public testing::GpioTester
+    , public testing::GpioObserverProxy
+{
+public:
+    GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
+
+    // Implementation of GpioTester
+    void SetGpio(bool state, uint32_t pin) override;
+
+private:
+    void InChanged();
+
+private:
+    hal::InputPin in;
+    hal::OutputPin out;
+    bool sending = false;
+};
+
+GpioTester::GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
+    : testing::GpioTester(echo)
+    , testing::GpioObserverProxy(echo)
+    , in(inPin)
+    , out(outPin, false)
+{
+    in.EnableInterrupt([this]()
+        {
+            InChanged();
+        },
+        hal::InterruptTrigger::bothEdges);
+}
+
+void GpioTester::SetGpio(bool state, uint32_t pin)
+{
+    out.Set(state);
+}
+
+void GpioTester::InChanged()
+{
+    if (!sending)
+        RequestSend([this]()
+            {
+                sending = false;
+                TestedGpioChanged(in.Get(), 0);
+            });
+
+    sending = true;
+}
+
 int main()
 {
     HAL_Init();
@@ -203,9 +252,6 @@ int main()
     static hal::GpioPinStm nResetStimPin(hal::Port::E, 6, hal::Drive::OpenDrain);
     static services::GpioPinInverted nResetStimPinInverted(nResetStimPin); // false: HiZ, true: Low
 
-    static hal::GpioPinStm outPin(hal::Port::F, 7);
-    static hal::GpioPinStm inPin(hal::Port::F, 8);
-
     // Echo infrastructure
     static hal::GpioPinStm hostUartTxPin(hal::Port::C, 10);
     static hal::GpioPinStm hostUartRxPin(hal::Port::C, 11);
@@ -217,16 +263,19 @@ int main()
     // Tester infrastucture
     static LedReport ledReport(ui.ledRed, ui.ledGreen);
     static EchoReport echoReport(response);
-    static Tester tester(nResetStimPinInverted, outPin, inPin, echoReport);
-    tester.ResetStim();
-    static services::DebouncedButton button(ui.buttonOne, []()
-        { tester.Run(); });
+    //static Tester tester(nResetStimPinInverted, outPin, inPin, echoReport);
+    //tester.ResetStim();
+    //static services::DebouncedButton button(ui.buttonOne, []()
+    //    { tester.Run(); });
 
-    // Event infrastructure
-    static Command command(echo, tester, ui.ledGreen);
+    //static Command command(echo, tester, ui.ledGreen);
     static services::DebugLed debugLed(ui.ledBlue);
 
     static main_::EchoBetweenTesterAndTested echoToTested;
+
+    static hal::GpioPinStm outPin(hal::Port::F, 7);
+    static hal::GpioPinStm inPin(hal::Port::F, 8);
+    static GpioTester gpioTester(echo, inPin, outPin);
 
     eventInfrastructure.Run();
     __builtin_unreachable();
