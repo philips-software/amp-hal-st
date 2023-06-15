@@ -34,7 +34,7 @@ set_directory_properties(PROPERTY USE_FOLDERS ON)
 
 # When building HalSt by itself do not exclude any targets from all
 # Libraries will only be excluded from all when HalSt is a consumed as a dependency.
-if (HALST_STANDALONE AND NOT EMIL_HOST_BUILD)
+if (HALST_STANDALONE)
     set(HALST_EXCLUDE_FROM_ALL "")
 else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")

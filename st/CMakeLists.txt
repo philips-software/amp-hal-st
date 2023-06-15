@@ -49,7 +49,8 @@ target_compile_definitions(st.hal_driver_stm32wbxx PUBLIC
     DEVICE_HEADER="stm32wbxx.h"
 )
 
-add_library(st.hal_driver ${HALST_EXCLUDE_FROM_ALL} INTERFACE)
+add_library(st.hal_driver INTERFACE)
+emil_build_for(st.hal_driver TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_STANDALONE)
 install(TARGETS st.hal_driver EXPORT halStTargets)
 
 if (TARGET_MCU_VENDOR STREQUAL st)
