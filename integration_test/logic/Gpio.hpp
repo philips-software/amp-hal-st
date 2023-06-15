@@ -6,15 +6,13 @@
 
 namespace application
 {
-    class GpioTested
-        : public testing::GpioTested
-        , public testing::GpioObserverProxy
+    class GpioBase
+        : public testing::GpioObserverProxy
     {
     public:
-        GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
+        GpioBase(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
 
-        // Implementation of GpioTested
-        void SetGpio(bool state, uint32_t pin) override;
+        void SetGpio(bool state, uint32_t pin);
 
     private:
         void InChanged();
@@ -23,6 +21,28 @@ namespace application
         hal::InputPin in;
         hal::OutputPin out;
         bool sending = false;
+    };
+
+    class GpioTester
+        : public GpioBase
+        , public testing::GpioTester
+    {
+    public:
+        GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
+
+        // Implementation of GpioTester
+        void SetGpio(bool state, uint32_t pin) override;
+    };
+
+    class GpioTested
+        : public GpioBase
+        , public testing::GpioTested
+    {
+    public:
+        GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
+
+        // Implementation of GpioTested
+        void SetGpio(bool state, uint32_t pin) override;
     };
 }
 

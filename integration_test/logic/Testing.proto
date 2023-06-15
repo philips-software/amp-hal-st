@@ -4,33 +4,36 @@ import "EchoAttributes.proto";
 
 package testing;
 
-message GpioOut {
-  bool value = 1;
-}
-
-message GpioIn {
-  bool value = 1;
-  bool valueN = 2;
-}
-
 message GpioState
 {
     bool state = 1;
     uint32 pin = 2;
 }
 
-service Command
+enum Peripheral
+{
+    gpio_input = 0;
+    gpio_output = 1;
+}
+
+message PeripheralType
+{
+    Peripheral peripheral = 1;
+}
+
+service Tester
 {
     option (service_id) = 1;
 
-    rpc RunGpioTest(GpioOut) returns (Nothing) { option (method_id) = 1; }
+    rpc Reset(Nothing) returns (Nothing) { option (method_id) = 1; }
+    rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
 }
 
-service Reponse
+service Tested
 {
     option (service_id) = 2;
 
-    rpc GpioTestResult(GpioIn) returns (Nothing) { option (method_id) = 1; }
+    rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
 }
 
 service GpioTester

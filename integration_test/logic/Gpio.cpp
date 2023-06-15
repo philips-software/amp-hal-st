@@ -2,9 +2,8 @@
 
 namespace application
 {
-    GpioTested::GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
-        : testing::GpioTested(echo)
-        , testing::GpioObserverProxy(echo)
+    GpioBase::GpioBase(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
+        : testing::GpioObserverProxy(echo)
         , in(inPin)
         , out(outPin, false)
     {
@@ -15,12 +14,12 @@ namespace application
             hal::InterruptTrigger::bothEdges);
     }
 
-    void GpioTested::SetGpio(bool state, uint32_t pin)
+    void GpioBase::SetGpio(bool state, uint32_t pin)
     {
         out.Set(state);
     }
 
-    void GpioTested::InChanged()
+    void GpioBase::InChanged()
     {
         if (!sending)
             RequestSend([this]()
@@ -30,5 +29,27 @@ namespace application
                 });
 
         sending = true;
+    }
+
+    GpioTester::GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
+        : GpioBase(echo, inPin, outPin)
+        , testing::GpioTester(echo)
+    {}
+
+    void GpioTester::SetGpio(bool state, uint32_t pin)
+    {
+        GpioBase::SetGpio(state, pin);
+        MethodDone();
+    }
+
+    GpioTested::GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
+        : GpioBase(echo, inPin, outPin)
+        , testing::GpioTested(echo)
+    {}
+
+    void GpioTested::SetGpio(bool state, uint32_t pin)
+    {
+        GpioBase::SetGpio(state, pin);
+        MethodDone();
     }
 }

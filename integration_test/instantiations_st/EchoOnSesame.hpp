@@ -14,6 +14,9 @@ namespace main_
         hal::UartStm echoUart{ 5, echoUartTx, echoUartRx };
         main_::EchoOnSerialCommunication<1024> echo{ echoUart };
     };
+
+    using EchoToTested = EchoBetweenTesterAndTested;
+    using EchoFromTester = EchoBetweenTesterAndTested;
 }
 
 #endif

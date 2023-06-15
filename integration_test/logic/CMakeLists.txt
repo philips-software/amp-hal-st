@@ -9,6 +9,12 @@ protocol_buffer_echo_cpp(integration_test.logic Testing.proto)
 target_sources(integration_test.logic PRIVATE
     Gpio.cpp
     Gpio.hpp
+    Peripheral.cpp
+    Peripheral.hpp
+    Tested.cpp
+    Tested.hpp
+    Tester.cpp
+    Tester.hpp
 )
 
 target_link_libraries(integration_test.logic PUBLIC
