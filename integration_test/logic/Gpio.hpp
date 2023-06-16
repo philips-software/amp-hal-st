@@ -11,6 +11,7 @@ namespace application
     {
     public:
         GpioBase(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
+        ~GpioBase();
 
         void SetGpio(bool state, uint32_t pin);
 

@@ -162,6 +162,11 @@
       "name": "stm32f767-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "stm32f767"
+    },
+    {
+      "name": "stm32f767-Debug",
+      "configuration": "Debug",
+      "configurePreset": "stm32f767"
     }
   ]
 }

@@ -23,7 +23,6 @@ namespace application
         Peripherals::EnablePeripheral(type);
 
         MethodDone();
-
     }
 
     services::Echo& Tester::GetEcho() const

@@ -29,7 +29,7 @@ namespace main_
         Tested(services::Echo& echo);
 
         application::Tested tested;
-        application::Perpipheral<main_::GpioTested> gpioTested{ tested };
+        application::Perpipheral<main_::GpioTested> gpioTested{ tested, testing::Peripheral::gpio };
     };
 
     Tested::Tested(services::Echo& echo)

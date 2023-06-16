@@ -14,6 +14,11 @@ namespace application
             hal::InterruptTrigger::bothEdges);
     }
 
+    GpioBase::~GpioBase()
+    {
+        in.DisableInterrupt();
+    }
+
     void GpioBase::SetGpio(bool state, uint32_t pin)
     {
         out.Set(state);

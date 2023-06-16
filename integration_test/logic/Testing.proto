@@ -12,8 +12,7 @@ message GpioState
 
 enum Peripheral
 {
-    gpio_input = 0;
-    gpio_output = 1;
+    gpio = 0;
 }
 
 message PeripheralType

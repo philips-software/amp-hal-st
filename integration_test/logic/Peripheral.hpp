@@ -39,7 +39,7 @@ namespace application
         : public PeripheralBase
     {
     public:
-        Perpipheral(Peripherals& subject);
+        Perpipheral(Peripherals& subject, testing::Peripheral type);
 
         infra::SharedPtr<void> Construct() override;
 
@@ -51,8 +51,8 @@ namespace application
     //// Implementation ////
 
     template<class Constructed>
-    Perpipheral<Constructed>::Perpipheral(Peripherals& subject)
-        : PeripheralBase(subject, testing::Peripheral::gpio_input)
+    Perpipheral<Constructed>::Perpipheral(Peripherals& subject, testing::Peripheral type)
+        : PeripheralBase(subject, type)
         , echo(subject.GetEcho())
     {}
 

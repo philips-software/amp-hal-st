@@ -31,8 +31,8 @@ namespace main_
     {
         GpioTester(services::Echo& echo);
 
-        hal::GpioPinStm outPin{ hal::Port::F, 7 };
         hal::GpioPinStm inPin{ hal::Port::F, 8 };
+        hal::GpioPinStm outPin{ hal::Port::F, 7 };
         application::GpioTester gpioTester;
     };
 
@@ -46,7 +46,7 @@ namespace main_
 
         hal::GpioPinStm nResetTester{ hal::Port::E, 6, hal::Drive::OpenDrain };
         application::Tester tester;
-        application::Perpipheral<main_::GpioTester> gpioTester{ tester };
+        application::Perpipheral<main_::GpioTester> gpioTester{ tester, testing::Peripheral::gpio };
     };
 
     Tester::Tester(services::Echo& echo)
@@ -68,11 +68,15 @@ namespace main_
 
         main_::EchoToTested echoToTested;
         std::array<uint8_t, 1024> buffer;
+        services::ServiceForwarder forwardTested;
         services::ServiceForwarder forwardGpioTested;
+        services::ServiceForwarder forwardGpioObserver;
     };
 
     ForwardingEchoToTested::ForwardingEchoToTested(services::Echo& echo)
-        : forwardGpioTested(buffer, echo, testing::GpioTested::serviceId, echoToTested.echo)
+        : forwardTested(buffer, echo, testing::Tested::serviceId, echoToTested.echo)
+        , forwardGpioTested(buffer, echo, testing::GpioTested::serviceId, echoToTested.echo)
+        , forwardGpioObserver(buffer, echoToTested.echo, testing::GpioObserver::serviceId, echo)
     {}
 }
 

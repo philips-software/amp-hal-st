@@ -9,8 +9,8 @@ namespace main_
 {
     struct EchoBetweenTesterAndTested
     {
-        hal::GpioPinStm echoUartTx{ hal::Port::D, 2 };
-        hal::GpioPinStm echoUartRx{ hal::Port::C, 12 };
+        hal::GpioPinStm echoUartTx{ hal::Port::C, 12 };
+        hal::GpioPinStm echoUartRx{ hal::Port::D, 2 };
         hal::UartStm echoUart{ 5, echoUartTx, echoUartRx };
         main_::EchoOnSerialCommunication<1024> echo{ echoUart };
     };
