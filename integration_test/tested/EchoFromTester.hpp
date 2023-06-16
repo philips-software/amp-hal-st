@@ -1,5 +1,5 @@
-#ifndef HAL_ST_INTEGRATION_TEST_ECHO_ON_SESAME_HPP
-#define HAL_ST_INTEGRATION_TEST_ECHO_ON_SESAME_HPP
+#ifndef HAL_ST_INTEGRATION_TEST_ECHO_FROM_TESTER_HPP
+#define HAL_ST_INTEGRATION_TEST_ECHO_FROM_TESTER_HPP
 
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/UartStm.hpp"
@@ -7,16 +7,13 @@
 
 namespace main_
 {
-    struct EchoBetweenTesterAndTested
+    struct EchoFromTester
     {
         hal::GpioPinStm echoUartTx{ hal::Port::C, 12 };
         hal::GpioPinStm echoUartRx{ hal::Port::D, 2 };
         hal::UartStm echoUart{ 5, echoUartTx, echoUartRx };
         main_::EchoOnSerialCommunication<1024> echo{ echoUart };
     };
-
-    using EchoToTested = EchoBetweenTesterAndTested;
-    using EchoFromTester = EchoBetweenTesterAndTested;
 }
 
 #endif
