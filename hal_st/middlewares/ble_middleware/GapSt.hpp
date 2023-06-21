@@ -2,20 +2,19 @@
 #define HAL_ST_GAP_ST_HPP
 
 #include "ble/ble.h"
-#include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
-#include "hci_tl.h"
 #include "infra/util/BoundedString.hpp"
-#include "infra/util/BoundedVector.hpp"
-#include "infra/util/Function.hpp"
+#include "infra/util/ProxyCreator.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
-#include "shci.h"
+#include "services/ble/BondStorageSynchronizer.hpp"
 
 namespace hal
 {
     class GapSt
         : public services::AttMtuExchange
+        , public services::GapBonding
+        , public services::GapPairing
         , private hal::HciEventSink
     {
     public:
@@ -32,10 +31,23 @@ namespace hal
         };
 
     protected:
-        GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, uint32_t& bleBondsStorage);
+        GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage);
 
         // Implementation of AttMtuExchange
-        virtual uint16_t EffectiveMaxAttMtuSize() const override;
+        uint16_t EffectiveMaxAttMtuSize() const override;
+
+        // Implementation of GapBonding
+        void RemoveAllBonds() override;
+        void RemoveOldestBond() override;
+        std::size_t GetMaxNumberOfBonds() const override;
+        std::size_t GetNumberOfBonds() const override;
+
+        // Implementation of GapPairing
+        virtual void Pair() override;
+        virtual void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
+        virtual void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
+        virtual void AuthenticateWithPasskey(uint32_t passkey) override;
+        virtual void NumericComparisonConfirm(bool accept) override;
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
@@ -46,7 +58,7 @@ namespace hal
         virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
 
-        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
         virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
@@ -56,7 +68,7 @@ namespace hal
 
     private:
         // Implementation of HciEventSink
-        virtual void HciEvent(hci_event_pckt& event);
+        void HciEvent(hci_event_pckt& event) override;
 
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
@@ -92,6 +104,7 @@ namespace hal
     private:
         uint8_t& txPowerLevel;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+        infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
     };
 }
 

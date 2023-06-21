@@ -1,58 +1,35 @@
 #ifndef HAL_ST_GAP_PERIPHERAL_ST_HPP
 #define HAL_ST_GAP_PERIPHERAL_ST_HPP
 
-#include "ble/ble.h"
-#include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
-#include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
-#include "hci_tl.h"
-#include "infra/util/BoundedString.hpp"
 #include "infra/util/BoundedVector.hpp"
-#include "infra/util/ProxyCreator.hpp"
-#include "services/ble/BondStorageSynchronizer.hpp"
-#include "services/ble/Gap.hpp"
-#include "services/ble/Gatt.hpp"
-#include "shci.h"
 
 namespace hal
 {
     class GapPeripheralSt
         : public services::GapPeripheral
-        , public services::GapPeripheralBonding
-        , public services::GapPeripheralPairing
         , public GapSt
     {
     public:
         GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const hal::GapSt::RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of GapPeripheral
-        virtual services::GapAddress GetAddress() const override;
-        virtual services::GapAddress GetIdentityAddress() const override;
-        virtual void SetAdvertisementData(infra::ConstByteRange data) override;
-        virtual infra::ConstByteRange GetAdvertisementData() const override;
-        virtual void SetScanResponseData(infra::ConstByteRange data) override;
-        virtual infra::ConstByteRange GetScanResponseData() const override;
-        virtual void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
-        virtual void Standby() override;
+        services::GapAddress GetAddress() const override;
+        services::GapAddress GetIdentityAddress() const override;
+        void SetAdvertisementData(infra::ConstByteRange data) override;
+        infra::ConstByteRange GetAdvertisementData() const override;
+        void SetScanResponseData(infra::ConstByteRange data) override;
+        infra::ConstByteRange GetScanResponseData() const override;
+        void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
+        void Standby() override;
 
-        // Implementation of GapPeripheralBonding
-        virtual void RemoveAllBonds() override;
-        virtual void RemoveOldestBond() override;
-        virtual std::size_t GetMaxNumberOfBonds() const override;
-        virtual std::size_t GetNumberOfBonds() const override;
-
-        // Implementation of GapPeripheralPairing
-        virtual void AllowPairing(bool allow) override;
-        virtual void SetSecurityMode(services::GapSecurityMode mode, services::GapSecurityLevel level) override;
-        virtual void SetIoCapabilities(services::GapIoCapabilities caps) override;
-        virtual void AuthenticateWithPasskey(uint32_t passkey) override;
-        virtual void NumericComparisonConfirm(bool accept) override;
+        // Implementation of GapPairing
+        void AllowPairing(bool allow) override;
 
     protected:
         // Implementation of GapSt
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
 
     private:
         void RequestConnectionParameterUpdate();
@@ -63,7 +40,6 @@ namespace hal
         void Initialize(const GapService& gapService);
 
     private:
-        infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
         services::GapState state = services::GapState::standby;
         bool allowPairing = true;
 

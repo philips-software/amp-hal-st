@@ -12,37 +12,9 @@ namespace
 namespace hal
 {
     GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const hal::GapSt::RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
-        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, *bleBondsStorage)
+        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, bondStorageSynchronizerCreator, *bleBondsStorage)
     {
         Initialize(gapService);
-        bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
-    }
-
-    void GapPeripheralSt::RemoveAllBonds()
-    {
-        (*bondStorageSynchronizer)->RemoveAllBonds();
-    }
-
-    void GapPeripheralSt::RemoveOldestBond()
-    {
-        std::abort();
-    }
-
-    std::size_t GapPeripheralSt::GetMaxNumberOfBonds() const
-    {
-        if (bondStorageSynchronizer)
-            return (*bondStorageSynchronizer)->GetMaxNumberOfBonds();
-
-        return 0;
-    }
-
-    std::size_t GapPeripheralSt::GetNumberOfBonds() const
-    {
-        uint8_t numberOfBondedAddress = 0;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
-
-        return numberOfBondedAddress;
     }
 
     services::GapAddress GapPeripheralSt::GetAddress() const
@@ -142,59 +114,6 @@ namespace hal
         allowPairing = allow;
     }
 
-    void GapPeripheralSt::SetSecurityMode(services::GapSecurityMode mode, services::GapSecurityLevel level)
-    {
-        assert(mode == services::GapSecurityMode::mode1);
-
-        enum class SecureConnection : uint8_t
-        {
-            notSupported = 0,
-            optional = 1,
-            mandatory
-        };
-
-        SecureConnection secureConnectionSupport = (level == services::GapSecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
-        uint8_t mitmMode = (level == services::GapSecurityLevel::level3 || level == services::GapSecurityLevel::level4) ? 1 : 0;
-
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
-    }
-
-    void GapPeripheralSt::SetIoCapabilities(services::GapIoCapabilities caps)
-    {
-        tBleStatus status = BLE_STATUS_FAILED;
-
-        switch (caps)
-        {
-            case services::GapIoCapabilities::display:
-                status = aci_gap_set_io_capability(0);
-                break;
-            case services::GapIoCapabilities::displayYesNo:
-                status = aci_gap_set_io_capability(1);
-                break;
-            case services::GapIoCapabilities::keyboard:
-                status = aci_gap_set_io_capability(2);
-                break;
-            case services::GapIoCapabilities::none:
-                status = aci_gap_set_io_capability(3);
-                break;
-            case services::GapIoCapabilities::keyboardDisplay:
-                status = aci_gap_set_io_capability(4);
-                break;
-        }
-
-        assert(status == BLE_STATUS_SUCCESS);
-    }
-
-    void GapPeripheralSt::AuthenticateWithPasskey(uint32_t passkey)
-    {
-        std::abort();
-    }
-
-    void GapPeripheralSt::NumericComparisonConfirm(bool accept)
-    {
-        std::abort();
-    }
-
     void GapPeripheralSt::UpdateResolvingList()
     {
         aci_gap_configure_whitelist();
@@ -244,20 +163,6 @@ namespace hal
         UpdateState(services::GapState::connected);
     }
 
-    void GapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
-    {
-        GapSt::HandlePairingCompleteEvent(vendorEvent);
-
-        auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
-
-        if (pairingComplete->Connection_Handle == connectionContext.connectionHandle && aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
-        {
-            hal::MacAddress address = connectionContext.peerAddress;
-            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-            (*bondStorageSynchronizer)->UpdateBondedDevice(address);
-        }
-    }
-
     void GapPeripheralSt::RequestConnectionParameterUpdate()
     {
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
@@ -273,7 +178,7 @@ namespace hal
         aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
-        SetIoCapabilities(services::GapIoCapabilities::none);
-        SetSecurityMode(services::GapSecurityMode::mode1, services::GapSecurityLevel::level1);
+        SetIoCapabilities(services::GapPairing::IoCapabilities::none);
+        SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
     }
 }

@@ -15,8 +15,8 @@ namespace services
 
 namespace hal
 {
-    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, uint32_t* bleBondsStorage, services::Tracer& tracer)
-        : GapCentralSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, gapService, bleBondsStorage)
+    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage, services::Tracer& tracer)
+        : GapCentralSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, gapService, bondStorageSynchronizerCreator, bleBondsStorage)
         , tracer(tracer)
     {}
 
@@ -145,5 +145,15 @@ namespace hal
         const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
         tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << mtuExchangeEvent->Server_RX_MTU;
         GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
+    }
+
+    void TracingGapCentralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
+    {
+        const auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
+        tracer.Trace() << "GapPeripheralSt::HandlePairingCompleteEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << pairingComplete->Connection_Handle;
+        tracer.Trace() << "\tStatus              : 0x" << infra::hex << pairingComplete->Status;
+        tracer.Trace() << "\tReason              : 0x" << infra::hex << pairingComplete->Reason;
+        GapCentralSt::HandlePairingCompleteEvent(vendorEvent);
     }
 }
