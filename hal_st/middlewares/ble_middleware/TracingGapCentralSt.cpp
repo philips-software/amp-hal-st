@@ -56,6 +56,60 @@ namespace hal
         GapCentralSt::StopDeviceDiscovery();
     }
 
+    void TracingGapCentralSt::RemoveAllBonds()
+    {
+        tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
+        GapCentralSt::RemoveAllBonds();
+    }
+
+    void TracingGapCentralSt::RemoveOldestBond()
+    {
+        tracer.Trace() << "TracingGapCentralSt::RemoveOldestBond";
+        GapCentralSt::RemoveOldestBond();
+    }
+
+    std::size_t TracingGapCentralSt::GetMaxNumberOfBonds() const
+    {
+        tracer.Trace() << "TracingGapCentralSt::GetMaxNumberOfBonds";
+        return GapCentralSt::GetMaxNumberOfBonds();
+    }
+
+    std::size_t TracingGapCentralSt::GetNumberOfBonds() const
+    {
+        tracer.Trace() << "TracingGapCentralSt::GetNumberOfBonds";
+        return GapCentralSt::GetNumberOfBonds();
+    }
+
+    void TracingGapCentralSt::Pair()
+    {
+        tracer.Trace() << "TracingGapCentralSt::Pair";
+        GapCentralSt::Pair();
+    }
+
+    void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetSecurityMode";
+        GapCentralSt::SetSecurityMode(mode, level);
+    }
+
+    void TracingGapCentralSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetIoCapabilities";
+        GapCentralSt::SetIoCapabilities(caps);
+    }
+
+    void TracingGapCentralSt::AuthenticateWithPasskey(uint32_t passkey)
+    {
+        tracer.Trace() << "TracingGapCentralSt::AuthenticateWithPasskey";
+        GapCentralSt::AuthenticateWithPasskey(passkey);
+    }
+
+    void TracingGapCentralSt::NumericComparisonConfirm(bool accept)
+    {
+        tracer.Trace() << "TracingGapCentralSt::NumericComparisonConfirm";
+        GapCentralSt::NumericComparisonConfirm(accept);
+    }
+
     void TracingGapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
         const auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);

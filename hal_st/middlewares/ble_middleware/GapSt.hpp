@@ -30,9 +30,6 @@ namespace hal
             std::array<uint8_t, 16> encryption;
         };
 
-    protected:
-        GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage);
-
         // Implementation of AttMtuExchange
         uint16_t EffectiveMaxAttMtuSize() const override;
 
@@ -48,6 +45,9 @@ namespace hal
         virtual void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         virtual void AuthenticateWithPasskey(uint32_t passkey) override;
         virtual void NumericComparisonConfirm(bool accept) override;
+
+    protected:
+        GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 

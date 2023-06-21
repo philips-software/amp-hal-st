@@ -99,7 +99,7 @@ namespace hal
         }
     }
 
-    void AllowPairing(bool)
+    void GapCentralSt::AllowPairing(bool)
     {
 
     }
