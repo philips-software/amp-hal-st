@@ -1,5 +1,4 @@
 add_library(hal_st.synchronous_stm32fxxx ${HALST_EXCLUDE_FROM_ALL} STATIC)
-install(TARGETS hal_st.synchronous_stm32fxxx EXPORT halStTargets)
 
 target_include_directories(hal_st.synchronous_stm32fxxx PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"
