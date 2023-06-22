@@ -47,8 +47,6 @@ namespace hal
         really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
         // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
 
-        bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
-
         connectionContext.connectionHandle = GapSt::invalidConnection;
 
         const uint8_t maxNumberOfBleLinks = 0x01;
@@ -115,6 +113,8 @@ namespace hal
 
         // Write Encryption root key used to derive LTK and CSRK
         aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, rootKeys.encryption.data());
+
+        bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
 
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();

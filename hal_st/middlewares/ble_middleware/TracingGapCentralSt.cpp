@@ -113,19 +113,23 @@ namespace hal
     void TracingGapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
         const auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
-        tracer.Trace() << "TracingGapCentralSt::HandleHciDisconnectEvent handle = 0x" << infra::hex << disconnectEvt->Connection_Handle;
+        tracer.Trace() << "TracingGapCentralSt::HandleHciDisconnectEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex  << disconnectEvt->Connection_Handle;
         GapCentralSt::HandleHciDisconnectEvent(eventPacket);
     }
 
     void TracingGapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent Handle - 0x" << infra::hex << connectionCompleteEvt->Connection_Handle;
 
         hal::MacAddress mac;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address),
-            std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
-        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << connectionCompleteEvt->Peer_Address_Type;
+        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
+
+        tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex  << connectionCompleteEvt->Connection_Handle;
+        tracer.Trace() << "\tPeer address        : " << infra::AsMacAddress(mac);
+        tracer.Trace() << "\tPeer address type   : " << connectionCompleteEvt->Peer_Address_Type;
+
         GapCentralSt::HandleHciLeConnectionCompleteEvent(metaEvent);
     }
 
@@ -142,11 +146,12 @@ namespace hal
     void TracingGapCentralSt::HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent)
     {
         const auto dataLengthChangeEvent = *reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleHciLeDataLengthChangeEvent, Handle - 0x" << infra::hex << dataLengthChangeEvent.Connection_Handle;
-        tracer.Trace() << "\tMax TX octets : " << dataLengthChangeEvent.MaxTxOctets;
-        tracer.Trace() << "\tMax TX time   : " << dataLengthChangeEvent.MaxTxTime;
-        tracer.Trace() << "\tMax RX octets : " << dataLengthChangeEvent.MaxRxOctets;
-        tracer.Trace() << "\tMax RX time   : " << dataLengthChangeEvent.MaxRxTime;
+        tracer.Trace() << "TracingGapCentralSt::HandleHciLeDataLengthChangeEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex  << dataLengthChangeEvent.Connection_Handle;
+        tracer.Trace() << "\tMax TX octets       : " << dataLengthChangeEvent.MaxTxOctets;
+        tracer.Trace() << "\tMax TX time         : " << dataLengthChangeEvent.MaxTxTime;
+        tracer.Trace() << "\tMax RX octets       : " << dataLengthChangeEvent.MaxRxOctets;
+        tracer.Trace() << "\tMax RX time         : " << dataLengthChangeEvent.MaxRxTime;
         GapCentralSt::HandleHciLeDataLengthChangeEvent(metaEvent);
     }
 
@@ -160,12 +165,15 @@ namespace hal
     void TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         const auto enhancedConnectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
-        tracer.Trace() << "TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent Handle - 0x" << infra::hex << enhancedConnectionCompleteEvt->Connection_Handle;
 
         hal::MacAddress mac;
-        std::copy(std::begin(enhancedConnectionCompleteEvt->Peer_Address),
-            std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
-        tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << enhancedConnectionCompleteEvt->Peer_Address_Type;
+        std::copy(std::begin(enhancedConnectionCompleteEvt->Peer_Address), std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
+
+        tracer.Trace() << "TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex  << enhancedConnectionCompleteEvt->Connection_Handle;
+        tracer.Trace() << "\tPeer address        : " << infra::AsMacAddress(mac);
+        tracer.Trace() << "\tPeer address type   : " << enhancedConnectionCompleteEvt->Peer_Address_Type;
+
         GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
     }
 
@@ -204,7 +212,7 @@ namespace hal
     void TracingGapCentralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
     {
         const auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
-        tracer.Trace() << "GapPeripheralSt::HandlePairingCompleteEvent";
+        tracer.Trace() << "TracingGapCentralSt::HandlePairingCompleteEvent";
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << pairingComplete->Connection_Handle;
         tracer.Trace() << "\tStatus              : 0x" << infra::hex << pairingComplete->Status;
         tracer.Trace() << "\tReason              : 0x" << infra::hex << pairingComplete->Reason;
