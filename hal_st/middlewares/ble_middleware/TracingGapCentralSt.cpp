@@ -47,7 +47,7 @@ namespace hal
     {
         const auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
 
-        tracer.Trace() << "TracingGapCentralSt::HandleHciDisconnectEvent" << infra::hex << disconnectEvt->Connection_Handle;
+        tracer.Trace() << "TracingGapCentralSt::HandleHciDisconnectEvent";
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << disconnectEvt->Connection_Handle;
         tracer.Trace() << "\tReason              : 0x" << infra::hex << disconnectEvt->Reason;
         tracer.Trace() << "\tStatus              : 0x" << infra::hex << disconnectEvt->Status;
