@@ -171,7 +171,7 @@ namespace hal
 
     void GapCentralSt::HandleGapDirectConnectionEstablishmentEvent()
     {
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->ConfigureConnection(); });
     }
 
     void GapCentralSt::HandleAdvertisingReport(const Advertising_Report_t& advertisingReport)
@@ -197,22 +197,13 @@ namespace hal
             connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
-    void GapCentralSt::DataLengthUpdate()
-    {
-        [[maybe_unused]] auto status = hci_le_set_data_length(connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-
-        assert(status == BLE_STATUS_SUCCESS);
-
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->MtuExchange(); });
-    }
-
-    void GapCentralSt::MtuExchange()
+    void GapCentralSt::ConfigureConnection()
     {
         onConnection = [](services::GapCentralObserver& observer) { observer.StateChanged(services::GapState::connected); };
 
-        [[maybe_unused]] auto status = aci_gatt_exchange_config(connectionContext.connectionHandle);
-
-        assert(status == BLE_STATUS_SUCCESS);
+        hci_le_set_data_length(connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
+        hci_le_set_phy(connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0);
+        aci_gatt_exchange_config(connectionContext.connectionHandle);
     }
 
     void GapCentralSt::Initialize(const GapService& gapService)

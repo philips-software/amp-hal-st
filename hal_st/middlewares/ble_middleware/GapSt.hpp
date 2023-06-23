@@ -57,7 +57,7 @@ namespace hal
 
     private:
         // Implementation of HciEventSink
-        virtual void HciEvent(hci_event_pckt& event);
+        void HciEvent(hci_event_pckt& event) override;
 
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);

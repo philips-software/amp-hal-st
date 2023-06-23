@@ -46,8 +46,7 @@ namespace hal
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetConnectionInterval() const;
-        void DataLengthUpdate();
-        void MtuExchange();
+        void ConfigureConnection();
         void Initialize(const GapService& gapService);
 
     private:
