@@ -46,11 +46,11 @@ namespace hal
         virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
 
-        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent){};
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
-        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) {};
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);

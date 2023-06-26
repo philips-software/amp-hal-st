@@ -152,7 +152,7 @@ namespace hal
         const auto mtuExchangeEvent = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
 
         tracer.Trace() << "TracingGapCentralSt::HandleMtuExchangeResponseEvent";
-        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex  << mtuExchangeEvent->Connection_Handle;
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << mtuExchangeEvent->Connection_Handle;
         tracer.Trace() << "\tServer TX MTU       : " << mtuExchangeEvent->Server_RX_MTU;
 
         GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);

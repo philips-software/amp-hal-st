@@ -173,9 +173,9 @@ namespace hal
     void GapCentralSt::HandleGapDirectConnectionEstablishmentEvent()
     {
         onConnection = [](services::GapCentralObserver& observer)
-            {
-                observer.StateChanged(services::GapState::connected);
-            };
+        {
+            observer.StateChanged(services::GapState::connected);
+        };
 
         SetPhy();
         SetDataLength();
@@ -188,7 +188,10 @@ namespace hal
             {
                 if (hci_le_set_phy(this->connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0) == commandDisallowed)
                 {
-                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->SetPhy(); });
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                        {
+                            this->SetPhy();
+                        });
                 }
             });
     }
@@ -222,7 +225,10 @@ namespace hal
 
         discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
 
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer) { observer.DeviceDiscovered(discoveredDevice); });
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer)
+            {
+                observer.DeviceDiscovered(discoveredDevice);
+            });
     }
 
     void GapCentralSt::SetConnectionInterval() const

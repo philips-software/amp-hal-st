@@ -142,7 +142,10 @@ namespace hal
         really_assert(attExchangeMtuResponse.Connection_Handle == connectionContext.connectionHandle);
         maxAttMtu = attExchangeMtuResponse.Server_RX_MTU;
 
-        AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
+        AttMtuExchange::NotifyObservers([](auto& observer)
+            {
+                observer.ExchangedMaxAttMtuSize();
+            });
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
