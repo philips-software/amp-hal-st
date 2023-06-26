@@ -50,7 +50,6 @@ namespace hal
         tracer.Trace() << "TracingGapCentralSt::HandleHciDisconnectEvent";
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << disconnectEvt->Connection_Handle;
         tracer.Trace() << "\tReason              : 0x" << infra::hex << disconnectEvt->Reason;
-        tracer.Trace() << "\tStatus              : 0x" << infra::hex << disconnectEvt->Status;
 
         GapCentralSt::HandleHciDisconnectEvent(eventPacket);
     }
@@ -105,7 +104,6 @@ namespace hal
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << evtLePhyUpdate->Connection_Handle;
         tracer.Trace() << "\tRX phy              : " << evtLePhyUpdate->RX_PHY << " Mbps";
         tracer.Trace() << "\tTX phy              : " << evtLePhyUpdate->TX_PHY << " Mbps";
-        tracer.Trace() << "\tStatus              : 0x" << infra::hex << evtLePhyUpdate->Status;
 
         GapCentralSt::HandleHciLePhyUpdateCompleteEvent(metaEvent);
     }

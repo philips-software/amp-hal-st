@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
+#include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 
@@ -171,7 +172,41 @@ namespace hal
 
     void GapCentralSt::HandleGapDirectConnectionEstablishmentEvent()
     {
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->ConfigureConnection(); });
+        onConnection = [](services::GapCentralObserver& observer)
+            {
+                observer.StateChanged(services::GapState::connected);
+            };
+
+        SetPhy();
+        SetDataLength();
+        MtuExchange();
+    }
+
+    void GapCentralSt::SetPhy()
+    {
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                if (hci_le_set_phy(this->connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0) == commandDisallowed)
+                {
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->SetPhy(); });
+                }
+            });
+    }
+
+    void GapCentralSt::SetDataLength() const
+    {
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
+            });
+    }
+
+    void GapCentralSt::MtuExchange() const
+    {
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+            });
     }
 
     void GapCentralSt::HandleAdvertisingReport(const Advertising_Report_t& advertisingReport)
@@ -195,15 +230,6 @@ namespace hal
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
             connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
             connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
-    }
-
-    void GapCentralSt::ConfigureConnection()
-    {
-        onConnection = [](services::GapCentralObserver& observer) { observer.StateChanged(services::GapState::connected); };
-
-        hci_le_set_data_length(connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-        hci_le_set_phy(connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0);
-        aci_gatt_exchange_config(connectionContext.connectionHandle);
     }
 
     void GapCentralSt::Initialize(const GapService& gapService)

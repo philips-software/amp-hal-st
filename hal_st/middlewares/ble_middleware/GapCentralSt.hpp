@@ -46,7 +46,9 @@ namespace hal
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetConnectionInterval() const;
-        void ConfigureConnection();
+        void SetPhy();
+        void SetDataLength() const;
+        void MtuExchange() const;
         void Initialize(const GapService& gapService);
 
     private:
@@ -66,6 +68,9 @@ namespace hal
         // Discovery parameters
         const uint8_t filterDuplicatesEnabled = 1;
         const uint8_t acceptAllParameters = 1;
+
+        // HCI status
+        const uint8_t commandDisallowed = 0x0c;
 
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
