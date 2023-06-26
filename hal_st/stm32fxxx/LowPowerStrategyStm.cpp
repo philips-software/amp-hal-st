@@ -5,12 +5,13 @@ namespace hal
 {
     void LowPowerStrategyStm::RequestExecution()
     {
+        __DSB();
+        __SEV();
     }
 
     void LowPowerStrategyStm::Idle(const infra::EventDispatcherWorker& eventDispatcher)
     {
-        __SEV();
-        __WFE();
+        __DSB();
         __WFE();
     }
 }
