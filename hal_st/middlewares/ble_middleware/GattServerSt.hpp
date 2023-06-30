@@ -32,6 +32,16 @@ namespace hal
     private:
         infra::IntrusiveForwardList<services::GattServerService> services;
     };
+
+    class GattConfirmIndication
+        : public hal::HciEventSink
+    {
+        public:
+            explicit GattConfirmIndication(hal::HciEventSource& hciEventSource);
+
+            // Implementation of hal::HciEventSink
+            void HciEvent(hci_event_pckt& event) override;
+    };
 }
 
 #endif
