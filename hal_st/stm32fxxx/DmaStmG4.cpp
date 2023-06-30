@@ -119,23 +119,29 @@ namespace hal
 
     uint8_t DmaStmG4::StreamBase::DataSize() const
     {
-        const auto psize = LL_DMA_GetPeriphSize(Peripheral(), channelIndex);
-        return 1 << (psize >> DMA_CCR_PSIZE_Pos);
+        const auto msize = LL_DMA_GetMemorySize(Peripheral(), channelIndex);
+        return 1 << (msize >> DMA_CCR_MSIZE_Pos);
     }
 
     void DmaStmG4::StreamBase::SetDataSize(uint8_t dataSizeInBytes)
     {
-        LL_DMA_SetMemorySize(Peripheral(),
-            channelIndex,
-            dataSizeInBytes == 1   ? LL_DMA_MDATAALIGN_BYTE
-            : dataSizeInBytes == 2 ? LL_DMA_MDATAALIGN_HALFWORD
-                                   : LL_DMA_MDATAALIGN_WORD);
+        SetDataSize(dataSizeInBytes, dataSizeInBytes);
+    }
+
+    void DmaStmG4::StreamBase::SetDataSize(uint8_t peripheralDataSizeInBytes, uint8_t memoryDataSizeInBytes)
+    {
 
         LL_DMA_SetPeriphSize(Peripheral(),
             channelIndex,
-            dataSizeInBytes == 1   ? LL_DMA_PDATAALIGN_BYTE
-            : dataSizeInBytes == 2 ? LL_DMA_PDATAALIGN_HALFWORD
-                                   : LL_DMA_PDATAALIGN_WORD);
+            peripheralDataSizeInBytes == 1   ? LL_DMA_PDATAALIGN_BYTE
+            : peripheralDataSizeInBytes == 2 ? LL_DMA_PDATAALIGN_HALFWORD
+                                             : LL_DMA_PDATAALIGN_WORD);
+
+        LL_DMA_SetMemorySize(Peripheral(),
+            channelIndex,
+            memoryDataSizeInBytes == 1   ? LL_DMA_MDATAALIGN_BYTE
+            : memoryDataSizeInBytes == 2 ? LL_DMA_MDATAALIGN_HALFWORD
+                                         : LL_DMA_MDATAALIGN_WORD);
     }
 
     bool DmaStmG4::StreamBase::StopTransfer()

@@ -35,6 +35,7 @@ namespace hal
         public:
             uint8_t DataSize() const;
             void SetDataSize(uint8_t dataSizeInBytes);
+            void SetDataSize(uint8_t peripheralDataSizeInBytes, uint8_t memoryDataSizeInBytes);
             bool StopTransfer();
 
         protected:
