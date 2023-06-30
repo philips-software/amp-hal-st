@@ -101,7 +101,7 @@ namespace hal
 
     void UartStmDuplexDmaG4::ReceiveComplete(size_t currentPosition)
     {
-        if (currentPosition == lastReceivedPosition)
+        if (currentPosition <= lastReceivedPosition)
             return;
 
         if (dataReceived)
