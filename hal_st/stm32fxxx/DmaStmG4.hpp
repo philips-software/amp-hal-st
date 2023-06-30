@@ -104,6 +104,8 @@ namespace hal
                 infra::Function<void()> actionOnFirstHalfDone,
                 infra::Function<void()> actionOnSecondHalfDone);
 
+            void StartTransmit(infra::ConstByteRange data);
+
             std::size_t ReceivedSize() const;
             void StartReceive(infra::ByteRange data);
 
@@ -115,7 +117,7 @@ namespace hal
             infra::Function<void()> actionOnFirstHalfDone;
             infra::Function<void()> actionOnSecondHalfDone;
 
-            infra::ByteRange data;
+            infra::ByteRange receiveData;
         };
 
     public:

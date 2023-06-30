@@ -230,7 +230,9 @@ namespace hal
         : StreamBase(dma, channelId, peripheralAddress)
         , actionOnTransferComplete(actionOnTransferComplete)
         , interruptHandler(hal::dmaIrq[dmaIndex][channelIndex], [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
     {
         LL_DMA_InitTypeDef dmaInitStruct;
         LL_DMA_StructInit(&dmaInitStruct);
@@ -248,7 +250,9 @@ namespace hal
     DmaStmG4::Stream::Stream(Stream&& other)
         : StreamBase(std::move(other))
         , interruptHandler(std::move(other.interruptHandler), [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
         , actionOnTransferComplete(other.actionOnTransferComplete)
     {
         other.actionOnTransferComplete = nullptr;
@@ -260,7 +264,9 @@ namespace hal
 
         actionOnTransferComplete = other.actionOnTransferComplete;
         interruptHandler.Assign(std::move(other.interruptHandler), [this]()
-            { OnInterrupt(); });
+            {
+                OnInterrupt();
+            });
 
         other.actionOnTransferComplete = nullptr;
 
@@ -335,7 +341,9 @@ namespace hal
         , actionOnFirstHalfDone(actionOnFirstHalfDone)
         , actionOnSecondHalfDone(actionOnSecondHalfDone)
         , interruptHandler(hal::dmaIrq[dmaIndex][channelIndex], [this]()
-              { OnInterrupt(); })
+              {
+                  OnInterrupt();
+              })
     {
         LL_DMA_InitTypeDef dmaInitStruct;
         LL_DMA_StructInit(&dmaInitStruct);
@@ -351,20 +359,13 @@ namespace hal
         SetPeripheralAddress(peripheralAddress);
     }
 
-    size_t DmaStmG4::CircularStream::ReceivedSize() const
-    {
-        const auto dataLength = LL_DMA_GetDataLength(Peripheral(), channelIndex);
-        const auto bytesToTransfer = dataLength * DataSize();
-        return data.size() - bytesToTransfer;
-    }
-
-    void DmaStmG4::CircularStream::StartReceive(infra::ByteRange data)
+    void DmaStmG4::CircularStream::StartTransmit(infra::ConstByteRange data)
     {
         assert(data.size() <= 65535);
+        assert(!data.empty());
+        __DMB();
 
-        this->data = data;
-
-        SetPeripheralToMemoryMode();
+        SetMemoryToPeripheralMode();
         EnableMemoryIncrement();
         SetTransferSize(data.size());
         SetMemoryAddress(data.begin());
@@ -373,9 +374,30 @@ namespace hal
         Enable();
     }
 
+    size_t DmaStmG4::CircularStream::ReceivedSize() const
+    {
+        const auto dataLength = LL_DMA_GetDataLength(Peripheral(), channelIndex);
+        const auto bytesToTransfer = dataLength * DataSize();
+        return receiveData.size() - bytesToTransfer;
+    }
+
+    void DmaStmG4::CircularStream::StartReceive(infra::ByteRange data)
+    {
+        assert(receiveData.size() <= 65535);
+
+        receiveData = data;
+
+        SetPeripheralToMemoryMode();
+        EnableMemoryIncrement();
+        SetTransferSize(receiveData.size());
+        SetMemoryAddress(receiveData.begin());
+        EnableTransferCompleteInterrupt();
+        EnableHalfTransferCompleteInterrupt();
+        Enable();
+    }
+
     void DmaStmG4::CircularStream::OnInterrupt()
     {
-
         if (*dmaISR[dmaIndex] & streamToHTIF[channelIndex])
         {
             *dmaIFCR[dmaIndex] = streamToHTIF[channelIndex];
