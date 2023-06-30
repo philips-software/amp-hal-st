@@ -36,11 +36,11 @@ namespace hal
     class GattConfirmIndication
         : public hal::HciEventSink
     {
-        public:
-            explicit GattConfirmIndication(hal::HciEventSource& hciEventSource);
+    public:
+        explicit GattConfirmIndication(hal::HciEventSource& hciEventSource);
 
-            // Implementation of hal::HciEventSink
-            void HciEvent(hci_event_pckt& event) override;
+        // Implementation of hal::HciEventSink
+        void HciEvent(hci_event_pckt& event) override;
     };
 }
 

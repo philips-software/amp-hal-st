@@ -147,7 +147,6 @@ namespace hal
             if (vendorEvent->ecode == ACI_GATT_INDICATION_VSEVT_CODE)
             {
                 const auto gattIndicationEvent = *reinterpret_cast<aci_gatt_indication_event_rp0*>(vendorEvent->data);
-                
                 aci_gatt_confirm_indication(gattIndicationEvent.Connection_Handle);
             }
         }
