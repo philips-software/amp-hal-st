@@ -33,10 +33,10 @@
     </pin>
   </peripheral>
   <peripheral name="Spi">
-    <pin name="Clock"><input name="SPI:_SCK"/></pin>
-    <pin name="Miso"><input name="SPI:_MISO"/></pin>
-    <pin name="Mosi"><input name="SPI:_MOSI"/></pin>
-    <pin name="SlaveSelect"><input name="SPI:_NSS"/></pin>
+    <pin name="Clock" speed="High"><input name="SPI:_SCK"/></pin>
+    <pin name="Miso" speed="High"><input name="SPI:_MISO"/></pin>
+    <pin name="Mosi" speed="High"><input name="SPI:_MOSI"/></pin>
+    <pin name="SlaveSelect" speed="High"><input name="SPI:_NSS"/></pin>
   </peripheral>
   <peripheral name="Sai">
     <pin name="Sck" speed="High"><input name="SAI:_SCK_A"/><input name="SAI:_SCK_B"/></pin>
