@@ -6,8 +6,6 @@ namespace hal
 {
     namespace
     {
-        constexpr auto invalidIrq = static_cast<IRQn_Type>(0xffff);
-
         void EnableInterrupt(IRQn_Type irq, InterruptPriority priority)
         {
             if (irq >= 0)
@@ -59,49 +57,49 @@ namespace hal
     InterruptHandler::InterruptHandler(InterruptHandler&& other)
         : irq(other.irq)
     {
-        InterruptTable::Instance().TakeOverHandler(irq, *this, other);
-        other.irq = invalidIrq;
+        InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
+        other.irq = infra::none;
     }
 
     InterruptHandler& InterruptHandler::operator=(InterruptHandler&& other)
     {
-        if (irq != invalidIrq)
-            InterruptTable::Instance().DeregisterHandler(irq, *this);
+        if (irq)
+            InterruptTable::Instance().DeregisterHandler(*irq, *this);
 
         irq = other.irq;
 
-        InterruptTable::Instance().TakeOverHandler(irq, *this, other);
-        other.irq = invalidIrq;
+        InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
+        other.irq = infra::none;
 
         return *this;
     }
 
     InterruptHandler::~InterruptHandler()
     {
-        if (irq != invalidIrq)
-            InterruptTable::Instance().DeregisterHandler(irq, *this);
+        if (irq)
+            InterruptTable::Instance().DeregisterHandler(*irq, *this);
     }
 
     void InterruptHandler::Register(IRQn_Type irq, InterruptPriority priority)
     {
         this->irq = irq;
-        InterruptTable::Instance().RegisterHandler(this->irq, *this, priority);
+        InterruptTable::Instance().RegisterHandler(*this->irq, *this, priority);
     }
 
     void InterruptHandler::Unregister()
     {
-        InterruptTable::Instance().DeregisterHandler(irq, *this);
-        irq = invalidIrq;
+        InterruptTable::Instance().DeregisterHandler(*irq, *this);
+        irq = infra::none;
     }
 
     IRQn_Type InterruptHandler::Irq() const
     {
-        return irq;
+        return *irq;
     }
 
     void InterruptHandler::ClearPending()
     {
-        NVIC_ClearPendingIRQ(irq);
+        NVIC_ClearPendingIRQ(*irq);
     }
 
     InterruptTable::InterruptTable(infra::MemoryRange<InterruptHandler*> table)
