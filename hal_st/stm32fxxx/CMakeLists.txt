@@ -54,6 +54,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     QuadSpiStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.hpp>
+    LowPowerStrategyStm.cpp
+    LowPowerStrategyStm.hpp
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
