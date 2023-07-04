@@ -176,7 +176,9 @@ namespace hal
         IRQn_Type irq = Irq();
         DispatchedInterruptHandler& handler = *this;
         infra::EventDispatcher::Instance().Schedule([irq, &handler]()
-            { InvokeScheduled(irq, handler); });
+            {
+                InvokeScheduled(irq, handler);
+            });
     }
 
     void DispatchedInterruptHandler::SetInvoke(const infra::Function<void()>& onInvoke)

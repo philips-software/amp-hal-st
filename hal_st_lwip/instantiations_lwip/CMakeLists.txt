@@ -1,6 +1,5 @@
 add_library(hal_st.instantiations_lwip STATIC)
 emil_build_for(hal_st.instantiations_lwip TARGET_MCU_FAMILY stm32f4xx TARGET_MCU_FAMILY stm32f7xx PREREQUISITE_BOOL HALST_STANDALONE)
-install(TARGETS hal_st.instantiations_lwip EXPORT halStLwipTargets)
 
 target_include_directories(hal_st.instantiations_lwip PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"
