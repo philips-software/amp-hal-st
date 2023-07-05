@@ -105,7 +105,8 @@ namespace hal
 
     void InterruptHandler::ClearPending()
     {
-        NVIC_ClearPendingIRQ(*irq);
+        if (irq)
+            NVIC_ClearPendingIRQ(*irq);
     }
 
     InterruptTable::InterruptTable(infra::MemoryRange<InterruptHandler*> table)
