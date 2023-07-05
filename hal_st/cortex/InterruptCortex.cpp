@@ -57,7 +57,9 @@ namespace hal
     InterruptHandler::InterruptHandler(InterruptHandler&& other)
         : irq(other.irq)
     {
-        InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
+        if (irq)
+            InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
+
         other.irq = infra::none;
     }
 
@@ -68,7 +70,9 @@ namespace hal
 
         irq = other.irq;
 
-        InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
+        if (irq)
+            InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
+
         other.irq = infra::none;
 
         return *this;
@@ -88,13 +92,15 @@ namespace hal
 
     void InterruptHandler::Unregister()
     {
-        InterruptTable::Instance().DeregisterHandler(*irq, *this);
+        if (irq)
+            InterruptTable::Instance().DeregisterHandler(*irq, *this);
+
         irq = infra::none;
     }
 
-    IRQn_Type InterruptHandler::Irq() const
+    infra::Optional<IRQn_Type> InterruptHandler::Irq() const
     {
-        return *irq;
+        return irq;
     }
 
     void InterruptHandler::ClearPending()
@@ -167,11 +173,14 @@ namespace hal
 
     void DispatchedInterruptHandler::Invoke()
     {
-        DisableInterrupt(Irq());
+        if (!Irq())
+            return;
+
+        DisableInterrupt(*Irq());
         assert(!pending);
         pending = true;
 
-        IRQn_Type irq = Irq();
+        IRQn_Type irq = *Irq();
         DispatchedInterruptHandler& handler = *this;
         infra::EventDispatcher::Instance().Schedule([irq, &handler]()
             {

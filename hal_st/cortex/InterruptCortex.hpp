@@ -33,7 +33,7 @@ namespace hal
         void Unregister();
         virtual void Invoke() = 0;
 
-        IRQn_Type Irq() const;
+        infra::Optional<IRQn_Type> Irq() const;
 
         void ClearPending();
 
