@@ -192,12 +192,14 @@ namespace hal
         auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
         really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
-        really_assert(gattProcedureEvent.Error_Code == BLE_STATUS_SUCCESS);
 
-        if (onDiscoveryCompletion)
-            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
-        else if (onDone)
-            std::exchange(onDone, nullptr)();
+        if (gattProcedureEvent.Error_Code == BLE_STATUS_SUCCESS)
+        {
+            if (onDiscoveryCompletion)
+                infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
+            else if (onDone)
+                std::exchange(onDone, nullptr)();
+        }
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)

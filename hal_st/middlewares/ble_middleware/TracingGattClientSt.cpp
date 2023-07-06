@@ -90,4 +90,13 @@ namespace hal
 
         GattClientSt::HandleGattNotificationEvent(vendorEvent);
     }
+
+    void TracingGattClientSt::HandleGattCompleteResponse(evt_blecore_aci* vendorEvent)
+    {
+        auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
+
+        tracer.Trace() << "TracingGattClientSt::GATT complete response, handle: 0x" << infra::hex << gattProcedureEvent.Connection_Handle << ", status: 0x" << gattProcedureEvent.Error_Code;
+
+        GattClientSt::HandleGattCompleteResponse(vendorEvent);
+    }
 }
