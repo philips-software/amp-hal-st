@@ -98,15 +98,14 @@ namespace hal
         irq = infra::none;
     }
 
-    infra::Optional<IRQn_Type> InterruptHandler::Irq() const
+    IRQn_Type InterruptHandler::Irq() const
     {
-        return irq;
+        return *irq;
     }
 
     void InterruptHandler::ClearPending()
     {
-        if (irq)
-            NVIC_ClearPendingIRQ(*irq);
+        NVIC_ClearPendingIRQ(*irq);
     }
 
     InterruptTable::InterruptTable(infra::MemoryRange<InterruptHandler*> table)
@@ -174,14 +173,11 @@ namespace hal
 
     void DispatchedInterruptHandler::Invoke()
     {
-        if (!Irq())
-            return;
-
-        DisableInterrupt(*Irq());
+        DisableInterrupt(Irq());
         assert(!pending);
         pending = true;
 
-        IRQn_Type irq = *Irq();
+        IRQn_Type irq = Irq();
         DispatchedInterruptHandler& handler = *this;
         infra::EventDispatcher::Instance().Schedule([irq, &handler]()
             {
