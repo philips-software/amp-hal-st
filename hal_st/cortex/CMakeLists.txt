@@ -11,8 +11,6 @@ target_link_libraries(hal_st.cortex PUBLIC
 )
 
 target_sources(hal_st.cortex PRIVATE
-    EventDispatcherCortex.cpp
     InterruptCortex.cpp
-    EventDispatcherCortex.hpp
     InterruptCortex.hpp
 )
