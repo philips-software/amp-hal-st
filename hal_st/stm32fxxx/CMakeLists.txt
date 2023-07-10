@@ -1,5 +1,4 @@
 add_library(hal_st.stm32fxxx ${HALST_EXCLUDE_FROM_ALL} STATIC)
-install(TARGETS hal_st.stm32fxxx EXPORT halStTargets)
 
 target_include_directories(hal_st.stm32fxxx PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"
@@ -55,6 +54,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     QuadSpiStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.hpp>
+    LowPowerStrategyStm.cpp
+    LowPowerStrategyStm.hpp
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp

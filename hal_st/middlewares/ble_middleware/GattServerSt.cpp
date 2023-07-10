@@ -134,4 +134,21 @@ namespace hal
 
     void GattServerSt::ReportError(tBleStatus status) const
     {}
+
+    GattConfirmIndication::GattConfirmIndication(hal::HciEventSource& hciEventSource)
+        : hal::HciEventSink(hciEventSource)
+    {}
+
+    void GattConfirmIndication::HciEvent(hci_event_pckt& event)
+    {
+        if (event.evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE)
+        {
+            const auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(event.data);
+            if (vendorEvent->ecode == ACI_GATT_INDICATION_VSEVT_CODE)
+            {
+                const auto gattIndicationEvent = *reinterpret_cast<aci_gatt_indication_event_rp0*>(vendorEvent->data);
+                aci_gatt_confirm_indication(gattIndicationEvent.Connection_Handle);
+            }
+        }
+    }
 }
