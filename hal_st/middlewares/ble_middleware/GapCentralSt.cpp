@@ -143,6 +143,8 @@ namespace hal
 
     void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
     {
+        GapSt::HandleGattCompleteEvent(vendorEvent);
+
         auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
         really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);

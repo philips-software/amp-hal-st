@@ -59,7 +59,7 @@ namespace hal
         const auto connectionCompleteEvt = reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
 
         hal::MacAddress mac;
-        std::copy(std::begin(connectionCompleteEvt->Peer_Address), std::end(connectionCompleteEvt->Peer_Address), std::begin(mac));
+        infra::Copy(infra::MakeRange(connectionCompleteEvt->Peer_Address), infra::MakeRange(mac));
 
         tracer.Trace() << "TracingGapCentralSt::HandleHciLeConnectionCompleteEvent";
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << connectionCompleteEvt->Connection_Handle;
@@ -112,7 +112,7 @@ namespace hal
     {
         const auto enhancedConnectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
         hal::MacAddress mac;
-        std::copy(std::begin(enhancedConnectionCompleteEvt->Peer_Address), std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
+        infra::Copy(infra::MakeRange(enhancedConnectionCompleteEvt->Peer_Address), infra::MakeRange(mac));
 
         tracer.Trace() << "TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent Handle - 0x" << infra::hex << enhancedConnectionCompleteEvt->Connection_Handle;
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << enhancedConnectionCompleteEvt->Connection_Handle;
