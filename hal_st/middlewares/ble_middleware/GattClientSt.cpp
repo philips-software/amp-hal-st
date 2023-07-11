@@ -191,10 +191,10 @@ namespace hal
     {
         auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
-
         if (gattProcedureEvent.Error_Code == BLE_STATUS_SUCCESS)
         {
+            really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
+
             if (onDiscoveryCompletion)
                 infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
             else if (onDone)
