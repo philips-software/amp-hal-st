@@ -93,7 +93,7 @@ namespace hal
 
         SVCCTL_Init();
 
-        hci_le_write_suggested_default_data_length(services::GapPeripheral::connectionInitialMaxTxOctets, services::GapPeripheral::connectionInitialMaxTxTime);
+        hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
@@ -137,8 +137,15 @@ namespace hal
 
     void GapSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
     {
-        maxAttMtu = reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data)->Server_RX_MTU;
-        AttMtuExchange::NotifyObservers([](auto& observer) { observer.ExchangedMaxAttMtuSize(); });
+        auto attExchangeMtuResponse = *reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
+
+        really_assert(attExchangeMtuResponse.Connection_Handle == connectionContext.connectionHandle);
+        maxAttMtu = attExchangeMtuResponse.Server_RX_MTU;
+
+        AttMtuExchange::NotifyObservers([](auto& observer)
+            {
+                observer.ExchangedMaxAttMtuSize();
+            });
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
@@ -210,6 +217,9 @@ namespace hal
             break;
         case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
             HandleGapProcedureCompleteEvent(vendorEvent);
+            break;
+        case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
+            HandleGattCompleteEvent(vendorEvent);
             break;
         case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE:
             HandleL2capConnectionUpdateRequestEvent(vendorEvent);
