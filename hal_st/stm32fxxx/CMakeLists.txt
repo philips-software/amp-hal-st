@@ -35,6 +35,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32g070>:DefaultClockNucleoG070RB.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474RET.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474RET.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.hpp>
     DigitalToAnalogPinStm.cpp
