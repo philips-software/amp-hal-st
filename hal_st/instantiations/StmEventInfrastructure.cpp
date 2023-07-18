@@ -12,4 +12,15 @@ namespace main_
     {
         eventDispatcher.Run();
     }
+
+    LowPowerStmEventInfrastructure::LowPowerStmEventInfrastructure(infra::Duration tickDuration)
+        : eventDispatcher(lowPowerStrategy)
+        , gpio(hal::pinoutTableDefaultStm, hal::analogTableDefaultStm)
+        , systemTick(tickDuration)
+    {}
+
+    void LowPowerStmEventInfrastructure::Run()
+    {
+        eventDispatcher.Run();
+    }
 }

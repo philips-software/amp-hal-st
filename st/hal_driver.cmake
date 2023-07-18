@@ -1,7 +1,6 @@
 function(add_hal_driver target_name hal_driver cmsis)
 
     add_library(${target_name} STATIC)
-    install(TARGETS ${target_name} EXPORT halStTargets)
 
     file(GLOB st_include RELATIVE ${CMAKE_CURRENT_LIST_DIR} ${cmsis}/Device/ST/STM32*)
 

@@ -1,6 +1,5 @@
 add_library(hal_st.stm32_wpan STATIC)
 emil_build_for(hal_st.stm32_wpan TARGET_MCU_FAMILY stm32wbxx PREREQUISITE_BOOL HALST_STANDALONE)
-install(TARGETS hal_st.stm32_wpan EXPORT halStTargets)
 
 target_include_directories(hal_st.stm32_wpan PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"

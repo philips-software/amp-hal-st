@@ -30,6 +30,7 @@ namespace hal
     protected:
         virtual void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent) override;
         virtual void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent) override;
+        virtual void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent) override;
 
     private:
         services::Tracer& tracer;
