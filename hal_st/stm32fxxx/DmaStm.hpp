@@ -27,7 +27,7 @@ namespace hal
         class StreamBase
         {
         protected:
-            StreamBase(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress);
+            StreamBase(DmaStm& dma, DmaChannelId channelId);
             StreamBase(const StreamBase&) = delete;
             StreamBase(StreamBase&& other);
             virtual ~StreamBase();

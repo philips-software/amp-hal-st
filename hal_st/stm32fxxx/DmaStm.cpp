@@ -117,7 +117,7 @@ namespace hal
         streamAllocation[dmaIndex] &= ~(1 << streamIndex);
     }
 
-    DmaStm::StreamBase::StreamBase(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress)
+    DmaStm::StreamBase::StreamBase(DmaStm& dma, DmaChannelId channelId)
         : dma(dma)
         , dmaIndex(channelId.dma)
         , streamIndex(channelId.stream)
@@ -322,7 +322,7 @@ namespace hal
     }
 
     DmaStm::Stream::Stream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnTransferComplete)
-        : StreamBase(dma, channelId, peripheralAddress)
+        : StreamBase(dma, channelId)
         , actionOnTransferComplete(actionOnTransferComplete)
         , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
               {
@@ -439,7 +439,7 @@ namespace hal
     }
 
     DmaStm::CircularStream::CircularStream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnFirstHalfDone, infra::Function<void()> actionOnSecondHalfDone)
-        : StreamBase(dma, channelId, peripheralAddress)
+        : StreamBase(dma, channelId)
         , actionOnFirstHalfDone(actionOnFirstHalfDone)
         , actionOnSecondHalfDone(actionOnSecondHalfDone)
         , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
