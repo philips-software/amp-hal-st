@@ -30,6 +30,7 @@ namespace hal
         void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
         void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
         void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) override;
         void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
