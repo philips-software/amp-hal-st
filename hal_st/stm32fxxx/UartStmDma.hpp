@@ -21,12 +21,11 @@ namespace hal
             uint32_t baudrate = 115200;
             uint32_t hwFlowControl = UART_HWCONTROL_NONE;
             uint32_t parity = USART_PARITY_NONE;
-            infra::Optional<DmaChannelId> dmaChannelTx;
             infra::Optional<InterruptPriority> priority;
         };
 
-        UartStmDma(hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStmDma(hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
         ~UartStmDma();
 
         virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
@@ -46,8 +45,7 @@ namespace hal
 
         UART_HandleTypeDef uartHandle = {};
 
-        hal::DmaStm& dma;
-        DmaStm::Stream transmitDmaChannel;
+        TransmitDmaChannel transmitDmaChannel;
 
         infra::Function<void()> transferDataComplete;
         infra::Function<void(infra::ConstByteRange data)> dataReceived;

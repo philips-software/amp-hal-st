@@ -1,7 +1,11 @@
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
+#include "cmsis_gcc.h"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
+
+volatile uint32_t uartdatareceived = 0;
+volatile uint32_t uartdatapushed = 0;
 
 namespace hal
 {
@@ -17,22 +21,21 @@ namespace hal
             DmaChannelId{ 1, 0, 5 } } };
     }
 
-    UartStmDma::UartStmDma(hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
+    UartStmDma::UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
         , uartHandle()
-        , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              {
-                  TransferComplete();
-              })
+        , transmitDmaChannel{ transmitStreamBase, &peripheralUart[uartIndex]->TDR, 1, [this]()
+            {
+                TransferComplete();
+            } }
 #else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  TransferComplete();
-              })
+        , transmitDmaChannel{ transmitStreamBase, &peripheralUart[uartIndex]->DR, 1, [this]()
+            {
+                TransferComplete();
+            } }
 #endif
     {
         RegisterInterrupt(config);
@@ -57,24 +60,23 @@ namespace hal
         peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT;
     }
 
-    UartStmDma::UartStmDma(hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
+    UartStmDma::UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
         , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
         , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
         , uartHandle()
-        , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              {
-                  TransferComplete();
-              })
+        , transmitDmaChannel{ transmitStreamBase, &peripheralUart[uartIndex]->TDR, 1, [this]()
+            {
+                TransferComplete();
+            } }
 #else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  TransferComplete();
-              })
+        , transmitDmaChannel{ transmitStreamBase, &peripheralUart[uartIndex]->DR, 1, [this]()
+            {
+                TransferComplete();
+            } }
 #endif
     {
         RegisterInterrupt(config);
