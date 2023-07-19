@@ -1,18 +1,4 @@
 #include "hal_st/middlewares/ble_middleware/TracingGattClientSt.hpp"
-#include "infra/stream/StringOutputStream.hpp"
-
-namespace infra
-{
-    TextOutputStream& operator<<(TextOutputStream& stream, const services::AttAttribute::Uuid& uuid)
-    {
-        if (uuid.Is<services::AttAttribute::Uuid16>())
-            stream << "0x" << hex << uuid.Get<services::AttAttribute::Uuid16>();
-        else
-            stream << "[" << AsHex(MakeByteRange(uuid.Get<services::AttAttribute::Uuid128>())) << "]";
-
-        return stream;
-    }
-}
 
 namespace hal
 {
@@ -103,5 +89,14 @@ namespace hal
         tracer.Trace() << "TracingGattClientSt::Notification received, handle: " << infra::hex << gattNotificationEvent.Attribute_Handle << ", data: " << infra::AsHex(data);
 
         GattClientSt::HandleGattNotificationEvent(vendorEvent);
+    }
+
+    void TracingGattClientSt::HandleGattCompleteResponse(evt_blecore_aci* vendorEvent)
+    {
+        auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
+
+        tracer.Trace() << "TracingGattClientSt::GATT complete response, handle: 0x" << infra::hex << gattProcedureEvent.Connection_Handle << ", status: 0x" << gattProcedureEvent.Error_Code;
+
+        GattClientSt::HandleGattCompleteResponse(vendorEvent);
     }
 }

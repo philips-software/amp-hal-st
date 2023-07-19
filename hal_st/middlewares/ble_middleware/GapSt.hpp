@@ -40,11 +40,11 @@ namespace hal
         std::size_t GetNumberOfBonds() const override;
 
         // Implementation of GapPairing
-        virtual void Pair() override;
-        virtual void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
-        virtual void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
-        virtual void AuthenticateWithPasskey(uint32_t passkey) override;
-        virtual void NumericComparisonConfirm(bool accept) override;
+        void Pair() override;
+        void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
+        void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
+        void AuthenticateWithPasskey(uint32_t passkey) override;
+        void NumericComparisonConfirm(bool accept) override;
 
     protected:
         GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage);
@@ -60,8 +60,9 @@ namespace hal
 
         virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);

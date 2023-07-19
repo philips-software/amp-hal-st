@@ -37,15 +37,14 @@ namespace hal
         void HandleGapDirectConnectionEstablishmentEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
-        void SetConnectionInterval(uint16_t connectionInterval, uint16_t slaveLatency, uint16_t timeoutMultiplier);
-        void DataLengthUpdate();
+        void SetConnectionInterval() const;
+        void SetPhy();
+        void SetDataLength() const;
+        void MtuExchange() const;
         void Initialize(const GapService& gapService);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
-
-        const uint16_t transmissionOctets = 251;
-        const uint16_t transmissionTime = 2120;
 
         // Create connection parameters
         const uint16_t leScanInterval = 0x320;
@@ -62,8 +61,12 @@ namespace hal
         const uint8_t filterDuplicatesEnabled = 1;
         const uint8_t acceptAllParameters = 1;
 
+        // HCI status
+        const uint8_t commandDisallowed = 0x0c;
+
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
+        infra::Function<void(services::GapCentralObserver&)> onConnection;
     };
 }
 

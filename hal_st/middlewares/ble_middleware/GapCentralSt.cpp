@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
+#include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 
@@ -14,31 +15,6 @@ namespace hal
 
     namespace
     {
-        infra::ConstByteRange GetLocalNameFromAdvertising(infra::ConstByteRange advertisingIndication)
-        {
-            infra::ByteInputStream stream(advertisingIndication, infra::noFail);
-
-            while (!stream.Empty())
-            {
-                uint8_t length = 0;
-                uint8_t adType = 0;
-
-                stream >> length;
-
-                if (length > 0)
-                {
-                    stream >> adType;
-
-                    if (adType == AD_TYPE_COMPLETE_LOCAL_NAME || adType == AD_TYPE_SHORTENED_LOCAL_NAME)
-                        return stream.ContiguousRange(length - 1);
-
-                    stream.Consume(length - 1);
-                }
-            }
-
-            return infra::ConstByteRange();
-        }
-
         services::GapAdvertisingEventType ToAdvertisingEventType(uint8_t eventType)
         {
             return static_cast<services::GapAdvertisingEventType>(eventType);
@@ -170,6 +146,19 @@ namespace hal
         }
     }
 
+    void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
+    {
+        GapSt::HandleGattCompleteEvent(vendorEvent);
+
+        auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
+
+        really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+        really_assert(gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS);
+
+        if (onConnection)
+            infra::Subject<services::GapCentralObserver>::NotifyObservers(std::exchange(onConnection, nullptr));
+    }
+
     void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent)
     {
         GapSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
@@ -190,7 +179,44 @@ namespace hal
 
     void GapCentralSt::HandleGapDirectConnectionEstablishmentEvent()
     {
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]() { this->DataLengthUpdate(); });
+        onConnection = [](services::GapCentralObserver& observer)
+        {
+            observer.StateChanged(services::GapState::connected);
+        };
+
+        SetPhy();
+        SetDataLength();
+        MtuExchange();
+    }
+
+    void GapCentralSt::SetPhy()
+    {
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                if (hci_le_set_phy(this->connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0) == commandDisallowed)
+                {
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                        {
+                            this->SetPhy();
+                        });
+                }
+            });
+    }
+
+    void GapCentralSt::SetDataLength() const
+    {
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
+            });
+    }
+
+    void GapCentralSt::MtuExchange() const
+    {
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+            });
     }
 
     void GapCentralSt::HandleAdvertisingReport(const Advertising_Report_t& advertisingReport)
@@ -204,25 +230,19 @@ namespace hal
 
         auto advertisementData = reinterpret_cast<const uint8_t*>(&advertisingReport.Length_Data) + 1;
 
-        discoveredDevice.data = GetLocalNameFromAdvertising(infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data));
+        discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
 
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer) { observer.DeviceDiscovered(discoveredDevice); });
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer)
+            {
+                observer.DeviceDiscovered(discoveredDevice);
+            });
     }
 
-    void GapCentralSt::SetConnectionInterval(uint16_t connectionInterval, uint16_t slaveLatency, uint16_t timeoutMultiplier)
+    void GapCentralSt::SetConnectionInterval() const
     {
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
             connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
             connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
-    }
-
-    void GapCentralSt::DataLengthUpdate()
-    {
-        [[maybe_unused]] auto status = hci_le_set_data_length(connectionContext.connectionHandle, transmissionOctets, transmissionTime);
-
-        assert(status == BLE_STATUS_SUCCESS);
-
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::connected); });
     }
 
     void GapCentralSt::Initialize(const GapService& gapService)
