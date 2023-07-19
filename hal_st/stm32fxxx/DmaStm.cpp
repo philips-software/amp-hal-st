@@ -56,41 +56,40 @@ namespace hal
 #endif
 
 #if defined(DMA_CHANNEL_BASED)
+        // clang-format off
         const std::array dmaISR
         {
             std::array
             {
                 &DMA1->ISR,
-                    &DMA1->ISR,
-                    &DMA1->ISR,
-                    &DMA1->ISR,
-                    &DMA1->ISR,
-                    &DMA1->ISR,
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
-                    &DMA1->ISR,
+                &DMA1->ISR,
+                &DMA1->ISR,
+                &DMA1->ISR,
+                &DMA1->ISR,
+                &DMA1->ISR,
+#if defined(DMA1_Channel7)
+                &DMA1->ISR,
 #endif
-#if defined(STM32G4)
-                    &DMA1->ISR,
+#if defined(DMA1_Channel8)
+                &DMA1->ISR,
 #endif
-            }
-            ,
-#if defined(STM32G4) || defined(STM32WB)
-                std::array
+            },
+#if defined(DMA2_Channel1)
+            std::array
             {
                 &DMA2->ISR,
-                    &DMA2->ISR,
-                    &DMA2->ISR,
-                    &DMA2->ISR,
-                    &DMA2->ISR,
-                    &DMA2->ISR,
-#if defined(STM32G4) || defined(STM32WB)
-                    &DMA2->ISR,
+                &DMA2->ISR,
+                &DMA2->ISR,
+                &DMA2->ISR,
+                &DMA2->ISR,
+                &DMA2->ISR,
+#if defined(DMA2_Channel7)
+                &DMA2->ISR,
 #endif
-#if defined(STM32G4)
-                    &DMA2->ISR,
+#if defined(DMA2_Channel8)
+                &DMA2->ISR,
 #endif
-            }
-            ,
+            },
 #endif
         };
 
@@ -99,36 +98,34 @@ namespace hal
             std::array
             {
                 &DMA1->IFCR,
-                    &DMA1->IFCR,
-                    &DMA1->IFCR,
-                    &DMA1->IFCR,
-                    &DMA1->IFCR,
-                    &DMA1->IFCR,
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
-                    &DMA1->IFCR,
+                &DMA1->IFCR,
+                &DMA1->IFCR,
+                &DMA1->IFCR,
+                &DMA1->IFCR,
+                &DMA1->IFCR,
+#if defined(DMA1_Channel7)
+                &DMA1->IFCR,
 #endif
-#if defined(STM32G4)
-                    &DMA1->IFCR,
+#if defined(DMA1_Channel8)
+                &DMA1->IFCR,
 #endif
-            }
-            ,
-#if defined(STM32G4) || defined(STM32WB)
-                std::array
+            },
+#if defined(DMA2_Channel1)
+            std::array
             {
                 &DMA2->IFCR,
-                    &DMA2->IFCR,
-                    &DMA2->IFCR,
-                    &DMA2->IFCR,
-                    &DMA2->IFCR,
-                    &DMA2->IFCR,
-#if defined(STM32G4) || defined(STM32WB)
-                    &DMA2->IFCR,
+                &DMA2->IFCR,
+                &DMA2->IFCR,
+                &DMA2->IFCR,
+                &DMA2->IFCR,
+                &DMA2->IFCR,
+#if defined(DMA2_Channel7)
+                &DMA2->IFCR,
 #endif
-#if defined(STM32G4)
-                    &DMA2->IFCR,
+#if defined(DMA2_Channel8)
+                &DMA2->IFCR,
 #endif
-            }
-            ,
+            },
 #endif
         };
 
@@ -137,36 +134,34 @@ namespace hal
             std::array
             {
                 DMA1_Channel1,
-                    DMA1_Channel2,
-                    DMA1_Channel3,
-                    DMA1_Channel4,
-                    DMA1_Channel5,
-                    DMA1_Channel6,
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
-                    DMA1_Channel7,
+                DMA1_Channel2,
+                DMA1_Channel3,
+                DMA1_Channel4,
+                DMA1_Channel5,
+                DMA1_Channel6,
+#if defined(DMA1_Channel7)
+                DMA1_Channel7,
 #endif
-#if defined(STM32G4)
-                    DMA1_Channel8,
+#if defined(DMA1_Channel8)
+                DMA1_Channel8,
 #endif
-            }
-            ,
-#if defined(STM32G4) || defined(STM32WB)
-                std::array
+            },
+#if defined(DMA2_Channel1)
+            std::array
             {
                 DMA2_Channel1,
-                    DMA2_Channel2,
-                    DMA2_Channel3,
-                    DMA2_Channel4,
-                    DMA2_Channel5,
-                    DMA2_Channel6,
-#if defined(STM32G4) || defined(STM32WB)
-                    DMA2_Channel7,
+                DMA2_Channel2,
+                DMA2_Channel3,
+                DMA2_Channel4,
+                DMA2_Channel5,
+                DMA2_Channel6,
+#if defined(DMA2_Channel7)
+                DMA2_Channel7,
 #endif
-#if defined(STM32G4)
-                    DMA2_Channel8,
+#if defined(DMA2_Channel8)
+                DMA2_Channel8,
 #endif
-            }
-            ,
+            },
 #endif
         };
         const std::array dmaIrq
@@ -174,85 +169,85 @@ namespace hal
             std::array
             {
                 DMA1_Channel1_IRQn,
-                    DMA1_Channel2_IRQn,
-                    DMA1_Channel3_IRQn,
-                    DMA1_Channel4_IRQn,
-                    DMA1_Channel5_IRQn,
-                    DMA1_Channel6_IRQn,
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
-                    DMA1_Channel7_IRQn,
+                DMA1_Channel2_IRQn,
+                DMA1_Channel3_IRQn,
+                DMA1_Channel4_IRQn,
+                DMA1_Channel5_IRQn,
+                DMA1_Channel6_IRQn,
+#if defined(DMA1_Channel7)
+                DMA1_Channel7_IRQn,
 #endif
-#if defined(STM32G4)
-                    DMA1_Channel8_IRQn,
+#if defined(DMA1_Channel8)
+                DMA1_Channel8_IRQn,
 #endif
-            }
-            ,
-#if defined(STM32G4) || defined(STM32WB)
-                std::array
+            },
+#if defined(DMA2_Channel1)
+            std::array
             {
                 DMA2_Channel1_IRQn,
-                    DMA2_Channel2_IRQn,
-                    DMA2_Channel3_IRQn,
-                    DMA2_Channel4_IRQn,
-                    DMA2_Channel5_IRQn,
-                    DMA2_Channel6_IRQn,
-#if defined(STM32G4) || defined(STM32WB)
-                    DMA2_Channel7_IRQn,
+                DMA2_Channel2_IRQn,
+                DMA2_Channel3_IRQn,
+                DMA2_Channel4_IRQn,
+                DMA2_Channel5_IRQn,
+                DMA2_Channel6_IRQn,
+#if defined(DMA2_Channel7)
+                DMA2_Channel7_IRQn,
 #endif
-#if defined(STM32G4)
-                    DMA2_Channel8_IRQn,
+#if defined(DMA2_Channel8)
+                DMA2_Channel8_IRQn,
 #endif
-            }
-            ,
+            },
 #endif
         };
 
         const std::array streamToTCIF
         {
             DMA_FLAG_TC1,
-                DMA_FLAG_TC2,
-                DMA_FLAG_TC3,
-                DMA_FLAG_TC4,
-                DMA_FLAG_TC5,
-                DMA_FLAG_TC6,
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
-                DMA_FLAG_TC7,
+            DMA_FLAG_TC2,
+            DMA_FLAG_TC3,
+            DMA_FLAG_TC4,
+            DMA_FLAG_TC5,
+            DMA_FLAG_TC6,
+#if defined(DMA_FLAG_TC7)
+            DMA_FLAG_TC7,
 #endif
-#if defined(STM32G4)
-                DMA_FLAG_TC8,
+#if defined(DMA_FLAG_TC8)
+            DMA_FLAG_TC8,
 #endif
         };
         const std::array streamToHTIF
         {
             DMA_FLAG_HT1,
-                DMA_FLAG_HT2,
-                DMA_FLAG_HT3,
-                DMA_FLAG_HT4,
-                DMA_FLAG_HT5,
-                DMA_FLAG_HT6,
-#if defined(STM32G4) || defined(STM32WB)
-                DMA_FLAG_HT7,
+            DMA_FLAG_HT2,
+            DMA_FLAG_HT3,
+            DMA_FLAG_HT4,
+            DMA_FLAG_HT5,
+            DMA_FLAG_HT6,
+#if defined(DMA_FLAG_HT7)
+            DMA_FLAG_HT7,
 #endif
-#if defined(STM32G4)
-                DMA_FLAG_HT8,
+#if defined(DMA_FLAG_HT8)
+            DMA_FLAG_HT8,
 #endif
         };
         const std::array streamToTEIF
         {
             DMA_FLAG_TE1,
-                DMA_FLAG_TE2,
-                DMA_FLAG_TE3,
-                DMA_FLAG_TE4,
-                DMA_FLAG_TE5,
-                DMA_FLAG_TE6,
-#if defined(STM32G4) || defined(STM32WB)
-                DMA_FLAG_TE7,
+            DMA_FLAG_TE2,
+            DMA_FLAG_TE3,
+            DMA_FLAG_TE4,
+            DMA_FLAG_TE5,
+            DMA_FLAG_TE6,
+#if defined(DMA_FLAG_TE7)
+            DMA_FLAG_TE7,
 #endif
-#if defined(STM32G4)
-                DMA_FLAG_TE8,
+#if defined(DMA_FLAG_TE8)
+            DMA_FLAG_TE8,
 #endif
         };
 #endif
+
+        // clang-format on
 
         static_assert(dmaISR[0].size() == dmaIFCR[0].size());
         static_assert(dmaISR[0].size() == DmaChannel[0].size());

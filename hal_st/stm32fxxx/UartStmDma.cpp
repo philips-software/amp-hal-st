@@ -9,24 +9,12 @@ volatile uint32_t uartdatapushed = 0;
 
 namespace hal
 {
-    namespace
-    {
-        const std::array<DmaChannelId, 8> defaultDmaChannelId = { { DmaChannelId{ 2, 7, 4 },
-            DmaChannelId{ 1, 6, 4 },
-            DmaChannelId{ 1, 3, 4 },
-            DmaChannelId{ 1, 4, 4 },
-            DmaChannelId{ 1, 7, 4 },
-            DmaChannelId{ 2, 6, 5 },
-            DmaChannelId{ 1, 1, 5 },
-            DmaChannelId{ 1, 0, 5 } } };
-    }
-
     UartStmDma::UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
         , uartHandle()
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         , transmitDmaChannel{ transmitStreamBase, &peripheralUart[uartIndex]->TDR, 1, [this]()
             {
                 TransferComplete();
@@ -67,7 +55,7 @@ namespace hal
         , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
         , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
         , uartHandle()
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         , transmitDmaChannel{ transmitStreamBase, &peripheralUart[uartIndex]->TDR, 1, [this]()
             {
                 TransferComplete();
@@ -152,13 +140,15 @@ namespace hal
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
+        while (peripheralUart[uartIndex]->ISR & USART_ISR_NE)
+#elif defined(STM32G0)
+        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
 #else
         while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
 #endif
         {
             uint8_t receivedByte =
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
                 peripheralUart[uartIndex]->RDR;
 #else
                 peripheralUart[uartIndex]->DR;
@@ -167,7 +157,7 @@ namespace hal
         }
 
         // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
 #else
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));
