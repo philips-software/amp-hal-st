@@ -28,7 +28,7 @@ jobs:
           clangFormatVersion: 15
           inplace: true
           extensions: "cpp,hpp"
-      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
+      - uses: reviewdog/action-suggester@3f60d0e826f0873905e0eeca522d562a6e67afbd # v1.7.1
         with:
           tool_name: clang-format
           filter_mode: diff_context
@@ -54,7 +54,7 @@ jobs:
           name: linter
           path: |
             megalinter-reports
-      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
+      - uses: reviewdog/action-suggester@3f60d0e826f0873905e0eeca522d562a6e67afbd # v1.7.1
         with:
           tool_name: MegaLinter
           filter_mode: diff_context
