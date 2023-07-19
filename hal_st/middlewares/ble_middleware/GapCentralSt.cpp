@@ -77,7 +77,6 @@ namespace hal
 
     void GapCentralSt::AllowPairing(bool)
     {
-
     }
 
     void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)

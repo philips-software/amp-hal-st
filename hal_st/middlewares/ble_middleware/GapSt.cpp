@@ -2,8 +2,8 @@
 #include "ble_gap_aci.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "services/ble/Gap.hpp"
-#include "stm32wbxx_ll_system.h"
 #include "shci.h"
+#include "stm32wbxx_ll_system.h"
 
 namespace hal
 {
@@ -32,8 +32,7 @@ namespace hal
         }
     }
 
-    const services::GapConnectionParameters GapSt::connectionParameters
-    {
+    const services::GapConnectionParameters GapSt::connectionParameters{
         6,
         6,
         0,
@@ -279,9 +278,15 @@ namespace hal
         }
 
         if (pairingComplete->Status == SMP_PAIRING_STATUS_SUCCESS)
-            GapPairing::NotifyObservers([](auto& observer) { observer.PairingSuccessfullyCompleted(); });
+            GapPairing::NotifyObservers([](auto& observer)
+                {
+                    observer.PairingSuccessfullyCompleted();
+                });
         else
-            GapPairing::NotifyObservers([&pairingComplete](auto& observer) { observer.PairingFailed(ParserPairingFailure(pairingComplete->Status, pairingComplete->Reason)); });
+            GapPairing::NotifyObservers([&pairingComplete](auto& observer)
+                {
+                    observer.PairingFailed(ParserPairingFailure(pairingComplete->Status, pairingComplete->Reason));
+                });
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
