@@ -1,7 +1,9 @@
 #ifndef HAL_ST_NUCLEO_UI_HPP
 #define HAL_ST_NUCLEO_UI_HPP
 
+#include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/UartStmDma.hpp"
 
 namespace main_
 {
@@ -24,6 +26,7 @@ namespace main_
     // UM2324: MB1360 reference board with G070RB, G071RB, G0B1RE
     // UM2206: MB1319 reference board with L412RB-P, L433RC-P, L452RE-P
     // UM2953: MB1717 reference board with C031C6
+#if defined(STM32G431xx) || defined(STM32G474xx)
     struct Nucleo64Ui
     {
         hal::GpioPinStm buttonOne{ hal::Port::C, 13, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
@@ -31,9 +34,19 @@ namespace main_
         hal::GpioPinStm ledGreen{ hal::Port::B, 13 };
 #else
         hal::GpioPinStm ledGreen{ hal::Port::A, 5 }; // STM32G0, STM32G4
+
+        hal::GpioPinStm stLinkUartTxPin{ hal::Port::A, 2 };
+        hal::GpioPinStm stLinkUartRxPin{ hal::Port::A, 3 };
+
+        hal::DmaStm dmaStm;
+        hal::DmaChannelId dmaChannelId{ 1, 1, DMA_REQUEST_USART2_TX };
+        hal::DmaStm::TransmitStreamBase transmitStreamBase{ dmaStm, dmaChannelId };
+        hal::UartStmDma stLinkUartDma{ transmitStreamBase, 2, stLinkUartTxPin, stLinkUartRxPin };
 #endif
     };
+#endif
 
+#if defined(STM32WB)
     // UM2435: MB1355 reference board with STM32WB55RG
     struct Nucleo64WBUi
     {
@@ -43,8 +56,18 @@ namespace main_
         hal::GpioPinStm ledRed{ hal::Port::B, 1 };
         hal::GpioPinStm ledGreen{ hal::Port::B, 0 };
         hal::GpioPinStm ledBlue{ hal::Port::B, 5 };
-    };
 
+        hal::GpioPinStm stLinkUartTxPin{ hal::Port::B, 6 };
+        hal::GpioPinStm stLinkUartRxPin{ hal::Port::B, 7 };
+
+        hal::DmaStm dmaStm;
+        hal::DmaChannelId dmaChannelId{ 1, 1, DMA_REQUEST_USART1_TX };
+        hal::DmaStm::TransmitStreamBase transmitStreamBase{ dmaStm, dmaChannelId };
+        hal::UartStmDma stLinkUartDma{ transmitStreamBase, 1, stLinkUartTxPin, stLinkUartRxPin };
+    };
+#endif
+
+#if defined(STM32F429xx) || defined(STM32F746xx) || defined(STM32F767xx)
     // UM1974: MB1137 reference board with F207ZG, F303ZE, F412ZG, F413ZH, F429ZI, F439ZI, F446ZE, F722ZE, F746ZG, F756ZG, F767ZI, H743ZI
     // UM2179: MB1312 reference board with L496ZG, L496ZG-P, L4A6ZG, L4P5ZG, LR5ZI, L4R5ZI-P
     struct Nucleo144Ui
@@ -55,9 +78,19 @@ namespace main_
         hal::GpioPinStm ledGreen{ hal::Port::C, 7 };
 #else
         hal::GpioPinStm ledGreen{ hal::Port::B, 0 };
+
+        hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
+        hal::GpioPinStm stLinkUartRxPin{ hal::Port::D, 9 };
+
+        hal::DmaStm dmaStm;
+        hal::DmaChannelId dmaChannelId{ 1, 3, 4 };
+        hal::DmaStm::TransmitStreamBase transmitStreamBase{ dmaStm, dmaChannelId };
+        hal::UartStmDma stLinkUartDma{ transmitStreamBase, 3, stLinkUartTxPin, stLinkUartRxPin };
+
 #endif
         hal::GpioPinStm ledBlue{ hal::Port::B, 7 };
     };
+#endif
 }
 
 #endif
