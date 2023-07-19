@@ -13,7 +13,6 @@ namespace hal
     class GattClientSt
         : public services::GattClientDiscovery
         , public services::GattClientCharacteristicOperations
-        , public services::GattClientStackUpdate
         , public hal::HciEventSink
     {
     public:

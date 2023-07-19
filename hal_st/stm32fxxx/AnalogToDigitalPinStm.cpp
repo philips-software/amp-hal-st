@@ -1,6 +1,32 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include <array>
 #include <cassert>
+
+namespace
+{
+    constexpr std::array<uint32_t, 19> adcChannel = {
+        ADC_CHANNEL_0,
+        ADC_CHANNEL_1,
+        ADC_CHANNEL_2,
+        ADC_CHANNEL_3,
+        ADC_CHANNEL_4,
+        ADC_CHANNEL_5,
+        ADC_CHANNEL_6,
+        ADC_CHANNEL_7,
+        ADC_CHANNEL_8,
+        ADC_CHANNEL_9,
+        ADC_CHANNEL_10,
+        ADC_CHANNEL_11,
+        ADC_CHANNEL_12,
+        ADC_CHANNEL_13,
+        ADC_CHANNEL_14,
+        ADC_CHANNEL_15,
+        ADC_CHANNEL_16,
+        ADC_CHANNEL_17,
+        ADC_CHANNEL_18
+    };
+}
 
 namespace hal
 {
@@ -12,13 +38,19 @@ namespace hal
     void AnalogToDigitalPinImplStm::Measure(const infra::Function<void(int32_t value)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = pin.AdcChannel(adc.index + 1);
+        channelConfig.Channel = adcChannel[pin.AdcChannel(adc.index + 1)];
+#if !defined(STM32WB)
         channelConfig.Rank = 1;
+#else
+        channelConfig.Rank = ADC_REGULAR_RANK_1;
+#endif
 #if defined(STM32F0) || defined(STM32F3)
         channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
 #elif defined(STM32WB)
         channelConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
         channelConfig.Offset = 0;
+        channelConfig.OffsetNumber = ADC_OFFSET_NONE;
+        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
 #elif defined(STM32G0)
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
 #elif defined(STM32G4)
@@ -67,6 +99,10 @@ namespace hal
         handle.Init.NbrOfConversion = 1;
 #if !defined(STM32F3)
         handle.Init.DMAContinuousRequests = DISABLE;
+#endif
+#if defined(STM32WB)
+        handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+#elif !defined(STM32F3)
         handle.Init.EOCSelection = DISABLE;
 #endif
         HAL_StatusTypeDef result = HAL_ADC_Init(&handle);
@@ -90,7 +126,7 @@ namespace hal
     {
         assert(onDone != nullptr);
 #if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
-        handle.Instance->ISR &= ~ADC_ISR_EOC;
+        handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
 #else
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif
