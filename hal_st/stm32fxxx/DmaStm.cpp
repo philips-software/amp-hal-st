@@ -18,7 +18,7 @@ namespace hal
             std::array{ &DMA2->LIFCR, &DMA2->LIFCR, &DMA2->LIFCR, &DMA2->LIFCR, &DMA2->HIFCR, &DMA2->HIFCR, &DMA2->HIFCR, &DMA2->HIFCR },
         };
 
-        const std::arrayDmaChannel{
+        const std::array DmaChannel{
             std::array{ DMA1_Stream0, DMA1_Stream1, DMA1_Stream2, DMA1_Stream3, DMA1_Stream4, DMA1_Stream5, DMA1_Stream6, DMA1_Stream7 },
             std::array{ DMA2_Stream0, DMA2_Stream1, DMA2_Stream2, DMA2_Stream3, DMA2_Stream4, DMA2_Stream5, DMA2_Stream6, DMA2_Stream7 },
         };
@@ -835,7 +835,7 @@ namespace hal
 
     DmaStm::StreamInterruptHandler::StreamInterruptHandler(StreamBase& streamBase, const infra::Function<void()>& transferFullComplete)
         : streamBase{ streamBase }
-        , dispatchedInterruptHandler{ IRQn_Type::DMA1_Channel1_IRQn, [this]
+        , dispatchedInterruptHandler{ dmaIrq[streamBase.dmaIndex][streamBase.streamIndex], [this]
             {
                 OnInterrupt();
             } }
@@ -862,7 +862,7 @@ namespace hal
 
     DmaStm::CircularStreamInterruptHandler::CircularStreamInterruptHandler(StreamBase& streamBase, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
         : streamBase{ streamBase }
-        , immediateInterruptHandler{ IRQn_Type::DMA1_Channel1_IRQn, [this]
+        , immediateInterruptHandler{ dmaIrq[streamBase.dmaIndex][streamBase.streamIndex], [this]
             {
                 OnInterrupt();
             } }
