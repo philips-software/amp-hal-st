@@ -214,7 +214,13 @@ namespace hal
     {
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
             {
-                aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+                if (aci_gatt_exchange_config(this->connectionContext.connectionHandle) == commandDisallowed)
+                {
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                        {
+                            this->MtuExchange();
+                        });
+                }
             });
     }
 
