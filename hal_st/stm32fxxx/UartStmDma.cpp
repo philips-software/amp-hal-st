@@ -1,5 +1,4 @@
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
-#include "cmsis_gcc.h"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"

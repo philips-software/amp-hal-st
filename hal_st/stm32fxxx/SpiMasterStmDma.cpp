@@ -1,5 +1,4 @@
 #include "hal_st/stm32fxxx/SpiMasterStmDma.hpp"
-#include "build/stm32g070/_deps/emil-src/infra/util/MemoryRange.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
