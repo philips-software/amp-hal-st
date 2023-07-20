@@ -102,26 +102,6 @@ namespace hal
             uint8_t streamIndex = 0xff;
         };
 
-    public:
-        DmaStm();
-        ~DmaStm();
-
-    private:
-        void ReserveStream(uint8_t dmaIndex, uint8_t streamIndex);
-        void ReleaseStream(uint8_t dmaIndex, uint8_t streamIndex);
-
-    private:
-        std::array<uint32_t, 2> streamAllocation = { { 0, 0 } };
-
-    public:
-        /* ======================================================= */
-        /* ======================================================= */
-        /* ======================================================= */
-        /* ======================================================= */
-        /* ======================================================= */
-        /* ======================================================= */
-        /* ======================================================= */
-
         template<class T>
         class TransmitStreamBaseV2
         {
@@ -355,6 +335,17 @@ namespace hal
             PeripheralStream peripheralStream;
             TransceiveStream& stream;
         };
+
+    public:
+        DmaStm();
+        ~DmaStm();
+
+    private:
+        void ReserveStream(uint8_t dmaIndex, uint8_t streamIndex);
+        void ReleaseStream(uint8_t dmaIndex, uint8_t streamIndex);
+
+    private:
+        std::array<uint32_t, 2> streamAllocation = { { 0, 0 } };
     };
 
     namespace detail
