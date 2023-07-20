@@ -23,7 +23,7 @@ namespace hal
             infra::Optional<DmaChannelId> dmaChannelRx;
         };
 
-        SpiMasterStmDma(hal::DmaStm& dmaStm, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
+        SpiMasterStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
 
         virtual void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
         virtual void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
@@ -59,8 +59,8 @@ namespace hal
         bool receiveDone = false;
         bool sendDone = false;
 
-        hal::DmaStm::Stream tx;
-        hal::DmaStm::Stream rx;
+        hal::TransmitDmaChannel tx;
+        hal::ReceiveDmaChannel rx;
     };
 }
 

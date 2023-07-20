@@ -288,7 +288,7 @@ namespace hal
         streamAllocation[dmaIndex] &= ~(1 << streamIndex);
     }
 
-    DmaStm::StreamBase::StreamBase(DmaStm& dma, DmaChannelId channelId)
+    DmaStm::Stream::Stream(DmaStm& dma, DmaChannelId channelId)
         : dma(dma)
         , dmaIndex(channelId.dma)
 
@@ -299,15 +299,37 @@ namespace hal
 #endif
     {
         dma.ReserveStream(dmaIndex, streamIndex);
+
+        DMA_HandleTypeDef DmaChannelHandle = {};
+
+        DmaChannelHandle.Instance = DmaChannel[dmaIndex][streamIndex];
+
+        DmaChannelHandle.Init.Direction = DMA_MEMORY_TO_PERIPH;
+        DmaChannelHandle.Init.PeriphInc = DMA_PINC_DISABLE;
+        DmaChannelHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        DmaChannelHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+        DmaChannelHandle.Init.Mode = DMA_NORMAL;
+        DmaChannelHandle.Init.Priority = DMA_PRIORITY_MEDIUM;
+#if defined(DMA_STREAM_BASED)
+        DmaChannelHandle.Init.Channel = dmaChannel[channelId.channel];
+        DmaChannelHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        DmaChannelHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+        DmaChannelHandle.Init.MemBurst = DMA_MBURST_SINGLE;
+        DmaChannelHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+#else
+        DmaChannelHandle.Init.Request = channelId.mux;
+#endif
+
+        HAL_DMA_Init(&DmaChannelHandle);
     }
 
-    DmaStm::StreamBase::~StreamBase()
+    DmaStm::Stream::~Stream()
     {
         if (streamIndex != 0xff)
             dma.ReleaseStream(dmaIndex, streamIndex);
     }
 
-    DmaStm::StreamBase::StreamBase(StreamBase&& other)
+    DmaStm::Stream::Stream(Stream&& other)
         : dma(other.dma)
         , dmaIndex(other.dmaIndex)
         , streamIndex(other.streamIndex)
@@ -315,7 +337,7 @@ namespace hal
         other.streamIndex = 0xff;
     }
 
-    DmaStm::StreamBase& DmaStm::StreamBase::operator=(StreamBase&& other)
+    DmaStm::Stream& DmaStm::Stream::operator=(Stream&& other)
     {
         dmaIndex = other.dmaIndex;
         streamIndex = other.streamIndex;
@@ -325,7 +347,7 @@ namespace hal
         return *this;
     }
 
-    uint8_t DmaStm::StreamBase::DataSize() const
+    uint8_t DmaStm::Stream::DataSize() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -335,13 +357,13 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetDataSize(uint8_t dataSizeInBytes)
+    void DmaStm::Stream::SetDataSize(uint8_t dataSizeInBytes)
     {
         SetPeripheralDataSize(dataSizeInBytes);
         SetMemoryDataSize(dataSizeInBytes);
     }
 
-    void DmaStm::StreamBase::SetPeripheralDataSize(uint8_t dataSizeInBytes)
+    void DmaStm::Stream::SetPeripheralDataSize(uint8_t dataSizeInBytes)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -351,7 +373,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetMemoryDataSize(uint8_t dataSizeInBytes)
+    void DmaStm::Stream::SetMemoryDataSize(uint8_t dataSizeInBytes)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -361,7 +383,7 @@ namespace hal
 #endif
     }
 
-    bool DmaStm::StreamBase::StopTransfer()
+    bool DmaStm::Stream::StopTransfer()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
         bool finished = Finished();
@@ -372,7 +394,7 @@ namespace hal
         return !finished;
     }
 
-    void DmaStm::StreamBase::Disable()
+    void DmaStm::Stream::Disable()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -382,7 +404,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::DisableHalfTransferCompleteInterrupt()
+    void DmaStm::Stream::DisableHalfTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -392,7 +414,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::DisableMemoryIncrement()
+    void DmaStm::Stream::DisableMemoryIncrement()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -402,7 +424,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::DisableTransferCompleteInterrupt()
+    void DmaStm::Stream::DisableTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -412,7 +434,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::DisableCircularMode()
+    void DmaStm::Stream::DisableCircularMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -422,7 +444,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::Enable()
+    void DmaStm::Stream::Enable()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -432,7 +454,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::EnableHalfTransferCompleteInterrupt()
+    void DmaStm::Stream::EnableHalfTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -442,7 +464,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::EnableMemoryIncrement()
+    void DmaStm::Stream::EnableMemoryIncrement()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -452,7 +474,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::EnableTransferCompleteInterrupt()
+    void DmaStm::Stream::EnableTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -462,7 +484,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::EnableCircularMode()
+    void DmaStm::Stream::EnableCircularMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -472,7 +494,7 @@ namespace hal
 #endif
     }
 
-    bool DmaStm::StreamBase::Finished() const
+    bool DmaStm::Stream::Finished() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -483,7 +505,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetMemoryAddress(const void* memoryAddress)
+    void DmaStm::Stream::SetMemoryAddress(const void* memoryAddress)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -493,7 +515,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetMemoryToPeripheralMode()
+    void DmaStm::Stream::SetMemoryToPeripheralMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -503,7 +525,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetPeripheralAddress(volatile void* peripheralAddress)
+    void DmaStm::Stream::SetPeripheralAddress(volatile void* peripheralAddress)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -513,7 +535,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetPeripheralToMemoryMode()
+    void DmaStm::Stream::SetPeripheralToMemoryMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -523,7 +545,7 @@ namespace hal
 #endif
     }
 
-    void DmaStm::StreamBase::SetTransferSize(uint16_t size)
+    void DmaStm::Stream::SetTransferSize(uint16_t size)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
@@ -533,219 +555,34 @@ namespace hal
 #endif
     }
 
-    bool DmaStm::StreamBase::IsHalfComplete() const
+    bool DmaStm::Stream::IsHalfComplete() const
     {
         return *dmaISR[dmaIndex][streamIndex] & streamToHTIF[streamIndex];
     }
 
-    bool DmaStm::StreamBase::IsFullComplete() const
+    bool DmaStm::Stream::IsFullComplete() const
     {
         return *dmaISR[dmaIndex][streamIndex] & streamToTCIF[streamIndex];
     }
 
-    void DmaStm::StreamBase::ClearHalfComplete() const
+    void DmaStm::Stream::ClearHalfComplete() const
     {
         *dmaIFCR[dmaIndex][streamIndex] |= streamToHTIF[streamIndex];
     }
 
-    void DmaStm::StreamBase::ClearFullComplete() const
+    void DmaStm::Stream::ClearFullComplete() const
     {
         *dmaIFCR[dmaIndex][streamIndex] |= streamToTCIF[streamIndex];
     }
 
-    DmaStm::Stream::Stream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnTransferComplete)
-        : StreamBase(dma, channelId)
-        , actionOnTransferComplete(actionOnTransferComplete)
-        , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
-              {
-                  OnInterrupt();
-              })
-    {
-        DMA_HandleTypeDef DmaChannelHandle = {};
-
-        DmaChannelHandle.Instance = DmaChannel[dmaIndex][streamIndex];
-
-        DmaChannelHandle.Init.Direction = DMA_MEMORY_TO_PERIPH;
-        DmaChannelHandle.Init.PeriphInc = DMA_PINC_DISABLE;
-        DmaChannelHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-        DmaChannelHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        DmaChannelHandle.Init.Mode = DMA_NORMAL;
-        DmaChannelHandle.Init.Priority = DMA_PRIORITY_MEDIUM;
-#if defined(DMA_STREAM_BASED)
-        DmaChannelHandle.Init.Channel = dmaChannel[channelId.channel];
-        DmaChannelHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-        DmaChannelHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-        DmaChannelHandle.Init.MemBurst = DMA_MBURST_SINGLE;
-        DmaChannelHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;
-#else
-        DmaChannelHandle.Init.Request = channelId.mux;
-#endif
-
-        HAL_DMA_Init(&DmaChannelHandle);
-        SetPeripheralAddress(peripheralAddress);
-    }
-
-    DmaStm::Stream::Stream(Stream&& other)
-        : StreamBase(std::move(other))
-        , interruptHandler(std::move(other.interruptHandler), [this]()
-              {
-                  OnInterrupt();
-              })
-        , actionOnTransferComplete(other.actionOnTransferComplete)
-    {
-        other.actionOnTransferComplete = nullptr;
-    }
-
-    DmaStm::Stream& DmaStm::Stream::operator=(Stream&& other)
-    {
-        StreamBase::operator=(std::move(other));
-
-        actionOnTransferComplete = other.actionOnTransferComplete;
-        interruptHandler.Assign(std::move(other.interruptHandler), [this]()
-            {
-                OnInterrupt();
-            });
-
-        other.actionOnTransferComplete = nullptr;
-
-        return *this;
-    }
-
-    void DmaStm::Stream::StartTransmit(infra::ConstByteRange data)
-    {
-        assert(data.size() <= 65535);
-        assert(!data.empty());
-        __DMB();
-
-        SetMemoryToPeripheralMode();
-        EnableMemoryIncrement();
-        SetTransferSize(data.size());
-        SetMemoryAddress(data.begin());
-        EnableTransferCompleteInterrupt();
-        Enable();
-    }
-
-    void DmaStm::Stream::StartTransmitDummy(uint16_t size)
-    {
-        DisableMemoryIncrement();
-        SetMemoryToPeripheralMode();
-        SetTransferSize(size);
-        SetMemoryAddress(&dummy);
-        EnableTransferCompleteInterrupt();
-        Enable();
-    }
-
-    void DmaStm::Stream::StartReceive(infra::ByteRange data)
-    {
-        assert(data.size() <= 65535);
-        SetPeripheralToMemoryMode();
-        EnableMemoryIncrement();
-        SetTransferSize(data.size());
-        SetMemoryAddress(data.begin());
-        EnableTransferCompleteInterrupt();
-        Enable();
-    }
-
-    void DmaStm::Stream::StartReceiveDummy(uint16_t size)
-    {
-        SetPeripheralToMemoryMode();
-        DisableMemoryIncrement();
-        SetTransferSize(size);
-        SetMemoryAddress(&dummy);
-        EnableTransferCompleteInterrupt();
-        Enable();
-    }
-
-    void DmaStm::Stream::OnInterrupt()
-    {
-        if (*dmaISR[dmaIndex][streamIndex] & streamToTCIF[streamIndex])
-        {
-            *dmaIFCR[dmaIndex][streamIndex] |= streamToTCIF[streamIndex];
-            Disable();
-
-            __DMB();
-
-            interruptHandler.ClearPending();
-            actionOnTransferComplete();
-        }
-    }
-
-    DmaStm::CircularStream::CircularStream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnFirstHalfDone, infra::Function<void()> actionOnSecondHalfDone)
-        : StreamBase(dma, channelId)
-        , actionOnFirstHalfDone(actionOnFirstHalfDone)
-        , actionOnSecondHalfDone(actionOnSecondHalfDone)
-        , interruptHandler(hal::dmaIrq[dmaIndex][streamIndex], [this]()
-              {
-                  OnInterrupt();
-              })
-    {
-        DMA_HandleTypeDef DmaChannelHandle = {};
-
-        DmaChannelHandle.Instance = DmaChannel[dmaIndex][streamIndex];
-
-        DmaChannelHandle.Init.Direction = DMA_MEMORY_TO_PERIPH;
-        DmaChannelHandle.Init.PeriphInc = DMA_PINC_DISABLE;
-        DmaChannelHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-        DmaChannelHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        DmaChannelHandle.Init.Mode = DMA_CIRCULAR;
-        DmaChannelHandle.Init.Priority = DMA_PRIORITY_MEDIUM;
-#if defined(DMA_STREAM_BASED)
-        DmaChannelHandle.Init.Channel = dmaChannel[channelId.channel];
-        DmaChannelHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-        DmaChannelHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-        DmaChannelHandle.Init.MemBurst = DMA_MBURST_SINGLE;
-        DmaChannelHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;
-#else
-        DmaChannelHandle.Init.Request = channelId.mux;
-#endif
-
-        HAL_DMA_Init(&DmaChannelHandle);
-        SetPeripheralAddress(peripheralAddress);
-    }
-
-    size_t DmaStm::CircularStream::ReceivedSize() const
+    size_t DmaStm::Stream::BytesToTransfer() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
-        size_t bytesToTransfer = streamRegister->NDTR * DataSize();
+        return streamRegister->NDTR * DataSize();
 #else
-        size_t bytesToTransfer = streamRegister->CNDTR * DataSize();
+        return streamRegister->CNDTR * DataSize();
 #endif
-
-        return data.size() - bytesToTransfer;
-    }
-
-    void DmaStm::CircularStream::StartReceive(infra::ByteRange data)
-    {
-        assert(data.size() <= 65535);
-
-        this->data = data;
-
-        SetPeripheralToMemoryMode();
-        EnableMemoryIncrement();
-        SetTransferSize(data.size());
-        SetMemoryAddress(data.begin());
-        EnableTransferCompleteInterrupt();
-        EnableHalfTransferCompleteInterrupt();
-        Enable();
-    }
-
-    void DmaStm::CircularStream::OnInterrupt()
-    {
-        if (*dmaISR[dmaIndex][streamIndex] & streamToTCIF[streamIndex])
-        {
-            *dmaIFCR[dmaIndex][streamIndex] |= streamToTCIF[streamIndex];
-
-            interruptHandler.ClearPending();
-            actionOnSecondHalfDone();
-        }
-        else if (*dmaISR[dmaIndex][streamIndex] & streamToHTIF[streamIndex])
-        {
-            *dmaIFCR[dmaIndex][streamIndex] |= streamToHTIF[streamIndex];
-
-            interruptHandler.ClearPending();
-            actionOnFirstHalfDone();
-        }
     }
 
     /* ======================================================= */
@@ -756,97 +593,25 @@ namespace hal
     /* ======================================================= */
     /* ======================================================= */
 
-    DmaStm::TransceiverStreamBase::TransceiverStreamBase(DmaStm& dma, DmaChannelId channelId)
-        : StreamBase(dma, channelId)
-    {
-        DMA_HandleTypeDef DmaChannelHandle = {};
-
-        DmaChannelHandle.Instance = DmaChannel[dmaIndex][streamIndex];
-
-        DmaChannelHandle.Init.Direction = DMA_MEMORY_TO_PERIPH;
-        DmaChannelHandle.Init.PeriphInc = DMA_PINC_DISABLE;
-        DmaChannelHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-        DmaChannelHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        DmaChannelHandle.Init.Mode = DMA_NORMAL;
-        DmaChannelHandle.Init.Priority = DMA_PRIORITY_MEDIUM;
-#if defined(DMA_STREAM_BASED)
-        DmaChannelHandle.Init.Channel = dmaChannel[channelId.channel];
-        DmaChannelHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-        DmaChannelHandle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-        DmaChannelHandle.Init.MemBurst = DMA_MBURST_SINGLE;
-        DmaChannelHandle.Init.PeriphBurst = DMA_PBURST_SINGLE;
-#else
-        DmaChannelHandle.Init.Request = channelId.mux;
-#endif
-
-        HAL_DMA_Init(&DmaChannelHandle);
-    }
-
-    DmaStm::TransmitStreamBase::TransmitStreamBase(DmaStm& dma, DmaChannelId channelId)
-        : TransceiverStreamBase{ dma, channelId }
-    {
-        SetMemoryToPeripheralMode();
-    }
-
-    void DmaStm::TransmitStreamBase::StartTransmit(infra::ConstByteRange data)
-    {
-        EnableMemoryIncrement();
-        SetTransferSize(data.size());
-        SetMemoryAddress(data.begin());
-        Enable();
-    }
-
-    void DmaStm::TransmitStreamBase::StartTransmitDummy(uint16_t size)
-    {
-        DisableMemoryIncrement();
-        SetTransferSize(size);
-        SetMemoryAddress(&dummy);
-        Enable();
-    }
-
-    DmaStm::ReceiveStreamBase::ReceiveStreamBase(DmaStm& dma, DmaChannelId channelId)
-        : TransceiverStreamBase{ dma, channelId }
-    {
-        SetPeripheralToMemoryMode();
-    }
-
-    void DmaStm::ReceiveStreamBase::StartReceive(infra::ByteRange data)
-    {
-        this->data = data;
-
-        EnableMemoryIncrement();
-        SetTransferSize(data.size());
-        SetMemoryAddress(data.begin());
-        Enable();
-    }
-
-    void DmaStm::ReceiveStreamBase::StartReceiveDummy(uint16_t size)
-    {
-        DisableMemoryIncrement();
-        SetTransferSize(size);
-        SetMemoryAddress(&dummy);
-        Enable();
-    }
-
-    DmaStm::StreamInterruptHandler::StreamInterruptHandler(StreamBase& streamBase, const infra::Function<void()>& transferFullComplete)
-        : streamBase{ streamBase }
-        , dispatchedInterruptHandler{ dmaIrq[streamBase.dmaIndex][streamBase.streamIndex], [this]
+    DmaStm::StreamInterruptHandler::StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete)
+        : stream{ stream }
+        , dispatchedInterruptHandler{ dmaIrq[stream.dmaIndex][stream.streamIndex], [this]
             {
                 OnInterrupt();
             } }
         , transferFullComplete{ transferFullComplete }
     {
-        streamBase.DisableCircularMode();
-        streamBase.EnableTransferCompleteInterrupt();
+        stream.DisableCircularMode();
+        stream.EnableTransferCompleteInterrupt();
     }
 
     void DmaStm::StreamInterruptHandler::OnInterrupt()
     {
-        if (streamBase.IsFullComplete())
+        if (stream.IsFullComplete())
         {
-            streamBase.ClearFullComplete();
+            stream.ClearFullComplete();
 
-            streamBase.Disable();
+            stream.Disable();
 
             __DMB();
 
@@ -855,34 +620,34 @@ namespace hal
         }
     }
 
-    DmaStm::CircularStreamInterruptHandler::CircularStreamInterruptHandler(StreamBase& streamBase, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : streamBase{ streamBase }
-        , immediateInterruptHandler{ dmaIrq[streamBase.dmaIndex][streamBase.streamIndex], [this]
+    DmaStm::CircularStreamInterruptHandler::CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+        : stream{ stream }
+        , immediateInterruptHandler{ dmaIrq[stream.dmaIndex][stream.streamIndex], [this]
             {
                 OnInterrupt();
             } }
         , transferHalfComplete{ transferHalfComplete }
         , transferFullComplete{ transferFullComplete }
     {
-        streamBase.EnableCircularMode();
-        streamBase.EnableHalfTransferCompleteInterrupt();
-        streamBase.EnableTransferCompleteInterrupt();
+        stream.EnableCircularMode();
+        stream.EnableHalfTransferCompleteInterrupt();
+        stream.EnableTransferCompleteInterrupt();
     }
 
     void DmaStm::CircularStreamInterruptHandler::OnInterrupt()
     {
-        if (streamBase.IsHalfComplete())
+        if (stream.IsHalfComplete())
         {
-            streamBase.ClearHalfComplete();
+            stream.ClearHalfComplete();
 
             immediateInterruptHandler.ClearPending();
 
             transferHalfComplete();
         }
 
-        if (streamBase.IsFullComplete())
+        if (stream.IsFullComplete())
         {
-            streamBase.ClearFullComplete();
+            stream.ClearFullComplete();
 
             immediateInterruptHandler.ClearPending();
 
@@ -890,161 +655,53 @@ namespace hal
         }
     }
 
-    DmaStm::PeripheralStream::PeripheralStream(StreamBase& streamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+    DmaStm::PeripheralStream::PeripheralStream(Stream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
     {
-        streamBase.SetPeripheralAddress(peripheralAddress);
-        streamBase.SetPeripheralDataSize(peripheralTransferSize);
+        stream.SetPeripheralAddress(peripheralAddress);
+        stream.SetPeripheralDataSize(peripheralTransferSize);
     }
 
-    DmaStm::PeripheralTransmitStream::PeripheralTransmitStream(TransmitStreamBase& transmitStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
-        : PeripheralStream{ transmitStreamBase, peripheralAddress, peripheralTransferSize }
-        , transmitStreamBase{ transmitStreamBase }
+    DmaStm::PeripheralTransmitStream::PeripheralTransmitStream(TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+        : peripheralStream{ transmitStream, peripheralAddress, peripheralTransferSize }
+        , stream{ transmitStream }
     {}
 
-    void DmaStm::PeripheralTransmitStream::StartTransmit(infra::MemoryRange<const uint8_t> data)
-    {
-        transmitStreamBase.SetMemoryDataSize(1);
-        transmitStreamBase.StartTransmit(data);
-    }
-
-    void DmaStm::PeripheralTransmitStream::StartTransmit(infra::MemoryRange<const uint16_t> data)
-    {
-        transmitStreamBase.SetMemoryDataSize(2);
-        transmitStreamBase.StartTransmit(infra::ReinterpretCastByteRange(data));
-    }
-
-    void DmaStm::PeripheralTransmitStream::StartTransmit(infra::MemoryRange<const uint32_t> data)
-    {
-        transmitStreamBase.SetMemoryDataSize(4);
-        transmitStreamBase.StartTransmit(infra::ReinterpretCastByteRange(data));
-    }
-
-    void DmaStm::PeripheralTransmitStream::StartTransmitDummy(uint16_t size, uint8_t dataSize)
-    {
-        transmitStreamBase.SetMemoryDataSize(dataSize);
-        transmitStreamBase.StartTransmitDummy(size);
-    }
-
-    DmaStm::PeripheralReceiveStream::PeripheralReceiveStream(ReceiveStreamBase& receiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
-        : PeripheralStream{ receiveStreamBase, peripheralAddress, peripheralTransferSize }
-        , receiveStreamBase{ receiveStreamBase }
+    DmaStm::PeripheralReceiveStream::PeripheralReceiveStream(ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+        : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
+        , stream{ receiveStream }
     {}
 
-    void DmaStm::PeripheralReceiveStream::StartReceive(infra::MemoryRange<uint8_t> data)
-    {
-        receiveStreamBase.SetMemoryDataSize(1);
-        receiveStreamBase.StartReceive(data);
-    }
-
-    void DmaStm::PeripheralReceiveStream::StartReceive(infra::MemoryRange<uint16_t> data)
-    {
-        receiveStreamBase.SetMemoryDataSize(2);
-        receiveStreamBase.StartReceive(infra::ReinterpretCastByteRange(data));
-    }
-
-    void DmaStm::PeripheralReceiveStream::StartReceive(infra::MemoryRange<uint32_t> data)
-    {
-        receiveStreamBase.SetMemoryDataSize(4);
-        receiveStreamBase.StartReceive(infra::ReinterpretCastByteRange(data));
-    }
-
-    void DmaStm::PeripheralReceiveStream::StartReceiveDummy(uint16_t size, uint8_t dataSize)
-    {
-        receiveStreamBase.SetMemoryDataSize(dataSize);
-        receiveStreamBase.StartReceiveDummy(size);
-    }
-
-    TransmitDmaChannel::TransmitDmaChannel(DmaStm::TransmitStreamBase& transmitStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ transmitStreamBase, peripheralAddress, peripheralTransferSize }
-        , streamInterruptHandler{ transmitStreamBase, transferFullComplete }
-    {
-    }
-
-    void TransmitDmaChannel::StartTransmit(infra::MemoryRange<const uint8_t> data)
-    {
-        peripheralStream.StartTransmit(data);
-    }
-
-    void TransmitDmaChannel::StartTransmit(infra::MemoryRange<const uint16_t> data)
-    {
-        peripheralStream.StartTransmit(data);
-    }
-
-    void TransmitDmaChannel::StartTransmit(infra::MemoryRange<const uint32_t> data)
-    {
-        peripheralStream.StartTransmit(data);
-    }
-
-    void TransmitDmaChannel::StartTransmitDummy(uint16_t size, uint8_t dataSize)
-    {
-        peripheralStream.StartTransmitDummy(size, dataSize);
-    }
-
-    CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStreamBase& transmitStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ transmitStreamBase, peripheralAddress, peripheralTransferSize }
-        , circularStreamInterruptHandler{ transmitStreamBase, transferHalfComplete, transferFullComplete }
-    {
-    }
-
-    void CircularTransmitDmaChannel::StartTransmit(infra::MemoryRange<const uint8_t> data)
-    {
-        peripheralStream.StartTransmit(data);
-    }
-
-    void CircularTransmitDmaChannel::StartTransmit(infra::MemoryRange<const uint16_t> data)
-    {
-        peripheralStream.StartTransmit(data);
-    }
-
-    void CircularTransmitDmaChannel::StartTransmit(infra::MemoryRange<const uint32_t> data)
-    {
-        peripheralStream.StartTransmit(data);
-    }
-
-    ReceiveDmaChannel::ReceiveDmaChannel(DmaStm::ReceiveStreamBase& receiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ receiveStreamBase, peripheralAddress, peripheralTransferSize }
-        , streamInterruptHandler{ receiveStreamBase, transferFullComplete }
+    DmaStm::PeripheralTransceiveStream::PeripheralTransceiveStream(TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+        : peripheralStream{ transceiveStreamBase, peripheralAddress, peripheralTransferSize }
+        , stream{ transceiveStreamBase }
     {}
 
-    void ReceiveDmaChannel::StartReceive(infra::MemoryRange<uint8_t> data)
+    TransmitDmaChannel::TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
+        : peripheralStream{ transmitStream, peripheralAddress, peripheralTransferSize }
+        , streamInterruptHandler{ transmitStream, transferFullComplete }
     {
-        peripheralStream.StartReceive(data);
     }
 
-    void ReceiveDmaChannel::StartReceive(infra::MemoryRange<uint16_t> data)
+    CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+        : peripheralStream{ transmitStream, peripheralAddress, peripheralTransferSize }
+        , circularStreamInterruptHandler{ transmitStream, transferHalfComplete, transferFullComplete }
     {
-        peripheralStream.StartReceive(data);
     }
 
-    void ReceiveDmaChannel::StartReceive(infra::MemoryRange<uint32_t> data)
-    {
-        peripheralStream.StartReceive(data);
-    }
-
-    void ReceiveDmaChannel::StartReceiveDummy(uint16_t size, uint8_t dataSize)
-    {
-        peripheralStream.StartReceiveDummy(size, dataSize);
-    }
-
-    CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStreamBase& receiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ receiveStreamBase, peripheralAddress, peripheralTransferSize }
-        , circularStreamInterruptHandler{ receiveStreamBase, transferHalfComplete, transferFullComplete }
+    ReceiveDmaChannel::ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
+        : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
+        , streamInterruptHandler{ receiveStream, transferFullComplete }
     {}
 
-    void CircularReceiveDmaChannel::StartReceive(infra::MemoryRange<uint8_t> data)
-    {
-        peripheralStream.StartReceive(data);
-    }
+    CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+        : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
+        , circularStreamInterruptHandler{ receiveStream, transferHalfComplete, transferFullComplete }
+    {}
 
-    void CircularReceiveDmaChannel::StartReceive(infra::MemoryRange<uint16_t> data)
-    {
-        peripheralStream.StartReceive(data);
-    }
-
-    void CircularReceiveDmaChannel::StartReceive(infra::MemoryRange<uint32_t> data)
-    {
-        peripheralStream.StartReceive(data);
-    }
+    TransceiverDmaChannel::TransceiverDmaChannel(DmaStm::TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
+        : peripheralStream{ transceiveStreamBase, peripheralAddress, peripheralTransferSize }
+        , streamInterruptHandler{ transceiveStreamBase, transferFullComplete }
+    {}
 }
 
 #endif

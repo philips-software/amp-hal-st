@@ -47,13 +47,15 @@ namespace hal
     class DmaStm
     {
     public:
-        class StreamBase
+        class Stream
         {
+        public:
+            Stream(DmaStm& dma, DmaChannelId channelId);
+
         protected:
-            StreamBase(DmaStm& dma, DmaChannelId channelId);
-            StreamBase(const StreamBase&) = delete;
-            StreamBase(StreamBase&& other);
-            virtual ~StreamBase();
+            Stream(const Stream&) = delete;
+            Stream(Stream&& other) noexcept;
+            virtual ~Stream();
 
         public:
             uint8_t DataSize() const;
@@ -63,9 +65,8 @@ namespace hal
             bool StopTransfer();
 
         protected:
-            StreamBase& operator=(const StreamBase&) = delete;
-            StreamBase& operator=(StreamBase&& other);
-            virtual void OnInterrupt() = 0;
+            Stream& operator=(const Stream&) = delete;
+            Stream& operator=(Stream&& other);
 
         private:
             friend class DmaStm;
@@ -93,54 +94,12 @@ namespace hal
             void ClearHalfComplete() const;
             void ClearFullComplete() const;
 
+            size_t BytesToTransfer() const;
+
         private:
             DmaStm& dma;
             uint8_t dmaIndex;
             uint8_t streamIndex = 0xff;
-        };
-
-        class Stream
-            : public StreamBase
-        {
-        public:
-            Stream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnTransferComplete);
-            Stream(const Stream&) = delete;
-            Stream(Stream&& other);
-
-            Stream& operator=(const Stream&) = delete;
-            Stream& operator=(Stream&& other);
-
-            void StartTransmit(infra::ConstByteRange data);
-            void StartTransmitDummy(uint16_t size);
-            void StartReceive(infra::ByteRange data);
-            void StartReceiveDummy(uint16_t size);
-
-        protected:
-            virtual void OnInterrupt() override;
-
-        private:
-            DispatchedInterruptHandler interruptHandler;
-            infra::Function<void()> actionOnTransferComplete;
-        };
-
-        class CircularStream
-            : public StreamBase
-        {
-        public:
-            CircularStream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnFirstHalfDone, infra::Function<void()> actionOnSecondHalfDone);
-
-            std::size_t ReceivedSize() const;
-            void StartReceive(infra::ByteRange data);
-
-        protected:
-            virtual void OnInterrupt() override;
-
-        private:
-            ImmediateInterruptHandler interruptHandler;
-            infra::Function<void()> actionOnFirstHalfDone;
-            infra::Function<void()> actionOnSecondHalfDone;
-
-            infra::ByteRange data;
         };
 
     public:
@@ -163,48 +122,106 @@ namespace hal
         /* ======================================================= */
         /* ======================================================= */
 
-        class TransceiverStreamBase : public StreamBase
+        template<class T>
+        class TransmitStreamBaseV2
         {
         public:
-            TransceiverStreamBase(DmaStm& dma, DmaChannelId channelId);
-
-        private:
-            [[deprecated]] void OnInterrupt() override
+            void StartTransmit(infra::ConstByteRange data)
             {
-                /* not required */
+                auto& derived = *static_cast<T*>(this);
+
+                derived.SetMemoryToPeripheralMode();
+                derived.EnableMemoryIncrement();
+                derived.SetTransferSize(data.size());
+                derived.SetMemoryAddress(data.begin());
+                derived.Enable();
+            }
+
+            void StartTransmitDummy(uint16_t size)
+            {
+                static uint32_t dummy;
+
+                auto& derived = *static_cast<T*>(this);
+
+                derived.SetMemoryToPeripheralMode();
+                derived.DisableMemoryIncrement();
+                derived.SetTransferSize(size);
+                derived.SetMemoryAddress(&dummy);
+                derived.Enable();
             }
         };
 
-        class TransmitStreamBase : public TransceiverStreamBase
+        template<class T>
+        class ReceiveStreamBaseV2
         {
         public:
-            TransmitStreamBase(DmaStm& dma, DmaChannelId channelId);
+            void StartReceive(infra::ByteRange data)
+            {
+                auto& derived = *static_cast<T*>(this);
 
-            void StartTransmit(infra::ConstByteRange data);
-            void StartTransmitDummy(uint16_t size);
-        };
+                this->data = data;
 
-        class ReceiveStreamBase : public TransceiverStreamBase
-        {
-        public:
-            ReceiveStreamBase(DmaStm& dma, DmaChannelId channelId);
+                derived.SetPeripheralToMemoryMode();
+                derived.EnableMemoryIncrement();
+                derived.SetTransferSize(data.size());
+                derived.SetMemoryAddress(data.begin());
+                derived.Enable();
+            }
 
-            void StartReceive(infra::ByteRange data);
-            void StartReceiveDummy(uint16_t size);
+            void StartReceiveDummy(uint16_t size)
+            {
+                static uint32_t dummy;
+
+                auto& derived = *static_cast<T*>(this);
+
+                derived.SetPeripheralToMemoryMode();
+                derived.DisableMemoryIncrement();
+                derived.SetTransferSize(size);
+                derived.SetMemoryAddress(&dummy);
+                derived.Enable();
+            }
+
+            size_t ReceivedSize() const
+            {
+                const auto& derived = *static_cast<const T*>(this);
+                return data.size() - derived.BytesToTransfer();
+            }
 
         private:
             infra::ByteRange data;
         };
 
+        class TransmitStream : public Stream
+            , public TransmitStreamBaseV2<TransmitStream>
+        {
+        public:
+            using Stream::Stream;
+        };
+
+        class ReceiveStream : public Stream
+            , public ReceiveStreamBaseV2<ReceiveStream>
+        {
+        public:
+            using Stream::Stream;
+        };
+
+        class TransceiveStream : public Stream
+            , public TransmitStreamBaseV2<TransceiveStream>
+            , public ReceiveStreamBaseV2<TransceiveStream>
+        {
+        public:
+            using Stream::Stream;
+        };
+
         class StreamInterruptHandler
         {
         public:
-            StreamInterruptHandler(StreamBase& streamBase, const infra::Function<void()>& transferFullComplete);
+            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete);
 
         private:
             void OnInterrupt();
 
-            StreamBase& streamBase;
+            Stream& stream;
 
             DispatchedInterruptHandler dispatchedInterruptHandler;
 
@@ -214,12 +231,12 @@ namespace hal
         class CircularStreamInterruptHandler
         {
         public:
-            CircularStreamInterruptHandler(StreamBase& streamBase, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
+            CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
         private:
             void OnInterrupt();
 
-            StreamBase& streamBase;
+            Stream& stream;
 
             ImmediateInterruptHandler immediateInterruptHandler;
 
@@ -230,101 +247,275 @@ namespace hal
         class PeripheralStream
         {
         public:
-            PeripheralStream(StreamBase& streamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
+            PeripheralStream(Stream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
         };
 
-        class PeripheralTransmitStream : public PeripheralStream
+        template<class T>
+        class PeripheralTransmitStreamBase
         {
         public:
-            PeripheralTransmitStream(TransmitStreamBase& transmitStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
+            template<class U>
+            void StartTransmit(infra::MemoryRange<const U> data)
+            {
+                const auto& derived = *static_cast<T*>(this);
 
-            void StartTransmit(infra::MemoryRange<const uint8_t> data);
-            void StartTransmit(infra::MemoryRange<const uint16_t> data);
-            void StartTransmit(infra::MemoryRange<const uint32_t> data);
+                derived.stream.SetMemoryDataSize(sizeof(U));
+                derived.stream.StartTransmit(infra::ReinterpretCastByteRange(data));
+            }
 
-            void StartTransmitDummy(uint16_t size, uint8_t dataSize);
+            void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1)
+            {
+                const auto& derived = *static_cast<T*>(this);
 
-        private:
-            TransmitStreamBase& transmitStreamBase;
+                derived.stream.SetMemoryDataSize(dataSize);
+                derived.stream.StartTransmitDummy(size);
+            }
+
+            bool StopTransfer()
+            {
+                const auto& derived = *static_cast<T*>(this);
+
+                return derived.stream.StopTransfer();
+            }
         };
 
-        class PeripheralReceiveStream : public PeripheralStream
+        template<class T>
+        class PeripheralReceiveStreamBase
         {
         public:
-            PeripheralReceiveStream(ReceiveStreamBase& receiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
+            template<class U>
+            void StartReceive(infra::MemoryRange<U> data)
+            {
+                const auto& derived = *static_cast<T*>(this);
 
-            void StartReceive(infra::MemoryRange<uint8_t> data);
-            void StartReceive(infra::MemoryRange<uint16_t> data);
-            void StartReceive(infra::MemoryRange<uint32_t> data);
+                derived.stream.SetMemoryDataSize(sizeof(U));
+                derived.stream.StartReceive(infra::ReinterpretCastByteRange(data));
+            }
 
-            void StartReceiveDummy(uint16_t size, uint8_t dataSize);
+            void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1)
+            {
+                const auto& derived = *static_cast<T*>(this);
+
+                derived.stream.SetMemoryDataSize(dataSize);
+                derived.stream.StartReceiveDummy(size);
+            }
+
+            bool StopTransfer()
+            {
+                const auto& derived = *static_cast<T*>(this);
+
+                return derived.stream.StopTransfer();
+            }
+
+            size_t ReceivedSize() const
+            {
+                const auto& derived = *static_cast<const T*>(this);
+
+                return derived.stream.ReceivedSize();
+            }
+        };
+
+        class PeripheralTransmitStream
+            : public PeripheralTransmitStreamBase<PeripheralTransmitStream>
+        {
+        public:
+            PeripheralTransmitStream(TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
         private:
-            ReceiveStreamBase& receiveStreamBase;
+            friend PeripheralTransmitStreamBase<PeripheralTransmitStream>;
+
+            PeripheralStream peripheralStream;
+            TransmitStream& stream;
+        };
+
+        class PeripheralReceiveStream
+            : public PeripheralReceiveStreamBase<PeripheralReceiveStream>
+        {
+        public:
+            PeripheralReceiveStream(ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
+
+        private:
+            friend PeripheralReceiveStreamBase<PeripheralReceiveStream>;
+
+            PeripheralStream peripheralStream;
+            ReceiveStream& stream;
+        };
+
+        class PeripheralTransceiveStream
+            : public PeripheralTransmitStreamBase<PeripheralTransceiveStream>
+            , public PeripheralReceiveStreamBase<PeripheralTransceiveStream>
+        {
+        public:
+            PeripheralTransceiveStream(TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
+
+        private:
+            friend PeripheralTransmitStreamBase<PeripheralTransceiveStream>;
+            friend PeripheralReceiveStreamBase<PeripheralTransceiveStream>;
+
+            PeripheralStream peripheralStream;
+            TransceiveStream& stream;
         };
     };
 
+    namespace detail
+    {
+        template<class T>
+        class TransmitRangeDmaChannelBase
+        {
+        public:
+            template<class U>
+            void StartTransmit(infra::MemoryRange<const U> data)
+            {
+                auto& derived = *static_cast<T*>(this);
+
+                derived.peripheralStream.StartTransmit(data);
+            }
+        };
+
+        template<class T>
+        class TransmitDummyDmaChannelBase
+        {
+        public:
+            void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1)
+            {
+                auto& derived = *static_cast<T*>(this);
+
+                derived.peripheralStream.StartTransmitDummy(size, dataSize);
+            }
+        };
+
+        template<class T>
+        class ReceiveRangeDmaChannelBase
+        {
+        public:
+            template<class U>
+            void StartReceive(infra::MemoryRange<U> data)
+            {
+                auto& derived = *static_cast<T*>(this);
+
+                derived.peripheralStream.StartReceive(data);
+            }
+
+            size_t ReceivedSize() const
+            {
+                auto& derived = *static_cast<const T*>(this);
+
+                return derived.peripheralStream.ReceivedSize();
+            }
+        };
+
+        template<class T>
+        class ReceiveDummyDmaChannelBase
+        {
+        public:
+            void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1)
+            {
+                auto& derived = *static_cast<T*>(this);
+
+                derived.peripheralStream.StartReceiveDummy(size, dataSize);
+            }
+        };
+
+        template<class T>
+        class StopTransferDmaChannelBase
+        {
+        public:
+            bool StopTransfer()
+            {
+                auto& derived = *static_cast<T*>(this);
+
+                return derived.peripheralStream.StopTransfer();
+            }
+        };
+    }
+
     class TransmitDmaChannel
+        : public detail::TransmitRangeDmaChannelBase<TransmitDmaChannel>
+        , public detail::TransmitDummyDmaChannelBase<TransmitDmaChannel>
+        , public detail::StopTransferDmaChannelBase<TransmitDmaChannel>
     {
     public:
-        TransmitDmaChannel(DmaStm::TransmitStreamBase& transmitStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
-
-        void StartTransmit(infra::MemoryRange<const uint8_t> data);
-        void StartTransmit(infra::MemoryRange<const uint16_t> data);
-        void StartTransmit(infra::MemoryRange<const uint32_t> data);
-
-        void StartTransmitDummy(uint16_t size, uint8_t dataSize);
+        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
 
     private:
+        friend detail::TransmitRangeDmaChannelBase<TransmitDmaChannel>;
+        friend detail::TransmitDummyDmaChannelBase<TransmitDmaChannel>;
+        friend detail::StopTransferDmaChannelBase<TransmitDmaChannel>;
+
         DmaStm::PeripheralTransmitStream peripheralStream;
         DmaStm::StreamInterruptHandler streamInterruptHandler;
     };
 
     class CircularTransmitDmaChannel
+        : public detail::TransmitRangeDmaChannelBase<CircularTransmitDmaChannel>
+        , public detail::StopTransferDmaChannelBase<CircularTransmitDmaChannel>
     {
     public:
-        CircularTransmitDmaChannel(DmaStm::TransmitStreamBase& transmitStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
-
-        void StartTransmit(infra::MemoryRange<const uint8_t> data);
-        void StartTransmit(infra::MemoryRange<const uint16_t> data);
-        void StartTransmit(infra::MemoryRange<const uint32_t> data);
+        CircularTransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
     private:
+        friend detail::TransmitRangeDmaChannelBase<CircularTransmitDmaChannel>;
+        friend detail::StopTransferDmaChannelBase<CircularTransmitDmaChannel>;
+
         DmaStm::PeripheralTransmitStream peripheralStream;
         DmaStm::CircularStreamInterruptHandler circularStreamInterruptHandler;
     };
 
     class ReceiveDmaChannel
+        : public detail::ReceiveRangeDmaChannelBase<ReceiveDmaChannel>
+        , public detail::ReceiveDummyDmaChannelBase<ReceiveDmaChannel>
+        , public detail::StopTransferDmaChannelBase<ReceiveDmaChannel>
     {
 
     public:
-        ReceiveDmaChannel(DmaStm::ReceiveStreamBase& receiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
-
-        void StartReceive(infra::MemoryRange<uint8_t> data);
-        void StartReceive(infra::MemoryRange<uint16_t> data);
-        void StartReceive(infra::MemoryRange<uint32_t> data);
-
-        void StartReceiveDummy(uint16_t size, uint8_t dataSize);
+        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
 
     private:
+        friend detail::ReceiveRangeDmaChannelBase<ReceiveDmaChannel>;
+        friend detail::ReceiveDummyDmaChannelBase<ReceiveDmaChannel>;
+        friend detail::StopTransferDmaChannelBase<ReceiveDmaChannel>;
+
         DmaStm::PeripheralReceiveStream peripheralStream;
         DmaStm::StreamInterruptHandler streamInterruptHandler;
     };
 
     class CircularReceiveDmaChannel
+        : public detail::ReceiveRangeDmaChannelBase<CircularReceiveDmaChannel>
+        , public detail::StopTransferDmaChannelBase<CircularReceiveDmaChannel>
     {
 
     public:
-        CircularReceiveDmaChannel(DmaStm::ReceiveStreamBase& receiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
-
-        void StartReceive(infra::MemoryRange<uint8_t> data);
-        void StartReceive(infra::MemoryRange<uint16_t> data);
-        void StartReceive(infra::MemoryRange<uint32_t> data);
+        CircularReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
     private:
+        friend detail::ReceiveRangeDmaChannelBase<CircularReceiveDmaChannel>;
+        friend detail::StopTransferDmaChannelBase<CircularReceiveDmaChannel>;
+
         DmaStm::PeripheralReceiveStream peripheralStream;
         DmaStm::CircularStreamInterruptHandler circularStreamInterruptHandler;
     };
+
+    class TransceiverDmaChannel
+        : public detail::TransmitRangeDmaChannelBase<TransceiverDmaChannel>
+        , public detail::TransmitDummyDmaChannelBase<TransceiverDmaChannel>
+        , public detail::ReceiveRangeDmaChannelBase<TransceiverDmaChannel>
+        , public detail::ReceiveDummyDmaChannelBase<TransceiverDmaChannel>
+        , public detail::StopTransferDmaChannelBase<TransceiverDmaChannel>
+    {
+    public:
+        TransceiverDmaChannel(DmaStm::TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
+
+    private:
+        friend detail::TransmitRangeDmaChannelBase<TransceiverDmaChannel>;
+        friend detail::TransmitDummyDmaChannelBase<TransceiverDmaChannel>;
+        friend detail::ReceiveRangeDmaChannelBase<TransceiverDmaChannel>;
+        friend detail::ReceiveDummyDmaChannelBase<TransceiverDmaChannel>;
+        friend detail::StopTransferDmaChannelBase<TransceiverDmaChannel>;
+
+        DmaStm::PeripheralTransceiveStream peripheralStream;
+        DmaStm::StreamInterruptHandler streamInterruptHandler;
+    };
+
 }
 
 #endif

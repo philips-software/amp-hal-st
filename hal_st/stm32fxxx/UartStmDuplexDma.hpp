@@ -29,8 +29,8 @@ namespace hal
         template<std::size_t RxBufferSize>
         using WithRxBuffer = infra::WithStorage<UartStmDuplexDma, std::array<uint8_t, RxBufferSize>>;
 
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
         ~UartStmDuplexDma();
 
         virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
@@ -53,9 +53,8 @@ namespace hal
 
         UART_HandleTypeDef uartHandle = {};
 
-        hal::DmaStm& dma;
-        DmaStm::Stream transmitDmaChannel;
-        DmaStm::CircularStream receiveDmaChannel;
+        hal::TransmitDmaChannel transmitDmaChannel;
+        hal::CircularReceiveDmaChannel receiveDmaChannel;
 
         infra::Function<void()> transferDataComplete;
         infra::Function<void(infra::ConstByteRange data)> dataReceived;

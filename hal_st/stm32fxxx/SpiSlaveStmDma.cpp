@@ -14,19 +14,19 @@ namespace hal
             std::make_pair(DmaChannelId{ 2, 5, 1 }, DmaChannelId{ 2, 6, 1 }) } };
     }
 
-    SpiSlaveStmDma::SpiSlaveStmDma(hal::DmaStm& dmaStm, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect, const Config& config)
+    SpiSlaveStmDma::SpiSlaveStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect, const Config& config)
         : spiInstance(oneBasedSpiIndex - 1)
         , clock(clock, PinConfigTypeStm::spiClock, oneBasedSpiIndex)
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
-        , rx(dmaStm, config.dmaChannelRx.ValueOr(defaultDmaChannelId[spiInstance].second), &peripheralSpi[spiInstance]->DR, [this]()
-              {
-                  ReceiveDone();
-              })
-        , tx(dmaStm, config.dmaChannelTx.ValueOr(defaultDmaChannelId[spiInstance].first), &peripheralSpi[spiInstance]->DR, [this]()
+        , tx(transmitStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
               {
                   SendDone();
+              })
+        , rx(receiveStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
+              {
+                  ReceiveDone();
               })
     {
         ResetPeripheralSpi(spiInstance);

@@ -13,14 +13,14 @@ namespace hal
 #endif
     }
 
-    QuadSpiStmDma::QuadSpiStmDma(hal::DmaStm& dma, GpioPinStm& clock, GpioPinStm& slaveSelect, GpioPinStm& data0, GpioPinStm& data1, GpioPinStm& data2, GpioPinStm& data3, const Config& config)
+    QuadSpiStmDma::QuadSpiStmDma(hal::DmaStm::TransceiveStream& transceiveStreamBase, GpioPinStm& clock, GpioPinStm& slaveSelect, GpioPinStm& data0, GpioPinStm& data1, GpioPinStm& data2, GpioPinStm& data3, const Config& config)
         : clock(clock, PinConfigTypeStm::quadSpiClock, 0)
         , slaveSelect(slaveSelect, PinConfigTypeStm::quadSpiSlaveSelect, 0)
         , data0(data0, PinConfigTypeStm::quadSpiData0, 0)
         , data1(data1, PinConfigTypeStm::quadSpiData1, 0)
         , data2(data2, PinConfigTypeStm::quadSpiData2, 0)
         , data3(data3, PinConfigTypeStm::quadSpiData3, 0)
-        , dmaStream(dma, quadSpiDmaChannel, &QUADSPI->DR, [this]()
+        , dmaStream(transceiveStreamBase, &QUADSPI->DR, 1, [this]()
               {
                   OnDmaTransferDone();
               })

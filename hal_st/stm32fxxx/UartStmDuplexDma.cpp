@@ -35,35 +35,46 @@ namespace hal
 
     }
 
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : rxBuffer(rxBuffer)
         , uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
         , uartHandle()
-        , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              { TransferComplete(); })
+        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              receiveStream, &peripheralUart[uartIndex]->RDR, 1, [this]()
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { TransferComplete(); })
+        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->DR, 1, [this]()
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              receiveStream, &peripheralUart[uartIndex]->DR, 1, [this]()
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #endif
     {
         Configure(config);
     }
 
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : rxBuffer(rxBuffer)
         , uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
@@ -71,23 +82,34 @@ namespace hal
         , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
         , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
         , uartHandle()
-        , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              { TransferComplete(); })
+        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              receiveStream, &peripheralUart[uartIndex]->RDR, 1, [this]()
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { TransferComplete(); })
+        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->DR, 1, [this]()
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              receiveStream, &peripheralUart[uartIndex]->DR, 1, [this]()
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #endif
     {
         Configure(config);

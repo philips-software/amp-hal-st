@@ -24,8 +24,8 @@ namespace hal
             infra::Optional<InterruptPriority> priority;
         };
 
-        UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStmDma(DmaStm::TransmitStreamBase& transmitStreamBase, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
         ~UartStmDma();
 
         virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
