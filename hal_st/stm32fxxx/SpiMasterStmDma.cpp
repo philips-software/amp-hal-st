@@ -4,16 +4,6 @@
 
 namespace hal
 {
-    namespace
-    {
-        const std::array<std::pair<DmaChannelId, DmaChannelId>, 6> defaultDmaChannelId = { { std::make_pair(DmaChannelId{ 2, 3, 3 }, DmaChannelId{ 2, 0, 3 }),
-            std::make_pair(DmaChannelId{ 1, 4, 0 }, DmaChannelId{ 1, 3, 0 }),
-            std::make_pair(DmaChannelId{ 1, 5, 0 }, DmaChannelId{ 1, 0, 0 }),
-            std::make_pair(DmaChannelId{ 2, 1, 4 }, DmaChannelId{ 2, 0, 4 }),
-            std::make_pair(DmaChannelId{ 2, 4, 2 }, DmaChannelId{ 2, 3, 2 }),
-            std::make_pair(DmaChannelId{ 2, 5, 1 }, DmaChannelId{ 2, 6, 1 }) } };
-    }
-
     SpiMasterStmDma::SpiMasterStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config, GpioPinStm& slaveSelect)
         : spiInstance(oneBasedSpiIndex - 1)
         , clock(clock, PinConfigTypeStm::spiClock, oneBasedSpiIndex)

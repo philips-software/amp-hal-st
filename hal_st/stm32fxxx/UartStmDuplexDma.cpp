@@ -8,31 +8,6 @@ namespace hal
     namespace
     {
         uint16_t defaultRxTimeout = 16;
-
-#if defined(STM32WB)
-        const std::array<DmaChannelId, 1> defaultTxDmaChannelId = { { DmaChannelId{ 1, 0, DMA_REQUEST_USART1_TX } } };
-
-        const std::array<DmaChannelId, 1> defaultRxDmaChannelId = { { DmaChannelId{ 1, 0, DMA_REQUEST_USART1_RX } } };
-#else
-        const std::array<DmaChannelId, 8> defaultTxDmaChannelId = { { DmaChannelId{ 2, 7, 4 },
-            DmaChannelId{ 1, 6, 4 },
-            DmaChannelId{ 1, 3, 4 },
-            DmaChannelId{ 1, 4, 4 },
-            DmaChannelId{ 1, 7, 4 },
-            DmaChannelId{ 2, 6, 5 },
-            DmaChannelId{ 1, 1, 5 },
-            DmaChannelId{ 1, 0, 5 } } };
-
-        const std::array<DmaChannelId, 8> defaultRxDmaChannelId = { { DmaChannelId{ 2, 2, 4 },
-            DmaChannelId{ 1, 5, 4 },
-            DmaChannelId{ 1, 1, 4 },
-            DmaChannelId{ 1, 2, 4 },
-            DmaChannelId{ 1, 0, 4 },
-            DmaChannelId{ 2, 7, 5 },
-            DmaChannelId{ 1, 3, 5 },
-            DmaChannelId{ 1, 6, 5 } } };
-#endif
-
     }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
