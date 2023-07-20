@@ -13,22 +13,24 @@ namespace hal
         {
             if (status == SMP_PAIRING_STATUS_SMP_TIMEOUT)
                 return services::GapPairingObserver::PairingErrorType::timeout;
-
-            switch (error)
-            {
-                case PAIRING_NOT_SUPPORTED:
-                    return services::GapPairingObserver::PairingErrorType::pairingNotSupported;
-                case AUTH_REQ_CANNOT_BE_MET:
-                    return services::GapPairingObserver::PairingErrorType::authenticationRequirementsNotMet;
-                case INSUFF_ENCRYPTION_KEY_SIZE:
-                    return services::GapPairingObserver::PairingErrorType::insufficientEncryptionKeySize;
-                case CONFIRM_VALUE_FAILED:
-                    return services::GapPairingObserver::PairingErrorType::passkeyEntryFailed;
-                case SMP_SC_NUMCOMPARISON_FAILED:
-                    return services::GapPairingObserver::PairingErrorType::numericComparisonFailed;
-                default:
-                    return services::GapPairingObserver::PairingErrorType::unknown;
-            }
+            else if (status == SMP_PAIRING_STATUS_ENCRYPT_FAILED)
+                return services::GapPairingObserver::PairingErrorType::encryptionFailed;
+            else
+                switch (error)
+                {
+                    case PAIRING_NOT_SUPPORTED:
+                        return services::GapPairingObserver::PairingErrorType::pairingNotSupported;
+                    case AUTH_REQ_CANNOT_BE_MET:
+                        return services::GapPairingObserver::PairingErrorType::authenticationRequirementsNotMet;
+                    case INSUFF_ENCRYPTION_KEY_SIZE:
+                        return services::GapPairingObserver::PairingErrorType::insufficientEncryptionKeySize;
+                    case CONFIRM_VALUE_FAILED:
+                        return services::GapPairingObserver::PairingErrorType::passkeyEntryFailed;
+                    case SMP_SC_NUMCOMPARISON_FAILED:
+                        return services::GapPairingObserver::PairingErrorType::numericComparisonFailed;
+                    default:
+                        return services::GapPairingObserver::PairingErrorType::unknown;
+                }
         }
     }
 
