@@ -106,66 +106,18 @@ namespace hal
         class TransmitStreamBaseV2
         {
         public:
-            void StartTransmit(infra::ConstByteRange data)
-            {
-                auto& derived = *static_cast<T*>(this);
-
-                derived.SetMemoryToPeripheralMode();
-                derived.EnableMemoryIncrement();
-                derived.SetTransferSize(data.size());
-                derived.SetMemoryAddress(data.begin());
-                derived.Enable();
-            }
-
-            void StartTransmitDummy(uint16_t size)
-            {
-                static uint32_t dummy;
-
-                auto& derived = *static_cast<T*>(this);
-
-                derived.SetMemoryToPeripheralMode();
-                derived.DisableMemoryIncrement();
-                derived.SetTransferSize(size);
-                derived.SetMemoryAddress(&dummy);
-                derived.Enable();
-            }
+            void StartTransmit(infra::ConstByteRange data);
+            void StartTransmitDummy(uint16_t size);
         };
 
         template<class T>
         class ReceiveStreamBaseV2
         {
         public:
-            void StartReceive(infra::ByteRange data)
-            {
-                auto& derived = *static_cast<T*>(this);
+            void StartReceive(infra::ByteRange data);
+            void StartReceiveDummy(uint16_t size);
 
-                this->data = data;
-
-                derived.SetPeripheralToMemoryMode();
-                derived.EnableMemoryIncrement();
-                derived.SetTransferSize(data.size());
-                derived.SetMemoryAddress(data.begin());
-                derived.Enable();
-            }
-
-            void StartReceiveDummy(uint16_t size)
-            {
-                static uint32_t dummy;
-
-                auto& derived = *static_cast<T*>(this);
-
-                derived.SetPeripheralToMemoryMode();
-                derived.DisableMemoryIncrement();
-                derived.SetTransferSize(size);
-                derived.SetMemoryAddress(&dummy);
-                derived.Enable();
-            }
-
-            size_t ReceivedSize() const
-            {
-                const auto& derived = *static_cast<const T*>(this);
-                return data.size() - derived.BytesToTransfer();
-            }
+            size_t ReceivedSize() const;
 
         private:
             infra::ByteRange data;
@@ -235,28 +187,10 @@ namespace hal
         {
         public:
             template<class U>
-            void StartTransmit(infra::MemoryRange<const U> data)
-            {
-                const auto& derived = *static_cast<T*>(this);
+            void StartTransmit(infra::MemoryRange<const U> data);
+            void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1);
 
-                derived.stream.SetMemoryDataSize(sizeof(U));
-                derived.stream.StartTransmit(infra::ReinterpretCastByteRange(data));
-            }
-
-            void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1)
-            {
-                const auto& derived = *static_cast<T*>(this);
-
-                derived.stream.SetMemoryDataSize(dataSize);
-                derived.stream.StartTransmitDummy(size);
-            }
-
-            bool StopTransfer()
-            {
-                const auto& derived = *static_cast<T*>(this);
-
-                return derived.stream.StopTransfer();
-            }
+            bool StopTransfer();
         };
 
         template<class T>
@@ -264,35 +198,12 @@ namespace hal
         {
         public:
             template<class U>
-            void StartReceive(infra::MemoryRange<U> data)
-            {
-                const auto& derived = *static_cast<T*>(this);
+            void StartReceive(infra::MemoryRange<U> data);
+            void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1);
 
-                derived.stream.SetMemoryDataSize(sizeof(U));
-                derived.stream.StartReceive(infra::ReinterpretCastByteRange(data));
-            }
+            bool StopTransfer();
 
-            void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1)
-            {
-                const auto& derived = *static_cast<T*>(this);
-
-                derived.stream.SetMemoryDataSize(dataSize);
-                derived.stream.StartReceiveDummy(size);
-            }
-
-            bool StopTransfer()
-            {
-                const auto& derived = *static_cast<T*>(this);
-
-                return derived.stream.StopTransfer();
-            }
-
-            size_t ReceivedSize() const
-            {
-                const auto& derived = *static_cast<const T*>(this);
-
-                return derived.stream.ReceivedSize();
-            }
+            size_t ReceivedSize() const;
         };
 
         class PeripheralTransmitStream
@@ -355,24 +266,14 @@ namespace hal
         {
         public:
             template<class U>
-            void StartTransmit(infra::MemoryRange<const U> data)
-            {
-                auto& derived = *static_cast<T*>(this);
-
-                derived.peripheralStream.StartTransmit(data);
-            }
+            void StartTransmit(infra::MemoryRange<const U> data);
         };
 
         template<class T>
         class TransmitDummyDmaChannelBase
         {
         public:
-            void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1)
-            {
-                auto& derived = *static_cast<T*>(this);
-
-                derived.peripheralStream.StartTransmitDummy(size, dataSize);
-            }
+            void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1);
         };
 
         template<class T>
@@ -380,43 +281,23 @@ namespace hal
         {
         public:
             template<class U>
-            void StartReceive(infra::MemoryRange<U> data)
-            {
-                auto& derived = *static_cast<T*>(this);
+            void StartReceive(infra::MemoryRange<U> data);
 
-                derived.peripheralStream.StartReceive(data);
-            }
-
-            size_t ReceivedSize() const
-            {
-                auto& derived = *static_cast<const T*>(this);
-
-                return derived.peripheralStream.ReceivedSize();
-            }
+            size_t ReceivedSize() const;
         };
 
         template<class T>
         class ReceiveDummyDmaChannelBase
         {
         public:
-            void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1)
-            {
-                auto& derived = *static_cast<T*>(this);
-
-                derived.peripheralStream.StartReceiveDummy(size, dataSize);
-            }
+            void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1);
         };
 
         template<class T>
         class StopTransferDmaChannelBase
         {
         public:
-            bool StopTransfer()
-            {
-                auto& derived = *static_cast<T*>(this);
-
-                return derived.peripheralStream.StopTransfer();
-            }
+            bool StopTransfer();
         };
     }
 
@@ -507,6 +388,183 @@ namespace hal
         DmaStm::StreamInterruptHandler streamInterruptHandler;
     };
 
+    ////    Implementation    ////
+
+    template<class T>
+    void DmaStm::TransmitStreamBaseV2<T>::StartTransmit(infra::ConstByteRange data)
+    {
+        auto& derived = *static_cast<T*>(this);
+
+        derived.SetMemoryToPeripheralMode();
+        derived.EnableMemoryIncrement();
+        derived.SetTransferSize(data.size());
+        derived.SetMemoryAddress(data.begin());
+        derived.Enable();
+    }
+
+    template<class T>
+    void DmaStm::TransmitStreamBaseV2<T>::StartTransmitDummy(uint16_t size)
+    {
+        static uint32_t dummy;
+
+        auto& derived = *static_cast<T*>(this);
+
+        derived.SetMemoryToPeripheralMode();
+        derived.DisableMemoryIncrement();
+        derived.SetTransferSize(size);
+        derived.SetMemoryAddress(&dummy);
+        derived.Enable();
+    }
+
+    template<class T>
+    void DmaStm::ReceiveStreamBaseV2<T>::StartReceive(infra::ByteRange data)
+    {
+        auto& derived = *static_cast<T*>(this);
+
+        this->data = data;
+
+        derived.SetPeripheralToMemoryMode();
+        derived.EnableMemoryIncrement();
+        derived.SetTransferSize(data.size());
+        derived.SetMemoryAddress(data.begin());
+        derived.Enable();
+    }
+
+    template<class T>
+    void DmaStm::ReceiveStreamBaseV2<T>::StartReceiveDummy(uint16_t size)
+    {
+        static uint32_t dummy;
+
+        auto& derived = *static_cast<T*>(this);
+
+        derived.SetPeripheralToMemoryMode();
+        derived.DisableMemoryIncrement();
+        derived.SetTransferSize(size);
+        derived.SetMemoryAddress(&dummy);
+        derived.Enable();
+    }
+
+    template<class T>
+    size_t DmaStm::ReceiveStreamBaseV2<T>::ReceivedSize() const
+    {
+        const auto& derived = *static_cast<const T*>(this);
+        return data.size() - derived.BytesToTransfer();
+    }
+
+    template<class T>
+    template<class U>
+    void DmaStm::PeripheralTransmitStreamBase<T>::StartTransmit(infra::MemoryRange<const U> data)
+    {
+        const auto& derived = *static_cast<T*>(this);
+
+        derived.stream.SetMemoryDataSize(sizeof(U));
+        derived.stream.StartTransmit(infra::ReinterpretCastByteRange(data));
+    }
+
+    template<class T>
+    void DmaStm::PeripheralTransmitStreamBase<T>::StartTransmitDummy(uint16_t size, uint8_t dataSize)
+    {
+        const auto& derived = *static_cast<T*>(this);
+
+        derived.stream.SetMemoryDataSize(dataSize);
+        derived.stream.StartTransmitDummy(size);
+    }
+
+    template<class T>
+    bool DmaStm::PeripheralTransmitStreamBase<T>::StopTransfer()
+    {
+        const auto& derived = *static_cast<T*>(this);
+
+        return derived.stream.StopTransfer();
+    }
+
+    template<class T>
+    template<class U>
+    void DmaStm::PeripheralReceiveStreamBase<T>::StartReceive(infra::MemoryRange<U> data)
+    {
+        const auto& derived = *static_cast<T*>(this);
+
+        derived.stream.SetMemoryDataSize(sizeof(U));
+        derived.stream.StartReceive(infra::ReinterpretCastByteRange(data));
+    }
+
+    template<class T>
+    void DmaStm::PeripheralReceiveStreamBase<T>::StartReceiveDummy(uint16_t size, uint8_t dataSize)
+    {
+        const auto& derived = *static_cast<T*>(this);
+
+        derived.stream.SetMemoryDataSize(dataSize);
+        derived.stream.StartReceiveDummy(size);
+    }
+
+    template<class T>
+    bool DmaStm::PeripheralReceiveStreamBase<T>::StopTransfer()
+    {
+        const auto& derived = *static_cast<T*>(this);
+
+        return derived.stream.StopTransfer();
+    }
+
+    template<class T>
+    size_t DmaStm::PeripheralReceiveStreamBase<T>::ReceivedSize() const
+    {
+        const auto& derived = *static_cast<const T*>(this);
+
+        return derived.stream.ReceivedSize();
+    }
+
+    namespace detail
+    {
+        template<class T>
+        template<class U>
+        void TransmitRangeDmaChannelBase<T>::StartTransmit(infra::MemoryRange<const U> data)
+        {
+            auto& derived = *static_cast<T*>(this);
+
+            derived.peripheralStream.StartTransmit(data);
+        }
+
+        template<class T>
+        void TransmitDummyDmaChannelBase<T>::StartTransmitDummy(uint16_t size, uint8_t dataSize)
+        {
+            auto& derived = *static_cast<T*>(this);
+
+            derived.peripheralStream.StartTransmitDummy(size, dataSize);
+        }
+
+        template<class T>
+        template<class U>
+        void ReceiveRangeDmaChannelBase<T>::StartReceive(infra::MemoryRange<U> data)
+        {
+            auto& derived = *static_cast<T*>(this);
+
+            derived.peripheralStream.StartReceive(data);
+        }
+
+        template<class T>
+        size_t ReceiveRangeDmaChannelBase<T>::ReceivedSize() const
+        {
+            auto& derived = *static_cast<const T*>(this);
+
+            return derived.peripheralStream.ReceivedSize();
+        }
+
+        template<class T>
+        void ReceiveDummyDmaChannelBase<T>::StartReceiveDummy(uint16_t size, uint8_t dataSize)
+        {
+            auto& derived = *static_cast<T*>(this);
+
+            derived.peripheralStream.StartReceiveDummy(size, dataSize);
+        }
+
+        template<class T>
+        bool StopTransferDmaChannelBase<T>::StopTransfer()
+        {
+            auto& derived = *static_cast<T*>(this);
+
+            return derived.peripheralStream.StopTransfer();
+        }
+    }
 }
 
 #endif
