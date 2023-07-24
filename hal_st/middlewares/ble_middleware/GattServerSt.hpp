@@ -16,13 +16,13 @@ namespace hal
         explicit GattServerSt(hal::HciEventSource& hciEventSource);
 
         // Implementation of services::GattServer
-        virtual void AddService(services::GattServerService& service);
+        void AddService(services::GattServerService& service) override;
 
         // Implementation of services::GattCharacteristicClientOperations
-        virtual UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const;
+        UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
 
         // Implementation of hal::HciEventSink
-        virtual void HciEvent(hci_event_pckt& event);
+        void HciEvent(hci_event_pckt& event) override;
 
     protected:
         virtual void AddCharacteristic(services::GattServerCharacteristic& characteristic);

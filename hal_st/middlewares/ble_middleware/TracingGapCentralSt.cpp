@@ -2,8 +2,8 @@
 
 namespace hal
 {
-    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, uint32_t* bleBondsStorage, services::Tracer& tracer)
-        : GapCentralSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, gapService, bleBondsStorage)
+    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage, services::Tracer& tracer)
+        : GapCentralSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, gapService, bondStorageSynchronizerCreator, bleBondsStorage)
         , tracer(tracer)
     {}
 
@@ -41,6 +41,60 @@ namespace hal
     {
         tracer.Trace() << "TracingGapCentralSt::StopDeviceDiscovery";
         GapCentralSt::StopDeviceDiscovery();
+    }
+
+    void TracingGapCentralSt::RemoveAllBonds()
+    {
+        tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
+        GapCentralSt::RemoveAllBonds();
+    }
+
+    void TracingGapCentralSt::RemoveOldestBond()
+    {
+        tracer.Trace() << "TracingGapCentralSt::RemoveOldestBond";
+        GapCentralSt::RemoveOldestBond();
+    }
+
+    std::size_t TracingGapCentralSt::GetMaxNumberOfBonds() const
+    {
+        tracer.Trace() << "TracingGapCentralSt::GetMaxNumberOfBonds";
+        return GapCentralSt::GetMaxNumberOfBonds();
+    }
+
+    std::size_t TracingGapCentralSt::GetNumberOfBonds() const
+    {
+        tracer.Trace() << "TracingGapCentralSt::GetNumberOfBonds";
+        return GapCentralSt::GetNumberOfBonds();
+    }
+
+    void TracingGapCentralSt::Pair()
+    {
+        tracer.Trace() << "TracingGapCentralSt::Pair";
+        GapCentralSt::Pair();
+    }
+
+    void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetSecurityMode";
+        GapCentralSt::SetSecurityMode(mode, level);
+    }
+
+    void TracingGapCentralSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetIoCapabilities";
+        GapCentralSt::SetIoCapabilities(caps);
+    }
+
+    void TracingGapCentralSt::AuthenticateWithPasskey(uint32_t passkey)
+    {
+        tracer.Trace() << "TracingGapCentralSt::AuthenticateWithPasskey";
+        GapCentralSt::AuthenticateWithPasskey(passkey);
+    }
+
+    void TracingGapCentralSt::NumericComparisonConfirm(bool accept)
+    {
+        tracer.Trace() << "TracingGapCentralSt::NumericComparisonConfirm";
+        GapCentralSt::NumericComparisonConfirm(accept);
     }
 
     void TracingGapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
@@ -92,7 +146,6 @@ namespace hal
         tracer.Trace() << "\tMax TX time         : " << dataLengthChangeEvent.MaxTxTime;
         tracer.Trace() << "\tMax RX octets       : " << dataLengthChangeEvent.MaxRxOctets;
         tracer.Trace() << "\tMax RX time         : " << dataLengthChangeEvent.MaxRxTime;
-
         GapCentralSt::HandleHciLeDataLengthChangeEvent(metaEvent);
     }
 
@@ -114,7 +167,7 @@ namespace hal
         hal::MacAddress mac;
         infra::Copy(infra::MakeRange(enhancedConnectionCompleteEvt->Peer_Address), infra::MakeRange(mac));
 
-        tracer.Trace() << "TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent Handle - 0x" << infra::hex << enhancedConnectionCompleteEvt->Connection_Handle;
+        tracer.Trace() << "TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent Handle";
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << enhancedConnectionCompleteEvt->Connection_Handle;
         tracer.Trace() << "\tPeer address        : " << infra::AsMacAddress(mac);
         tracer.Trace() << "\tPeer address type   : " << enhancedConnectionCompleteEvt->Peer_Address_Type;
@@ -156,5 +209,15 @@ namespace hal
         tracer.Trace() << "\tServer TX MTU       : " << mtuExchangeEvent->Server_RX_MTU;
 
         GapCentralSt::HandleMtuExchangeResponseEvent(vendorEvent);
+    }
+
+    void TracingGapCentralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
+    {
+        const auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
+        tracer.Trace() << "TracingGapCentralSt::HandlePairingCompleteEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << pairingComplete->Connection_Handle;
+        tracer.Trace() << "\tStatus              : 0x" << infra::hex << pairingComplete->Status;
+        tracer.Trace() << "\tReason              : 0x" << infra::hex << pairingComplete->Reason;
+        GapCentralSt::HandlePairingCompleteEvent(vendorEvent);
     }
 }

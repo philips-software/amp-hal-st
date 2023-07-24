@@ -1,18 +1,47 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "ble_gap_aci.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "services/ble/Gap.hpp"
+#include "shci.h"
 #include "stm32wbxx_ll_system.h"
 
 namespace hal
 {
-    const services::GapConnectionParameters GapSt::connectionParameters
+    namespace
     {
+        constexpr services::GapPairingObserver::PairingErrorType ParserPairingFailure(uint8_t status, uint8_t error)
+        {
+            if (status == SMP_PAIRING_STATUS_SMP_TIMEOUT)
+                return services::GapPairingObserver::PairingErrorType::timeout;
+            else if (status == SMP_PAIRING_STATUS_ENCRYPT_FAILED)
+                return services::GapPairingObserver::PairingErrorType::encryptionFailed;
+            else
+                switch (error)
+                {
+                    case PAIRING_NOT_SUPPORTED:
+                        return services::GapPairingObserver::PairingErrorType::pairingNotSupported;
+                    case AUTH_REQ_CANNOT_BE_MET:
+                        return services::GapPairingObserver::PairingErrorType::authenticationRequirementsNotMet;
+                    case INSUFF_ENCRYPTION_KEY_SIZE:
+                        return services::GapPairingObserver::PairingErrorType::insufficientEncryptionKeySize;
+                    case CONFIRM_VALUE_FAILED:
+                        return services::GapPairingObserver::PairingErrorType::passkeyEntryFailed;
+                    case SMP_SC_NUMCOMPARISON_FAILED:
+                        return services::GapPairingObserver::PairingErrorType::numericComparisonFailed;
+                    default:
+                        return services::GapPairingObserver::PairingErrorType::unknown;
+                }
+        }
+    }
+
+    const services::GapConnectionParameters GapSt::connectionParameters{
         6,
         6,
         0,
         500,
     };
 
-    GapSt::GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, uint32_t& bleBondsStorage)
+    GapSt::GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage)
         : HciEventSink(hciEventSource)
         , txPowerLevel(txPowerLevel)
     {
@@ -86,6 +115,8 @@ namespace hal
         // Write Encryption root key used to derive LTK and CSRK
         aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, rootKeys.encryption.data());
 
+        bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
+
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
 
@@ -100,6 +131,93 @@ namespace hal
     uint16_t GapSt::EffectiveMaxAttMtuSize() const
     {
         return maxAttMtu;
+    }
+
+    void GapSt::RemoveAllBonds()
+    {
+        (*bondStorageSynchronizer)->RemoveAllBonds();
+    }
+
+    void GapSt::RemoveOldestBond()
+    {
+        std::abort();
+    }
+
+    std::size_t GapSt::GetMaxNumberOfBonds() const
+    {
+        if (bondStorageSynchronizer)
+            return (*bondStorageSynchronizer)->GetMaxNumberOfBonds();
+
+        return 0;
+    }
+
+    std::size_t GapSt::GetNumberOfBonds() const
+    {
+        uint8_t numberOfBondedAddress = 0;
+        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
+        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
+
+        return numberOfBondedAddress;
+    }
+
+    void GapSt::Pair()
+    {
+        really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
+
+        aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
+    }
+
+    void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    {
+        assert(mode == services::GapPairing::SecurityMode::mode1);
+
+        enum class SecureConnection : uint8_t
+        {
+            notSupported = 0,
+            optional = 1,
+            mandatory
+        };
+
+        SecureConnection secureConnectionSupport = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
+        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
+
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+    }
+
+    void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
+    {
+        tBleStatus status = BLE_STATUS_FAILED;
+
+        switch (caps)
+        {
+            case services::GapPairing::IoCapabilities::display:
+                status = aci_gap_set_io_capability(0);
+                break;
+            case services::GapPairing::IoCapabilities::displayYesNo:
+                status = aci_gap_set_io_capability(1);
+                break;
+            case services::GapPairing::IoCapabilities::keyboard:
+                status = aci_gap_set_io_capability(2);
+                break;
+            case services::GapPairing::IoCapabilities::none:
+                status = aci_gap_set_io_capability(3);
+                break;
+            case services::GapPairing::IoCapabilities::keyboardDisplay:
+                status = aci_gap_set_io_capability(4);
+                break;
+        }
+
+        assert(status == BLE_STATUS_SUCCESS);
+    }
+
+    void GapSt::AuthenticateWithPasskey(uint32_t passkey)
+    {
+        std::abort();
+    }
+
+    void GapSt::NumericComparisonConfirm(bool accept)
+    {
+        std::abort();
     }
 
     void GapSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
@@ -146,6 +264,31 @@ namespace hal
             {
                 observer.ExchangedMaxAttMtuSize();
             });
+    }
+
+    void GapSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
+    {
+        auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
+
+        really_assert(pairingComplete->Connection_Handle == connectionContext.connectionHandle);
+
+        if (aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
+        {
+            hal::MacAddress address = connectionContext.peerAddress;
+            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
+            (*bondStorageSynchronizer)->UpdateBondedDevice(address);
+        }
+
+        if (pairingComplete->Status == SMP_PAIRING_STATUS_SUCCESS)
+            GapPairing::NotifyObservers([](auto& observer)
+                {
+                    observer.PairingSuccessfullyCompleted();
+                });
+        else
+            GapPairing::NotifyObservers([&pairingComplete](auto& observer)
+                {
+                    observer.PairingFailed(ParserPairingFailure(pairingComplete->Status, pairingComplete->Reason));
+                });
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
