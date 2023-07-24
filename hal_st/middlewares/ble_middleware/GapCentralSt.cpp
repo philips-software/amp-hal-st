@@ -151,11 +151,13 @@ namespace hal
 
         auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-        really_assert(gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS);
+        auto localOnConnection = std::exchange(onConnection, nullptr);
 
-        if (onConnection)
-            infra::Subject<services::GapCentralObserver>::NotifyObservers(std::exchange(onConnection, nullptr));
+        if (localOnConnection && gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
+        {
+            really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+            infra::Subject<services::GapCentralObserver>::NotifyObservers(localOnConnection);
+        }
     }
 
     void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent)
