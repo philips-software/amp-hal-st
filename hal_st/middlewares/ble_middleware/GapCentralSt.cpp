@@ -26,8 +26,8 @@ namespace hal
         }
     }
 
-    GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, uint32_t* bleBondsStorage)
-        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, *bleBondsStorage)
+    GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
+        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, bondStorageSynchronizerCreator, *bleBondsStorage)
     {
         Initialize(gapService);
 
@@ -73,6 +73,10 @@ namespace hal
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
             discovering = false;
         }
+    }
+
+    void GapCentralSt::AllowPairing(bool)
+    {
     }
 
     void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
@@ -147,11 +151,13 @@ namespace hal
 
         auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-        really_assert(gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS);
+        auto localOnConnection = std::exchange(onConnection, nullptr);
 
-        if (onConnection)
-            infra::Subject<services::GapCentralObserver>::NotifyObservers(std::exchange(onConnection, nullptr));
+        if (localOnConnection && gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
+        {
+            really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+            infra::Subject<services::GapCentralObserver>::NotifyObservers(localOnConnection);
+        }
     }
 
     void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent)
@@ -210,7 +216,13 @@ namespace hal
     {
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
             {
-                aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+                if (aci_gatt_exchange_config(this->connectionContext.connectionHandle) == commandDisallowed)
+                {
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                        {
+                            this->MtuExchange();
+                        });
+                }
             });
     }
 
@@ -248,7 +260,7 @@ namespace hal
         aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
-        aci_gap_set_io_capability(ioCapability);
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        SetIoCapabilities(services::GapPairing::IoCapabilities::none);
+        SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
     }
 }

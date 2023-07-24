@@ -10,25 +10,40 @@ namespace hal
         : public GapCentralSt
     {
     public:
-        TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, uint32_t* bleBondsStorage, services::Tracer& tracer);
+        TracingGapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage, services::Tracer& tracer);
 
-        virtual void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
-        virtual void Disconnect() override;
-        virtual void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
-        virtual void StartDeviceDiscovery() override;
-        virtual void StopDeviceDiscovery() override;
+        // Implementation of services::GapCentral
+        void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void Disconnect() override;
+        void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void StartDeviceDiscovery() override;
+        void StopDeviceDiscovery() override;
+
+        // Implementation of GapBonding
+        void RemoveAllBonds() override;
+        void RemoveOldestBond() override;
+        std::size_t GetMaxNumberOfBonds() const override;
+        std::size_t GetNumberOfBonds() const override;
+
+        // Implementation of GapPairing
+        void Pair() override;
+        void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
+        void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
+        void AuthenticateWithPasskey(uint32_t passkey) override;
+        void NumericComparisonConfirm(bool accept) override;
 
     protected:
         // Implementation of GapCentralSt
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
-        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
+        void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
         services::Tracer& tracer;
