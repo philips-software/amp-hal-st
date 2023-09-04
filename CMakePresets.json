@@ -183,7 +183,7 @@
     },
     {
       "name": "host-Debug",
-      "configurePreset": "host-Debug",
+      "configurePreset": "host",
       "configuration": "Debug",
       "inherits": "defaults"
     }
