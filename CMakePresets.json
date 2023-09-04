@@ -129,6 +129,11 @@
       "configurePreset": "host"
     },
     {
+      "name": "host-Debug",
+      "configuration": "Debug",
+      "configurePreset": "host"
+    },
+    {
       "name": "stm32wb55-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "stm32wb55"
@@ -162,6 +167,25 @@
       "name": "stm32f767-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "stm32f767"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "defaults",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "host-Debug",
+      "configurePreset": "host-Debug",
+      "configuration": "Debug",
+      "inherits": "defaults"
     }
   ]
 }
