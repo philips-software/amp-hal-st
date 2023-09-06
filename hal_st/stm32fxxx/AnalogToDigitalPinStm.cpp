@@ -39,23 +39,20 @@ namespace hal
     {
         ADC_ChannelConfTypeDef channelConfig;
         channelConfig.Channel = adcChannel[pin.AdcChannel(adc.index + 1)];
-#if !defined(STM32WB)
-        channelConfig.Rank = 1;
-#else
+#if defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         channelConfig.Rank = ADC_REGULAR_RANK_1;
+#else
+        channelConfig.Rank = 1;
 #endif
 #if defined(STM32F0) || defined(STM32F3)
         channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
-#elif defined(STM32WB)
+#elif defined(STM32WB) || defined(STM32G4)
         channelConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
         channelConfig.Offset = 0;
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
         channelConfig.SingleDiff = ADC_SINGLE_ENDED;
 #elif defined(STM32G0)
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
-#elif defined(STM32G4)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
-        channelConfig.Offset = 0;
 #else
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
         channelConfig.Offset = 0;
@@ -100,7 +97,7 @@ namespace hal
 #if !defined(STM32F3)
         handle.Init.DMAContinuousRequests = DISABLE;
 #endif
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 #elif !defined(STM32F3)
         handle.Init.EOCSelection = DISABLE;
@@ -124,7 +121,7 @@ namespace hal
 
     void AdcStm::MeasurementDone()
     {
-        assert(onDone != nullptr);
+        assert(onDone == true);
 #if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
 #else
