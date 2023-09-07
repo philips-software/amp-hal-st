@@ -626,6 +626,11 @@ namespace hal
         stream.EnableTransferCompleteInterrupt();
     }
 
+    bool DmaStm::CircularStreamInterruptHandler::IsInterruptPending() const
+    {
+        return stream.IsHalfComplete() || stream.IsFullComplete();
+    }
+
     void DmaStm::CircularStreamInterruptHandler::OnInterrupt()
     {
         if (stream.IsHalfComplete())
@@ -689,6 +694,11 @@ namespace hal
         : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
         , circularStreamInterruptHandler{ receiveStream, transferHalfComplete, transferFullComplete }
     {}
+
+    bool CircularReceiveDmaChannel::IsInterruptPending() const
+    {
+        return circularStreamInterruptHandler.IsInterruptPending();
+    }
 
     TransceiverDmaChannel::TransceiverDmaChannel(DmaStm::TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
         : peripheralStream{ transceiveStreamBase, peripheralAddress, peripheralTransferSize }

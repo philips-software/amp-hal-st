@@ -165,6 +165,8 @@ namespace hal
         public:
             CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
+            bool IsInterruptPending() const;
+
         private:
             void OnInterrupt();
 
@@ -358,6 +360,8 @@ namespace hal
 
     public:
         CircularReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
+
+        bool IsInterruptPending() const;
 
     private:
         friend detail::ReceiveRangeDmaChannelBase<CircularReceiveDmaChannel>;
