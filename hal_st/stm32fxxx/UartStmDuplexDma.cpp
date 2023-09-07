@@ -56,7 +56,7 @@ namespace hal
     {}
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm* uartRts, GpioPinStm* uartCts, const Config& config)
-        : UartStmDuplexDmaOptionalFlowControl{ aUartIndex, &uartTx, &uartRx }
+        : UartStmDuplexDmaOptionalFlowControl{ aUartIndex, uartRts, uartCts }
         , rxBuffer(rxBuffer)
         , uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
