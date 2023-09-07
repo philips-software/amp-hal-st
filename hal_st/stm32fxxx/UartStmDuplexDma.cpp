@@ -2,90 +2,79 @@
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/Optional.hpp"
+#include "infra/util/ReallyAssert.hpp"
 
 namespace hal
 {
     namespace
     {
-        uint16_t defaultRxTimeout = 16;
+        uint32_t defaultRxTimeout = 16;
+
+        volatile void* TransmitRegister(uint8_t uartIndex)
+        {
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+            return &peripheralUart[uartIndex]->TDR;
+#else
+            return &peripheralUart[uartIndex]->DR;
+#endif
+        }
+
+        volatile void* ReceiveRegister(uint8_t uartIndex)
+        {
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+            return &peripheralUart[uartIndex]->RDR;
+#else
+            return &peripheralUart[uartIndex]->DR;
+#endif
+        }
     }
+
+    UartStmDuplexDmaOptionalFlowControl::UartStmDuplexDmaOptionalFlowControl(uint8_t aUartIndex, GpioPinStm* uartRts, GpioPinStm* uartCts)
+    {
+        if (uartRts != nullptr && uartCts != nullptr)
+        {
+            this->uartRts.Emplace(*uartRts, PinConfigTypeStm::uartRts, aUartIndex);
+            this->uartCts.Emplace(*uartCts, PinConfigTypeStm::uartCts, aUartIndex);
+        }
+    }
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, aUartIndex, uartTx, uartRx, {} }
+    {}
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-        : rxBuffer(rxBuffer)
-        , uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartHandle()
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              receiveStream, &peripheralUart[uartIndex]->RDR, 1, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#else
-        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->DR, 1, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              receiveStream, &peripheralUart[uartIndex]->DR, 1, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#endif
-    {
-        Configure(config);
-    }
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, aUartIndex, uartTx, uartRx, nullptr, nullptr, config }
+    {}
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, aUartIndex, uartTx, uartRx, uartRts, uartCts, {} }
+    {}
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
-        : rxBuffer(rxBuffer)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, aUartIndex, uartTx, uartRx, &uartRts, &uartCts, config }
+    {}
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm* uartRts, GpioPinStm* uartCts, const Config& config)
+        : UartStmDuplexDmaOptionalFlowControl{ aUartIndex, &uartTx, &uartRx }
+        , rxBuffer(rxBuffer)
         , uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
-        , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
         , uartHandle()
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
+        , transmitDmaChannel(transmitStream, TransmitRegister(uartIndex), 1, [this]
               {
                   TransferComplete();
               })
         , receiveDmaChannel(
-              receiveStream, &peripheralUart[uartIndex]->RDR, 1, [this]()
+              receiveStream, ReceiveRegister(uartIndex), 1, [this]
               {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
+                  HalfReceiveComplete();
               },
-              [this]()
+              [this]
               {
-                  ReceiveComplete(this->rxBuffer.size());
+                  FullReceiveComplete();
               })
-#else
-        , transmitDmaChannel(transmitStream, &peripheralUart[uartIndex]->DR, 1, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              receiveStream, &peripheralUart[uartIndex]->DR, 1, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#endif
     {
         Configure(config);
     }
@@ -146,25 +135,32 @@ namespace hal
         peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
+    void UartStmDuplexDma::HalfReceiveComplete()
+    {
+        ReceiveComplete(this->rxBuffer.size() / 2);
+    }
+
+    void UartStmDuplexDma::FullReceiveComplete()
+    {
+        ReceiveComplete(this->rxBuffer.size());
+    }
+
     void UartStmDuplexDma::ReceiveComplete(size_t currentPosition)
     {
-        if (currentPosition == lastReceivedPosition)
+        if (currentPosition == lastReceivedPosition || !dataReceived)
             return;
 
-        if (dataReceived)
-        {
-            infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
-            lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
-            dataReceived(receivedData);
-        }
+        really_assert(lastReceivedPosition <= currentPosition);
+
+        infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
+        lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
+
+        dataReceived(receivedData);
     }
 
     void UartStmDuplexDma::RegisterInterrupt(const Config& config)
     {
-        if (config.priority)
-            Register(peripheralUartIrq[uartIndex], *config.priority);
-        else
-            Register(peripheralUartIrq[uartIndex]);
+        Register(peripheralUartIrq[uartIndex], config.priority);
     }
 
     void UartStmDuplexDma::TransferComplete()
@@ -181,7 +177,13 @@ namespace hal
         if (peripheralUart[uartIndex]->ISR & USART_ISR_RTOF)
         {
             peripheralUart[uartIndex]->ICR = USART_ICR_RTOCF;
-            ReceiveComplete(receiveDmaChannel.ReceivedSize());
+
+            const auto receivedSize = receiveDmaChannel.ReceivedSize();
+
+            if (receiveDmaChannel.IsInterruptPending())
+                return;
+
+            ReceiveComplete(receivedSize);
         }
     }
 }
