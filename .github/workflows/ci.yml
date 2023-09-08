@@ -15,33 +15,39 @@ jobs:
     name: Host Build & Test (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           persist-credentials: false
       - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
         with:
           key: ${{ github.job }}-ubuntu-latest
           variant: sccache
+      - uses: seanmiddleditch/gha-setup-ninja@16b940825621068d98711680b6c3ff92201f8fc0 # v3
       - uses: lukka/run-cmake@c2b72aff009141774c5a5fabe74ea46c8c04d9c4 # v10.6
         with:
           configurePreset: "host"
-          buildPreset: "host-Debug"
-          testPreset: "host-Debug"
+          buildPreset: "host-Debug" #-WithPackage"
+          #testPreset: "host"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
-      - name: Upload test logs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-        with:
-          name: test-logs
-          path: build/host-Debug/Testing/Temporary/
+      #- uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      #  with:
+      #    name: halst
+      #    path: build/host/halst-*-Linux.tar.gz
+      #    if-no-files-found: error
+      #- name: Upload test logs
+      #  if: ${{ failure() }}
+      #  uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      #  with:
+      #    name: test-logs
+      #    path: build/host/Testing/Temporary/
   host_build_test:
     name: Host Build & Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, windows-2019]
+        os: [windows-latest, windows-2019, macos-latest]
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           persist-credentials: false
       - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
@@ -50,16 +56,16 @@ jobs:
           variant: sccache
       - uses: lukka/run-cmake@c2b72aff009141774c5a5fabe74ea46c8c04d9c4 # v10.6
         with:
-          configurePreset: "host"
-          buildPreset: "host-Debug"
-          testPreset: "host-Debug"
+          configurePreset: "host-single-Debug"
+          buildPreset: "host-single-Debug"
+          #testPreset: "host-single-Debug"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
-      - name: Upload test logs
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-        with:
-          name: test-logs
-          path: build/host-Debug/Testing/Temporary/
+      #- name: Upload test logs
+      #  if: ${{ failure() }}
+      #  uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      #  with:
+      #    name: test-logs
+      #    path: build/host/Testing/Temporary/
   embedded_build:
     name: Embedded Build
     runs-on: ubuntu-latest
