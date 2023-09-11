@@ -45,6 +45,7 @@ add_subdirectory(tools)
 add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
+add_subdirectory(services)
 add_subdirectory(examples)
 
 emil_clangformat_directories(hal_st DIRECTORIES .)
