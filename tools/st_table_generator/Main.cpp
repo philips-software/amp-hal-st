@@ -6,8 +6,8 @@
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/stubs/strutil.h"
 #include "hal/generic/FileSystemGeneric.hpp"
-#include "infra/xml/XmlNavigator.hpp"
 #include "infra/syntax/CppFormatter.hpp"
+#include "infra/syntax/XmlNavigator.hpp"
 
 template<class T>
 std::vector<T> Compact(const std::vector<infra::Optional<T>>& v)

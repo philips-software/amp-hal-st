@@ -7,5 +7,4 @@ target_link_libraries(tools.st_table_generator PRIVATE
     args
     hal.generic
     infra.syntax
-    infra.xml
 )
