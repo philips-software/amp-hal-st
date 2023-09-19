@@ -43,8 +43,6 @@ namespace hal
         infra::Optional<PeripheralPinStm> uartRts;
         infra::Optional<PeripheralPinStm> uartCts;
 
-        UART_HandleTypeDef uartHandle = {};
-
         TransmitDmaChannel transmitDmaChannel;
 
         infra::Function<void()> transferDataComplete;

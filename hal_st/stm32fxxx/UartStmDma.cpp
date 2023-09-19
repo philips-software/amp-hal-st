@@ -3,31 +3,34 @@
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
 
-volatile uint32_t uartdatareceived = 0;
-volatile uint32_t uartdatapushed = 0;
-
 namespace hal
 {
+    namespace
+    {
+        volatile void* PeripheralAddress(uint8_t uartIndex)
+        {
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
+            return &peripheralUart[uartIndex]->TDR;
+#else
+            return &peripheralUart[uartIndex]->DR;
+#endif
+        }
+    }
+
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartHandle()
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
-        , transmitDmaChannel{ transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
+        , transmitDmaChannel{ transmitStream, PeripheralAddress(uartIndex), 1, [this]()
             {
                 TransferComplete();
             } }
-#else
-        , transmitDmaChannel{ transmitStream, &peripheralUart[uartIndex]->DR, 1, [this]()
-            {
-                TransferComplete();
-            } }
-#endif
+
     {
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
 
+        UART_HandleTypeDef uartHandle = {};
         uartHandle.Instance = peripheralUart[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
         uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
@@ -53,7 +56,6 @@ namespace hal
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
         , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
         , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
-        , uartHandle()
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         , transmitDmaChannel{ transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
             {
@@ -69,6 +71,7 @@ namespace hal
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
 
+        UART_HandleTypeDef uartHandle = {};
         uartHandle.Instance = peripheralUart[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
         uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
