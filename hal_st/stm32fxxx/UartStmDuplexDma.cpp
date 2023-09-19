@@ -61,7 +61,6 @@ namespace hal
         , uartIndex(aUartIndex - 1)
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
         , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartHandle()
         , transmitDmaChannel(transmitStream, TransmitRegister(uartIndex), 1, [this]
               {
                   TransferComplete();
@@ -113,6 +112,7 @@ namespace hal
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
 
+        UART_HandleTypeDef uartHandle = {};
         uartHandle.Instance = peripheralUart[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
         uartHandle.Init.WordLength = USART_WORDLENGTH_8B;

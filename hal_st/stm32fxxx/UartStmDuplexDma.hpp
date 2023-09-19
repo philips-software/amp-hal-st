@@ -47,8 +47,8 @@ namespace hal
     public:
         ~UartStmDuplexDma();
 
-        virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
-        virtual void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
+        void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
+        void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
         void Configure(const Config& config);
@@ -57,15 +57,13 @@ namespace hal
         void ReceiveComplete(size_t currentPosition);
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
-        virtual void Invoke() override;
+        void Invoke() override;
 
     private:
         infra::MemoryRange<uint8_t> rxBuffer;
         uint8_t uartIndex;
         PeripheralPinStm uartTx;
         PeripheralPinStm uartRx;
-
-        UART_HandleTypeDef uartHandle = {};
 
         hal::TransmitDmaChannel transmitDmaChannel;
         hal::CircularReceiveDmaChannel receiveDmaChannel;
