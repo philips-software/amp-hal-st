@@ -10,18 +10,35 @@
       "name": "defaults",
       "hidden": true,
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "generator": "Ninja Multi-Config",
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
         "HALST_BUILD_EXAMPLES": true,
         "CMAKE_EXPORT_COMPILE_COMMANDS": "On"
       }
     },
     {
       "name": "host",
-      "displayName": "host",
-      "description": "Build required tools for host",
-      "inherits": "defaults"
+      "displayName": "Configuration for Host Tooling and Tests",
+      "inherits": "defaults",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
+      },
+      "generator": "Ninja Multi-Config"
+    },
+    {
+      "name": "host-single-Debug",
+      "displayName": "Configuration for Host Tooling and Tests, Single Config Generator, Debug",
+      "inherits": "defaults",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "host-single-MinSizeRel",
+      "displayName": "Configuration for Host Tooling and Tests, Single Config Generator, MinSizeRel",
+      "inherits": "defaults",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "MinSizeRel"
+      }
     },
     {
       "name": "stm32",
@@ -33,7 +50,8 @@
       "cacheVariables": {
         "EMIL_GENERATE_PACKAGE_CONFIG": false,
         "TARGET_MCU_VENDOR": "st"
-      }
+      },
+      "generator": "Ninja Multi-Config"
     },
     {
       "name": "stm32wb55",
@@ -175,11 +193,31 @@
       "name": "stm32f767-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "stm32f767"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "defaults",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
     },
     {
-      "name": "stm32g474-RelWithDebInfo",
-      "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32g474"
+      "name": "host",
+      "configurePreset": "host",
+      "configuration": "Debug",
+      "inherits": "defaults"
+    },
+    {
+      "name": "host-single-Debug",
+      "configurePreset": "host-single-Debug",
+      "configuration": "Debug",
+      "inherits": "defaults"
     }
   ]
 }
