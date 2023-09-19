@@ -1,13 +1,7 @@
-#include "hal/interfaces/Gpio.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 // #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
-#include "hal_st/stm32fxxx/DmaStm.hpp"
-#include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "hal_st/stm32fxxx/UartStm.hpp"
-#include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "services/util/DebugLed.hpp"
-#include <array>
 
 unsigned int hse_value = 8000000;
 
