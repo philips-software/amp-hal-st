@@ -155,9 +155,31 @@
   ],
   "buildPresets": [
     {
+      "name": "host-Debug",
+      "configuration": "Debug",
+      "configurePreset": "host"
+    },
+    {
+      "name": "host-Debug-WithPackage",
+      "configuration": "Debug",
+      "configurePreset": "host",
+      "targets": ["all", "package"]
+    },
+    {
       "name": "host-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "host"
+    },
+    {	
+      "name": "host-single-Debug",	
+      "configuration": "Debug",	
+      "configurePreset": "host-single-Debug"	
+    },	
+    {	
+      "name": "release-package",	
+      "configuration": "MinSizeRel",	
+      "configurePreset": "host-single-MinSizeRel",	
+      "targets": ["package"]	
     },
     {
       "name": "stm32wb55-RelWithDebInfo",
