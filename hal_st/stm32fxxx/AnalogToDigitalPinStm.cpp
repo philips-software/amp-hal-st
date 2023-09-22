@@ -121,7 +121,7 @@ namespace hal
 
     void AdcStm::MeasurementDone()
     {
-        assert(onDone == true);
+        assert(onDone != nullptr);
 #if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
 #else
