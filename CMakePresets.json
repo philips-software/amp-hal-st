@@ -1,10 +1,5 @@
 {
   "version": 3,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 24,
-    "patch": 0
-  },
   "configurePresets": [
     {
       "name": "defaults",
@@ -43,11 +38,11 @@
       "name": "stm32",
       "hidden": true,
       "inherits": "defaults",
+      "generator": "Ninja Multi-Config",
       "environment": {
         "CMAKE_TOOLCHAIN_FILE": ""
       },
       "cacheVariables": {
-        "generator": "Ninja Multi-Config",
         "EMIL_GENERATE_PACKAGE_CONFIG": false,
         "TARGET_MCU_VENDOR": "st"
       }

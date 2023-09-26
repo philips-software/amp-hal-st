@@ -6,6 +6,23 @@
     "configurations": [
         {
             "name": "stm32f767",
+            "cwd": "${workspaceFolder}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F767ZI",
+            "servertype": "external",
+            "showDevDebugOutput": "both",
+            "gdbTarget": "host.docker.internal:2331",
+            "overrideLaunchCommands": [
+                "monitor reset",
+                "-target-download",
+                "monitor reset"
+            ],
+            "overrideRestartCommands": [ "monitor reset" ]
+        },
+        {
+            "name": "stm32f767 without container",
             "cwd": "${workspaceRoot}",
             "request": "launch",
             "executable": "${command:cmake.launchTargetPath}",
@@ -14,21 +31,21 @@
             "device": "STM32F767ZI"
         },
         {
-            "name": "stm32g431",
+            "name": "stm32g431 without container",
             "cwd": "${workspaceRoot}",
             "request": "launch",
             "executable": "${command:cmake.launchTargetPath}",
             "type": "cortex-debug",
-            "servertype": "stlink",
+            "servertype": "jlink",
             "device": "STM32G431RB"
         },
         {
-            "name": "stm32g070",
+            "name": "stm32g070 without container",
             "cwd": "${workspaceRoot}",
             "request": "launch",
             "executable": "${command:cmake.launchTargetPath}",
             "type": "cortex-debug",
-            "servertype": "stlink",
+            "servertype": "jlink",
             "device": "STM32G070RB"
         }
     ]
