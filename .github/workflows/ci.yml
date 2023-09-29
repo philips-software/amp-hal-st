@@ -23,6 +23,7 @@ jobs:
           key: ${{ github.job }}-ubuntu-latest
           variant: sccache
       - uses: seanmiddleditch/gha-setup-ninja@16b940825621068d98711680b6c3ff92201f8fc0 # v3
+      - run: cat CMakePresets.json
       - uses: lukka/run-cmake@c2b72aff009141774c5a5fabe74ea46c8c04d9c4 # v10.6
         with:
           configurePreset: "host"
