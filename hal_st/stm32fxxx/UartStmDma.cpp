@@ -1,3 +1,5 @@
+
+
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
@@ -17,15 +19,24 @@ namespace hal
         }
     }
 
-    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-        : uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
+        : UartStmDma{ transmitStream, oneBasedIndex, uartTx, uartRx, hal::dummyPinStm, hal::dummyPinStm, config, false }
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
+        : UartStmDma{ transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config, true }
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
+        : uartIndex(oneBasedIndex - 1)
+        , uartTx(uartTx, PinConfigTypeStm::uartTx, oneBasedIndex)
+        , uartRx(uartRx, PinConfigTypeStm::uartRx, oneBasedIndex)
+        , uartRts(uartRts, PinConfigTypeStm::uartRts, oneBasedIndex)
+        , uartCts(uartCts, PinConfigTypeStm::uartCts, oneBasedIndex)
         , transmitDmaChannel{ transmitStream, PeripheralAddress(uartIndex), 1, [this]()
             {
                 TransferComplete();
             } }
-
     {
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
@@ -37,48 +48,12 @@ namespace hal
         uartHandle.Init.StopBits = USART_STOPBITS_1;
         uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
-        uartHandle.Init.HwFlowCtl = config.hwFlowControl;
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
-        uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
-#else
-        uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
-#endif
-        HAL_UART_Init(&uartHandle);
 
-        peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT;
-    }
+        if (hasFlowControl)
+            uartHandle.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+        else
+            uartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 
-    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
-        : uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
-        , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
-        , transmitDmaChannel{ transmitStream, &peripheralUart[uartIndex]->TDR, 1, [this]()
-            {
-                TransferComplete();
-            } }
-#else
-        , transmitDmaChannel{ transmitStream, &peripheralUart[uartIndex]->DR, 1, [this]()
-            {
-                TransferComplete();
-            } }
-#endif
-    {
-        RegisterInterrupt(config);
-        EnableClockUart(uartIndex);
-
-        UART_HandleTypeDef uartHandle = {};
-        uartHandle.Instance = peripheralUart[uartIndex];
-        uartHandle.Init.BaudRate = config.baudrate;
-        uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
-        uartHandle.Init.StopBits = USART_STOPBITS_1;
-        uartHandle.Init.Parity = config.parity;
-        uartHandle.Init.Mode = USART_MODE_TX_RX;
-        uartHandle.Init.HwFlowCtl = config.hwFlowControl;
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
@@ -121,10 +96,7 @@ namespace hal
 
     void UartStmDma::RegisterInterrupt(const Config& config)
     {
-        if (config.priority)
-            Register(peripheralUartIrq[uartIndex], *config.priority);
-        else
-            Register(peripheralUartIrq[uartIndex]);
+        Register(peripheralUartIrq[uartIndex], config.priority);
     }
 
     void UartStmDma::TransferComplete()

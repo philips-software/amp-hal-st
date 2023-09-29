@@ -8,20 +8,20 @@
 
 namespace hal
 {
+    namespace detail
+    {
+        struct SpiMasterStmDmaConfig
+        {
+            bool msbFirst{ true };
+            uint32_t baudRatePrescaler{ SPI_BAUDRATEPRESCALER_16 };
+        };
+    }
+
     class SpiMasterStmDma
         : public SpiMaster
     {
     public:
-        struct Config
-        {
-            constexpr Config()
-            {}
-
-            bool msbFirst = true;
-            uint32_t baudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-            infra::Optional<DmaChannelId> dmaChannelTx;
-            infra::Optional<DmaChannelId> dmaChannelRx;
-        };
+        using Config = detail::SpiMasterStmDmaConfig;
 
         SpiMasterStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
 

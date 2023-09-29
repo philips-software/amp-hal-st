@@ -4,7 +4,7 @@
 
 namespace hal
 {
-    SpiSlaveStmDma::SpiSlaveStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect, const Config& config)
+    SpiSlaveStmDma::SpiSlaveStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect)
         : spiInstance(oneBasedSpiIndex - 1)
         , clock(clock, PinConfigTypeStm::spiClock, oneBasedSpiIndex)
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)

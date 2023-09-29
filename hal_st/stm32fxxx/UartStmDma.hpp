@@ -5,29 +5,38 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include <cstdint>
+#include DEVICE_HEADER
 
 namespace hal
 {
+    namespace detail
+    {
+
+        struct UartStmDmaConfig
+        {
+            uint32_t baudrate{ 115200 };
+            uint32_t parity{ USART_PARITY_NONE };
+
+            hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
+        };
+    }
+
     class UartStmDma
         : public SerialCommunication
         , private InterruptHandler
     {
     public:
-        struct Config
-        {
-            constexpr Config()
-            {}
+        using Config = detail::UartStmDmaConfig;
 
-            uint32_t baudrate = 115200;
-            uint32_t hwFlowControl = UART_HWCONTROL_NONE;
-            uint32_t parity = USART_PARITY_NONE;
-            infra::Optional<InterruptPriority> priority;
-        };
-
-        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
         ~UartStmDma();
 
+    private:
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
+
+    public:
         virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         virtual void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
@@ -40,8 +49,8 @@ namespace hal
         uint8_t uartIndex;
         PeripheralPinStm uartTx;
         PeripheralPinStm uartRx;
-        infra::Optional<PeripheralPinStm> uartRts;
-        infra::Optional<PeripheralPinStm> uartCts;
+        PeripheralPinStm uartRts;
+        PeripheralPinStm uartCts;
 
         TransmitDmaChannel transmitDmaChannel;
 

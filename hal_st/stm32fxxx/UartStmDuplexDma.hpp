@@ -5,44 +5,35 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "infra/util/Optional.hpp"
 #include <atomic>
+#include <cstdint>
 
 namespace hal
 {
-    class UartStmDuplexDmaOptionalFlowControl
+    namespace detail
     {
-    protected:
-        UartStmDuplexDmaOptionalFlowControl(uint8_t aUartIndex, GpioPinStm* uartRts, GpioPinStm* uartCts);
-
-    private:
-        infra::Optional<PeripheralPinStm> uartRts;
-        infra::Optional<PeripheralPinStm> uartCts;
-    };
+        struct UartStmDuplexDmaConfig
+        {
+            uint32_t baudrate{ 115200 };
+            hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
+        };
+    }
 
     class UartStmDuplexDma
         : public SerialCommunication
         , private InterruptHandler
-        , private UartStmDuplexDmaOptionalFlowControl
     {
     public:
-        struct Config
-        {
-            uint32_t baudrate{ 115200 };
-            uint32_t hwFlowControl{ UART_HWCONTROL_NONE };
-            hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
-        };
+        using Config = detail::UartStmDuplexDmaConfig;
 
         template<std::size_t RxBufferSize>
         using WithRxBuffer = infra::WithStorage<UartStmDuplexDma, std::array<uint8_t, RxBufferSize>>;
 
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx);
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config);
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts);
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config);
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
 
     private:
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm* uartRts, GpioPinStm* uartCts, const Config& config);
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
 
     public:
         ~UartStmDuplexDma();
@@ -51,7 +42,6 @@ namespace hal
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
-        void Configure(const Config& config);
         void HalfReceiveComplete();
         void FullReceiveComplete();
         void ReceiveComplete(size_t currentPosition);
@@ -64,6 +54,8 @@ namespace hal
         uint8_t uartIndex;
         PeripheralPinStm uartTx;
         PeripheralPinStm uartRx;
+        PeripheralPinStm uartRts;
+        PeripheralPinStm uartCts;
 
         hal::TransmitDmaChannel transmitDmaChannel;
         hal::CircularReceiveDmaChannel receiveDmaChannel;
