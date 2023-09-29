@@ -329,7 +329,7 @@ namespace hal
             dma.ReleaseStream(dmaIndex, streamIndex);
     }
 
-    DmaStm::Stream::Stream(Stream&& other)
+    DmaStm::Stream::Stream(Stream&& other) noexcept
         : dma(other.dma)
         , dmaIndex(other.dmaIndex)
         , streamIndex(other.streamIndex)
