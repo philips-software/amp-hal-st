@@ -49,7 +49,7 @@
             "device": "STM32G070RB"
         },
         {
-            "name": "stm32wb55 target",
+            "name": "stm32wb55rg",
             "cwd": "${workspaceFolder}",
             "executable": "${command:cmake.launchTargetPath}",
             "request": "launch",

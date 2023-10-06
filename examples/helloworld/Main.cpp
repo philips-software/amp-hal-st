@@ -1,12 +1,7 @@
 #include "hal/interfaces/Gpio.hpp"
-#include "hal/interfaces/SerialCommunication.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
-#include "infra/event/EventDispatcher.hpp"
-#include "infra/event/QueueForOneReaderOneIrqWriter.hpp"
 #include "infra/timer/Timer.hpp"
-#include "infra/util/ByteRange.hpp"
-#include "infra/util/Optional.hpp"
 #include "services/tracer/GlobalTracer.hpp"
 #include "services/tracer/StreamWriterOnSerialCommunication.hpp"
 #include "services/tracer/Tracer.hpp"
@@ -15,7 +10,7 @@
 #include <array>
 #include <chrono>
 
-unsigned int hse_value = 8000000;
+unsigned int hse_value = 24'000'000;
 
 int main()
 {

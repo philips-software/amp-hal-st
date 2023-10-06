@@ -38,6 +38,7 @@ namespace hal
     public:
         ~UartStmDuplexDma();
 
+        // Implementation of SerialCommunication
         void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
@@ -47,6 +48,8 @@ namespace hal
         void ReceiveComplete(size_t currentPosition);
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
+
+        // Implementation of InterruptHandler
         void Invoke() override;
 
     private:

@@ -1,5 +1,3 @@
-
-
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
