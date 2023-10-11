@@ -41,6 +41,7 @@ struct Peripheral
 struct PeripheralGroup
 {
     std::string groupName;
+    std::string type;
     std::vector<Peripheral> peripherals;
 };
 
@@ -73,6 +74,13 @@ TableGenerator::TableGenerator(hal::FileSystem& fileSystem, const std::filesyste
     ReadCandidates(candidates);
 }
 
+std::string ToUpper(const std::string& s)
+{
+    std::string result(s.size(), ' ');
+    std::transform(s.begin(), s.end(), result.begin(), ::toupper);
+    return result;
+}
+
 void TableGenerator::Write(const std::filesystem::path& outputDirectory)
 {
     for (const auto& peripheralGroup : peripheralGroups)
@@ -89,7 +97,7 @@ void TableGenerator::Write(const std::filesystem::path& outputDirectory)
 
     std::unique_ptr<google::protobuf::io::ZeroCopyOutputStream> stream = std::make_unique<google::protobuf::io::OstreamOutputStream>(&std::cout);
     google::protobuf::io::Printer printer(stream.get(), '$', nullptr);
-    application::Entities formatter(true);
+    application::IncludeGuard formatter("include_guard_hpp");
 
     auto includesByHeader = std::make_shared<application::IncludesByHeader>();
     includesByHeader->Path("infra/util/MemoryRange.hpp");
@@ -98,25 +106,33 @@ void TableGenerator::Write(const std::filesystem::path& outputDirectory)
 
     auto includesBySource = std::make_shared<application::IncludesBySource>();
     includesBySource->Path("generated/stm32fxxx/PeripheralTable.hpp");
-    includesBySource->PathSystem("<array>");
-    includesBySource->PathSystem("<cstdlib>");
+    includesBySource->PathSystem("array");
+    includesBySource->PathSystem("cstdlib");
     formatter.Add(includesBySource);
 
     auto halNamespace = std::make_shared<application::Namespace>("hal");
+    formatter.Add(halNamespace);
 
     for (const auto& group : peripheralGroups)
     {
+        auto definitionName = "HAS_PERIPHERAL_" + ToUpper(group.groupName);
+        auto variableName = "peripheral" + group.groupName;
+
         if (group.peripherals.empty())
+            halNamespace->Add(std::make_shared<application::Undef>(definitionName));
+        else
         {
-             
+            halNamespace->Add(std::make_shared<application::Define>(definitionName));
+            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "Array", "constexpr std::array<unsigned int, 2>", "{{ }}"));
+            halNamespace->Add(std::make_shared<application::ExternVariable>(variableName, "const infra::MemoryRange<" + group.type + "* const>", "infra::ReinterpretCastMemoryRange<" + group.type + "* const>(infra::MakeRange(" + variableName + "Array)"));
         }
     }
 
-    std::cout << "============================" << std::endl;
+    printer.Print("============================");
     formatter.PrintHeader(printer);
-    std::cout << "============================" << std::endl;
+    printer.Print("============================");
     formatter.PrintSource(printer, "");
-    std::cout << "============================" << std::endl;
+    printer.Print("============================");
 }
 
 void TableGenerator::ReadCandidates(const std::vector<PeripheralCandidate>& candidates)
@@ -161,7 +177,7 @@ void TableGenerator::ReadCandidate(const PeripheralCandidate& candidate)
             return infra::Optional<Peripheral>();
         } };
 
-    peripheralGroups.push_back(PeripheralGroup{ candidate.name, Compact(navigator / mcu / ip) });
+    peripheralGroups.push_back(PeripheralGroup{ candidate.name, candidate.type, Compact(navigator / mcu / ip) });
 }
 
 std::string TableGenerator::Concatenate(const std::vector<std::string>& lines)
