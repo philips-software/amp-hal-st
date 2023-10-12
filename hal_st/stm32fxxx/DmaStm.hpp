@@ -185,6 +185,13 @@ namespace hal
         };
 
         template<class T>
+        class PeripheralStreamBase
+        {
+        public:
+            void SetPeripheralTransferSize(uint8_t peripheralTransferSize);
+        };
+
+        template<class T>
         class PeripheralTransmitStreamBase
         {
         public:
@@ -209,12 +216,14 @@ namespace hal
         };
 
         class PeripheralTransmitStream
-            : public PeripheralTransmitStreamBase<PeripheralTransmitStream>
+            : public PeripheralStreamBase<PeripheralTransmitStream>
+            , public PeripheralTransmitStreamBase<PeripheralTransmitStream>
         {
         public:
             PeripheralTransmitStream(TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
         private:
+            friend PeripheralStreamBase<PeripheralTransmitStream>;
             friend PeripheralTransmitStreamBase<PeripheralTransmitStream>;
 
             PeripheralStream peripheralStream;
@@ -222,12 +231,14 @@ namespace hal
         };
 
         class PeripheralReceiveStream
-            : public PeripheralReceiveStreamBase<PeripheralReceiveStream>
+            : public PeripheralStreamBase<PeripheralReceiveStream>
+            , public PeripheralReceiveStreamBase<PeripheralReceiveStream>
         {
         public:
             PeripheralReceiveStream(ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
         private:
+            friend PeripheralStreamBase<PeripheralReceiveStream>;
             friend PeripheralReceiveStreamBase<PeripheralReceiveStream>;
 
             PeripheralStream peripheralStream;
@@ -235,13 +246,15 @@ namespace hal
         };
 
         class PeripheralTransceiveStream
-            : public PeripheralTransmitStreamBase<PeripheralTransceiveStream>
+            : public PeripheralStreamBase<PeripheralTransceiveStream>
+            , public PeripheralTransmitStreamBase<PeripheralTransceiveStream>
             , public PeripheralReceiveStreamBase<PeripheralTransceiveStream>
         {
         public:
             PeripheralTransceiveStream(TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
         private:
+            friend PeripheralStreamBase<PeripheralTransceiveStream>;
             friend PeripheralTransmitStreamBase<PeripheralTransceiveStream>;
             friend PeripheralReceiveStreamBase<PeripheralTransceiveStream>;
 
@@ -301,12 +314,20 @@ namespace hal
         public:
             bool StopTransfer();
         };
+
+        template<class T>
+        class SetTransferSizeDmaChannelBase
+        {
+        public:
+            void SetPeripheralTransferSize(uint8_t peripheralTransferSize);
+        };
     }
 
     class TransmitDmaChannel
         : public detail::TransmitRangeDmaChannelBase<TransmitDmaChannel>
         , public detail::TransmitDummyDmaChannelBase<TransmitDmaChannel>
         , public detail::StopTransferDmaChannelBase<TransmitDmaChannel>
+        , public detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>
     {
     public:
         TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
@@ -315,6 +336,7 @@ namespace hal
         friend detail::TransmitRangeDmaChannelBase<TransmitDmaChannel>;
         friend detail::TransmitDummyDmaChannelBase<TransmitDmaChannel>;
         friend detail::StopTransferDmaChannelBase<TransmitDmaChannel>;
+        friend detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>;
 
         DmaStm::PeripheralTransmitStream peripheralStream;
         DmaStm::StreamInterruptHandler streamInterruptHandler;
@@ -323,6 +345,7 @@ namespace hal
     class CircularTransmitDmaChannel
         : public detail::TransmitRangeDmaChannelBase<CircularTransmitDmaChannel>
         , public detail::StopTransferDmaChannelBase<CircularTransmitDmaChannel>
+        , public detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>
     {
     public:
         CircularTransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
@@ -330,6 +353,7 @@ namespace hal
     private:
         friend detail::TransmitRangeDmaChannelBase<CircularTransmitDmaChannel>;
         friend detail::StopTransferDmaChannelBase<CircularTransmitDmaChannel>;
+        friend detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>;
 
         DmaStm::PeripheralTransmitStream peripheralStream;
         DmaStm::CircularStreamInterruptHandler circularStreamInterruptHandler;
@@ -339,6 +363,7 @@ namespace hal
         : public detail::ReceiveRangeDmaChannelBase<ReceiveDmaChannel>
         , public detail::ReceiveDummyDmaChannelBase<ReceiveDmaChannel>
         , public detail::StopTransferDmaChannelBase<ReceiveDmaChannel>
+        , public detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>
     {
 
     public:
@@ -348,6 +373,7 @@ namespace hal
         friend detail::ReceiveRangeDmaChannelBase<ReceiveDmaChannel>;
         friend detail::ReceiveDummyDmaChannelBase<ReceiveDmaChannel>;
         friend detail::StopTransferDmaChannelBase<ReceiveDmaChannel>;
+        friend detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>;
 
         DmaStm::PeripheralReceiveStream peripheralStream;
         DmaStm::StreamInterruptHandler streamInterruptHandler;
@@ -356,6 +382,7 @@ namespace hal
     class CircularReceiveDmaChannel
         : public detail::ReceiveRangeDmaChannelBase<CircularReceiveDmaChannel>
         , public detail::StopTransferDmaChannelBase<CircularReceiveDmaChannel>
+        , public detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>
     {
 
     public:
@@ -366,6 +393,7 @@ namespace hal
     private:
         friend detail::ReceiveRangeDmaChannelBase<CircularReceiveDmaChannel>;
         friend detail::StopTransferDmaChannelBase<CircularReceiveDmaChannel>;
+        friend detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>;
 
         DmaStm::PeripheralReceiveStream peripheralStream;
         DmaStm::CircularStreamInterruptHandler circularStreamInterruptHandler;
@@ -377,6 +405,7 @@ namespace hal
         , public detail::ReceiveRangeDmaChannelBase<TransceiverDmaChannel>
         , public detail::ReceiveDummyDmaChannelBase<TransceiverDmaChannel>
         , public detail::StopTransferDmaChannelBase<TransceiverDmaChannel>
+        , public detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>
     {
     public:
         TransceiverDmaChannel(DmaStm::TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
@@ -387,6 +416,7 @@ namespace hal
         friend detail::ReceiveRangeDmaChannelBase<TransceiverDmaChannel>;
         friend detail::ReceiveDummyDmaChannelBase<TransceiverDmaChannel>;
         friend detail::StopTransferDmaChannelBase<TransceiverDmaChannel>;
+        friend detail::SetTransferSizeDmaChannelBase<TransmitDmaChannel>;
 
         DmaStm::PeripheralTransceiveStream peripheralStream;
         DmaStm::StreamInterruptHandler streamInterruptHandler;
@@ -453,6 +483,13 @@ namespace hal
     {
         const auto& derived = *static_cast<const T*>(this);
         return data.size() - derived.BytesToTransfer();
+    }
+
+    template<class T>
+    void DmaStm::PeripheralStreamBase<T>::SetPeripheralTransferSize(uint8_t peripheralTransferSize)
+    {
+        const auto& derived = *static_cast<T*>(this);
+        derived.stream.SetPeripheralDataSize(peripheralTransferSize);
     }
 
     template<class T>
@@ -567,6 +604,14 @@ namespace hal
             auto& derived = *static_cast<T*>(this);
 
             return derived.peripheralStream.StopTransfer();
+        }
+
+        template<class T>
+        void SetTransferSizeDmaChannelBase<T>::SetPeripheralTransferSize(uint8_t peripheralTransferSize)
+        {
+            auto& derived = *static_cast<T*>(this);
+
+            derived.peripheralStream.SetPeripheralTransferSize(peripheralTransferSize);
         }
     }
 }
