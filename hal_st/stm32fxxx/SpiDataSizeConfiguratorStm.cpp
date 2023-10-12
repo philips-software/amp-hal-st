@@ -11,7 +11,7 @@ namespace hal
     void SpiDataSizeConfiguratorStm::ActivateConfiguration()
     {
         oldDataSize = spi.DataSize();
-        spi.SetDataSize(16);
+        spi.SetDataSize(dataSize);
     }
 
     void SpiDataSizeConfiguratorStm::DeactivateConfiguration()
