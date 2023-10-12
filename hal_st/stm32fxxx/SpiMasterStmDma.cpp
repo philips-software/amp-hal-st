@@ -128,6 +128,9 @@ namespace hal
         DisableDma();
         peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
 
+        tx.SetPeripheralTransferSize(dataSizeInBits <= 8 ? 1 : 2);
+        rx.SetPeripheralTransferSize(dataSizeInBits <= 8 ? 1 : 2);
+
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         assert(dataSizeInBits >= 4 && dataSizeInBits <= 16);
         peripheralSpi[spiInstance]->CR2 = (peripheralSpi[spiInstance]->CR2 & ~SPI_CR2_DS) | ((dataSizeInBits - 1) << POSITION_VAL(SPI_CR2_DS)) | (dataSizeInBits <= 8 ? SPI_CR2_FRXTH : 0);
@@ -137,6 +140,7 @@ namespace hal
 #endif
 
         peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
+
         EnableDma();
     }
 
