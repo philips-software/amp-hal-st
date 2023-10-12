@@ -111,9 +111,9 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-        while (peripheralUart[uartIndex]->ISR & USART_ISR_NE)
-#elif defined(STM32G0) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32G4) || defined(STM32WB)
+        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
+#elif defined(STM32G0)
         while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
 #else
         while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
