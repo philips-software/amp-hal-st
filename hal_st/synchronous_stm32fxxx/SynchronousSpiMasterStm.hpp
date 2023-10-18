@@ -17,6 +17,8 @@ namespace hal
             {}
 
             bool msbFirst = true;
+            bool polarityLow = true;
+            bool phase1st = true;
             uint32_t baudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
         };
 
