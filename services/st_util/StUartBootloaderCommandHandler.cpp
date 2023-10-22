@@ -65,7 +65,7 @@ namespace services
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, getCommand);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveRegularBufferAction>(), *this, commands);
+        commandActions.emplace_back(infra::InPlaceType<ReceiveBufferAction>(), *this, commands);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -94,7 +94,7 @@ namespace services
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, getVersion);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveRegularBufferAction>(), *this, internalRange, 3);
+        commandActions.emplace_back(infra::InPlaceType<ReceiveBufferAction>(), *this, internalRange, 3);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -116,7 +116,7 @@ namespace services
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, getId);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveRegularBufferAction>(), *this, internalRange);
+        commandActions.emplace_back(infra::InPlaceType<ReceiveBufferAction>(), *this, internalRange);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -141,7 +141,7 @@ namespace services
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, this->size);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveRegularBufferAction>(), *this, data, size);
+        commandActions.emplace_back(infra::InPlaceType<ReceiveBufferAction>(), *this, data, size);
 
         timeout.Start(commandTimeout, [this]()
             {
@@ -513,7 +513,7 @@ namespace services
         }
     }
 
-    void StUartBootloaderCommandHandler::ReceiveRegularBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
     {
             nBytes.Emplace(stream.Extract<uint8_t>() + 1);
             handler.queue.Consume(sizeof(uint8_t));

@@ -107,22 +107,12 @@ namespace services
             void DataReceived() override;
 
         protected:
-            virtual void ExtractNumberOfBytes(infra::ByteInputStream& stream) {};
+            virtual void ExtractNumberOfBytes(infra::ByteInputStream& stream);
 
         protected:
             infra::ByteRange& data;
             infra::Optional<std::size_t> nBytes;
             std::size_t nBytesReceived = 0;
-        };
-
-        class ReceiveRegularBufferAction
-            : public ReceiveBufferAction
-        {
-        public:
-            using ReceiveBufferAction::ReceiveBufferAction;
-
-        protected:
-            void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
         };
 
         class ReceiveSpecialBufferAction
@@ -191,7 +181,7 @@ namespace services
         std::array<uint8_t, 257> internalBuffer;
         infra::ByteRange internalRange;
 
-        std::deque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveRegularBufferAction, ReceiveSpecialBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>> commandActions;
+        std::deque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveBufferAction, ReceiveSpecialBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>> commandActions;
         infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
 
         infra::BigEndian<uint32_t> address;
