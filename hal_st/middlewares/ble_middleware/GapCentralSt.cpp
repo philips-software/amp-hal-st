@@ -177,7 +177,10 @@ namespace hal
     {
         discovering = false;
 
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+            {
+                observer.StateChanged(services::GapState::standby);
+            });
     }
 
     void GapCentralSt::MtuExchange()
