@@ -2,19 +2,18 @@
 #define SERVICES_ST_UTIL_ST_UART_BOOTLOADER_COMMAND_HANDLER_HPP
 
 #include "hal/interfaces/SerialCommunication.hpp"
-#include "infra/event/ClaimableResource.hpp"
 #include "infra/event/QueueForOneReaderOneIrqWriter.hpp"
-#include "infra/timer/Timer.hpp"
-#include "infra/util/BoundedString.hpp"
-#include "infra/util/ByteRange.hpp"
 #include "infra/stream/ByteInputStream.hpp"
+#include "infra/timer/Timer.hpp"
+#include "infra/util/AutoResetFunction.hpp"
+#include "infra/util/BoundedDeque.hpp"
+#include "infra/util/BoundedString.hpp"
+#include "infra/util/Endian.hpp"
 #include "infra/util/Optional.hpp"
-#include "services/st_util/StBootloaderCommandHandler.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
+#include "services/st_util/StBootloaderCommandHandler.hpp"
 #include <array>
 #include <cstdint>
-#include "infra/util/Endian.hpp"
-#include <deque>
 
 namespace services
 {
@@ -47,8 +46,8 @@ namespace services
     private:
         void InitializeUartBootloader();
         void ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
-        void TryHandleTransmitAction();
         void TryHandleNextAction();
+        void TryHandleTransmitAction();
         void SendData(infra::ConstByteRange data, uint8_t checksum);
         void SendData(infra::ConstByteRange data);
         void DataReceived();
@@ -102,7 +101,7 @@ namespace services
         {
         public:
             ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data);
-            ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytes);
+            ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytesTotal);
 
             void DataReceived() override;
 
@@ -111,7 +110,7 @@ namespace services
 
         protected:
             infra::ByteRange& data;
-            infra::Optional<std::size_t> nBytes;
+            infra::Optional<std::size_t> nBytesTotal;
             std::size_t nBytesReceived = 0;
         };
 
@@ -173,20 +172,15 @@ namespace services
         infra::AutoResetFunction<void()> onInitialized;
         infra::AutoResetFunction<void(infra::BoundedConstString reason)> onError;
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
-        infra::ClaimableResource resource;
-        infra::ClaimableResource::Claimer startClaimer{ resource };
-        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(StUartBootloaderCommandHandler*) + 3 * sizeof(infra::ConstByteRange)> claimer{ resource };
 
+        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveBufferAction, ReceiveSpecialBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>>::WithMaxSize<12> commandActions;
+        infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
         infra::TimerSingleShot timeout;
+
         std::array<uint8_t, 257> internalBuffer;
         infra::ByteRange internalRange;
-
-        std::deque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveBufferAction, ReceiveSpecialBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>> commandActions;
-        infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
-
         infra::BigEndian<uint32_t> address;
         infra::BigEndian<uint16_t> subcommand;
-        uint8_t size;
     };
 }
 

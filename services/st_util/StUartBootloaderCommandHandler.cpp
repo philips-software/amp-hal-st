@@ -1,11 +1,4 @@
 #include "services/st_util/StUartBootloaderCommandHandler.hpp"
-#include "infra/util/ByteRange.hpp"
-#include "infra/util/Endian.hpp"
-#include "infra/util/Function.hpp"
-#include "infra/util/MemoryRange.hpp"
-#include "infra/util/Optional.hpp"
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
 
 namespace
@@ -126,20 +119,20 @@ namespace services
 
         ExecuteCommand([this, onDone]()
             {
-                onDone((internalBuffer[0] << 8) | internalBuffer[1]);
+                uint16_t id = (internalBuffer[0] << 8) | internalBuffer[1];
+                onDone(id);
             });
     }
 
     void StUartBootloaderCommandHandler::ReadMemory(uint32_t address, uint8_t size, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
         this->address = address;
-        this->size = size - 1;
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, readMemory);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeByteRange(this->address));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->address));
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, this->size);
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, size - 1);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
         commandActions.emplace_back(infra::InPlaceType<ReceiveBufferAction>(), *this, data, size);
 
@@ -157,7 +150,7 @@ namespace services
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, go);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeByteRange(this->address));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->address));
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -174,14 +167,16 @@ namespace services
             std::abort();
 
         this->address = address;
+
         internalBuffer[0] = static_cast<uint8_t>(data.size() + 1);
         std::copy(data.begin(), data.begin() + data.size(), internalBuffer.begin() + 1);
+        internalRange = infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + internalBuffer[0]);
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, writeMemory);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeByteRange(this->address));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->address));
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + internalBuffer[0]));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, internalRange);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -214,10 +209,11 @@ namespace services
 
         internalBuffer[0] = static_cast<uint8_t>(pages.size() + 1);
         std::copy(pages.begin(), pages.begin() + pages.size(), internalBuffer.begin() + 1);
+        internalRange = infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + internalBuffer[0]);
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, erase);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + pages.size() + 1));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, internalRange);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -234,7 +230,7 @@ namespace services
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, extendedErase);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeByteRange(this->subcommand));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->subcommand));
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -253,10 +249,11 @@ namespace services
         internalBuffer[0] = static_cast<uint8_t>(nPages >> 8);
         internalBuffer[1] = static_cast<uint8_t>(nPages & 0xff) + 1;
         std::copy(pages.begin(), pages.begin() + pages.size(), internalBuffer.begin() + 2);
+        internalRange = infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + pages.size() + 2);
 
         commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, extendedErase);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + pages.size() + 2));
+        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, internalRange);
         commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
 
         timeout.Start(commandTimeout, [this]()
@@ -402,28 +399,20 @@ namespace services
 
     void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data, uint8_t checksum)
     {
-        claimer.Claim([this, data, checksum]()
+        serial.SendData(data, [this, checksum]()
             {
-                serial.SendData(data, [this, checksum]()
+                serial.SendData(infra::MakeConstByteRange(checksum), [this]()
                     {
-                        serial.SendData(infra::MakeByteRange(checksum), [this]()
-                            {
-                                claimer.Release();
-                                TryHandleTransmitAction();
-                            });
+                        TryHandleTransmitAction();
                     });
             });
     }
 
     void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data)
     {
-        claimer.Claim([this, data]()
+        serial.SendData(data, [this]()
             {
-                serial.SendData(data, [this]()
-                    {
-                        claimer.Release();
-                        TryHandleTransmitAction();
-                    });
+                TryHandleTransmitAction();
             });
     }
 
@@ -484,11 +473,11 @@ namespace services
         , data(data)
     {}
 
-    StUartBootloaderCommandHandler::ReceiveBufferAction::ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytes)
+    StUartBootloaderCommandHandler::ReceiveBufferAction::ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytesTotal)
         : StUartBootloaderCommandHandler::ReceiveAction(handler)
         , data(data)
     {
-        this->nBytes.Emplace(nBytes);
+        this->nBytesTotal.Emplace(nBytesTotal);
     }
 
     void StUartBootloaderCommandHandler::ReceiveBufferAction::DataReceived()
@@ -498,15 +487,15 @@ namespace services
 
         infra::ByteInputStream stream(handler.queue.ContiguousRange());
 
-        if (!nBytes)
+        if (!nBytesTotal)
             ExtractNumberOfBytes(stream);
 
-        auto buffer = infra::Head(infra::DiscardHead(data, nBytesReceived), std::min(stream.Available(), *nBytes - nBytesReceived));
+        auto buffer = infra::Head(infra::DiscardHead(data, nBytesReceived), std::min(stream.Available(), *nBytesTotal - nBytesReceived));
         stream >> buffer;
         handler.queue.Consume(buffer.size());
 
         nBytesReceived += buffer.size();
-        if (nBytesReceived == nBytes)
+        if (nBytesReceived == nBytesTotal)
         {
             data.shrink_from_back_to(nBytesReceived);
             handler.TryHandleNextAction();
@@ -515,14 +504,14 @@ namespace services
 
     void StUartBootloaderCommandHandler::ReceiveBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
     {
-            nBytes.Emplace(stream.Extract<uint8_t>() + 1);
-            handler.queue.Consume(sizeof(uint8_t));
+        nBytesTotal.Emplace(stream.Extract<uint8_t>() + 1);
+        handler.queue.Consume(sizeof(uint8_t));
     }
 
     void StUartBootloaderCommandHandler::ReceiveSpecialBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
     {
-            nBytes.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
-            handler.queue.Consume(sizeof(uint16_t));
+        nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
+        handler.queue.Consume(sizeof(uint16_t));
     }
 
     StUartBootloaderCommandHandler::TransmitRawAction::TransmitRawAction(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
