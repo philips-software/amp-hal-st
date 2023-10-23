@@ -212,14 +212,12 @@ namespace hal
     {
         services::GapAdvertisingReport discoveredDevice;
 
+        auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
+        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
         discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
         discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
-        discoveredDevice.rssi = -static_cast<int8_t>(advertisingReport.RSSI);
-        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
-
-        auto advertisementData = reinterpret_cast<const uint8_t*>(&advertisingReport.Length_Data) + 1;
-
         discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
+        discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer)
             {
