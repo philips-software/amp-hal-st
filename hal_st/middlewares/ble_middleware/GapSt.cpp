@@ -123,9 +123,6 @@ namespace hal
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
 
         SVCCTL_Init();
-
-        hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
     uint16_t GapSt::EffectiveMaxAttMtuSize() const
