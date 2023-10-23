@@ -387,7 +387,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x04});
+    ExpectSendData({ 0x00, 0x04 });
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -416,7 +416,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x04});
+    ExpectSendData({ 0x00, 0x04 });
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -424,7 +424,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData)
     ExpectReceiveData({ 0x00, 0x00 });
     ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
 
-    EXPECT_EQ((std::array<uint8_t, 4>{  }), rxDataBuffer);
+    EXPECT_EQ((std::array<uint8_t, 4>{}), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
@@ -445,7 +445,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxStatus)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x04});
+    ExpectSendData({ 0x00, 0x04 });
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -454,7 +454,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxStatus)
     ExpectReceiveData({ 0x00, 0x00 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
-    EXPECT_EQ((std::array<uint8_t, 4>{  }), rxStatusBuffer);
+    EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
 }
 
 TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData_rxStatus)
@@ -474,7 +474,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData_rxStatus)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x04});
+    ExpectSendData({ 0x00, 0x04 });
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -482,8 +482,8 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData_rxStatus)
     ExpectReceiveData({ 0x00, 0x00 });
     ExpectReceiveData({ 0x00, 0x00 });
 
-    EXPECT_EQ((std::array<uint8_t, 4>{  }), rxDataBuffer);
-    EXPECT_EQ((std::array<uint8_t, 4>{  }), rxStatusBuffer);
+    EXPECT_EQ((std::array<uint8_t, 4>{}), rxDataBuffer);
+    EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
 }
 
 TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_txData)
@@ -502,7 +502,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_txData)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x00});
+    ExpectSendData({ 0x00, 0x00 });
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
 
@@ -544,11 +544,11 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x04});
+    ExpectSendData({ 0x00, 0x04 });
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({0x00, 0x04});
+    ExpectSendData({ 0x00, 0x04 });
     ExpectSendData({ 0x05, 0x06, 0x07, 0x08 }, 0x0c);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
