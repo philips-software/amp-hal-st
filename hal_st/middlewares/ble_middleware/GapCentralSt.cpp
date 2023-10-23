@@ -165,7 +165,7 @@ namespace hal
 
         auto phyUpdateCompleteEvent = *reinterpret_cast<hci_le_phy_update_complete_event_rp0*>(metaEvent->data);
 
-        really_assert(phyUpdateCompleteEvent.Status == BLE_STATUS_SUCCESS);
+        really_assert(phyUpdateCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
             {
@@ -191,7 +191,7 @@ namespace hal
         };
 
         auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
-        really_assert(status == BLE_STATUS_SUCCESS);
+        assert(status == BLE_STATUS_SUCCESS);
     }
 
     void GapCentralSt::SetDataLength()
@@ -202,13 +202,13 @@ namespace hal
         };
 
         auto status = hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-        really_assert(status == BLE_STATUS_SUCCESS);
+        assert(status == BLE_STATUS_SUCCESS);
     }
 
     void GapCentralSt::SetPhy() const
     {
         auto status = hci_le_set_phy(this->connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0);
-        really_assert(status == BLE_STATUS_SUCCESS);
+        assert(status == BLE_STATUS_SUCCESS);
     }
 
     void GapCentralSt::HandleAdvertisingReport(const Advertising_Report_t& advertisingReport)
