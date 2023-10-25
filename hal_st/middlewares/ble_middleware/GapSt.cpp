@@ -123,9 +123,6 @@ namespace hal
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
 
         SVCCTL_Init();
-
-        hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
     uint16_t GapSt::EffectiveMaxAttMtuSize() const
@@ -225,27 +222,31 @@ namespace hal
         auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
 
         really_assert(disconnectionCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-        really_assert(disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
 
-        connectionContext.connectionHandle = GapSt::invalidConnection;
+        if (disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+            connectionContext.connectionHandle = GapSt::invalidConnection;
     }
 
     void GapSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
 
-        really_assert(connectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
-
-        SetConnectionContext(connectionCompleteEvent.Connection_Handle, connectionCompleteEvent.Peer_Address_Type, &connectionCompleteEvent.Peer_Address[0]);
+        if (connectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+        {
+            SetConnectionContext(connectionCompleteEvent.Connection_Handle, connectionCompleteEvent.Peer_Address_Type, &connectionCompleteEvent.Peer_Address[0]);
+            maxAttMtu = defaultMaxAttMtuSize;
+        }
     }
 
     void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
-        auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
+        auto connectionCompleteEvt = *reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
-        SetConnectionContext(connectionCompleteEvt->Connection_Handle, connectionCompleteEvt->Peer_Address_Type, &connectionCompleteEvt->Peer_Address[0]);
-
-        maxAttMtu = defaultMaxAttMtuSize;
+        if (connectionCompleteEvt.Status == BLE_STATUS_SUCCESS)
+        {
+            SetConnectionContext(connectionCompleteEvt.Connection_Handle, connectionCompleteEvt.Peer_Address_Type, &connectionCompleteEvt.Peer_Address[0]);
+            maxAttMtu = defaultMaxAttMtuSize;
+        }
     }
 
     void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
