@@ -180,5 +180,8 @@ namespace hal
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
         SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
+
+        hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
+        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 }

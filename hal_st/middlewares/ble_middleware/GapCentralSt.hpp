@@ -3,6 +3,7 @@
 
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "infra/util/AutoResetFunction.hpp"
 
 namespace hal
 {
@@ -35,13 +36,11 @@ namespace hal
 
     private:
         void HandleGapDiscoveryProcedureEvent();
-        void HandleGapDirectConnectionEstablishmentEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
-        void SetConnectionInterval() const;
-        void SetPhy();
-        void SetDataLength() const;
-        void MtuExchange() const;
+        void SetPhy() const;
+        void SetDataLength();
+        void MtuExchange();
         void Initialize(const GapService& gapService);
 
     private:
@@ -60,14 +59,16 @@ namespace hal
 
         // Discovery parameters
         const uint8_t filterDuplicatesEnabled = 1;
-        const uint8_t acceptAllParameters = 1;
+        const uint8_t acceptParameters = 1;
+        const uint8_t rejectParameters = 0;
 
         // HCI status
         const uint8_t commandDisallowed = 0x0c;
 
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
-        infra::Function<void(services::GapCentralObserver&)> onConnection;
+        infra::AutoResetFunction<void()> onMtuExchangeDone;
+        infra::AutoResetFunction<void()> onDataLengthChanged;
     };
 }
 

@@ -206,18 +206,16 @@ namespace hal
     {
         auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
 
-        really_assert(connectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
-
-        connectionHandle = connectionCompleteEvent.Connection_Handle;
+        if (connectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+            connectionHandle = connectionCompleteEvent.Connection_Handle;
     }
 
     void GattClientSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         auto enhancedConnectionCompleteEvent = *reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
-        really_assert(enhancedConnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
-
-        connectionHandle = enhancedConnectionCompleteEvent.Connection_Handle;
+        if (enhancedConnectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+            connectionHandle = enhancedConnectionCompleteEvent.Connection_Handle;
     }
 
     void GattClientSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
@@ -225,9 +223,9 @@ namespace hal
         auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
 
         really_assert(disconnectionCompleteEvent.Connection_Handle == connectionHandle);
-        really_assert(disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS);
 
-        connectionHandle = GattClientSt::invalidConnection;
+        if (disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+            connectionHandle = GattClientSt::invalidConnection;
     }
 
     void GattClientSt::HandleAttReadResponse(evt_blecore_aci* vendorEvent)
