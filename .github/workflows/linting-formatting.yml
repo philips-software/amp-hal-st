@@ -20,7 +20,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           persist-credentials: false
       - uses: DoozyX/clang-format-lint-action@a83a8fb7d371f66da7dd1c4f33a193023899494b # v0.16
@@ -28,7 +28,7 @@ jobs:
           clangFormatVersion: 15
           inplace: true
           extensions: "cpp,hpp"
-      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
+      - uses: reviewdog/action-suggester@94877e550e6b522dc1d21231974b645ff2f084ce # v1.8.0
         with:
           tool_name: clang-format
           filter_mode: diff_context
@@ -38,23 +38,23 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@0d014ffdef3307ca4a4cd1ddf482fc4f05733d7c # v7.0.4
+        uses: oxsecurity/megalinter@fda6ac3a38be0e969820709ac16e442464e5a035 # v7.3.0
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Linter artifacts
         if: ${{ success() }} || ${{ failure() }}
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: linter
           path: |
             megalinter-reports
-      - uses: reviewdog/action-suggester@8f83d27e749053b2029600995c115026a010408e # v1.6.0
+      - uses: reviewdog/action-suggester@94877e550e6b522dc1d21231974b645ff2f084ce # v1.8.0
         with:
           tool_name: MegaLinter
           filter_mode: diff_context

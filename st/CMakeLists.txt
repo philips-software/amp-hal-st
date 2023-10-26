@@ -51,7 +51,6 @@ target_compile_definitions(st.hal_driver_stm32wbxx PUBLIC
 
 add_library(st.hal_driver INTERFACE)
 emil_build_for(st.hal_driver TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_STANDALONE)
-install(TARGETS st.hal_driver EXPORT halStTargets)
 
 if (TARGET_MCU_VENDOR STREQUAL st)
     target_link_libraries(st.hal_driver INTERFACE

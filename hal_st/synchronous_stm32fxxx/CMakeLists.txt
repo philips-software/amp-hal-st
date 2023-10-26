@@ -1,6 +1,5 @@
 add_library(hal_st.synchronous_stm32fxxx STATIC)
 emil_build_for(hal_st.synchronous_stm32fxxx TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_STANDALONE)
-install(TARGETS hal_st.synchronous_stm32fxxx EXPORT halStTargets)
 
 target_include_directories(hal_st.synchronous_stm32fxxx PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"

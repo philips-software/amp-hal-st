@@ -1,31 +1,45 @@
 {
   "version": 3,
-  "cmakeMinimumRequired": {
-      "major": 3,
-      "minor": 24,
-      "patch": 0
-  },
   "configurePresets": [
     {
       "name": "defaults",
       "hidden": true,
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "generator": "Ninja Multi-Config",
+      "installDir": "${sourceDir}/install",
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
         "HALST_BUILD_EXAMPLES": true
       }
     },
     {
       "name": "host",
-      "displayName": "host",
-      "description": "Build required tools for host",
-      "inherits": "defaults"
+      "displayName": "Configuration for Host Tooling and Tests",
+      "inherits": "defaults",
+      "cacheVariables": {
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
+      },
+      "generator": "Ninja Multi-Config"
+    },
+    {
+      "name": "host-single-Debug",
+      "displayName": "Configuration for Host Tooling and Tests, Single Config Generator, Debug",
+      "inherits": "defaults",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "host-single-MinSizeRel",
+      "displayName": "Configuration for Host Tooling and Tests, Single Config Generator, MinSizeRel",
+      "inherits": "defaults",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "MinSizeRel"
+      }
     },
     {
       "name": "stm32",
       "hidden": true,
       "inherits": "defaults",
+      "generator": "Ninja Multi-Config",
       "environment": {
         "CMAKE_TOOLCHAIN_FILE": ""
       },
@@ -124,9 +138,31 @@
   ],
   "buildPresets": [
     {
+      "name": "host-Debug",
+      "configuration": "Debug",
+      "configurePreset": "host"
+    },
+    {
+      "name": "host-Debug-WithPackage",
+      "configuration": "Debug",
+      "configurePreset": "host",
+      "targets": ["all", "package"]
+    },
+    {
       "name": "host-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "host"
+    },
+    {
+      "name": "host-single-Debug",
+      "configuration": "Debug",
+      "configurePreset": "host-single-Debug"
+    },
+    {
+      "name": "release-package",
+      "configuration": "MinSizeRel",
+      "configurePreset": "host-single-MinSizeRel",
+      "targets": ["package"]
     },
     {
       "name": "stm32wb55-RelWithDebInfo",
@@ -167,6 +203,31 @@
       "name": "stm32f767-Debug",
       "configuration": "Debug",
       "configurePreset": "stm32f767"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "defaults",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "host",
+      "configurePreset": "host",
+      "configuration": "Debug",
+      "inherits": "defaults"
+    },
+    {
+      "name": "host-single-Debug",
+      "configurePreset": "host-single-Debug",
+      "configuration": "Debug",
+      "inherits": "defaults"
     }
   ]
 }

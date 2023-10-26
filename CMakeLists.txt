@@ -19,7 +19,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        d8b89886d0c903199821f133f0f0c511b8bef04f # Unreleased
+        GIT_TAG        2f5b81492e511ebe441b9811ef08cf3c96c3a058 # Unreleased
     )
 
     FetchContent_MakeAvailable(emil)
@@ -44,6 +44,7 @@ add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
 add_subdirectory(integration_test)
+add_subdirectory(services)
 add_subdirectory(examples)
 
 emil_clangformat_directories(hal_st DIRECTORIES .)

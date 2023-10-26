@@ -2,16 +2,8 @@
 #define HAL_ST_GAP_CENTRAL_ST_HPP
 
 #include "ble/ble.h"
-#include "ble/svc/Inc/svc_ctl.h"
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
-#include "hci_tl.h"
-#include "infra/util/BoundedString.hpp"
-#include "infra/util/BoundedVector.hpp"
-#include "infra/util/ProxyCreator.hpp"
-#include "services/ble/BondStorageSynchronizer.hpp"
-#include "services/ble/Gap.hpp"
-#include "services/ble/Gatt.hpp"
-#include "shci.h"
+#include "infra/util/AutoResetFunction.hpp"
 
 namespace hal
 {
@@ -20,38 +12,39 @@ namespace hal
         , public GapSt
     {
     public:
-        GapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, uint32_t* bleBondsStorage);
+        GapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
 
         // Implementation of services::GapCentral
-        virtual void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
-        virtual void Disconnect() override;
-        virtual void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
-        virtual void StartDeviceDiscovery() override;
-        virtual void StopDeviceDiscovery() override;
+        void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void Disconnect() override;
+        void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void StartDeviceDiscovery() override;
+        void StopDeviceDiscovery() override;
+
+        // Implementation of GapPairing
+        void AllowPairing(bool allow) override;
 
     protected:
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
         void HandleGapDiscoveryProcedureEvent();
-        void HandleGapDirectConnectionEstablishmentEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
-        void SetConnectionInterval(uint16_t connectionInterval, uint16_t slaveLatency, uint16_t timeoutMultiplier);
-        void DataLengthUpdate();
+        void SetPhy() const;
+        void SetDataLength();
+        void MtuExchange();
         void Initialize(const GapService& gapService);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
-
-        const uint16_t transmissionOctets = 251;
-        const uint16_t transmissionTime = 2120;
 
         // Create connection parameters
         const uint16_t leScanInterval = 0x320;
@@ -66,10 +59,16 @@ namespace hal
 
         // Discovery parameters
         const uint8_t filterDuplicatesEnabled = 1;
-        const uint8_t acceptAllParameters = 1;
+        const uint8_t acceptParameters = 1;
+        const uint8_t rejectParameters = 0;
+
+        // HCI status
+        const uint8_t commandDisallowed = 0x0c;
 
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
+        infra::AutoResetFunction<void()> onMtuExchangeDone;
+        infra::AutoResetFunction<void()> onDataLengthChanged;
     };
 }
 

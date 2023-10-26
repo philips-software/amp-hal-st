@@ -17,8 +17,8 @@ namespace hal
         spiHandle.Init.Mode = SPI_MODE_MASTER;
         spiHandle.Init.Direction = SPI_DIRECTION_2LINES;
         spiHandle.Init.DataSize = SPI_DATASIZE_8BIT;
-        spiHandle.Init.CLKPolarity = SPI_POLARITY_LOW;
-        spiHandle.Init.CLKPhase = SPI_PHASE_1EDGE;
+        spiHandle.Init.CLKPolarity = config.polarityLow ? SPI_POLARITY_LOW : SPI_POLARITY_HIGH;
+        spiHandle.Init.CLKPhase = config.phase1st ? SPI_PHASE_1EDGE : SPI_PHASE_2EDGE;
         spiHandle.Init.NSS = SPI_NSS_SOFT;
         spiHandle.Init.BaudRatePrescaler = config.baudRatePrescaler;
         spiHandle.Init.FirstBit = config.msbFirst ? SPI_FIRSTBIT_MSB : SPI_FIRSTBIT_LSB;
