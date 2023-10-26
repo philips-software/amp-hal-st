@@ -45,11 +45,11 @@ namespace services
         void AddCommand(Args&&... args);
 
         void ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
-        void TryHandleNextAction();
         void TryHandleTransmitAction();
+        void TryHandleDataReceived();
+        void TryHandleNextAction();
         void SendData(infra::ConstByteRange data, uint8_t checksum);
         void SendData(infra::ConstByteRange data);
-        void DataReceived();
         void SetCommandTimeout(infra::BoundedConstString reason);
         void OnError(infra::BoundedConstString reason);
 

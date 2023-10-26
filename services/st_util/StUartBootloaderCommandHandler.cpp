@@ -36,7 +36,7 @@ namespace services
         , onError(onError)
         , queue([this]()
               {
-                  DataReceived();
+                  TryHandleDataReceived();
               })
     {
         serial.ReceiveData([this](auto data)
@@ -310,6 +310,12 @@ namespace services
         }
     }
 
+    void StUartBootloaderCommandHandler::TryHandleDataReceived()
+    {
+        if (!queue.Empty())
+            commandActions.front()->DataReceived();
+    }
+
     void StUartBootloaderCommandHandler::TryHandleNextAction()
     {
         commandActions.pop_front();
@@ -322,7 +328,7 @@ namespace services
         }
 
         if (commandActions.front()->GetActionType() == ActionType::receive)
-            commandActions.front()->DataReceived();
+            TryHandleDataReceived();
         else
             TryHandleTransmitAction();
     }
@@ -344,12 +350,6 @@ namespace services
             {
                 TryHandleTransmitAction();
             });
-    }
-
-    void StUartBootloaderCommandHandler::DataReceived()
-    {
-        if (!commandActions.empty())
-            commandActions.front()->DataReceived();
     }
 
     void StUartBootloaderCommandHandler::SetCommandTimeout(infra::BoundedConstString reason)
@@ -421,9 +421,6 @@ namespace services
 
     void StUartBootloaderCommandHandler::ReceiveBufferAction::DataReceived()
     {
-        if (handler.queue.Empty())
-            return;
-
         infra::ByteInputStream stream(handler.queue.ContiguousRange());
 
         if (!nBytesTotal)
