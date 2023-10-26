@@ -51,6 +51,7 @@ namespace services
         void SendData(infra::ConstByteRange data, uint8_t checksum);
         void SendData(infra::ConstByteRange data);
         void DataReceived();
+        void SetCommandTimeout(infra::BoundedConstString reason);
         void OnError(infra::BoundedConstString reason);
 
     private:
@@ -106,7 +107,7 @@ namespace services
             void DataReceived() override;
 
         protected:
-            virtual void ExtractNumberOfBytes(infra::ByteInputStream& stream);
+            virtual void ExtractNumberOfBytes(infra::ByteInputStream& stream) = 0;
 
         protected:
             infra::ByteRange& data;
@@ -114,7 +115,17 @@ namespace services
             std::size_t nBytesReceived = 0;
         };
 
-        class ReceiveSpecialBufferAction
+        class ReceiveSmallBufferAction
+            : public ReceiveBufferAction
+        {
+        public:
+            using ReceiveBufferAction::ReceiveBufferAction;
+
+        protected:
+            void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
+        };
+
+        class ReceiveBigBufferAction
             : public ReceiveBufferAction
         {
         public:
@@ -173,8 +184,9 @@ namespace services
         infra::AutoResetFunction<void(infra::BoundedConstString reason)> onError;
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
 
-        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveBufferAction, ReceiveSpecialBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>>::WithMaxSize<12> commandActions;
+        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveSmallBufferAction, ReceiveBigBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>>::WithMaxSize<12> commandActions;
         infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
+        infra::BoundedString::WithStorage<46> timeoutReason;
         infra::TimerSingleShot timeout;
 
         std::array<uint8_t, 257> internalBuffer;
