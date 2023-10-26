@@ -1,4 +1,5 @@
 #include "services/st_util/StUartBootloaderCommandHandler.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include <cstdint>
 
 namespace
@@ -53,13 +54,12 @@ namespace services
 
     void StUartBootloaderCommandHandler::GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
-        if (commands.size() < 15)
-            std::abort();
+        really_assert(commands.size() >= 15);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, getCommand);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveSmallBufferAction>(), *this, commands);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(getCommand);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<ReceiveSmallBufferAction>(commands);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout getting commands");
         ExecuteCommand([this, onDone, &commands]()
@@ -71,7 +71,7 @@ namespace services
                     commands[i] = commands[i + 1];
 
                 commands.back() = 0;
-                commands = infra::DiscardTail(commands, 1);
+                commands.pop_back();
 
                 onDone(major, minor);
             });
@@ -81,10 +81,10 @@ namespace services
     {
         internalRange = infra::MakeByteRange(internalBuffer);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, getVersion);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveSmallBufferAction>(), *this, internalRange, 3);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(getVersion);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<ReceiveSmallBufferAction>(internalRange, 3);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout getting version");
         ExecuteCommand([this, onDone]()
@@ -99,10 +99,10 @@ namespace services
     {
         internalRange = infra::MakeByteRange(internalBuffer);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, getId);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveSmallBufferAction>(), *this, internalRange);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(getId);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<ReceiveSmallBufferAction>(internalRange);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout getting id");
         ExecuteCommand([this, onDone]()
@@ -116,13 +116,13 @@ namespace services
     {
         this->address = address;
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, readMemory);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->address));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, size - 1);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveSmallBufferAction>(), *this, data, size);
+        AddCommand<TransmitWithTwosComplementChecksum>(readMemory);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(infra::MakeConstByteRange(this->address));
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithTwosComplementChecksum>(size - 1);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<ReceiveSmallBufferAction>(data, size);
 
         SetCommandTimeout("Timeout reading memory");
         ExecuteCommand(onDone);
@@ -132,10 +132,10 @@ namespace services
     {
         this->address = address;
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, go);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->address));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(go);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(infra::MakeConstByteRange(this->address));
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout go");
         ExecuteCommand(onDone);
@@ -143,8 +143,7 @@ namespace services
 
     void StUartBootloaderCommandHandler::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
-        if (data.size() > 256)
-            std::abort();
+        really_assert(data.size() <= 256);
 
         this->address = address;
 
@@ -152,23 +151,25 @@ namespace services
         std::copy(data.begin(), data.begin() + data.size(), internalBuffer.begin() + 1);
         internalRange = infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + internalBuffer[0]);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, writeMemory);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->address));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, internalRange);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(writeMemory);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(infra::MakeConstByteRange(this->address));
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(internalRange);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout writing memory");
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::Erase(uint8_t subcommand, const infra::Function<void()>& onDone)
+    void StUartBootloaderCommandHandler::Erase(const infra::Function<void()>& onDone)
     {
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, erase);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, subcommand);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        constexpr uint8_t globalEraseSubCommand = 0xff;
+
+        AddCommand<TransmitWithTwosComplementChecksum>(erase);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithTwosComplementChecksum>(globalEraseSubCommand);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout erasing memory");
         ExecuteCommand(onDone);
@@ -176,51 +177,47 @@ namespace services
 
     void StUartBootloaderCommandHandler::Erase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
-        if (pages.size() > 256)
-            std::abort();
+        really_assert(pages.size() <= 256);
 
         internalBuffer[0] = static_cast<uint8_t>(pages.size() + 1);
         std::copy(pages.begin(), pages.begin() + pages.size(), internalBuffer.begin() + 1);
         internalRange = infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + internalBuffer[0]);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, erase);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, internalRange);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(erase);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(internalRange);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout erasing memory");
         ExecuteCommand(onDone);
     }
 
-    // enum class instead of uint16_t subcommand
-    void StUartBootloaderCommandHandler::ExtendedErase(uint16_t subcommand, const infra::Function<void()>& onDone)
+    void StUartBootloaderCommandHandler::ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone)
     {
-        this->subcommand = subcommand;
+        this->subcommand = static_cast<uint16_t>(subcommand);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, extendedErase);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeConstByteRange(this->subcommand));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(extendedErase);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(infra::MakeConstByteRange(this->subcommand));
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout extended erasing memory");
         ExecuteCommand(onDone);
     }
 
-    // uint16_t instead of uint8_t nPages
-    void StUartBootloaderCommandHandler::ExtendedErase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone)
+    void StUartBootloaderCommandHandler::ExtendedErase(uint16_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
-        if (pages.size() > 256)
-            std::abort();
+        really_assert(pages.size() <= 256);
 
         internalBuffer[0] = static_cast<uint8_t>(nPages >> 8);
         internalBuffer[1] = static_cast<uint8_t>(nPages & 0xff) + 1;
         std::copy(pages.begin(), pages.begin() + pages.size(), internalBuffer.begin() + 2);
         internalRange = infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + pages.size() + 2);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, extendedErase);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, internalRange);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitWithTwosComplementChecksum>(extendedErase);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(internalRange);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout extended erasing memory");
         ExecuteCommand(onDone);
@@ -233,16 +230,16 @@ namespace services
         internalBuffer[0] = static_cast<uint8_t>(txData.size() >> 8);
         internalBuffer[1] = static_cast<uint8_t>(txData.size() & 0xff);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, special);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeByteRange(this->subcommand));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitRawAction>(), *this, infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + 2));
+        AddCommand<TransmitWithTwosComplementChecksum>(special);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(infra::MakeByteRange(this->subcommand));
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitRawAction>(infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + 2));
         if (!txData.empty())
-            commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, txData);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveBigBufferAction>(), *this, rxData);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveBigBufferAction>(), *this, rxStatus);
+            AddCommand<TransmitWithChecksumAction>(txData);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<ReceiveBigBufferAction>(rxData);
+        AddCommand<ReceiveBigBufferAction>(rxStatus);
 
         SetCommandTimeout("Timeout special command");
         ExecuteCommand(onDone);
@@ -257,60 +254,40 @@ namespace services
         internalBuffer[2] = static_cast<uint8_t>(txData2.size() >> 8);
         internalBuffer[3] = static_cast<uint8_t>(txData2.size() & 0xff);
 
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithTwosComplementChecksum>(), *this, extendedSpecial);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, infra::MakeByteRange(this->subcommand));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitRawAction>(), *this, infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + 2));
+        AddCommand<TransmitWithTwosComplementChecksum>(extendedSpecial);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitWithChecksumAction>(infra::MakeByteRange(this->subcommand));
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitRawAction>(infra::MakeRange(internalBuffer.begin(), internalBuffer.begin() + 2));
         if (!txData1.empty())
-            commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, txData1);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<TransmitRawAction>(), *this, infra::MakeRange(internalBuffer.begin() + 2, internalBuffer.begin() + 4));
+            AddCommand<TransmitWithChecksumAction>(txData1);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<TransmitRawAction>(infra::MakeRange(internalBuffer.begin() + 2, internalBuffer.begin() + 4));
         if (!txData2.empty())
-            commandActions.emplace_back(infra::InPlaceType<TransmitWithChecksumAction>(), *this, txData2);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
-        commandActions.emplace_back(infra::InPlaceType<ReceiveBigBufferAction>(), *this, rxData);
+            AddCommand<TransmitWithChecksumAction>(txData2);
+        AddCommand<ReceiveAckAction>();
+        AddCommand<ReceiveBigBufferAction>(rxData);
 
         SetCommandTimeout("Timeout extended special command");
         ExecuteCommand(onDone);
     }
 
-    // Get rid of the aborts below, and remove the functions from the template
-    void StUartBootloaderCommandHandler::WriteProtect(infra::ConstByteRange sectors, const infra::Function<void()>& onDone)
-    {
-        std::abort();
-    }
-
-    void StUartBootloaderCommandHandler::WriteUnprotect(const infra::Function<void()>& onDone)
-    {
-        std::abort();
-    }
-
-    void StUartBootloaderCommandHandler::ReadoutProtect(const infra::Function<void()>& onDone)
-    {
-        std::abort();
-    }
-
-    void StUartBootloaderCommandHandler::ReadoutUnprotect(const infra::Function<void()>& onDone)
-    {
-        std::abort();
-    }
-
-    void StUartBootloaderCommandHandler::GetChecksum(uint32_t address, uint32_t memAreaSize, uint32_t crcPolinomial, uint32_t crcInitialization, const infra::Function<void(uint32_t crc, uint8_t checksum)>& onDone)
-    {
-        std::abort();
-    }
-
     void StUartBootloaderCommandHandler::InitializeUartBootloader()
     {
-        commandActions.emplace_back(infra::InPlaceType<TransmitRawAction>(), *this, infra::MakeByteRange(uartInitializationData));
-        commandActions.emplace_back(infra::InPlaceType<ReceiveAckAction>(), *this);
+        AddCommand<TransmitRawAction>(infra::MakeByteRange(uartInitializationData));
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout waiting for bootloader initialization");
         ExecuteCommand([this]()
             {
                 onInitialized();
             });
+    }
+
+    template<class T, class... Args>
+    void StUartBootloaderCommandHandler::AddCommand(Args&&... args)
+    {
+        commandActions.emplace_back(infra::InPlaceType<T>(), *this, std::forward<Args>(args)...);
     }
 
     void StUartBootloaderCommandHandler::ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
@@ -388,7 +365,7 @@ namespace services
     {
         timeout.Cancel();
         serial.ReceiveData([](auto data) {});
-        if (onError)
+        if (onError != nullptr)
             onError(reason);
     }
 

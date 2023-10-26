@@ -5,6 +5,13 @@
 
 namespace services
 {
+    enum class MassEraseSubcommand
+    {
+        global = 0xffff,
+        bankOne = 0xfffE,
+        bankTwo = 0xfffD,
+    };
+
     class StBootloaderCommandHandler
     {
     protected:
@@ -20,17 +27,12 @@ namespace services
         virtual void ReadMemory(uint32_t address, uint8_t size, infra::ByteRange& data, const infra::Function<void()>& onDone) = 0;
         virtual void Go(uint32_t address, const infra::Function<void()>& onDone) = 0;
         virtual void WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone) = 0;
-        virtual void Erase(uint8_t subcommand, const infra::Function<void()>& onDone) = 0;
+        virtual void Erase(const infra::Function<void()>& onDone) = 0;
         virtual void Erase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) = 0;
-        virtual void ExtendedErase(uint16_t subcommand, const infra::Function<void()>& onDone) = 0;
-        virtual void ExtendedErase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) = 0;
+        virtual void ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) = 0;
+        virtual void ExtendedErase(uint16_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) = 0;
         virtual void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) = 0;
         virtual void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) = 0;
-        virtual void WriteProtect(infra::ConstByteRange sectors, const infra::Function<void()>& onDone) = 0;
-        virtual void WriteUnprotect(const infra::Function<void()>& onDone) = 0;
-        virtual void ReadoutProtect(const infra::Function<void()>& onDone) = 0;
-        virtual void ReadoutUnprotect(const infra::Function<void()>& onDone) = 0;
-        virtual void GetChecksum(uint32_t address, uint32_t memAreaSize, uint32_t crcPolinomial, uint32_t crcInitialization, const infra::Function<void(uint32_t crc, uint8_t checksum)>& onDone) = 0;
     };
 }
 

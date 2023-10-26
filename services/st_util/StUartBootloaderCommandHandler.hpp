@@ -31,20 +31,19 @@ namespace services
         void ReadMemory(uint32_t address, uint8_t size, infra::ByteRange& data, const infra::Function<void()>& onDone) override;
         void Go(uint32_t address, const infra::Function<void()>& onDone) override;
         void WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone) override;
-        void Erase(uint8_t subcommand, const infra::Function<void()>& onDone) override;
+        void Erase(const infra::Function<void()>& onDone) override;
         void Erase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
-        void ExtendedErase(uint16_t subcommand, const infra::Function<void()>& onDone) override;
-        void ExtendedErase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
+        void ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) override;
+        void ExtendedErase(uint16_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
         void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) override;
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
-        void WriteProtect(infra::ConstByteRange sectors, const infra::Function<void()>& onDone) override;
-        void WriteUnprotect(const infra::Function<void()>& onDone) override;
-        void ReadoutProtect(const infra::Function<void()>& onDone) override;
-        void ReadoutUnprotect(const infra::Function<void()>& onDone) override;
-        void GetChecksum(uint32_t address, uint32_t memAreaSize, uint32_t crcPolinomial, uint32_t crcInitialization, const infra::Function<void(uint32_t crc, uint8_t checksum)>& onDone) override;
 
     private:
         void InitializeUartBootloader();
+
+        template<class T, class... Args>
+        void AddCommand(Args&&... args);
+
         void ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
         void TryHandleNextAction();
         void TryHandleTransmitAction();

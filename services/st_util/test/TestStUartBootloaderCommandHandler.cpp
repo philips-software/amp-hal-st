@@ -299,7 +299,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Erase_global)
     infra::VerifyingFunctionMock<void()> ondone;
 
     ExpectSendData(0x43, 0xbc);
-    handler.Erase(0xff, ondone);
+    handler.Erase(ondone);
     ExpectSendData(0xff, 0x00);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -338,7 +338,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_global)
     infra::VerifyingFunctionMock<void()> ondone;
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedErase(0xfffe, ondone);
+    handler.ExtendedErase(services::MassEraseSubcommand::bankOne, ondone);
     ExpectSendData({ 0xff, 0xfe }, 0x01);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -363,7 +363,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_timeout)
     testing::StrictMock<infra::MockCallback<void()>> ondone;
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedErase(0xffff, [&ondone]()
+    handler.ExtendedErase(services::MassEraseSubcommand::global, [&ondone]()
         {
             ondone.callback();
         });
