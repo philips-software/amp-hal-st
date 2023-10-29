@@ -15,7 +15,8 @@
       "displayName": "Configuration for Host Tooling and Tests",
       "inherits": "defaults",
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel"
+        "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
+        "EMIL_BUILD_ECHO_COMPILERS": true
       },
       "generator": "Ninja Multi-Config"
     },
@@ -44,7 +45,6 @@
         "CMAKE_TOOLCHAIN_FILE": ""
       },
       "cacheVariables": {
-        "EMIL_GENERATE_PACKAGE_CONFIG": false,
         "TARGET_MCU_VENDOR": "st"
       }
     },

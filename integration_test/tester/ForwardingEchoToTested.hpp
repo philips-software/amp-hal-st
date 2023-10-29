@@ -14,7 +14,8 @@ namespace main_
         hal::GpioPinStm echoUartTx{ hal::Port::C, 12 };
         hal::GpioPinStm echoUartRx{ hal::Port::D, 2 };
         hal::UartStm echoUart{ 5, echoUartTx, echoUartRx };
-        main_::EchoOnSerialCommunication<1024> echo{ echoUart };
+        services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
+        main_::EchoOnSerialCommunication<256> echo{ echoUart, serializerFactory };
     };
 
     struct ForwardingEchoToTested
@@ -22,7 +23,6 @@ namespace main_
         ForwardingEchoToTested(services::Echo& echo);
 
         main_::EchoToTested echoToTested;
-        std::array<uint8_t, 1024> buffer;
         services::ServiceForwarder forwardTested;
         services::ServiceForwarder forwardGpioTested;
         services::ServiceForwarder forwardGpioObserver;
