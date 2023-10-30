@@ -651,7 +651,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_receive_buffer_size_received_
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00});
+    ExpectReceiveData({ 0x00 });
     ExpectReceiveData({ 0x04, 0x05, 0x06, 0x07, 0x08 });
     ExpectReceiveData({ 0x00 });
     ExpectReceiveData({ 0x04, 0x09, 0x0a, 0x0b, 0x0c });
