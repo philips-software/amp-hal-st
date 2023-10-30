@@ -7,6 +7,7 @@
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedDeque.hpp"
 #include "infra/util/BoundedString.hpp"
+#include "infra/util/ByteRange.hpp"
 #include "infra/util/Endian.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
 #include "services/st_util/StBootloaderCommandHandler.hpp"
@@ -14,11 +15,11 @@
 namespace services
 {
     class StUartBootloaderCommandHandler
-        : public StBootloaderCommandHandler
+        : protected StBootloaderCommandHandler
     {
     public:
         StUartBootloaderCommandHandler(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
-        ~StUartBootloaderCommandHandler();
+        virtual ~StUartBootloaderCommandHandler();
 
         // Implementation of StBootloaderCommandHandler
         void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
@@ -41,14 +42,14 @@ namespace services
         void AddCommandAction(Args&&... args);
 
         void ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
-        void StartAction();
+        void StartCurrentAction();
         void TryHandleDataReceived();
         void OnCommandExecuted();
         void OnActionExecuted();
-        void SendData(infra::ConstByteRange data, uint8_t checksum);
-        void SendData(infra::ConstByteRange data);
         void SetCommandTimeout(infra::BoundedConstString reason);
         void OnError(infra::BoundedConstString reason);
+        void SendData(infra::ConstByteRange data, uint8_t checksum);
+        void SendData(infra::ConstByteRange data);
 
     private:
         class Action
@@ -84,7 +85,12 @@ namespace services
             void DataReceived() override;
 
         protected:
-            virtual void TryExtractNumberOfBytes(infra::DataInputStream& stream) = 0;
+            virtual void TryRetreiveNumberOfBytes(infra::DataInputStream& stream) = 0;
+
+        private:
+            bool TotalNumberOfBytesAvailable(infra::DataInputStream& stream);
+            void RetreiveData(infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader& reader, infra::DataInputStream& stream);
+            void CheckActionExecuted();
 
         protected:
             infra::ByteRange& data;
@@ -99,7 +105,7 @@ namespace services
             ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size);
 
         protected:
-            void TryExtractNumberOfBytes(infra::DataInputStream& stream) override;
+            void TryRetreiveNumberOfBytes(infra::DataInputStream& stream) override;
 
         private:
             const std::size_t size;
@@ -112,7 +118,7 @@ namespace services
             using ReceiveBuffer::ReceiveBuffer;
 
         protected:
-            void TryExtractNumberOfBytes(infra::DataInputStream& stream) override;
+            void TryRetreiveNumberOfBytes(infra::DataInputStream& stream) override;
         };
 
         class ReceiveBigBuffer
@@ -122,7 +128,7 @@ namespace services
             using ReceiveBuffer::ReceiveBuffer;
 
         protected:
-            void TryExtractNumberOfBytes(infra::DataInputStream& stream) override;
+            void TryRetreiveNumberOfBytes(infra::DataInputStream& stream) override;
         };
 
         class TransmitRaw
@@ -155,8 +161,10 @@ namespace services
         public:
             TransmitChecksummedBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
 
-            void AddToChecksum(const uint8_t& byte);
             void Start() override;
+
+        protected:
+            void AddToChecksum(const uint8_t& byte);
 
         private:
             infra::ConstByteRange data;
@@ -179,7 +187,7 @@ namespace services
             : public TransmitChecksummedBuffer
         {
         public:
-            TransmitBigBuffer(StUartBootloaderCommandHandler& handler, uint16_t size, infra::ConstByteRange data);
+            TransmitBigBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data, uint16_t size);
 
             void Start() override;
 
@@ -199,7 +207,7 @@ namespace services
         infra::TimerSingleShot timeout;
 
         std::array<uint8_t, 3> internalBuffer;
-        infra::ByteRange internalRange;
+        infra::ByteRange internalRange{ internalBuffer };
         infra::BigEndian<uint32_t> address;
         infra::BigEndian<uint16_t> subcommand;
     };

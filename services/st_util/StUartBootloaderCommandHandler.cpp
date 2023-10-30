@@ -17,14 +17,8 @@ namespace
     constexpr uint8_t extendedErase = 0x44;
     constexpr uint8_t special = 0x50;
     constexpr uint8_t extendedSpecial = 0x51;
-    constexpr uint8_t writeProtect = 0x63;
-    constexpr uint8_t writeUnprotect = 0x73;
-    constexpr uint8_t readoutProtect = 0x82;
-    constexpr uint8_t readoutUnprotect = 0x92;
-    constexpr uint8_t getChecksum = 0xa1;
 
     constexpr uint8_t ack = 0x79;
-    constexpr uint8_t nack = 0x1F;
 
     constexpr auto commandTimeout = std::chrono::seconds(1);
 }
@@ -63,7 +57,7 @@ namespace services
         AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout getting commands");
-        ExecuteCommand([this, onDone, &commands]()
+        ExecuteCommand([onDone, &commands]()
             {
                 uint8_t major = commands.front() >> 4;
                 uint8_t minor = commands.front() & 0xf;
@@ -80,8 +74,6 @@ namespace services
 
     void StUartBootloaderCommandHandler::GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
-        internalRange = infra::MakeByteRange(internalBuffer);
-
         AddCommandAction<TransmitWithTwosComplementChecksum>(getVersion);
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceivePredefinedBuffer>(internalRange, 3);
@@ -98,8 +90,6 @@ namespace services
 
     void StUartBootloaderCommandHandler::GetId(const infra::Function<void(uint16_t id)>& onDone)
     {
-        internalRange = infra::MakeByteRange(internalBuffer);
-
         AddCommandAction<TransmitWithTwosComplementChecksum>(getId);
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceiveSmallBuffer>(internalRange);
@@ -115,6 +105,8 @@ namespace services
 
     void StUartBootloaderCommandHandler::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
+        really_assert(data.size() <= 255);
+
         this->address = address;
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(readMemory);
@@ -144,7 +136,7 @@ namespace services
 
     void StUartBootloaderCommandHandler::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
-        really_assert(data.size() <= 256);
+        really_assert(data.size() <= 255);
 
         this->address = address;
 
@@ -200,12 +192,11 @@ namespace services
 
     void StUartBootloaderCommandHandler::ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
-        really_assert(pages.size() <= 256);
         really_assert(pages.size() % 2 == 0);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
         AddCommandAction<ReceiveAck>();
-        AddCommandAction<TransmitBigBuffer>((pages.size() / 2) - 1, pages);
+        AddCommandAction<TransmitBigBuffer>(pages, (pages.size() / 2) - 1);
         AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout extended erasing memory");
@@ -222,7 +213,7 @@ namespace services
         AddCommandAction<ReceiveAck>();
         AddCommandAction<TransmitChecksummedBuffer>(infra::MakeByteRange(this->subcommand));
         AddCommandAction<ReceiveAck>();
-        AddCommandAction<TransmitBigBuffer>(txData.size(), txData);
+        AddCommandAction<TransmitBigBuffer>(txData, txData.size());
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceiveBigBuffer>(rxData);
         AddCommandAction<ReceiveBigBuffer>(rxStatus);
@@ -243,9 +234,9 @@ namespace services
         AddCommandAction<ReceiveAck>();
         AddCommandAction<TransmitChecksummedBuffer>(infra::MakeByteRange(this->subcommand));
         AddCommandAction<ReceiveAck>();
-        AddCommandAction<TransmitBigBuffer>(txData1.size(), txData1);
+        AddCommandAction<TransmitBigBuffer>(txData1, txData1.size());
         AddCommandAction<ReceiveAck>();
-        AddCommandAction<TransmitBigBuffer>(txData2.size(), txData2);
+        AddCommandAction<TransmitBigBuffer>(txData2, txData2.size());
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceiveBigBuffer>(rxData);
         AddCommandAction<ReceiveAck>();
@@ -275,10 +266,10 @@ namespace services
     void StUartBootloaderCommandHandler::ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
     {
         this->onCommandExecuted = onCommandExecuted;
-        StartAction();
+        StartCurrentAction();
     }
 
-    void StUartBootloaderCommandHandler::StartAction()
+    void StUartBootloaderCommandHandler::StartCurrentAction()
     {
         commandActions.front()->Start();
         TryHandleDataReceived();
@@ -303,23 +294,7 @@ namespace services
         if (commandActions.empty())
             OnCommandExecuted();
         else
-            StartAction();
-    }
-
-    void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data, uint8_t checksum)
-    {
-        serial.SendData(data, [this, checksum]()
-            {
-                SendData(infra::MakeConstByteRange(checksum));
-            });
-    }
-
-    void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data)
-    {
-        serial.SendData(data, [this]()
-            {
-                OnActionExecuted();
-            });
+            StartCurrentAction();
     }
 
     void StUartBootloaderCommandHandler::SetCommandTimeout(infra::BoundedConstString reason)
@@ -337,6 +312,22 @@ namespace services
         serial.ReceiveData([](auto data) {});
         if (onError != nullptr)
             onError(reason);
+    }
+
+    void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data, uint8_t checksum)
+    {
+        serial.SendData(data, [this, checksum]()
+            {
+                SendData(infra::MakeConstByteRange(checksum));
+            });
+    }
+
+    void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data)
+    {
+        serial.SendData(data, [this]()
+            {
+                OnActionExecuted();
+            });
     }
 
     StUartBootloaderCommandHandler::Action::Action(StUartBootloaderCommandHandler& handler)
@@ -369,18 +360,31 @@ namespace services
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader reader(handler.queue);
         infra::DataInputStream::WithErrorPolicy stream(reader, infra::noFail);
 
-        if (nBytesTotal == infra::none)
-        {
-            TryExtractNumberOfBytes(stream);
-            if (nBytesTotal == infra::none)
-                return;
-        }
+        if (!TotalNumberOfBytesAvailable(stream))
+            return;
 
+        RetreiveData(reader, stream);
+        CheckActionExecuted();
+    }
+
+    bool StUartBootloaderCommandHandler::ReceiveBuffer::TotalNumberOfBytesAvailable(infra::DataInputStream& stream)
+    {
+        if (nBytesTotal == infra::none)
+            TryRetreiveNumberOfBytes(stream);
+
+        return nBytesTotal != infra::none;
+    }
+
+    void StUartBootloaderCommandHandler::ReceiveBuffer::RetreiveData(infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader& reader, infra::DataInputStream& stream)
+    {
         auto buffer = infra::Head(infra::DiscardHead(data, nBytesReceived), std::min(stream.Available(), *nBytesTotal - nBytesReceived));
         stream >> buffer;
         reader.Commit();
-
         nBytesReceived += buffer.size();
+    }
+
+    void StUartBootloaderCommandHandler::ReceiveBuffer::CheckActionExecuted()
+    {
         if (nBytesReceived == nBytesTotal)
         {
             data.shrink_from_back_to(nBytesReceived);
@@ -393,17 +397,17 @@ namespace services
         , size(size)
     {}
 
-    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::TryExtractNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::TryRetreiveNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(size);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveSmallBuffer::TryExtractNumberOfBytes(infra::DataInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveSmallBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(stream.Extract<uint8_t>() + 1);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveBigBuffer::TryExtractNumberOfBytes(infra::DataInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveBigBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
     {
         if (stream.Available() >= sizeof(uint16_t))
             nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
@@ -426,7 +430,7 @@ namespace services
 
     void StUartBootloaderCommandHandler::TransmitWithTwosComplementChecksum::Start()
     {
-        auto checksum = data ^ 0xff;
+        uint8_t checksum = data ^ 0xff;
         handler.SendData(infra::MakeConstByteRange(data), checksum);
     }
 
@@ -434,8 +438,8 @@ namespace services
         : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {
-        for (auto& b : data)
-            AddToChecksum(b);
+        for (auto& byte : data)
+            AddToChecksum(byte);
     }
 
     void StUartBootloaderCommandHandler::TransmitChecksummedBuffer::AddToChecksum(const uint8_t& byte)
@@ -466,7 +470,7 @@ namespace services
             });
     }
 
-    StUartBootloaderCommandHandler::TransmitBigBuffer::TransmitBigBuffer(StUartBootloaderCommandHandler& handler, uint16_t size, infra::ConstByteRange data)
+    StUartBootloaderCommandHandler::TransmitBigBuffer::TransmitBigBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data, uint16_t size)
         : StUartBootloaderCommandHandler::TransmitChecksummedBuffer(handler, data)
         , size(size)
     {

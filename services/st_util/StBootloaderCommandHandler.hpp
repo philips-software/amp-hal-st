@@ -2,6 +2,7 @@
 #define SERVICES_ST_UTIL_ST_BOOTLOADER_COMMAND_HANDLER_HPP
 
 #include "infra/util//Function.hpp"
+#include "infra/util/ByteRange.hpp"
 
 namespace services
 {
