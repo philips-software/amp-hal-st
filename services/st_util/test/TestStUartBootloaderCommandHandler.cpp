@@ -516,11 +516,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_txData)
     ExpectSendData({ 0x00, 0x54 }, 0x54);
     ExpectReceiveData({ 0x79 });
 
-    ExpectSendData({
-                       0x00,
-                       0x00,
-                   },
-        0x00);
+    ExpectSendData({ 0x00, 0x00 }, 0x00);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
 

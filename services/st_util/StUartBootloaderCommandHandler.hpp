@@ -48,59 +48,42 @@ namespace services
         void AddCommand(Args&&... args);
 
         void ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
-        void TryHandleTransmitAction();
+        void StartAction();
         void TryHandleDataReceived();
-        void TryHandleNextAction();
+        void OnCommandExecuted();
+        void OnActionExecuted();
         void SendData(infra::ConstByteRange data, uint8_t checksum);
         void SendData(infra::ConstByteRange data);
         void SetCommandTimeout(infra::BoundedConstString reason);
         void OnError(infra::BoundedConstString reason);
 
     private:
-        enum class ActionType : uint8_t
-        {
-            receive,
-            transmit,
-        };
-
         class Action
         {
         public:
-            Action(StUartBootloaderCommandHandler& handler, ActionType type);
-            Action(const Action& other) = default;
-            Action& operator=(const Action& other) = default;
+            Action(StUartBootloaderCommandHandler& handler);
+            Action(const Action& other) = delete;
+            Action& operator=(const Action& other) = delete;
             virtual ~Action() = default;
 
-            virtual void SendData();
+            virtual void Start();
             virtual void DataReceived();
-
-            ActionType GetActionType() const;
 
         protected:
             StUartBootloaderCommandHandler& handler;
-
-        private:
-            ActionType type;
-        };
-
-        class ReceiveAction
-            : public Action
-        {
-        public:
-            explicit ReceiveAction(StUartBootloaderCommandHandler& handler);
         };
 
         class ReceiveAckAction
-            : public ReceiveAction
+            : public Action
         {
         public:
-            using ReceiveAction::ReceiveAction;
+            using Action::Action;
 
             void DataReceived() override;
         };
 
         class ReceiveBufferAction
-            : public ReceiveAction
+            : public Action
         {
         public:
             ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data);
@@ -137,45 +120,38 @@ namespace services
             void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
         };
 
-        class TransmitAction
-            : public Action
-        {
-        public:
-            explicit TransmitAction(StUartBootloaderCommandHandler& handler);
-        };
-
         class TransmitRawAction
-            : public TransmitAction
+            : public Action
         {
         public:
             TransmitRawAction(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
 
-            void SendData() override;
+            void Start() override;
 
         private:
             infra::ConstByteRange data;
         };
 
         class TransmitWithTwosComplementChecksum
-            : public TransmitAction
+            : public Action
         {
         public:
             TransmitWithTwosComplementChecksum(StUartBootloaderCommandHandler& handler, uint8_t data);
 
-            void SendData() override;
+            void Start() override;
 
         private:
             uint8_t data;
         };
 
         class TransmitChecksummedBuffer
-            : public TransmitAction
+            : public Action
         {
         public:
             TransmitChecksummedBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
 
             void AddToChecksum(const uint8_t& byte);
-            void SendData() override;
+            void Start() override;
 
         private:
             infra::ConstByteRange data;
@@ -188,7 +164,7 @@ namespace services
         public:
             TransmitSmallBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
 
-            void SendData() override;
+            void Start() override;
 
         private:
             uint8_t size;
@@ -200,7 +176,7 @@ namespace services
         public:
             TransmitBigBuffer(StUartBootloaderCommandHandler& handler, uint16_t size, infra::ConstByteRange data);
 
-            void SendData() override;
+            void Start() override;
 
         private:
             infra::BigEndian<uint16_t> size;

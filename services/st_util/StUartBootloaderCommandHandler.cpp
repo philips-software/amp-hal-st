@@ -1,5 +1,6 @@
 #include "services/st_util/StUartBootloaderCommandHandler.hpp"
 #include "infra/util/ByteRange.hpp"
+#include "infra/util/Function.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include <cstdint>
 
@@ -117,11 +118,9 @@ namespace services
     {
         this->address = address;
 
-        static auto range = infra::MakeConstByteRange(this->address);
-
         AddCommand<TransmitWithTwosComplementChecksum>(readMemory);
         AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(range);
+        AddCommand<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
         AddCommand<ReceiveAckAction>();
         AddCommand<TransmitWithTwosComplementChecksum>(data.size() - 1);
         AddCommand<ReceiveAckAction>();
@@ -277,21 +276,13 @@ namespace services
     void StUartBootloaderCommandHandler::ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
     {
         this->onCommandExecuted = onCommandExecuted;
-        TryHandleTransmitAction();
+        StartAction();
     }
 
-    // Remove the aborts for each action, and leave them empty.
-    // Get rid of ActionType
-    void StUartBootloaderCommandHandler::TryHandleTransmitAction()
+    void StUartBootloaderCommandHandler::StartAction()
     {
-        if (commandActions.front()->GetActionType() == ActionType::transmit)
-        {
-            static auto transmitaction = commandActions.front();
-            transmitaction = commandActions.front();
-
-            commandActions.pop_front();
-            transmitaction->SendData();
-        }
+        commandActions.front()->Start();
+        TryHandleDataReceived();
     }
 
     void StUartBootloaderCommandHandler::TryHandleDataReceived()
@@ -300,21 +291,20 @@ namespace services
             commandActions.front()->DataReceived();
     }
 
-    void StUartBootloaderCommandHandler::TryHandleNextAction()
+    void StUartBootloaderCommandHandler::OnCommandExecuted()
+    {
+        timeout.Cancel();
+        onCommandExecuted();
+    }
+
+    void StUartBootloaderCommandHandler::OnActionExecuted()
     {
         commandActions.pop_front();
 
         if (commandActions.empty())
-        {
-            timeout.Cancel();
-            onCommandExecuted();
-            return;
-        }
-
-        if (commandActions.front()->GetActionType() == ActionType::receive)
-            TryHandleDataReceived();
+            OnCommandExecuted();
         else
-            TryHandleTransmitAction();
+            StartAction();
     }
 
     void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data, uint8_t checksum)
@@ -329,7 +319,7 @@ namespace services
     {
         serial.SendData(data, [this]()
             {
-                TryHandleTransmitAction();
+                OnActionExecuted();
             });
     }
 
@@ -350,32 +340,14 @@ namespace services
             onError(reason);
     }
 
-    StUartBootloaderCommandHandler::Action::Action(StUartBootloaderCommandHandler& handler, StUartBootloaderCommandHandler::ActionType type)
+    StUartBootloaderCommandHandler::Action::Action(StUartBootloaderCommandHandler& handler)
         : handler(handler)
-        , type(type)
     {}
 
-    void StUartBootloaderCommandHandler::Action::SendData()
-    {
-        std::abort();
-    }
+    void StUartBootloaderCommandHandler::Action::Start()
+    {}
 
     void StUartBootloaderCommandHandler::Action::DataReceived()
-    {
-        std::abort();
-    }
-
-    StUartBootloaderCommandHandler::ActionType StUartBootloaderCommandHandler::Action::GetActionType() const
-    {
-        return type;
-    }
-
-    StUartBootloaderCommandHandler::ReceiveAction::ReceiveAction(StUartBootloaderCommandHandler& handler)
-        : StUartBootloaderCommandHandler::Action(handler, StUartBootloaderCommandHandler::ActionType::receive)
-    {}
-
-    StUartBootloaderCommandHandler::TransmitAction::TransmitAction(StUartBootloaderCommandHandler& handler)
-        : StUartBootloaderCommandHandler::Action(handler, StUartBootloaderCommandHandler::ActionType::transmit)
     {}
 
     void StUartBootloaderCommandHandler::ReceiveAckAction::DataReceived()
@@ -383,18 +355,18 @@ namespace services
         auto byte = handler.queue.Get();
 
         if (byte == ack)
-            handler.TryHandleNextAction();
+            handler.OnActionExecuted();
         else
             handler.OnError("NACK received");
     }
 
     StUartBootloaderCommandHandler::ReceiveBufferAction::ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data)
-        : StUartBootloaderCommandHandler::ReceiveAction(handler)
+        : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {}
 
     StUartBootloaderCommandHandler::ReceiveBufferAction::ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytesTotal)
-        : StUartBootloaderCommandHandler::ReceiveAction(handler)
+        : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {
         this->nBytesTotal.Emplace(nBytesTotal);
@@ -402,6 +374,7 @@ namespace services
 
     void StUartBootloaderCommandHandler::ReceiveBufferAction::DataReceived()
     {
+        // add test case for wraparound
         infra::ByteInputStream stream(handler.queue.ContiguousRange());
 
         if (!nBytesTotal)
@@ -415,9 +388,11 @@ namespace services
         if (nBytesReceived == nBytesTotal)
         {
             data.shrink_from_back_to(nBytesReceived);
-            handler.TryHandleNextAction();
+            handler.OnActionExecuted();
         }
     }
+
+    // ReceivePredefinedBuffer
 
     void StUartBootloaderCommandHandler::ReceiveSmallBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
     {
@@ -427,33 +402,34 @@ namespace services
 
     void StUartBootloaderCommandHandler::ReceiveBigBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
     {
+        // 2 bytes received?
         nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
         handler.queue.Consume(sizeof(uint16_t));
     }
 
     StUartBootloaderCommandHandler::TransmitRawAction::TransmitRawAction(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
-        : StUartBootloaderCommandHandler::TransmitAction(handler)
+        : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::TransmitRawAction::SendData()
+    void StUartBootloaderCommandHandler::TransmitRawAction::Start()
     {
         handler.SendData(data);
     }
 
     StUartBootloaderCommandHandler::TransmitWithTwosComplementChecksum::TransmitWithTwosComplementChecksum(StUartBootloaderCommandHandler& handler, uint8_t data)
-        : StUartBootloaderCommandHandler::TransmitAction(handler)
+        : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::TransmitWithTwosComplementChecksum::SendData()
+    void StUartBootloaderCommandHandler::TransmitWithTwosComplementChecksum::Start()
     {
         auto checksum = data ^ 0xff;
         handler.SendData(infra::MakeConstByteRange(data), checksum);
     }
 
     StUartBootloaderCommandHandler::TransmitChecksummedBuffer::TransmitChecksummedBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
-        : StUartBootloaderCommandHandler::TransmitAction(handler)
+        : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {
         for (auto& b : data)
@@ -465,7 +441,7 @@ namespace services
         checksum ^= byte;
     }
 
-    void StUartBootloaderCommandHandler::TransmitChecksummedBuffer::SendData()
+    void StUartBootloaderCommandHandler::TransmitChecksummedBuffer::Start()
     {
         if (data.empty())
             handler.SendData(infra::MakeConstByteRange(checksum));
@@ -480,11 +456,11 @@ namespace services
         AddToChecksum(size);
     }
 
-    void StUartBootloaderCommandHandler::TransmitSmallBuffer::SendData()
+    void StUartBootloaderCommandHandler::TransmitSmallBuffer::Start()
     {
         handler.serial.SendData(infra::MakeConstByteRange(size), [this]()
             {
-                StUartBootloaderCommandHandler::TransmitChecksummedBuffer::SendData();
+                StUartBootloaderCommandHandler::TransmitChecksummedBuffer::Start();
             });
     }
 
@@ -496,11 +472,11 @@ namespace services
         AddToChecksum(static_cast<uint8_t>(size & 0xff));
     }
 
-    void StUartBootloaderCommandHandler::TransmitBigBuffer::SendData()
+    void StUartBootloaderCommandHandler::TransmitBigBuffer::Start()
     {
         handler.serial.SendData(infra::MakeConstByteRange(size), [this]()
             {
-                StUartBootloaderCommandHandler::TransmitChecksummedBuffer::SendData();
+                StUartBootloaderCommandHandler::TransmitChecksummedBuffer::Start();
             });
     }
 }
