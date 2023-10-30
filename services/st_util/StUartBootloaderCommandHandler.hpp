@@ -27,9 +27,9 @@ namespace services
         void ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone) override;
         void Go(uint32_t address, const infra::Function<void()>& onDone) override;
         void WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone) override;
-        void GlobalErase(const infra::Function<void()>& onDone) override;
+        void MassErase(const infra::Function<void()>& onDone) override;
         void Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
-        void ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) override;
+        void ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) override;
         void ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
         void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) override;
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
@@ -84,7 +84,7 @@ namespace services
             void DataReceived() override;
 
         protected:
-            virtual void ExtractNumberOfBytes(infra::DataInputStream& stream) = 0;
+            virtual void TryExtractNumberOfBytes(infra::DataInputStream& stream) = 0;
 
         protected:
             infra::ByteRange& data;
@@ -99,7 +99,7 @@ namespace services
             ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size);
 
         protected:
-            void ExtractNumberOfBytes(infra::DataInputStream& stream) override;
+            void TryExtractNumberOfBytes(infra::DataInputStream& stream) override;
 
         private:
             const std::size_t size;
@@ -112,7 +112,7 @@ namespace services
             using ReceiveBuffer::ReceiveBuffer;
 
         protected:
-            void ExtractNumberOfBytes(infra::DataInputStream& stream) override;
+            void TryExtractNumberOfBytes(infra::DataInputStream& stream) override;
         };
 
         class ReceiveBigBuffer
@@ -122,7 +122,7 @@ namespace services
             using ReceiveBuffer::ReceiveBuffer;
 
         protected:
-            void ExtractNumberOfBytes(infra::DataInputStream& stream) override;
+            void TryExtractNumberOfBytes(infra::DataInputStream& stream) override;
         };
 
         class TransmitRaw

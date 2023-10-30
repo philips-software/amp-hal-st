@@ -27,9 +27,9 @@ namespace services
         virtual void ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone) = 0;
         virtual void Go(uint32_t address, const infra::Function<void()>& onDone) = 0;
         virtual void WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone) = 0;
-        virtual void GlobalErase(const infra::Function<void()>& onDone) = 0;
+        virtual void MassErase(const infra::Function<void()>& onDone) = 0;
         virtual void Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) = 0;
-        virtual void ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) = 0;
+        virtual void ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) = 0;
         virtual void ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) = 0;
         virtual void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) = 0;
         virtual void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) = 0;

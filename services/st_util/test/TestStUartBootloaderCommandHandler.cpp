@@ -312,13 +312,13 @@ TEST_F(StUartBootloaderCommandHandlerTest, WriteMemory_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout writing memory");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GlobalErase)
+TEST_F(StUartBootloaderCommandHandlerTest, MassErase)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
 
     ExpectSendData(0x43, 0xbc);
-    handler.GlobalErase(ondone);
+    handler.MassErase(ondone);
     ExpectSendData(0xff, 0x00);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -357,7 +357,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_mass)
     infra::VerifyingFunctionMock<void()> ondone;
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedErase(services::MassEraseSubcommand::bankOne, ondone);
+    handler.ExtendedMassErase(services::MassEraseSubcommand::bankOne, ondone);
     ExpectSendData({ 0xff, 0xfe }, 0x01);
     ExpectReceiveData({ 0x79 });
     ExpectReceiveData({ 0x79 });
@@ -382,7 +382,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_timeout)
     testing::StrictMock<infra::MockCallback<void()>> ondone;
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedErase(services::MassEraseSubcommand::global, [&ondone]()
+    handler.ExtendedMassErase(services::MassEraseSubcommand::global, [&ondone]()
         {
             ondone.callback();
         });
@@ -628,5 +628,35 @@ TEST_F(StUartBootloaderCommandHandlerTest, receive_data_with_wrapped_around_queu
     rxDataSimulatedRange = infra::DiscardHead(rxDataSimulatedRange, 2);
     EXPECT_TRUE(infra::ContentsEqual(rxDataSimulatedRange, rxData));
 
+    EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
+}
+
+TEST_F(StUartBootloaderCommandHandlerTest, Special_receive_buffer_size_received_in_parts)
+{
+    Initialize();
+    infra::VerifyingFunctionMock<void()> ondone;
+    uint16_t subcommand = 0x54;
+    std::array<uint8_t, 4> rxDataBuffer;
+    std::array<uint8_t, 4> rxStatusBuffer;
+    infra::ByteRange rxData(rxDataBuffer);
+    infra::ByteRange rxStatus(rxStatusBuffer);
+
+    ExpectSendData(0x50, 0xaf);
+    handler.Special(subcommand, infra::ConstByteRange{}, rxData, rxStatus, ondone);
+
+    ExpectSendData({ 0x00, 0x54 }, 0x54);
+    ExpectReceiveData({ 0x79 });
+
+    ExpectSendData({ 0x00, 0x00 }, 0x00);
+    ExpectReceiveData({ 0x79 });
+    ExpectReceiveData({ 0x79 });
+
+    ExpectReceiveData({ 0x00});
+    ExpectReceiveData({ 0x04, 0x05, 0x06, 0x07, 0x08 });
+    ExpectReceiveData({ 0x00 });
+    ExpectReceiveData({ 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ExpectReceiveData({ 0x79 });
+
+    EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }

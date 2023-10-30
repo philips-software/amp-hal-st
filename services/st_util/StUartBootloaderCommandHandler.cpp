@@ -1,4 +1,7 @@
 #include "services/st_util/StUartBootloaderCommandHandler.hpp"
+#include "infra/util/Optional.hpp"
+#include <cstddef>
+#include <cstdint>
 
 namespace
 {
@@ -156,7 +159,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::GlobalErase(const infra::Function<void()>& onDone)
+    void StUartBootloaderCommandHandler::MassErase(const infra::Function<void()>& onDone)
     {
         constexpr uint8_t globalEraseSubCommand = 0xff;
 
@@ -182,7 +185,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone)
+    void StUartBootloaderCommandHandler::ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone)
     {
         this->subcommand = static_cast<uint16_t>(subcommand);
 
@@ -363,12 +366,15 @@ namespace services
 
     void StUartBootloaderCommandHandler::ReceiveBuffer::DataReceived()
     {
-        // add test case for wraparound
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader reader(handler.queue);
         infra::DataInputStream::WithErrorPolicy stream(reader, infra::noFail);
 
-        if (!nBytesTotal)
-            ExtractNumberOfBytes(stream);
+        if (nBytesTotal == infra::none)
+        {
+            TryExtractNumberOfBytes(stream);
+            if (nBytesTotal == infra::none)
+                return;
+        }
 
         auto buffer = infra::Head(infra::DiscardHead(data, nBytesReceived), std::min(stream.Available(), *nBytesTotal - nBytesReceived));
         stream >> buffer;
@@ -387,20 +393,20 @@ namespace services
         , size(size)
     {}
 
-    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ExtractNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::TryExtractNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(size);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveSmallBuffer::ExtractNumberOfBytes(infra::DataInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveSmallBuffer::TryExtractNumberOfBytes(infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(stream.Extract<uint8_t>() + 1);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveBigBuffer::ExtractNumberOfBytes(infra::DataInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveBigBuffer::TryExtractNumberOfBytes(infra::DataInputStream& stream)
     {
-        // 2 bytes received?
-        nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
+        if (stream.Available() >= sizeof(uint16_t))
+            nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
     }
 
     StUartBootloaderCommandHandler::TransmitRaw::TransmitRaw(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
