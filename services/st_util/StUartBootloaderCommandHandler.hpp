@@ -87,7 +87,6 @@ namespace services
         {
         public:
             ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data);
-            ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytesTotal);
 
             void DataReceived() override;
 
@@ -98,6 +97,19 @@ namespace services
             infra::ByteRange& data;
             infra::Optional<std::size_t> nBytesTotal;
             std::size_t nBytesReceived = 0;
+        };
+
+        class ReceivePredefinedBuffer
+            : public ReceiveBufferAction
+        {
+        public:
+            ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size);
+
+        protected:
+            void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
+
+        private:
+            const std::size_t size;
         };
 
         class ReceiveSmallBufferAction
@@ -188,7 +200,7 @@ namespace services
         infra::AutoResetFunction<void(infra::BoundedConstString reason)> onError;
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
 
-        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveSmallBufferAction, ReceiveBigBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
+        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceivePredefinedBuffer, ReceiveSmallBufferAction, ReceiveBigBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
         infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
         infra::BoundedString::WithStorage<46> timeoutReason;
         infra::TimerSingleShot timeout;

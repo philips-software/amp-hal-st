@@ -85,7 +85,7 @@ namespace services
 
         AddCommand<TransmitWithTwosComplementChecksum>(getVersion);
         AddCommand<ReceiveAckAction>();
-        AddCommand<ReceiveSmallBufferAction>(internalRange, 3);
+        AddCommand<ReceivePredefinedBuffer>(internalRange, 3);
         AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout getting version");
@@ -124,7 +124,7 @@ namespace services
         AddCommand<ReceiveAckAction>();
         AddCommand<TransmitWithTwosComplementChecksum>(data.size() - 1);
         AddCommand<ReceiveAckAction>();
-        AddCommand<ReceiveSmallBufferAction>(data, data.size());
+        AddCommand<ReceivePredefinedBuffer>(data, data.size());
 
         SetCommandTimeout("Timeout reading memory");
         ExecuteCommand(onDone);
@@ -365,13 +365,6 @@ namespace services
         , data(data)
     {}
 
-    StUartBootloaderCommandHandler::ReceiveBufferAction::ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t nBytesTotal)
-        : StUartBootloaderCommandHandler::Action(handler)
-        , data(data)
-    {
-        this->nBytesTotal.Emplace(nBytesTotal);
-    }
-
     void StUartBootloaderCommandHandler::ReceiveBufferAction::DataReceived()
     {
         // add test case for wraparound
@@ -392,7 +385,15 @@ namespace services
         }
     }
 
-    // ReceivePredefinedBuffer
+    StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size)
+        : StUartBootloaderCommandHandler::ReceiveBufferAction(handler, data)
+        , size(size)
+    {}
+
+    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ExtractNumberOfBytes([[maybe_unused]] infra::ByteInputStream& stream)
+    {
+        nBytesTotal.Emplace(size);
+    }
 
     void StUartBootloaderCommandHandler::ReceiveSmallBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
     {
