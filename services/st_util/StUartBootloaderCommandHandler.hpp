@@ -8,7 +8,10 @@
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedDeque.hpp"
 #include "infra/util/BoundedString.hpp"
+#include "infra/util/BoundedVector.hpp"
+#include "infra/util/ByteRange.hpp"
 #include "infra/util/Endian.hpp"
+#include "infra/util/Function.hpp"
 #include "infra/util/Optional.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
 #include "services/st_util/StBootloaderCommandHandler.hpp"
@@ -28,13 +31,13 @@ namespace services
         void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
         void GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
         void GetId(const infra::Function<void(uint16_t id)>& onDone) override;
-        void ReadMemory(uint32_t address, uint8_t size, infra::ByteRange& data, const infra::Function<void()>& onDone) override;
+        void ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone) override;
         void Go(uint32_t address, const infra::Function<void()>& onDone) override;
         void WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone) override;
-        void Erase(const infra::Function<void()>& onDone) override;
-        void Erase(uint8_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
+        void GlobalErase(const infra::Function<void()>& onDone) override;
+        void Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
         void ExtendedErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) override;
-        void ExtendedErase(uint16_t nPages, infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
+        void ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
         void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) override;
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
 
@@ -165,16 +168,42 @@ namespace services
             uint8_t data;
         };
 
-        class TransmitWithChecksumAction
+        class TransmitChecksummedBuffer
             : public TransmitAction
         {
         public:
-            TransmitWithChecksumAction(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
+            TransmitChecksummedBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
 
+            void AddToChecksum(const uint8_t& byte);
             void SendData() override;
 
         private:
             infra::ConstByteRange data;
+            uint8_t checksum;
+        };
+
+        class TransmitSmallBuffer
+            : public TransmitChecksummedBuffer
+        {
+        public:
+            TransmitSmallBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
+
+            void SendData() override;
+
+        private:
+            uint8_t size;
+        };
+
+        class TransmitBigBuffer
+            : public TransmitChecksummedBuffer
+        {
+        public:
+            TransmitBigBuffer(StUartBootloaderCommandHandler& handler, uint16_t size, infra::ConstByteRange data);
+
+            void SendData() override;
+
+        private:
+            infra::BigEndian<uint16_t> size;
         };
 
     private:
@@ -183,12 +212,12 @@ namespace services
         infra::AutoResetFunction<void(infra::BoundedConstString reason)> onError;
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
 
-        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveSmallBufferAction, ReceiveBigBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitWithChecksumAction>>::WithMaxSize<12> commandActions;
+        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceiveSmallBufferAction, ReceiveBigBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
         infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
         infra::BoundedString::WithStorage<46> timeoutReason;
         infra::TimerSingleShot timeout;
 
-        std::array<uint8_t, 257> internalBuffer;
+        std::array<uint8_t, 3> internalBuffer;
         infra::ByteRange internalRange;
         infra::BigEndian<uint32_t> address;
         infra::BigEndian<uint16_t> subcommand;
