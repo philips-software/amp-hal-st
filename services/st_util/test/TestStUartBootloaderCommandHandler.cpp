@@ -1,9 +1,14 @@
 #include "hal/interfaces/test_doubles/SerialCommunicationMock.hpp"
 #include "infra/timer/test_helper/ClockFixture.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
 #include "services/st_util/StUartBootloaderCommandHandler.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include <cstdint>
+#include <stdint.h>
+#include <sys/types.h>
+#include <vector>
 
 class StUartBootloaderCommandHandlerTest
     : public testing::Test
@@ -584,4 +589,44 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial_timeout)
             ondone.callback();
         });
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended special command");
+}
+
+TEST_F(StUartBootloaderCommandHandlerTest, receive_data_with_wrapped_around_queue)
+{
+    Initialize();
+    infra::VerifyingFunctionMock<void()> ondone;
+    uint16_t subcommand = 0x54;
+
+    std::vector<uint8_t> rxDataBuffer;
+    rxDataBuffer.resize(255, 0);
+    infra::ByteRange rxData(rxDataBuffer);
+
+    std::array<uint8_t, 4> rxStatusBuffer;
+    infra::ByteRange rxStatus(rxStatusBuffer);
+
+    ExpectSendData(0x50, 0xaf);
+    handler.Special(subcommand, infra::ConstByteRange{}, rxData, rxStatus, ondone);
+
+    ExpectSendData({ 0x00, 0x54 }, 0x54);
+    ExpectReceiveData({ 0x79 });
+
+    ExpectSendData({ 0x00, 0x00 }, 0x00);
+    ExpectReceiveData({ 0x79 });
+    ExpectReceiveData({ 0x79 });
+
+    std::vector<uint8_t> rxDataSimulated;
+    rxDataSimulated.emplace_back(0x00);
+    rxDataSimulated.emplace_back(0xff);
+    rxDataSimulated.resize(256, 0xaa);
+    rxDataSimulated.emplace_back(0xbb);
+
+    ExpectReceiveData(rxDataSimulated);
+    ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ExpectReceiveData({ 0x79 });
+
+    infra::ConstByteRange rxDataSimulatedRange(rxDataSimulated.data(), rxDataSimulated.data() + rxDataSimulated.size());
+    rxDataSimulatedRange = infra::DiscardHead(rxDataSimulatedRange, 2);
+    EXPECT_TRUE(infra::ContentsEqual(rxDataSimulatedRange, rxData));
+
+    EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }

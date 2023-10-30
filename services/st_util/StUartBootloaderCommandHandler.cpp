@@ -1,8 +1,4 @@
 #include "services/st_util/StUartBootloaderCommandHandler.hpp"
-#include "infra/util/ByteRange.hpp"
-#include "infra/util/Function.hpp"
-#include "infra/util/ReallyAssert.hpp"
-#include <cstdint>
 
 namespace
 {
@@ -58,10 +54,10 @@ namespace services
     {
         really_assert(commands.size() >= 15);
 
-        AddCommand<TransmitWithTwosComplementChecksum>(getCommand);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<ReceiveSmallBufferAction>(commands);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(getCommand);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<ReceiveSmallBuffer>(commands);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout getting commands");
         ExecuteCommand([this, onDone, &commands]()
@@ -83,10 +79,10 @@ namespace services
     {
         internalRange = infra::MakeByteRange(internalBuffer);
 
-        AddCommand<TransmitWithTwosComplementChecksum>(getVersion);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<ReceivePredefinedBuffer>(internalRange, 3);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(getVersion);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<ReceivePredefinedBuffer>(internalRange, 3);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout getting version");
         ExecuteCommand([this, onDone]()
@@ -101,10 +97,10 @@ namespace services
     {
         internalRange = infra::MakeByteRange(internalBuffer);
 
-        AddCommand<TransmitWithTwosComplementChecksum>(getId);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<ReceiveSmallBufferAction>(internalRange);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(getId);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<ReceiveSmallBuffer>(internalRange);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout getting id");
         ExecuteCommand([this, onDone]()
@@ -118,13 +114,13 @@ namespace services
     {
         this->address = address;
 
-        AddCommand<TransmitWithTwosComplementChecksum>(readMemory);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitWithTwosComplementChecksum>(data.size() - 1);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<ReceivePredefinedBuffer>(data, data.size());
+        AddCommandAction<TransmitWithTwosComplementChecksum>(readMemory);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(data.size() - 1);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<ReceivePredefinedBuffer>(data, data.size());
 
         SetCommandTimeout("Timeout reading memory");
         ExecuteCommand(onDone);
@@ -134,10 +130,10 @@ namespace services
     {
         this->address = address;
 
-        AddCommand<TransmitWithTwosComplementChecksum>(go);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(go);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout go");
         ExecuteCommand(onDone);
@@ -149,12 +145,12 @@ namespace services
 
         this->address = address;
 
-        AddCommand<TransmitWithTwosComplementChecksum>(writeMemory);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitSmallBuffer>(data);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(writeMemory);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitSmallBuffer>(data);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout writing memory");
         ExecuteCommand(onDone);
@@ -164,10 +160,10 @@ namespace services
     {
         constexpr uint8_t globalEraseSubCommand = 0xff;
 
-        AddCommand<TransmitWithTwosComplementChecksum>(erase);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitWithTwosComplementChecksum>(globalEraseSubCommand);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(erase);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(globalEraseSubCommand);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout erasing memory");
         ExecuteCommand(onDone);
@@ -177,10 +173,10 @@ namespace services
     {
         really_assert(pages.size() <= 255);
 
-        AddCommand<TransmitWithTwosComplementChecksum>(erase);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitSmallBuffer>(pages);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(erase);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitSmallBuffer>(pages);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout erasing memory");
         ExecuteCommand(onDone);
@@ -190,10 +186,10 @@ namespace services
     {
         this->subcommand = static_cast<uint16_t>(subcommand);
 
-        AddCommand<TransmitWithTwosComplementChecksum>(extendedErase);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->subcommand));
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->subcommand));
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout extended erasing memory");
         ExecuteCommand(onDone);
@@ -204,10 +200,10 @@ namespace services
         really_assert(pages.size() <= 256);
         really_assert(pages.size() % 2 == 0);
 
-        AddCommand<TransmitWithTwosComplementChecksum>(extendedErase);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitBigBuffer>((pages.size() / 2) - 1, pages);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitBigBuffer>((pages.size() / 2) - 1, pages);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout extended erasing memory");
         ExecuteCommand(onDone);
@@ -219,15 +215,15 @@ namespace services
 
         this->subcommand = subcommand;
 
-        AddCommand<TransmitWithTwosComplementChecksum>(special);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeByteRange(this->subcommand));
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitBigBuffer>(txData.size(), txData);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<ReceiveBigBufferAction>(rxData);
-        AddCommand<ReceiveBigBufferAction>(rxStatus);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(special);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitChecksummedBuffer>(infra::MakeByteRange(this->subcommand));
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitBigBuffer>(txData.size(), txData);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<ReceiveBigBuffer>(rxData);
+        AddCommandAction<ReceiveBigBuffer>(rxStatus);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout special command");
         ExecuteCommand(onDone);
@@ -240,16 +236,16 @@ namespace services
 
         this->subcommand = subcommand;
 
-        AddCommand<TransmitWithTwosComplementChecksum>(extendedSpecial);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeByteRange(this->subcommand));
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitBigBuffer>(txData1.size(), txData1);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitBigBuffer>(txData2.size(), txData2);
-        AddCommand<ReceiveAckAction>();
-        AddCommand<ReceiveBigBufferAction>(rxData);
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitWithTwosComplementChecksum>(extendedSpecial);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitChecksummedBuffer>(infra::MakeByteRange(this->subcommand));
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitBigBuffer>(txData1.size(), txData1);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<TransmitBigBuffer>(txData2.size(), txData2);
+        AddCommandAction<ReceiveAck>();
+        AddCommandAction<ReceiveBigBuffer>(rxData);
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout extended special command");
         ExecuteCommand(onDone);
@@ -257,8 +253,8 @@ namespace services
 
     void StUartBootloaderCommandHandler::InitializeUartBootloader()
     {
-        AddCommand<TransmitRawAction>(infra::MakeByteRange(uartInitializationData));
-        AddCommand<ReceiveAckAction>();
+        AddCommandAction<TransmitRaw>(infra::MakeByteRange(uartInitializationData));
+        AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout waiting for bootloader initialization");
         ExecuteCommand([this]()
@@ -268,7 +264,7 @@ namespace services
     }
 
     template<class T, class... Args>
-    void StUartBootloaderCommandHandler::AddCommand(Args&&... args)
+    void StUartBootloaderCommandHandler::AddCommandAction(Args&&... args)
     {
         commandActions.emplace_back(infra::InPlaceType<T>(), *this, std::forward<Args>(args)...);
     }
@@ -350,7 +346,7 @@ namespace services
     void StUartBootloaderCommandHandler::Action::DataReceived()
     {}
 
-    void StUartBootloaderCommandHandler::ReceiveAckAction::DataReceived()
+    void StUartBootloaderCommandHandler::ReceiveAck::DataReceived()
     {
         auto byte = handler.queue.Get();
 
@@ -360,22 +356,23 @@ namespace services
             handler.OnError("NACK received");
     }
 
-    StUartBootloaderCommandHandler::ReceiveBufferAction::ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data)
+    StUartBootloaderCommandHandler::ReceiveBuffer::ReceiveBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data)
         : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::ReceiveBufferAction::DataReceived()
+    void StUartBootloaderCommandHandler::ReceiveBuffer::DataReceived()
     {
         // add test case for wraparound
-        infra::ByteInputStream stream(handler.queue.ContiguousRange());
+        infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader reader(handler.queue);
+        infra::DataInputStream::WithErrorPolicy stream(reader, infra::noFail);
 
         if (!nBytesTotal)
             ExtractNumberOfBytes(stream);
 
         auto buffer = infra::Head(infra::DiscardHead(data, nBytesReceived), std::min(stream.Available(), *nBytesTotal - nBytesReceived));
         stream >> buffer;
-        handler.queue.Consume(buffer.size());
+        reader.Commit();
 
         nBytesReceived += buffer.size();
         if (nBytesReceived == nBytesTotal)
@@ -386,34 +383,32 @@ namespace services
     }
 
     StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size)
-        : StUartBootloaderCommandHandler::ReceiveBufferAction(handler, data)
+        : StUartBootloaderCommandHandler::ReceiveBuffer(handler, data)
         , size(size)
     {}
 
-    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ExtractNumberOfBytes([[maybe_unused]] infra::ByteInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ExtractNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(size);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveSmallBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveSmallBuffer::ExtractNumberOfBytes(infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(stream.Extract<uint8_t>() + 1);
-        handler.queue.Consume(sizeof(uint8_t));
     }
 
-    void StUartBootloaderCommandHandler::ReceiveBigBufferAction::ExtractNumberOfBytes(infra::ByteInputStream& stream)
+    void StUartBootloaderCommandHandler::ReceiveBigBuffer::ExtractNumberOfBytes(infra::DataInputStream& stream)
     {
         // 2 bytes received?
         nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
-        handler.queue.Consume(sizeof(uint16_t));
     }
 
-    StUartBootloaderCommandHandler::TransmitRawAction::TransmitRawAction(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
+    StUartBootloaderCommandHandler::TransmitRaw::TransmitRaw(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
         : StUartBootloaderCommandHandler::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::TransmitRawAction::Start()
+    void StUartBootloaderCommandHandler::TransmitRaw::Start()
     {
         handler.SendData(data);
     }

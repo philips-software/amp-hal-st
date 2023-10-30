@@ -3,20 +3,13 @@
 
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "infra/event/QueueForOneReaderOneIrqWriter.hpp"
-#include "infra/stream/ByteInputStream.hpp"
 #include "infra/timer/Timer.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedDeque.hpp"
 #include "infra/util/BoundedString.hpp"
-#include "infra/util/BoundedVector.hpp"
-#include "infra/util/ByteRange.hpp"
 #include "infra/util/Endian.hpp"
-#include "infra/util/Function.hpp"
-#include "infra/util/Optional.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
 #include "services/st_util/StBootloaderCommandHandler.hpp"
-#include <array>
-#include <cstdint>
 
 namespace services
 {
@@ -45,7 +38,7 @@ namespace services
         void InitializeUartBootloader();
 
         template<class T, class... Args>
-        void AddCommand(Args&&... args);
+        void AddCommandAction(Args&&... args);
 
         void ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
         void StartAction();
@@ -73,7 +66,7 @@ namespace services
             StUartBootloaderCommandHandler& handler;
         };
 
-        class ReceiveAckAction
+        class ReceiveAck
             : public Action
         {
         public:
@@ -82,16 +75,16 @@ namespace services
             void DataReceived() override;
         };
 
-        class ReceiveBufferAction
+        class ReceiveBuffer
             : public Action
         {
         public:
-            ReceiveBufferAction(StUartBootloaderCommandHandler& handler, infra::ByteRange& data);
+            ReceiveBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data);
 
             void DataReceived() override;
 
         protected:
-            virtual void ExtractNumberOfBytes(infra::ByteInputStream& stream) = 0;
+            virtual void ExtractNumberOfBytes(infra::DataInputStream& stream) = 0;
 
         protected:
             infra::ByteRange& data;
@@ -100,43 +93,43 @@ namespace services
         };
 
         class ReceivePredefinedBuffer
-            : public ReceiveBufferAction
+            : public ReceiveBuffer
         {
         public:
             ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size);
 
         protected:
-            void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
+            void ExtractNumberOfBytes(infra::DataInputStream& stream) override;
 
         private:
             const std::size_t size;
         };
 
-        class ReceiveSmallBufferAction
-            : public ReceiveBufferAction
+        class ReceiveSmallBuffer
+            : public ReceiveBuffer
         {
         public:
-            using ReceiveBufferAction::ReceiveBufferAction;
+            using ReceiveBuffer::ReceiveBuffer;
 
         protected:
-            void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
+            void ExtractNumberOfBytes(infra::DataInputStream& stream) override;
         };
 
-        class ReceiveBigBufferAction
-            : public ReceiveBufferAction
+        class ReceiveBigBuffer
+            : public ReceiveBuffer
         {
         public:
-            using ReceiveBufferAction::ReceiveBufferAction;
+            using ReceiveBuffer::ReceiveBuffer;
 
         protected:
-            void ExtractNumberOfBytes(infra::ByteInputStream& stream) override;
+            void ExtractNumberOfBytes(infra::DataInputStream& stream) override;
         };
 
-        class TransmitRawAction
+        class TransmitRaw
             : public Action
         {
         public:
-            TransmitRawAction(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
+            TransmitRaw(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data);
 
             void Start() override;
 
@@ -200,7 +193,7 @@ namespace services
         infra::AutoResetFunction<void(infra::BoundedConstString reason)> onError;
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
 
-        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAckAction, ReceivePredefinedBuffer, ReceiveSmallBufferAction, ReceiveBigBufferAction, TransmitRawAction, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
+        infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAck, ReceivePredefinedBuffer, ReceiveSmallBuffer, ReceiveBigBuffer, TransmitRaw, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
         infra::AutoResetFunction<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
         infra::BoundedString::WithStorage<46> timeoutReason;
         infra::TimerSingleShot timeout;
