@@ -407,6 +407,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special)
 
     ExpectReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
     ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ExpectReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
@@ -435,6 +436,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData)
 
     ExpectReceiveData({ 0x00, 0x00 });
     ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ExpectReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
@@ -463,6 +465,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxStatus)
 
     ExpectReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
     ExpectReceiveData({ 0x00, 0x00 });
+    ExpectReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
@@ -491,6 +494,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData_rxStatus)
 
     ExpectReceiveData({ 0x00, 0x00 });
     ExpectReceiveData({ 0x00, 0x00 });
+    ExpectReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
@@ -522,6 +526,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_txData)
 
     ExpectReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
     ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ExpectReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
@@ -566,6 +571,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial)
     ExpectReceiveData({ 0x79 });
 
     ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ExpectReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxDataBuffer);
 }

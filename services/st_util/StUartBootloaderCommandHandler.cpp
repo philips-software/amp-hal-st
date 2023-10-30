@@ -117,9 +117,11 @@ namespace services
     {
         this->address = address;
 
+        static auto range = infra::MakeConstByteRange(this->address);
+
         AddCommand<TransmitWithTwosComplementChecksum>(readMemory);
         AddCommand<ReceiveAckAction>();
-        AddCommand<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
+        AddCommand<TransmitChecksummedBuffer>(range);
         AddCommand<ReceiveAckAction>();
         AddCommand<TransmitWithTwosComplementChecksum>(data.size() - 1);
         AddCommand<ReceiveAckAction>();
@@ -226,6 +228,7 @@ namespace services
         AddCommand<ReceiveAckAction>();
         AddCommand<ReceiveBigBufferAction>(rxData);
         AddCommand<ReceiveBigBufferAction>(rxStatus);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout special command");
         ExecuteCommand(onDone);
@@ -247,6 +250,7 @@ namespace services
         AddCommand<TransmitBigBuffer>(txData2.size(), txData2);
         AddCommand<ReceiveAckAction>();
         AddCommand<ReceiveBigBufferAction>(rxData);
+        AddCommand<ReceiveAckAction>();
 
         SetCommandTimeout("Timeout extended special command");
         ExecuteCommand(onDone);

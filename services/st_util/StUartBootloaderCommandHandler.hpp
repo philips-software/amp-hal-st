@@ -179,7 +179,7 @@ namespace services
 
         private:
             infra::ConstByteRange data;
-            uint8_t checksum;
+            uint8_t checksum = 0;
         };
 
         class TransmitSmallBuffer
