@@ -20,8 +20,6 @@ target_sources(hal_st.stm32fxxx PRIVATE
     BackupRamStm.hpp
     CanStm.cpp
     CanStm.hpp
-    DacStm.cpp
-    DacStm.hpp
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockDiscoveryF746G.cpp>
