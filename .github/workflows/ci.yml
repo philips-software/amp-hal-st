@@ -15,14 +15,14 @@ jobs:
     name: Host Build & Test (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.0.0
         with:
           persist-credentials: false
       - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
         with:
           key: ${{ github.job }}-ubuntu-latest
           variant: sccache
-      - uses: seanmiddleditch/gha-setup-ninja@16b940825621068d98711680b6c3ff92201f8fc0 # v3
+      - uses: seanmiddleditch/gha-setup-ninja@8b297075da4cd2a5f1fd21fe011b499edf06e9d2 # v4
       - uses: lukka/run-cmake@c2b72aff009141774c5a5fabe74ea46c8c04d9c4 # v10.6
         with:
           configurePreset: "host"
@@ -47,7 +47,7 @@ jobs:
       matrix:
         os: [windows-latest, windows-2019, macos-latest]
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.0.0
         with:
           persist-credentials: false
       - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
@@ -85,7 +85,7 @@ jobs:
             configuration: "RelWithDebInfo"
             target: "stm32f767"
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
         uses: carlosperate/arm-none-eabi-gcc-action@6a221d7c85f5b36647d6e9b25e874abf187409d3 # v1.7.1
         with:
