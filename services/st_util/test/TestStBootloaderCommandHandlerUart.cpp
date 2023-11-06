@@ -324,6 +324,21 @@ TEST_F(StBootloaderCommandHandlerUartTest, MassErase)
     ReceiveData({ 0x79 });
 }
 
+TEST_F(StBootloaderCommandHandlerUartTest, MassErase_timeout)
+{
+    Initialize();
+    testing::StrictMock<infra::MockCallback<void()>> ondone;
+    std::array<uint8_t, 4> data;
+    uint32_t address = 0x01020304;
+
+    ExpectSendData(0x43, 0xbc);
+    handler.MassErase([&ondone]()
+        {
+            ondone.callback();
+        });
+    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout mass erasing memory");
+}
+
 TEST_F(StBootloaderCommandHandlerUartTest, Erase_pages)
 {
     Initialize();
@@ -351,7 +366,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Erase_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout erasing memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_mass)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedMassErase)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -361,6 +376,21 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_mass)
     ExpectSendData({ 0xff, 0xfe }, 0x01);
     ReceiveData({ 0x79 });
     ReceiveData({ 0x79 });
+}
+
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedMassErase_timeout)
+{
+    Initialize();
+    testing::StrictMock<infra::MockCallback<void()>> ondone;
+    std::array<uint8_t, 4> data;
+    uint32_t address = 0x01020304;
+
+    ExpectSendData(0x44, 0xbb);
+    handler.ExtendedMassErase(services::MassEraseSubcommand::bankTwo, [&ondone]()
+        {
+            ondone.callback();
+        });
+    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended mass erasing memory");
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
@@ -376,13 +406,14 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
+    std::array<infra::BigEndian<uint16_t>, 4> pages = { 0x0001, 0x0002, 0x0003, 0x0004 };
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedMassErase(services::MassEraseSubcommand::global, [&ondone]()
+    handler.ExtendedErase(infra::MakeByteRange(pages), [&ondone]()
         {
             ondone.callback();
         });

@@ -160,7 +160,7 @@ namespace services
         AddCommandAction<TransmitWithTwosComplementChecksum>(globalEraseSubCommand);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout erasing memory");
+        SetCommandTimeout("Timeout mass erasing memory");
         ExecuteCommand(onDone);
     }
 
@@ -186,7 +186,7 @@ namespace services
         AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->subcommand));
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout extended erasing memory");
+        SetCommandTimeout("Timeout extended mass erasing memory");
         ExecuteCommand(onDone);
     }
 
