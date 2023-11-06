@@ -68,7 +68,7 @@ public:
         ForwardTime(timeout);
     }
 
-    void ExpectReceiveData(std::vector<uint8_t> data)
+    void ReceiveData(std::vector<uint8_t> data)
     {
         serialCommunication.dataReceived(data);
         ExecuteAllActions();
@@ -118,7 +118,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, receive_nack)
             ondone.callback();
         });
     EXPECT_CALL(onErrorMock, callback(infra::BoundedConstString{ "NACK received" }));
-    ExpectReceiveData({ 0x1f });
+    ReceiveData({ 0x1f });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, GetCommand)
@@ -130,7 +130,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetCommand)
 
     ExpectSendData(0x00, 0xff);
     handler.GetCommand(commands, ondone);
-    ExpectReceiveData({ 0x79, 0x0b, 0x32, 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92, 0x79 });
+    ReceiveData({ 0x79, 0x0b, 0x32, 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92, 0x79 });
 
     EXPECT_EQ(commands.size(), 0x0b);
     EXPECT_EQ((std::array<uint8_t, 15>{ 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92 }), commandsbuffer);
@@ -145,8 +145,8 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_receive_in_parts)
 
     ExpectSendData(0x00, 0xff);
     handler.GetCommand(commands, ondone);
-    ExpectReceiveData({ 0x79, 0x0b, 0x32, 0x00, 0x01 });
-    ExpectReceiveData({ 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92, 0x79 });
+    ReceiveData({ 0x79, 0x0b, 0x32, 0x00, 0x01 });
+    ReceiveData({ 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92, 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 15>{ 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92 }), commandsbuffer);
 }
@@ -173,7 +173,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetVersion)
 
     ExpectSendData(0x01, 0xfe);
     handler.GetVersion(ondone);
-    ExpectReceiveData({ 0x79, 0x31, 0x00, 0x00, 0x79 });
+    ReceiveData({ 0x79, 0x31, 0x00, 0x00, 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, GetVersion_timeout)
@@ -196,7 +196,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetId)
 
     ExpectSendData(0x02, 0xfd);
     handler.GetId(ondone);
-    ExpectReceiveData({ 0x79, 0x01, 0x04, 0x95, 0x79 });
+    ReceiveData({ 0x79, 0x01, 0x04, 0x95, 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, GetId_timeout)
@@ -224,13 +224,13 @@ TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory)
     handler.ReadMemory(address, data, ondone);
 
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData(0x02, 0xFD);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x05, 0x06, 0x07 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x05, 0x06, 0x07 });
 
     EXPECT_EQ((std::array<uint8_t, 3>{ 0x05, 0x06, 0x07 }), dataBuffer);
 }
@@ -260,9 +260,9 @@ TEST_F(StBootloaderCommandHandlerUartTest, Go)
     handler.Go(address, ondone);
 
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, Go_timeout)
@@ -290,11 +290,11 @@ TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory)
     handler.WriteMemory(address, infra::MakeByteRange(data), ondone);
 
     ExpectSendData({ 0x01, 0x02, 0x03, 0x04 }, 0x04);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x03 }, { 0x05, 0x06, 0x07, 0x08 }, 0x0f);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory_timeout)
@@ -320,8 +320,8 @@ TEST_F(StBootloaderCommandHandlerUartTest, MassErase)
     ExpectSendData(0x43, 0xbc);
     handler.MassErase(ondone);
     ExpectSendData(0xff, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, Erase_pages)
@@ -333,8 +333,8 @@ TEST_F(StBootloaderCommandHandlerUartTest, Erase_pages)
     ExpectSendData(0x43, 0xbc);
     handler.Erase(infra::MakeByteRange(pages), ondone);
     ExpectSendData({ 0x03 }, { 0x01, 0x02, 0x03, 0x04 }, 0x07);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, Erase_timeout)
@@ -359,8 +359,8 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_mass)
     ExpectSendData(0x44, 0xbb);
     handler.ExtendedMassErase(services::MassEraseSubcommand::bankOne, ondone);
     ExpectSendData({ 0xff, 0xfe }, 0x01);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
@@ -372,8 +372,8 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
     ExpectSendData(0x44, 0xbb);
     handler.ExtendedErase(infra::MakeByteRange(pages), ondone);
     ExpectSendData({ 0x00, 0x03 }, { 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04 }, 0x07);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 }
 
 TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_timeout)
@@ -404,15 +404,15 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special)
     handler.Special(subcommand, infra::MakeConstByteRange(txData), rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x04 }, { 0x01, 0x02, 0x03, 0x04 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
-    ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
+    ReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
@@ -433,15 +433,15 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData)
     handler.Special(subcommand, infra::MakeConstByteRange(txData), rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x04 }, { 0x01, 0x02, 0x03, 0x04 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00, 0x00 });
-    ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00, 0x00 });
+    ReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
@@ -462,15 +462,15 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxStatus)
     handler.Special(subcommand, infra::MakeConstByteRange(txData), rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x04 }, { 0x01, 0x02, 0x03, 0x04 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
-    ExpectReceiveData({ 0x00, 0x00 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
+    ReceiveData({ 0x00, 0x00 });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
@@ -491,15 +491,15 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData_rxStatus)
     handler.Special(subcommand, infra::MakeConstByteRange(txData), rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x04 }, { 0x01, 0x02, 0x03, 0x04 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00, 0x00 });
-    ExpectReceiveData({ 0x00, 0x00 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00, 0x00 });
+    ReceiveData({ 0x00, 0x00 });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
@@ -519,15 +519,15 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_txData)
     handler.Special(subcommand, infra::ConstByteRange{}, rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x00 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
-    ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00, 0x04, 0x05, 0x06, 0x07, 0x08 });
+    ReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
@@ -562,17 +562,17 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial)
     handler.ExtendedSpecial(subcommand, infra::MakeConstByteRange(txData1), infra::MakeConstByteRange(txData2), rxData, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x04 }, { 0x01, 0x02, 0x03, 0x04 }, 0x00);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x04 }, { 0x05, 0x06, 0x07, 0x08 }, 0x08);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxDataBuffer);
 }
@@ -608,11 +608,11 @@ TEST_F(StBootloaderCommandHandlerUartTest, receive_data_with_wrapped_around_queu
     handler.Special(subcommand, infra::ConstByteRange{}, rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x00 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     std::vector<uint8_t> rxDataSimulated;
     rxDataSimulated.emplace_back(0x00);
@@ -620,9 +620,9 @@ TEST_F(StBootloaderCommandHandlerUartTest, receive_data_with_wrapped_around_queu
     rxDataSimulated.resize(256, 0xaa);
     rxDataSimulated.emplace_back(0xbb);
 
-    ExpectReceiveData(rxDataSimulated);
-    ExpectReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData(rxDataSimulated);
+    ReceiveData({ 0x00, 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ReceiveData({ 0x79 });
 
     infra::ConstByteRange rxDataSimulatedRange(rxDataSimulated.data(), rxDataSimulated.data() + rxDataSimulated.size());
     rxDataSimulatedRange = infra::DiscardHead(rxDataSimulatedRange, 2);
@@ -645,17 +645,17 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_receive_buffer_size_received_
     handler.Special(subcommand, infra::ConstByteRange{}, rxData, rxStatus, ondone);
 
     ExpectSendData({ 0x00, 0x54 }, 0x54);
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
     ExpectSendData({ 0x00, 0x00 }, 0x00);
-    ExpectReceiveData({ 0x79 });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
+    ReceiveData({ 0x79 });
 
-    ExpectReceiveData({ 0x00 });
-    ExpectReceiveData({ 0x04, 0x05, 0x06, 0x07, 0x08 });
-    ExpectReceiveData({ 0x00 });
-    ExpectReceiveData({ 0x04, 0x09, 0x0a, 0x0b, 0x0c });
-    ExpectReceiveData({ 0x79 });
+    ReceiveData({ 0x00 });
+    ReceiveData({ 0x04, 0x05, 0x06, 0x07, 0x08 });
+    ReceiveData({ 0x00 });
+    ReceiveData({ 0x04, 0x09, 0x0a, 0x0b, 0x0c });
+    ReceiveData({ 0x79 });
 
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x05, 0x06, 0x07, 0x08 }), rxDataBuffer);
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
