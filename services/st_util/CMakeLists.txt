@@ -11,8 +11,8 @@ target_sources(services.st_util PRIVATE
     StUartProgrammer.cpp
     StUartProgrammer.hpp
     StBootloaderCommandHandler.hpp
-    StUartBootloaderCommandHandler.cpp
-    StUartBootloaderCommandHandler.hpp
+    StBootloaderCommandHandlerUart.cpp
+    StBootloaderCommandHandlerUart.hpp
 )
 
 target_link_libraries(services.st_util PUBLIC

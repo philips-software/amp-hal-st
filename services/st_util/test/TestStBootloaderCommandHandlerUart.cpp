@@ -2,7 +2,7 @@
 #include "infra/timer/test_helper/ClockFixture.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
-#include "services/st_util/StUartBootloaderCommandHandler.hpp"
+#include "services/st_util/StBootloaderCommandHandlerUart.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <cstdint>
@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <vector>
 
-class StUartBootloaderCommandHandlerTest
+class StBootloaderCommandHandlerUartTest
     : public testing::Test
     , public infra::ClockFixture
 {
@@ -90,22 +90,22 @@ public:
         {
             ExpectSendData({ 0x7f });
         } };
-    services::StUartBootloaderCommandHandler handler{ serialCommunication, onInitialized, onError };
+    services::StBootloaderCommandHandlerUart handler{ serialCommunication, onInitialized, onError };
 };
 
-TEST_F(StUartBootloaderCommandHandlerTest, creation_initializes_uart_bootloader)
+TEST_F(StBootloaderCommandHandlerUartTest, creation_initializes_uart_bootloader)
 {
     Initialize();
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, creation_initializes_uart_bootloader_fails)
+TEST_F(StBootloaderCommandHandlerUartTest, creation_initializes_uart_bootloader_fails)
 {
     infra::BoundedConstString::WithStorage<64> errorMessage("Timeout waiting for bootloader initialization");
     EXPECT_CALL(onErrorMock, callback(errorMessage));
     ForwardTime(std::chrono::milliseconds(1000));
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, receive_nack)
+TEST_F(StBootloaderCommandHandlerUartTest, receive_nack)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -121,7 +121,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, receive_nack)
     ExpectReceiveData({ 0x1f });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetCommand)
+TEST_F(StBootloaderCommandHandlerUartTest, GetCommand)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 2);
@@ -136,7 +136,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetCommand)
     EXPECT_EQ((std::array<uint8_t, 15>{ 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92 }), commandsbuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetCommand_receive_in_parts)
+TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_receive_in_parts)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 2);
@@ -151,7 +151,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetCommand_receive_in_parts)
     EXPECT_EQ((std::array<uint8_t, 15>{ 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92 }), commandsbuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetCommand_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -166,7 +166,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetCommand_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting commands");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetVersion)
+TEST_F(StBootloaderCommandHandlerUartTest, GetVersion)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 1);
@@ -176,7 +176,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetVersion)
     ExpectReceiveData({ 0x79, 0x31, 0x00, 0x00, 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetVersion_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, GetVersion_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -189,7 +189,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetVersion_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting version");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetId)
+TEST_F(StBootloaderCommandHandlerUartTest, GetId)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint16_t)> ondone(0x0495);
@@ -199,7 +199,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetId)
     ExpectReceiveData({ 0x79, 0x01, 0x04, 0x95, 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, GetId_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, GetId_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -212,7 +212,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, GetId_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting id");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ReadMemory)
+TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -235,7 +235,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ReadMemory)
     EXPECT_EQ((std::array<uint8_t, 3>{ 0x05, 0x06, 0x07 }), dataBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ReadMemory_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -250,7 +250,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ReadMemory_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout reading memory");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Go)
+TEST_F(StBootloaderCommandHandlerUartTest, Go)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -265,7 +265,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Go)
     ExpectReceiveData({ 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Go_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, Go_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -279,7 +279,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Go_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout go");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, WriteMemory)
+TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -297,7 +297,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, WriteMemory)
     ExpectReceiveData({ 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, WriteMemory_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -312,7 +312,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, WriteMemory_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout writing memory");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, MassErase)
+TEST_F(StBootloaderCommandHandlerUartTest, MassErase)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -324,7 +324,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, MassErase)
     ExpectReceiveData({ 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Erase_pages)
+TEST_F(StBootloaderCommandHandlerUartTest, Erase_pages)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -337,7 +337,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Erase_pages)
     ExpectReceiveData({ 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Erase_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, Erase_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -351,7 +351,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Erase_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout erasing memory");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_mass)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_mass)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -363,7 +363,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_mass)
     ExpectReceiveData({ 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_pages)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -376,7 +376,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_pages)
     ExpectReceiveData({ 0x79 });
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -389,7 +389,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedErase_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended erasing memory");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special)
+TEST_F(StBootloaderCommandHandlerUartTest, Special)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -418,7 +418,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData)
+TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -447,7 +447,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxStatus)
+TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxStatus)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -476,7 +476,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxStatus)
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData_rxStatus)
+TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData_rxStatus)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -505,7 +505,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_rxData_rxStatus)
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_txData)
+TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_txData)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -533,7 +533,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_empty_txData)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, Special_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -548,7 +548,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, Special_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout special command");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -577,7 +577,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxDataBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial_timeout)
+TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -591,7 +591,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, ExtendedSpecial_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended special command");
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, receive_data_with_wrapped_around_queue)
+TEST_F(StBootloaderCommandHandlerUartTest, receive_data_with_wrapped_around_queue)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -631,7 +631,7 @@ TEST_F(StUartBootloaderCommandHandlerTest, receive_data_with_wrapped_around_queu
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StUartBootloaderCommandHandlerTest, Special_receive_buffer_size_received_in_parts)
+TEST_F(StBootloaderCommandHandlerUartTest, Special_receive_buffer_size_received_in_parts)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;

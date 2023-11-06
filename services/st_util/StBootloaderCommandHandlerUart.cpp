@@ -1,4 +1,4 @@
-#include "services/st_util/StUartBootloaderCommandHandler.hpp"
+#include "services/st_util/StBootloaderCommandHandlerUart.hpp"
 #include "infra/util/Optional.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -25,7 +25,7 @@ namespace
 
 namespace services
 {
-    StUartBootloaderCommandHandler::StUartBootloaderCommandHandler(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError)
+    StBootloaderCommandHandlerUart::StBootloaderCommandHandlerUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError)
         : serial(serial)
         , onInitialized(onInitialized)
         , onError(onError)
@@ -42,12 +42,12 @@ namespace services
         InitializeUartBootloader();
     }
 
-    StUartBootloaderCommandHandler::~StUartBootloaderCommandHandler()
+    StBootloaderCommandHandlerUart::~StBootloaderCommandHandlerUart()
     {
         serial.ReceiveData([](auto data) {});
     }
 
-    void StUartBootloaderCommandHandler::GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
+    void StBootloaderCommandHandlerUart::GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
         really_assert(commands.size() >= 15);
 
@@ -72,7 +72,7 @@ namespace services
             });
     }
 
-    void StUartBootloaderCommandHandler::GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
+    void StBootloaderCommandHandlerUart::GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
         AddCommandAction<TransmitWithTwosComplementChecksum>(getVersion);
         AddCommandAction<ReceiveAck>();
@@ -88,7 +88,7 @@ namespace services
             });
     }
 
-    void StUartBootloaderCommandHandler::GetId(const infra::Function<void(uint16_t id)>& onDone)
+    void StBootloaderCommandHandlerUart::GetId(const infra::Function<void(uint16_t id)>& onDone)
     {
         AddCommandAction<TransmitWithTwosComplementChecksum>(getId);
         AddCommandAction<ReceiveAck>();
@@ -103,7 +103,7 @@ namespace services
             });
     }
 
-    void StUartBootloaderCommandHandler::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
         really_assert(data.size() <= 255);
 
@@ -121,7 +121,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::Go(uint32_t address, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::Go(uint32_t address, const infra::Function<void()>& onDone)
     {
         this->address = address;
 
@@ -134,7 +134,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
         really_assert(data.size() <= 255);
 
@@ -151,7 +151,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::MassErase(const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::MassErase(const infra::Function<void()>& onDone)
     {
         constexpr uint8_t globalEraseSubCommand = 0xff;
 
@@ -164,7 +164,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
         really_assert(pages.size() <= 255);
 
@@ -177,7 +177,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone)
     {
         this->subcommand = static_cast<uint16_t>(subcommand);
 
@@ -190,7 +190,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
         really_assert(pages.size() % 2 == 0);
 
@@ -203,7 +203,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone)
     {
         really_assert(txData.size() <= 128);
 
@@ -223,7 +223,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone)
+    void StBootloaderCommandHandlerUart::ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone)
     {
         really_assert(txData1.size() <= 128);
         really_assert(txData2.size() <= 1024);
@@ -245,7 +245,7 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StUartBootloaderCommandHandler::InitializeUartBootloader()
+    void StBootloaderCommandHandlerUart::InitializeUartBootloader()
     {
         AddCommandAction<TransmitRaw>(infra::MakeByteRange(uartInitializationData));
         AddCommandAction<ReceiveAck>();
@@ -258,36 +258,36 @@ namespace services
     }
 
     template<class T, class... Args>
-    void StUartBootloaderCommandHandler::AddCommandAction(Args&&... args)
+    void StBootloaderCommandHandlerUart::AddCommandAction(Args&&... args)
     {
         commandActions.emplace_back(infra::InPlaceType<T>(), *this, std::forward<Args>(args)...);
     }
 
-    void StUartBootloaderCommandHandler::ExecuteCommand(const infra::Function<void(), sizeof(StUartBootloaderCommandHandler*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
+    void StBootloaderCommandHandlerUart::ExecuteCommand(const infra::Function<void(), sizeof(StBootloaderCommandHandlerUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
     {
         this->onCommandExecuted = onCommandExecuted;
         StartCurrentAction();
     }
 
-    void StUartBootloaderCommandHandler::StartCurrentAction()
+    void StBootloaderCommandHandlerUart::StartCurrentAction()
     {
         commandActions.front()->Start();
         TryHandleDataReceived();
     }
 
-    void StUartBootloaderCommandHandler::TryHandleDataReceived()
+    void StBootloaderCommandHandlerUart::TryHandleDataReceived()
     {
         if (!queue.Empty())
             commandActions.front()->DataReceived();
     }
 
-    void StUartBootloaderCommandHandler::OnCommandExecuted()
+    void StBootloaderCommandHandlerUart::OnCommandExecuted()
     {
         timeout.Cancel();
         onCommandExecuted();
     }
 
-    void StUartBootloaderCommandHandler::OnActionExecuted()
+    void StBootloaderCommandHandlerUart::OnActionExecuted()
     {
         commandActions.pop_front();
 
@@ -297,7 +297,7 @@ namespace services
             StartCurrentAction();
     }
 
-    void StUartBootloaderCommandHandler::SetCommandTimeout(infra::BoundedConstString reason)
+    void StBootloaderCommandHandlerUart::SetCommandTimeout(infra::BoundedConstString reason)
     {
         timeoutReason = reason;
         timeout.Start(commandTimeout, [this]()
@@ -306,7 +306,7 @@ namespace services
             });
     }
 
-    void StUartBootloaderCommandHandler::OnError(infra::BoundedConstString reason)
+    void StBootloaderCommandHandlerUart::OnError(infra::BoundedConstString reason)
     {
         timeout.Cancel();
         serial.ReceiveData([](auto data) {});
@@ -314,7 +314,7 @@ namespace services
             onError(reason);
     }
 
-    void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data, uint8_t checksum)
+    void StBootloaderCommandHandlerUart::SendData(infra::ConstByteRange data, uint8_t checksum)
     {
         serial.SendData(data, [this, checksum]()
             {
@@ -322,7 +322,7 @@ namespace services
             });
     }
 
-    void StUartBootloaderCommandHandler::SendData(infra::ConstByteRange data)
+    void StBootloaderCommandHandlerUart::SendData(infra::ConstByteRange data)
     {
         serial.SendData(data, [this]()
             {
@@ -330,17 +330,17 @@ namespace services
             });
     }
 
-    StUartBootloaderCommandHandler::Action::Action(StUartBootloaderCommandHandler& handler)
+    StBootloaderCommandHandlerUart::Action::Action(StBootloaderCommandHandlerUart& handler)
         : handler(handler)
     {}
 
-    void StUartBootloaderCommandHandler::Action::Start()
+    void StBootloaderCommandHandlerUart::Action::Start()
     {}
 
-    void StUartBootloaderCommandHandler::Action::DataReceived()
+    void StBootloaderCommandHandlerUart::Action::DataReceived()
     {}
 
-    void StUartBootloaderCommandHandler::ReceiveAck::DataReceived()
+    void StBootloaderCommandHandlerUart::ReceiveAck::DataReceived()
     {
         auto byte = handler.queue.Get();
 
@@ -350,12 +350,12 @@ namespace services
             handler.OnError("NACK received");
     }
 
-    StUartBootloaderCommandHandler::ReceiveBuffer::ReceiveBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data)
-        : StUartBootloaderCommandHandler::Action(handler)
+    StBootloaderCommandHandlerUart::ReceiveBuffer::ReceiveBuffer(StBootloaderCommandHandlerUart& handler, infra::ByteRange& data)
+        : StBootloaderCommandHandlerUart::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::ReceiveBuffer::DataReceived()
+    void StBootloaderCommandHandlerUart::ReceiveBuffer::DataReceived()
     {
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader reader(handler.queue);
         infra::DataInputStream::WithErrorPolicy stream(reader, infra::noFail);
@@ -367,7 +367,7 @@ namespace services
         CheckActionExecuted();
     }
 
-    bool StUartBootloaderCommandHandler::ReceiveBuffer::TotalNumberOfBytesAvailable(infra::DataInputStream& stream)
+    bool StBootloaderCommandHandlerUart::ReceiveBuffer::TotalNumberOfBytesAvailable(infra::DataInputStream& stream)
     {
         if (nBytesTotal == infra::none)
             TryRetreiveNumberOfBytes(stream);
@@ -375,7 +375,7 @@ namespace services
         return nBytesTotal != infra::none;
     }
 
-    void StUartBootloaderCommandHandler::ReceiveBuffer::RetreiveData(infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader& reader, infra::DataInputStream& stream)
+    void StBootloaderCommandHandlerUart::ReceiveBuffer::RetreiveData(infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader& reader, infra::DataInputStream& stream)
     {
         auto buffer = infra::Head(infra::DiscardHead(data, nBytesReceived), std::min(stream.Available(), *nBytesTotal - nBytesReceived));
         stream >> buffer;
@@ -383,7 +383,7 @@ namespace services
         nBytesReceived += buffer.size();
     }
 
-    void StUartBootloaderCommandHandler::ReceiveBuffer::CheckActionExecuted()
+    void StBootloaderCommandHandlerUart::ReceiveBuffer::CheckActionExecuted()
     {
         if (nBytesReceived == nBytesTotal)
         {
@@ -392,62 +392,62 @@ namespace services
         }
     }
 
-    StUartBootloaderCommandHandler::ReceivePredefinedBuffer::ReceivePredefinedBuffer(StUartBootloaderCommandHandler& handler, infra::ByteRange& data, const std::size_t size)
-        : StUartBootloaderCommandHandler::ReceiveBuffer(handler, data)
+    StBootloaderCommandHandlerUart::ReceivePredefinedBuffer::ReceivePredefinedBuffer(StBootloaderCommandHandlerUart& handler, infra::ByteRange& data, const std::size_t size)
+        : StBootloaderCommandHandlerUart::ReceiveBuffer(handler, data)
         , size(size)
     {}
 
-    void StUartBootloaderCommandHandler::ReceivePredefinedBuffer::TryRetreiveNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
+    void StBootloaderCommandHandlerUart::ReceivePredefinedBuffer::TryRetreiveNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(size);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveSmallBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
+    void StBootloaderCommandHandlerUart::ReceiveSmallBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
     {
         nBytesTotal.Emplace(stream.Extract<uint8_t>() + 1);
     }
 
-    void StUartBootloaderCommandHandler::ReceiveBigBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
+    void StBootloaderCommandHandlerUart::ReceiveBigBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
     {
         if (stream.Available() >= sizeof(uint16_t))
             nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
     }
 
-    StUartBootloaderCommandHandler::TransmitRaw::TransmitRaw(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
-        : StUartBootloaderCommandHandler::Action(handler)
+    StBootloaderCommandHandlerUart::TransmitRaw::TransmitRaw(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data)
+        : StBootloaderCommandHandlerUart::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::TransmitRaw::Start()
+    void StBootloaderCommandHandlerUart::TransmitRaw::Start()
     {
         handler.SendData(data);
     }
 
-    StUartBootloaderCommandHandler::TransmitWithTwosComplementChecksum::TransmitWithTwosComplementChecksum(StUartBootloaderCommandHandler& handler, uint8_t data)
-        : StUartBootloaderCommandHandler::Action(handler)
+    StBootloaderCommandHandlerUart::TransmitWithTwosComplementChecksum::TransmitWithTwosComplementChecksum(StBootloaderCommandHandlerUart& handler, uint8_t data)
+        : StBootloaderCommandHandlerUart::Action(handler)
         , data(data)
     {}
 
-    void StUartBootloaderCommandHandler::TransmitWithTwosComplementChecksum::Start()
+    void StBootloaderCommandHandlerUart::TransmitWithTwosComplementChecksum::Start()
     {
         uint8_t checksum = data ^ 0xff;
         handler.SendData(infra::MakeConstByteRange(data), checksum);
     }
 
-    StUartBootloaderCommandHandler::TransmitChecksummedBuffer::TransmitChecksummedBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
-        : StUartBootloaderCommandHandler::Action(handler)
+    StBootloaderCommandHandlerUart::TransmitChecksummedBuffer::TransmitChecksummedBuffer(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data)
+        : StBootloaderCommandHandlerUart::Action(handler)
         , data(data)
     {
         for (auto& byte : data)
             AddToChecksum(byte);
     }
 
-    void StUartBootloaderCommandHandler::TransmitChecksummedBuffer::AddToChecksum(const uint8_t& byte)
+    void StBootloaderCommandHandlerUart::TransmitChecksummedBuffer::AddToChecksum(const uint8_t& byte)
     {
         checksum ^= byte;
     }
 
-    void StUartBootloaderCommandHandler::TransmitChecksummedBuffer::Start()
+    void StBootloaderCommandHandlerUart::TransmitChecksummedBuffer::Start()
     {
         if (data.empty())
             handler.SendData(infra::MakeConstByteRange(checksum));
@@ -455,34 +455,34 @@ namespace services
             handler.SendData(data, checksum);
     }
 
-    StUartBootloaderCommandHandler::TransmitSmallBuffer::TransmitSmallBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data)
-        : StUartBootloaderCommandHandler::TransmitChecksummedBuffer(handler, data)
+    StBootloaderCommandHandlerUart::TransmitSmallBuffer::TransmitSmallBuffer(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data)
+        : StBootloaderCommandHandlerUart::TransmitChecksummedBuffer(handler, data)
     {
         size = data.size() - 1;
         AddToChecksum(size);
     }
 
-    void StUartBootloaderCommandHandler::TransmitSmallBuffer::Start()
+    void StBootloaderCommandHandlerUart::TransmitSmallBuffer::Start()
     {
         handler.serial.SendData(infra::MakeConstByteRange(size), [this]()
             {
-                StUartBootloaderCommandHandler::TransmitChecksummedBuffer::Start();
+                StBootloaderCommandHandlerUart::TransmitChecksummedBuffer::Start();
             });
     }
 
-    StUartBootloaderCommandHandler::TransmitBigBuffer::TransmitBigBuffer(StUartBootloaderCommandHandler& handler, infra::ConstByteRange data, uint16_t size)
-        : StUartBootloaderCommandHandler::TransmitChecksummedBuffer(handler, data)
+    StBootloaderCommandHandlerUart::TransmitBigBuffer::TransmitBigBuffer(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data, uint16_t size)
+        : StBootloaderCommandHandlerUart::TransmitChecksummedBuffer(handler, data)
         , size(size)
     {
         AddToChecksum(static_cast<uint8_t>(size >> 8));
         AddToChecksum(static_cast<uint8_t>(size & 0xff));
     }
 
-    void StUartBootloaderCommandHandler::TransmitBigBuffer::Start()
+    void StBootloaderCommandHandlerUart::TransmitBigBuffer::Start()
     {
         handler.serial.SendData(infra::MakeConstByteRange(size), [this]()
             {
-                StUartBootloaderCommandHandler::TransmitChecksummedBuffer::Start();
+                StBootloaderCommandHandlerUart::TransmitChecksummedBuffer::Start();
             });
     }
 }
