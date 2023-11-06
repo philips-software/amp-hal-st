@@ -87,10 +87,10 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
-        uses: carlosperate/arm-none-eabi-gcc-action@6a221d7c85f5b36647d6e9b25e874abf187409d3 # v1.7.1
+        uses: carlosperate/arm-none-eabi-gcc-action@e9cd61b92edb079b14b2d0449b21f8a517121fe8 # v1.8.0
         with:
           release: ${{ matrix.gcc }}
-      - uses: hendrikmuhs/ccache-action@ca3acd2731eef11f1572ccb126356c2f9298d35e # v1.2.9
+      - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
       - run: |
