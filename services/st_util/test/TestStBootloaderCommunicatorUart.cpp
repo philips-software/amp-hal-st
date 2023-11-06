@@ -2,7 +2,7 @@
 #include "infra/timer/test_helper/ClockFixture.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
-#include "services/st_util/StBootloaderCommandHandlerUart.hpp"
+#include "services/st_util/StBootloaderCommunicatorUart.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <cstdint>
@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <vector>
 
-class StBootloaderCommandHandlerUartTest
+class StBootloaderCommunicatorUartTest
     : public testing::Test
     , public infra::ClockFixture
 {
@@ -90,22 +90,22 @@ public:
         {
             ExpectSendData({ 0x7f });
         } };
-    services::StBootloaderCommandHandlerUart handler{ serialCommunication, onInitialized, onError };
+    services::StBootloaderCommunicatorUart handler{ serialCommunication, onInitialized, onError };
 };
 
-TEST_F(StBootloaderCommandHandlerUartTest, creation_initializes_uart_bootloader)
+TEST_F(StBootloaderCommunicatorUartTest, creation_initializes_uart_bootloader)
 {
     Initialize();
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, creation_initializes_uart_bootloader_fails)
+TEST_F(StBootloaderCommunicatorUartTest, creation_initializes_uart_bootloader_fails)
 {
     infra::BoundedConstString::WithStorage<64> errorMessage("Timeout waiting for bootloader initialization");
     EXPECT_CALL(onErrorMock, callback(errorMessage));
     ForwardTime(std::chrono::milliseconds(1000));
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, receive_nack)
+TEST_F(StBootloaderCommunicatorUartTest, receive_nack)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -121,7 +121,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, receive_nack)
     ReceiveData({ 0x1f });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetCommand)
+TEST_F(StBootloaderCommunicatorUartTest, GetCommand)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 2);
@@ -136,7 +136,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetCommand)
     EXPECT_EQ((std::array<uint8_t, 15>{ 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92 }), commandsbuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_receive_in_parts)
+TEST_F(StBootloaderCommunicatorUartTest, GetCommand_receive_in_parts)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 2);
@@ -151,7 +151,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_receive_in_parts)
     EXPECT_EQ((std::array<uint8_t, 15>{ 0x00, 0x01, 0x02, 0x11, 0x21, 0x31, 0x44, 0x63, 0x73, 0x82, 0x92 }), commandsbuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, GetCommand_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -166,7 +166,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetCommand_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting commands");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetVersion)
+TEST_F(StBootloaderCommunicatorUartTest, GetVersion)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 1);
@@ -176,7 +176,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetVersion)
     ReceiveData({ 0x79, 0x31, 0x00, 0x00, 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetVersion_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, GetVersion_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -189,7 +189,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetVersion_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting version");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetId)
+TEST_F(StBootloaderCommunicatorUartTest, GetId)
 {
     Initialize();
     infra::VerifyingFunctionMock<void(uint16_t)> ondone(0x0495);
@@ -199,7 +199,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetId)
     ReceiveData({ 0x79, 0x01, 0x04, 0x95, 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, GetId_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, GetId_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -212,7 +212,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, GetId_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting id");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory)
+TEST_F(StBootloaderCommunicatorUartTest, ReadMemory)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -235,7 +235,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory)
     EXPECT_EQ((std::array<uint8_t, 3>{ 0x05, 0x06, 0x07 }), dataBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, ReadMemory_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -250,7 +250,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ReadMemory_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout reading memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Go)
+TEST_F(StBootloaderCommunicatorUartTest, Go)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -265,7 +265,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Go)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Go_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, Go_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -279,7 +279,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Go_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout go");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory)
+TEST_F(StBootloaderCommunicatorUartTest, WriteMemory)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -297,7 +297,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, WriteMemory_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -312,7 +312,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, WriteMemory_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout writing memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, MassErase)
+TEST_F(StBootloaderCommunicatorUartTest, MassErase)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -324,7 +324,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, MassErase)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, MassErase_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, MassErase_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -339,7 +339,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, MassErase_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout mass erasing memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Erase_pages)
+TEST_F(StBootloaderCommunicatorUartTest, Erase_pages)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -352,7 +352,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Erase_pages)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Erase_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, Erase_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -366,7 +366,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Erase_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout erasing memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedMassErase)
+TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -378,7 +378,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedMassErase)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedMassErase_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -393,7 +393,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedMassErase_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended mass erasing memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
+TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -406,7 +406,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages)
     ReceiveData({ 0x79 });
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -420,7 +420,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedErase_pages_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended erasing memory");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special)
+TEST_F(StBootloaderCommunicatorUartTest, Special)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -449,7 +449,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData)
+TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxData)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -478,7 +478,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxStatus)
+TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxStatus)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -507,7 +507,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxStatus)
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData_rxStatus)
+TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxData_rxStatus)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -536,7 +536,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_rxData_rxStatus)
     EXPECT_EQ((std::array<uint8_t, 4>{}), rxStatusBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_txData)
+TEST_F(StBootloaderCommunicatorUartTest, Special_empty_txData)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -564,7 +564,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_empty_txData)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, Special_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -579,7 +579,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, Special_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout special command");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial)
+TEST_F(StBootloaderCommunicatorUartTest, ExtendedSpecial)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -608,7 +608,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial)
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxDataBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial_timeout)
+TEST_F(StBootloaderCommunicatorUartTest, ExtendedSpecial_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
@@ -622,7 +622,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, ExtendedSpecial_timeout)
     ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended special command");
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, receive_data_with_wrapped_around_queue)
+TEST_F(StBootloaderCommunicatorUartTest, receive_data_with_wrapped_around_queue)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;
@@ -662,7 +662,7 @@ TEST_F(StBootloaderCommandHandlerUartTest, receive_data_with_wrapped_around_queu
     EXPECT_EQ((std::array<uint8_t, 4>{ 0x09, 0x0a, 0x0b, 0x0c }), rxStatusBuffer);
 }
 
-TEST_F(StBootloaderCommandHandlerUartTest, Special_receive_buffer_size_received_in_parts)
+TEST_F(StBootloaderCommunicatorUartTest, Special_receive_buffer_size_received_in_parts)
 {
     Initialize();
     infra::VerifyingFunctionMock<void()> ondone;

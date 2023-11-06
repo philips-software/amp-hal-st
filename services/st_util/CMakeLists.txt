@@ -10,9 +10,9 @@ target_sources(services.st_util PRIVATE
     FlashOnStUartProgrammer.hpp
     StUartProgrammer.cpp
     StUartProgrammer.hpp
-    StBootloaderCommandHandler.hpp
-    StBootloaderCommandHandlerUart.cpp
-    StBootloaderCommandHandlerUart.hpp
+    StBootloaderCommunicator.hpp
+    StBootloaderCommunicatorUart.cpp
+    StBootloaderCommunicatorUart.hpp
 )
 
 target_link_libraries(services.st_util PUBLIC

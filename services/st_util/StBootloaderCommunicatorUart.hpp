@@ -10,18 +10,18 @@
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Endian.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
-#include "services/st_util/StBootloaderCommandHandler.hpp"
+#include "services/st_util/StBootloaderCommunicator.hpp"
 
 namespace services
 {
-    class StBootloaderCommandHandlerUart
-        : protected StBootloaderCommandHandler
+    class StBootloaderCommunicatorUart
+        : protected StBootloaderCommunicator
     {
     public:
-        StBootloaderCommandHandlerUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
-        virtual ~StBootloaderCommandHandlerUart();
+        StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
+        virtual ~StBootloaderCommunicatorUart();
 
-        // Implementation of StBootloaderCommandHandler
+        // Implementation of StBootloaderCommunicator
         void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
         void GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
         void GetId(const infra::Function<void(uint16_t id)>& onDone) override;
@@ -41,7 +41,7 @@ namespace services
         template<class T, class... Args>
         void AddCommandAction(Args&&... args);
 
-        void ExecuteCommand(const infra::Function<void(), sizeof(StBootloaderCommandHandlerUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
+        void ExecuteCommand(const infra::Function<void(), sizeof(StBootloaderCommunicatorUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted);
         void StartCurrentAction();
         void TryHandleDataReceived();
         void OnCommandExecuted();
@@ -55,7 +55,7 @@ namespace services
         class Action
         {
         public:
-            Action(StBootloaderCommandHandlerUart& handler);
+            Action(StBootloaderCommunicatorUart& handler);
             Action(const Action& other) = delete;
             Action& operator=(const Action& other) = delete;
             virtual ~Action() = default;
@@ -64,7 +64,7 @@ namespace services
             virtual void DataReceived();
 
         protected:
-            StBootloaderCommandHandlerUart& handler;
+            StBootloaderCommunicatorUart& handler;
         };
 
         class ReceiveAck
@@ -80,7 +80,7 @@ namespace services
             : public Action
         {
         public:
-            ReceiveBuffer(StBootloaderCommandHandlerUart& handler, infra::ByteRange& data);
+            ReceiveBuffer(StBootloaderCommunicatorUart& handler, infra::ByteRange& data);
 
             void DataReceived() override;
 
@@ -102,7 +102,7 @@ namespace services
             : public ReceiveBuffer
         {
         public:
-            ReceivePredefinedBuffer(StBootloaderCommandHandlerUart& handler, infra::ByteRange& data, const std::size_t size);
+            ReceivePredefinedBuffer(StBootloaderCommunicatorUart& handler, infra::ByteRange& data, const std::size_t size);
 
         protected:
             void TryRetreiveNumberOfBytes(infra::DataInputStream& stream) override;
@@ -135,7 +135,7 @@ namespace services
             : public Action
         {
         public:
-            TransmitRaw(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data);
+            TransmitRaw(StBootloaderCommunicatorUart& handler, infra::ConstByteRange data);
 
             void Start() override;
 
@@ -147,7 +147,7 @@ namespace services
             : public Action
         {
         public:
-            TransmitWithTwosComplementChecksum(StBootloaderCommandHandlerUart& handler, uint8_t data);
+            TransmitWithTwosComplementChecksum(StBootloaderCommunicatorUart& handler, uint8_t data);
 
             void Start() override;
 
@@ -159,7 +159,7 @@ namespace services
             : public Action
         {
         public:
-            TransmitChecksummedBuffer(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data);
+            TransmitChecksummedBuffer(StBootloaderCommunicatorUart& handler, infra::ConstByteRange data);
 
             void Start() override;
 
@@ -175,7 +175,7 @@ namespace services
             : public TransmitChecksummedBuffer
         {
         public:
-            TransmitSmallBuffer(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data);
+            TransmitSmallBuffer(StBootloaderCommunicatorUart& handler, infra::ConstByteRange data);
 
             void Start() override;
 
@@ -187,7 +187,7 @@ namespace services
             : public TransmitChecksummedBuffer
         {
         public:
-            TransmitBigBuffer(StBootloaderCommandHandlerUart& handler, infra::ConstByteRange data, uint16_t size);
+            TransmitBigBuffer(StBootloaderCommunicatorUart& handler, infra::ConstByteRange data, uint16_t size);
 
             void Start() override;
 
@@ -202,7 +202,7 @@ namespace services
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
 
         infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAck, ReceivePredefinedBuffer, ReceiveSmallBuffer, ReceiveBigBuffer, TransmitRaw, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
-        infra::AutoResetFunction<void(), sizeof(StBootloaderCommandHandlerUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
+        infra::AutoResetFunction<void(), sizeof(StBootloaderCommunicatorUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
         infra::BoundedString::WithStorage<46> timeoutReason;
         infra::TimerSingleShot timeout;
 

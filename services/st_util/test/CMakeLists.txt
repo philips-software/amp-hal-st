@@ -2,7 +2,7 @@ add_executable(services.st_util_test)
 emil_add_test(services.st_util_test)
 
 target_sources(services.st_util_test PRIVATE
-    TestStBootloaderCommandHandlerUart.cpp
+    TestStBootloaderCommunicatorUart.cpp
 )
 
 target_link_libraries(services.st_util_test PUBLIC

@@ -13,13 +13,13 @@ namespace services
         bankTwo = 0xfffD,
     };
 
-    class StBootloaderCommandHandler
+    class StBootloaderCommunicator
     {
     protected:
-        StBootloaderCommandHandler() = default;
-        StBootloaderCommandHandler(const StBootloaderCommandHandler& other) = delete;
-        StBootloaderCommandHandler& operator=(const StBootloaderCommandHandler& other) = delete;
-        ~StBootloaderCommandHandler() = default;
+        StBootloaderCommunicator() = default;
+        StBootloaderCommunicator(const StBootloaderCommunicator& other) = delete;
+        StBootloaderCommunicator& operator=(const StBootloaderCommunicator& other) = delete;
+        ~StBootloaderCommunicator() = default;
 
     public:
         virtual void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) = 0;
