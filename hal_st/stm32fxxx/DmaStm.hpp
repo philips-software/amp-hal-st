@@ -482,7 +482,7 @@ namespace hal
     size_t DmaStm::ReceiveStreamBaseV2<T>::ReceivedSize() const
     {
         const auto& derived = *static_cast<const T*>(this);
-        return data.size() - derived.BytesToTransfer();
+        return (data.size() - derived.BytesToTransfer()) / derived.DataSize();
     }
 
     template<class T>
