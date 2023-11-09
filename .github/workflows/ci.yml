@@ -91,7 +91,7 @@ jobs:
         uses: carlosperate/arm-none-eabi-gcc-action@e9cd61b92edb079b14b2d0449b21f8a517121fe8 # v1.8.0
         with:
           release: ${{ matrix.gcc }}
-      - run: sudo apt-get update && sudo apt-get install ninja-build
+      - run: sudo apt-get update && sudo apt-get install ninja-build xsltproc
       - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
