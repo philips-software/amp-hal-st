@@ -91,6 +91,7 @@ jobs:
         uses: carlosperate/arm-none-eabi-gcc-action@6a221d7c85f5b36647d6e9b25e874abf187409d3 # v1.7.1
         with:
           release: ${{ matrix.gcc }}
+      - run: sudo apt-get update && sudo apt-get install ninja-build
       - uses: hendrikmuhs/ccache-action@ca3acd2731eef11f1572ccb126356c2f9298d35e # v1.2.9
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
@@ -99,10 +100,8 @@ jobs:
           name: hal_st
       - run: tar -zxvf hal_st-*.tar.gz
       - run: mkdir install && mv hal_st-*/* install/
-      - run: |
-          sudo apt-get update && sudo apt-get install --no-install-recommends ninja-build xsltproc
-          echo "::add-matcher::.github/matchers/gcc-problem-matcher.json"
-          cmake --preset host -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          cmake --build --preset host-${{ matrix.configuration }}
-          cmake --preset ${{ matrix.target }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          cmake --build --preset ${{ matrix.target }}-${{ matrix.configuration }}
+      - uses: lukka/run-cmake@2ce8982be71b8e9a3c4d5e432135035afd1e76a7 # v10.7
+        with:
+          configurePreset: ${{ matrix.target }}
+          buildPreset: ${{ matrix.target }}-${{ matrix.configuration }}
+          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
