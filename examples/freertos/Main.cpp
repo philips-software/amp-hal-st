@@ -59,7 +59,8 @@ int main()
                 pin.Set(true);
                 std::this_thread::sleep_for(200ms);
                 pin.Set(false);
-            } });
+            }
+        });
 
     static std::thread t2([]()
         {
@@ -70,7 +71,8 @@ int main()
                     pin.Set(!pin.GetOutputLatch());
                 });
 
-            eventDispatcher.Run(); });
+            eventDispatcher.Run();
+        });
 
     osal::Run();
     __builtin_unreachable();
