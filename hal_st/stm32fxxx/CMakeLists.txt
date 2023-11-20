@@ -1,4 +1,5 @@
-add_library(hal_st.stm32fxxx ${HALST_EXCLUDE_FROM_ALL} STATIC)
+add_library(hal_st.stm32fxxx STATIC)
+emil_build_for(hal_st.stm32fxxx TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_STANDALONE)
 
 target_include_directories(hal_st.stm32fxxx PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"
@@ -20,8 +21,6 @@ target_sources(hal_st.stm32fxxx PRIVATE
     BackupRamStm.hpp
     CanStm.cpp
     CanStm.hpp
-    DacStm.cpp
-    DacStm.hpp
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockDiscoveryF746G.cpp>
