@@ -1,5 +1,6 @@
 add_executable(tools.st_table_generator)
 emil_build_for(tools.st_table_generator HOST All)
+emil_install(tools.st_table_generator EXPORT halstTargets DESTINATION bin)
 
 target_sources(tools.st_table_generator PRIVATE Main.cpp)
 

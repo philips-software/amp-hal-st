@@ -8,6 +8,9 @@
 #include "hal/generic/FileSystemGeneric.hpp"
 #include "infra/syntax/CppFormatter.hpp"
 #include "infra/syntax/XmlNavigator.hpp"
+#include <fstream>
+#include <ostream>
+#include <sstream>
 
 template<class T>
 std::vector<T> Compact(const std::vector<infra::Optional<T>>& v)
@@ -56,6 +59,12 @@ private:
     void ReadCandidates(const std::vector<PeripheralCandidate>& candidates);
     void ReadCandidate(const PeripheralCandidate& candidate);
 
+    std::string MakeArrayType(const std::string& type, int size) const;
+    std::string PeripheralInitializer(const std::vector<Peripheral>& peripherals) const;
+    std::string IrqInitializer(const std::vector<Peripheral>& peripherals) const;
+    std::string EnableClockBody(const std::vector<Peripheral>& peripherals) const;
+    std::string DisableClockBody(const std::vector<Peripheral>& peripherals) const;
+
     static std::string Concatenate(const std::vector<std::string>& lines);
 
 private:
@@ -95,8 +104,6 @@ void TableGenerator::Write(const std::filesystem::path& outputDirectory)
         }
     }
 
-    std::unique_ptr<google::protobuf::io::ZeroCopyOutputStream> stream = std::make_unique<google::protobuf::io::OstreamOutputStream>(&std::cout);
-    google::protobuf::io::Printer printer(stream.get(), '$', nullptr);
     application::IncludeGuard formatter("include_guard_hpp");
 
     auto includesByHeader = std::make_shared<application::IncludesByHeader>();
@@ -123,16 +130,28 @@ void TableGenerator::Write(const std::filesystem::path& outputDirectory)
         else
         {
             halNamespace->Add(std::make_shared<application::Define>(definitionName));
-            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "Array", "constexpr std::array<unsigned int, 2>", "{{ }}"));
+            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "Array", MakeArrayType("unsigned_int", group.peripherals.size()), PeripheralInitializer(group.peripherals)));
             halNamespace->Add(std::make_shared<application::ExternVariable>(variableName, "const infra::MemoryRange<" + group.type + "* const>", "infra::ReinterpretCastMemoryRange<" + group.type + "* const>(infra::MakeRange(" + variableName + "Array)"));
+            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "IrqArray", MakeArrayType("IRQn_Type const", group.peripherals.size()), IrqInitializer(group.peripherals)));
+            halNamespace->Add(std::make_shared<application::ExternVariable>(variableName + "Irq", "const infra::MemoryRange<IRQn_Type const>", "infra::MakeRange(" + variableName + "IrqArray"));
+            auto EnableClock = std::make_shared<application::Function>("EnableClock" + group.groupName, EnableClockBody(group.peripherals), "void", 0);
+            EnableClock->Parameter("std::size_t index");
+            halNamespace->Add(EnableClock);
+            auto DisableClock = std::make_shared<application::Function>("DisableClock" + group.groupName, DisableClockBody(group.peripherals), "void", 0);
+            DisableClock->Parameter("std::size_t index");
+            halNamespace->Add(DisableClock);
         }
     }
 
-    printer.Print("============================");
-    formatter.PrintHeader(printer);
-    printer.Print("============================");
-    formatter.PrintSource(printer, "");
-    printer.Print("============================");
+    std::ofstream header(outputDirectory / "PeripheralTable.chpp");
+    std::unique_ptr<google::protobuf::io::ZeroCopyOutputStream> headerStream = std::make_unique<google::protobuf::io::OstreamOutputStream>(&header);
+    google::protobuf::io::Printer headerPrinter(headerStream.get(), '$', nullptr);
+    formatter.PrintHeader(headerPrinter);
+
+    std::ofstream source(outputDirectory / "PeripheralTable.cpp");
+    std::unique_ptr<google::protobuf::io::ZeroCopyOutputStream> sourceStream = std::make_unique<google::protobuf::io::OstreamOutputStream>(&source);
+    google::protobuf::io::Printer sourcePrinter(sourceStream.get(), '$', nullptr);
+    formatter.PrintSource(sourcePrinter, "");
 }
 
 void TableGenerator::ReadCandidates(const std::vector<PeripheralCandidate>& candidates)
@@ -180,6 +199,73 @@ void TableGenerator::ReadCandidate(const PeripheralCandidate& candidate)
     peripheralGroups.push_back(PeripheralGroup{ candidate.name, candidate.type, Compact(navigator / mcu / ip) });
 }
 
+std::string TableGenerator::MakeArrayType(const std::string& type, int size) const
+{
+    std::ostringstream stream;
+
+    stream << "constexpr std::array<" << type << ", " << size << ">";
+
+    return stream.str();
+}
+
+std::string TableGenerator::PeripheralInitializer(const std::vector<Peripheral>& peripherals) const
+{
+    std::ostringstream stream;
+
+    stream << "\n  {{\n";
+    for (auto& p : peripherals)
+        stream << "    " << p.name << ",\n";
+    stream << "  }}";
+
+    return stream.str();
+}
+
+std::string TableGenerator::IrqInitializer(const std::vector<Peripheral>& peripherals) const
+{
+    std::ostringstream stream;
+
+    stream << "\n  {{\n";
+    for (auto& p : peripherals)
+        stream << "    " << p.name << "_IRQn,\n";
+    stream << "  }}";
+
+    return stream.str();
+}
+
+std::string TableGenerator::EnableClockBody(const std::vector<Peripheral>& peripherals) const
+{
+    std::ostringstream stream;
+
+    stream << "switch (index)\n{\n";
+
+    for (auto& p : peripherals)
+        if (p.clockEnable)
+            stream << "  case " << std::distance(peripherals.data(), &p) << ": " << *p.clockEnable << "(); break;\n";
+        else
+            stream << "  case " << std::distance(peripherals.data(), &p) << ": __HAL_RCC_" << p.name << "_CLK_ENABLE(); break;\n";
+
+    stream << "  default:\n    std::abort();\n}";
+
+    return stream.str();
+}
+
+std::string TableGenerator::DisableClockBody(const std::vector<Peripheral>& peripherals) const
+{
+    std::ostringstream stream;
+
+    stream << "switch (index)\n{\n";
+
+    for (auto& p : peripherals)
+        if (p.clockEnable)
+            stream << "  case " << std::distance(peripherals.data(), &p) << ": " << p.clockEnable->substr(0, p.clockEnable->size() - 6)  << "DISABLE(); break;\n";
+        else
+            stream << "  case " << std::distance(peripherals.data(), &p) << ": __HAL_RCC_" << p.name << "_CLK_DISABLE(); break;\n";
+
+    stream << "  default:\n    std::abort();\n}";
+
+    return stream.str();
+}
+
 std::string TableGenerator::Concatenate(const std::vector<std::string>& lines)
 {
     std::string result;
@@ -222,11 +308,11 @@ int main(int argc, const char* argv[], const char* env[])
         std::cout << parser;
         return 1;
     }
-    //catch (const std::exception& ex)
-    //{
-    //    std::cout << ex.what() << std::endl;
-    //    return 1;
-    //}
+    catch (const std::exception& ex)
+    {
+        std::cout << ex.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }
