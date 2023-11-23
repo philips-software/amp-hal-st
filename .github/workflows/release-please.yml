@@ -33,3 +33,30 @@ jobs:
           command: manifest
           #token: ${{ steps.token.outputs.token }}
           token: ${{ secrets.AUTOMATIC_RELEASE_TOKEN }}
+  build_upload_packages:
+    name: Build & Upload Packages
+    needs: release_please
+    if: ${{ needs.release_please.outputs.releases_created }}
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+      - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
+        with:
+          key: ${{ github.job }}-${{ matrix.os }}
+          variant: sccache
+      - uses: lukka/run-cmake@2ce8982be71b8e9a3c4d5e432135035afd1e76a7 # v10.7
+        with:
+          configurePreset: "host-single-MinSizeRel"
+          buildPreset: "release-package"
+          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
+      - run: gh release upload ${{ needs.release_please.outputs.tag_name }} build/**/hal_st-*.zip --clobber
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

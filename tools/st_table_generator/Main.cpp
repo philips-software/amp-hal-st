@@ -28,6 +28,7 @@ struct PeripheralCandidate
 {
     std::string name;
     std::string type;
+    bool interrupt;
     std::vector<std::string> ipNames;
     infra::Optional<std::string> prefix;
     infra::Optional<std::string> base;
@@ -45,6 +46,7 @@ struct PeripheralGroup
 {
     std::string groupName;
     std::string type;
+    bool interrupt;
     std::vector<Peripheral> peripherals;
 };
 
@@ -64,6 +66,8 @@ private:
     std::string IrqInitializer(const std::vector<Peripheral>& peripherals) const;
     std::string EnableClockBody(const std::vector<Peripheral>& peripherals) const;
     std::string DisableClockBody(const std::vector<Peripheral>& peripherals) const;
+    std::string ReplaceAll(std::string_view names, std::string_view from, std::string_view to) const;
+    std::string InvokeAll(std::string_view names) const;
 
     static std::string Concatenate(const std::vector<std::string>& lines);
 
@@ -130,10 +134,15 @@ void TableGenerator::Write(const std::filesystem::path& outputDirectory)
         else
         {
             halNamespace->Add(std::make_shared<application::Define>(definitionName));
-            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "Array", MakeArrayType("unsigned_int", group.peripherals.size()), PeripheralInitializer(group.peripherals)));
-            halNamespace->Add(std::make_shared<application::ExternVariable>(variableName, "const infra::MemoryRange<" + group.type + "* const>", "infra::ReinterpretCastMemoryRange<" + group.type + "* const>(infra::MakeRange(" + variableName + "Array)"));
-            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "IrqArray", MakeArrayType("IRQn_Type const", group.peripherals.size()), IrqInitializer(group.peripherals)));
-            halNamespace->Add(std::make_shared<application::ExternVariable>(variableName + "Irq", "const infra::MemoryRange<IRQn_Type const>", "infra::MakeRange(" + variableName + "IrqArray"));
+            halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "Array", MakeArrayType("unsigned int", group.peripherals.size()), PeripheralInitializer(group.peripherals)));
+            halNamespace->Add(std::make_shared<application::ExternVariable>(variableName, "const infra::MemoryRange<" + group.type + " const>", "infra::ReinterpretCastMemoryRange<" + group.type + " const>(infra::MakeRange(" + variableName + "Array))"));
+
+            if (group.interrupt)
+            {
+                halNamespace->Add(std::make_shared<application::SourceLocalVariable>(variableName + "IrqArray", MakeArrayType("IRQn_Type const", group.peripherals.size()), IrqInitializer(group.peripherals)));
+                halNamespace->Add(std::make_shared<application::ExternVariable>(variableName + "Irq", "const infra::MemoryRange<IRQn_Type const>", "infra::MakeRange(" + variableName + "IrqArray)"));
+            }
+
             auto EnableClock = std::make_shared<application::Function>("EnableClock" + group.groupName, EnableClockBody(group.peripherals), "void", 0);
             EnableClock->Parameter("std::size_t index");
             halNamespace->Add(EnableClock);
@@ -143,7 +152,7 @@ void TableGenerator::Write(const std::filesystem::path& outputDirectory)
         }
     }
 
-    std::ofstream header(outputDirectory / "PeripheralTable.chpp");
+    std::ofstream header(outputDirectory / "PeripheralTable.hpp");
     std::unique_ptr<google::protobuf::io::ZeroCopyOutputStream> headerStream = std::make_unique<google::protobuf::io::OstreamOutputStream>(&header);
     google::protobuf::io::Printer headerPrinter(headerStream.get(), '$', nullptr);
     formatter.PrintHeader(headerPrinter);
@@ -196,7 +205,7 @@ void TableGenerator::ReadCandidate(const PeripheralCandidate& candidate)
             return infra::Optional<Peripheral>();
         } };
 
-    peripheralGroups.push_back(PeripheralGroup{ candidate.name, candidate.type, Compact(navigator / mcu / ip) });
+    peripheralGroups.push_back(PeripheralGroup{ candidate.name, candidate.type, candidate.interrupt, Compact(navigator / mcu / ip) });
 }
 
 std::string TableGenerator::MakeArrayType(const std::string& type, int size) const
@@ -214,7 +223,7 @@ std::string TableGenerator::PeripheralInitializer(const std::vector<Peripheral>&
 
     stream << "\n  {{\n";
     for (auto& p : peripherals)
-        stream << "    " << p.name << ",\n";
+        stream << "    " << p.name << "_BASE,\n";
     stream << "  }}";
 
     return stream.str();
@@ -240,11 +249,11 @@ std::string TableGenerator::EnableClockBody(const std::vector<Peripheral>& perip
 
     for (auto& p : peripherals)
         if (p.clockEnable)
-            stream << "  case " << std::distance(peripherals.data(), &p) << ": " << *p.clockEnable << "(); break;\n";
+            stream << "  case " << std::distance(peripherals.data(), &p) << ": " << InvokeAll(*p.clockEnable) << " break;\n";
         else
             stream << "  case " << std::distance(peripherals.data(), &p) << ": __HAL_RCC_" << p.name << "_CLK_ENABLE(); break;\n";
 
-    stream << "  default:\n    std::abort();\n}";
+    stream << "  default:\n    std::abort();\n}\n";
 
     return stream.str();
 }
@@ -257,13 +266,43 @@ std::string TableGenerator::DisableClockBody(const std::vector<Peripheral>& peri
 
     for (auto& p : peripherals)
         if (p.clockEnable)
-            stream << "  case " << std::distance(peripherals.data(), &p) << ": " << p.clockEnable->substr(0, p.clockEnable->size() - 6)  << "DISABLE(); break;\n";
+            stream << "  case " << std::distance(peripherals.data(), &p) << ": " << ReplaceAll(InvokeAll(*p.clockEnable), "ENABLE", "DISABLE") << " break;\n";
         else
             stream << "  case " << std::distance(peripherals.data(), &p) << ": __HAL_RCC_" << p.name << "_CLK_DISABLE(); break;\n";
 
-    stream << "  default:\n    std::abort();\n}";
+    stream << "  default:\n    std::abort();\n}\n";
 
     return stream.str();
+}
+
+std::string TableGenerator::ReplaceAll(std::string_view names, std::string_view from, std::string_view to) const
+{
+    std::string result(names);
+
+    for (auto pos = result.find(from); pos != std::string::npos; pos = result.find(from))
+        result.replace(pos, from.size(), to);
+
+    return result;
+}
+
+std::string TableGenerator::InvokeAll(std::string_view names) const
+{
+    std::string result;
+
+    while (true)
+    {
+        auto pos = names.find(';');
+
+        result.append(names.substr(0, pos));
+        result.append("(); ");
+
+        if (pos == std::string::npos)
+            break;
+
+        names = names.substr(pos + 1);
+    }
+
+    return result;
 }
 
 std::string TableGenerator::Concatenate(const std::vector<std::string>& lines)
@@ -291,11 +330,11 @@ int main(int argc, const char* argv[], const char* env[])
         hal::FileSystemGeneric fileSystem;
 
         std::vector<PeripheralCandidate> candidates{
-            PeripheralCandidate{ "Uart", "USART_TypeDef*", { "UART", "USART" }, infra::none },
-            PeripheralCandidate{ "Spi", "SPI_TypeDef*", { "SPI" }, infra::none },
-            PeripheralCandidate{ "Timer", "TIM_TypeDef*", { "TIM1_8", "TIM6_7", "TIM1_8F7", "TIM6_7F7", "TIM1_8F37", "TIM6_7F37", "TIM1_8F77", "TIM6_7F77" }, infra::MakeOptional<std::string>("TIM") },
-            PeripheralCandidate{ "Adc", "ADC_TypeDef*", { "ADC" }, infra::none },
-            PeripheralCandidate{ "Rtc", "RTC_TypeDef*", { "RTC" }, infra::none },
+            PeripheralCandidate{ "Uart", "USART_TypeDef*", true, { "UART", "USART" }, infra::none },
+            PeripheralCandidate{ "Spi", "SPI_TypeDef*", true, { "SPI" }, infra::none },
+            PeripheralCandidate{ "Timer", "TIM_TypeDef*", true, { "TIM1_8", "TIM6_7", "TIM1_8F7", "TIM6_7F7", "TIM1_8F37", "TIM6_7F37", "TIM1_8F77", "TIM6_7F77" }, infra::MakeOptional<std::string>("TIM") },
+            PeripheralCandidate{ "Adc", "ADC_TypeDef*", true, { "ADC" }, infra::none },
+            PeripheralCandidate{ "Rtc", "RTC_TypeDef*", false, { "RTC" }, infra::none },
         };
 
         TableGenerator tableGenerator(fileSystem, std::filesystem::path(args::get(inputArgument)), candidates);

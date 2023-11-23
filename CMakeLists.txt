@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}")
 
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(HALST_STANDALONE On)
@@ -52,6 +54,32 @@ emil_clangformat_directories(hal_st DIRECTORIES .)
 
 if (HALST_STANDALONE)
     emil_folderize_all_targets()
+endif()
+
+if (EMIL_HOST_BUILD)
+    install(EXPORT halstTargets
+        FILE hal_stTargets.cmake
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/hal_st
+    )
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+        COMPATIBILITY SameMajorVersion
+        # When cross-compiling for a 32-bit architecture and re-using host tooling from a 64-bit architecture
+        # ARCH_INDEPENDENT is necessary here. See: https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html.
+        ARCH_INDEPENDENT
+    )
+
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
 endif()
 
 set(CPACK_GENERATOR "ZIP;TGZ")
