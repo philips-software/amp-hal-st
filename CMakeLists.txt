@@ -27,7 +27,7 @@ endif()
 
 project(hal_st LANGUAGES C CXX ASM VERSION 2.1.0) # x-release-please-version
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
@@ -38,6 +38,10 @@ if (HALST_STANDALONE)
     set(HALST_EXCLUDE_FROM_ALL "")
 else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
+endif()
+
+if (NOT CMAKE_CROSSCOMPILING)
+    add_subdirectory(amp-cucumber-cpp-runner-poc)
 endif()
 
 add_subdirectory(st)
