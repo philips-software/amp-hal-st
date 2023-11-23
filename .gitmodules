@@ -1,0 +1,3 @@
+[submodule "amp-cucumber-cpp-runner-poc"]
+	path = amp-cucumber-cpp-runner-poc
+	url = https://github.com/philips-internal/amp-cucumber-cpp-runner-poc.git
