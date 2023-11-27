@@ -7,7 +7,6 @@ package testing;
 message GpioState
 {
     bool state = 1;
-    uint32 pin = 2;
 }
 
 enum Peripheral

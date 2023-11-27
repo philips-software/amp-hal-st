@@ -1,13 +1,19 @@
-add_executable(integration_test.test EXCLUDE_FROM_ALL)
+add_executable(integration_test.test)
 emil_build_for(integration_test.test HOST All)
 
 target_sources(integration_test.test PRIVATE
-    fixtures/Fixture.hpp
-    hooks/Hooks.cpp
-    steps/Steps.cpp
+    FixtureEcho.hpp
+    FixtureEventDispatcher.hpp
+    FixtureEventDispatcher.cpp
+    FixtureSystemChanges.hpp
+    Hooks.cpp
+    RunInSync.cpp
+    RunInSync.hpp
+    StepsGpio.cpp
 )
 
 target_link_libraries(integration_test.test PRIVATE
     cucumber-cpp-runner
     integration_test.logic
+    hal.windows
 )

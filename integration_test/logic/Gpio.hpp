@@ -13,7 +13,7 @@ namespace application
         GpioBase(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
         ~GpioBase();
 
-        void SetGpio(bool state, uint32_t pin);
+        void SetGpio(bool state);
 
     private:
         void InChanged();
@@ -32,7 +32,7 @@ namespace application
         GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
 
         // Implementation of GpioTester
-        void SetGpio(bool state, uint32_t pin) override;
+        void SetGpio(bool state) override;
     };
 
     class GpioTested
@@ -43,7 +43,7 @@ namespace application
         GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin);
 
         // Implementation of GpioTested
-        void SetGpio(bool state, uint32_t pin) override;
+        void SetGpio(bool state) override;
     };
 }
 

@@ -19,7 +19,7 @@ namespace application
         in.DisableInterrupt();
     }
 
-    void GpioBase::SetGpio(bool state, uint32_t pin)
+    void GpioBase::SetGpio(bool state)
     {
         out.Set(state);
     }
@@ -30,7 +30,7 @@ namespace application
             RequestSend([this]()
                 {
                     sending = false;
-                    TestedGpioChanged(in.Get(), 0);
+                    TestedGpioChanged(in.Get());
                 });
 
         sending = true;
@@ -41,9 +41,9 @@ namespace application
         , testing::GpioTester(echo)
     {}
 
-    void GpioTester::SetGpio(bool state, uint32_t pin)
+    void GpioTester::SetGpio(bool state)
     {
-        GpioBase::SetGpio(state, pin);
+        GpioBase::SetGpio(state);
         MethodDone();
     }
 
@@ -52,9 +52,9 @@ namespace application
         , testing::GpioTested(echo)
     {}
 
-    void GpioTested::SetGpio(bool state, uint32_t pin)
+    void GpioTested::SetGpio(bool state)
     {
-        GpioBase::SetGpio(state, pin);
+        GpioBase::SetGpio(state);
         MethodDone();
     }
 }
