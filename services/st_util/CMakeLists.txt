@@ -10,9 +10,16 @@ target_sources(services.st_util PRIVATE
     FlashOnStUartProgrammer.hpp
     StUartProgrammer.cpp
     StUartProgrammer.hpp
+    StBootloaderCommunicator.hpp
+    StBootloaderCommunicatorUart.cpp
+    StBootloaderCommunicatorUart.hpp
 )
 
 target_link_libraries(services.st_util PUBLIC
     hal.interfaces
     services.util
 )
+
+if (EMIL_BUILD_TESTS)
+    add_subdirectory(test)
+endif()

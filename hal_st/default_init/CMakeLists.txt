@@ -1,4 +1,5 @@
-add_library(hal_st.default_init ${HALST_EXCLUDE_FROM_ALL} STATIC)
+add_library(hal_st.default_init STATIC)
+emil_build_for(hal_st.default_init TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_STANDALONE)
 
 target_include_directories(hal_st.default_init PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"

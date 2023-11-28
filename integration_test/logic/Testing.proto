@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+import "EchoAttributes.proto";
+
+package testing;
+
+message GpioState
+{
+    bool state = 1;
+    uint32 pin = 2;
+}
+
+enum Peripheral
+{
+    gpio = 0;
+}
+
+message PeripheralType
+{
+    Peripheral peripheral = 1;
+}
+
+service Tester
+{
+    option (service_id) = 1;
+
+    rpc Reset(Nothing) returns (Nothing) { option (method_id) = 1; }
+    rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
+}
+
+service Tested
+{
+    option (service_id) = 2;
+
+    rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
+}
+
+service GpioTester
+{
+    option (service_id) = 3;
+
+    rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
+}
+
+service GpioTested
+{
+    option (service_id) = 4;
+
+    rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
+}
+
+service GpioObserver
+{
+    option (service_id) = 5;
+
+    rpc TesterGpioChanged(GpioState) returns (Nothing) { option (method_id) = 1; }
+    rpc TestedGpioChanged(GpioState) returns (Nothing) { option (method_id) = 2; }
+}
