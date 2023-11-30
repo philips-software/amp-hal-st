@@ -66,9 +66,9 @@ STEP("gpio peripherals are enabled")
     context.emplace<testing::GpioTestedProxy>(*context.get<services::Echo>());
 }
 
-STEP("the tester sets its output pin ([a-z]+)")
+STEP("the tester sets its output pin (high|low)")
 {
-    context.set("state", std::make_shared<bool>(ConvertPinState(parameters[0].get<std::string>())));
+    context.emplace<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
 
     RunInSync([&](const std::function<void()>& done)
         {
@@ -80,9 +80,9 @@ STEP("the tester sets its output pin ([a-z]+)")
         });
 }
 
-STEP("the tester sees a ([a-z]+) value")
+STEP("the tester sees a (high|low) value")
 {
-    context.set("state", std::make_shared<bool>(ConvertPinState(parameters[0].get<std::string>())));
+    context.emplace<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
 
     RunInSyncOnSystemChange([&](const std::function<void()>& done)
         {
@@ -92,9 +92,9 @@ STEP("the tester sees a ([a-z]+) value")
         context);
 }
 
-STEP("the tested sets its output pin ([a-z]+)")
+STEP("the tested sets its output pin (high|low)")
 {
-    context.set("state", std::make_shared<bool>(ConvertPinState(parameters[0].get<std::string>())));
+    context.emplace<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
 
     RunInSync([&](const std::function<void()>& done)
         {
@@ -106,9 +106,9 @@ STEP("the tested sets its output pin ([a-z]+)")
         });
 }
 
-STEP("the tested sees a ([a-z]+) value")
+STEP("the tested sees a (high|low) value")
 {
-    context.set("state", std::make_shared<bool>(ConvertPinState(parameters[0].get<std::string>())));
+    context.emplace<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
 
     RunInSyncOnSystemChange([&](const std::function<void()>& done)
         {
