@@ -58,6 +58,7 @@ void RunInSyncOnSystemChange(const std::function<void(const std::function<void()
             break;
 
         promise = std::promise<void>{};
+        future = promise.get_future();
     }
 
     ASSERT_THAT(reached, testing::IsTrue());

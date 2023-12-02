@@ -8,7 +8,7 @@ namespace main_
 {
     struct FixtureEcho
     {
-        hal::UartWindows serial{ "COM1" };
+        hal::UartWindows serial{ "COM43" };
         services::MethodSerializerFactory::OnHeap serializerFactory;
         main_::EchoOnSerialCommunication<256> echo{ serial, serializerFactory };
     };

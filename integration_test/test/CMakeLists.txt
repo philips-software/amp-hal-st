@@ -7,13 +7,18 @@ target_sources(integration_test.test PRIVATE
     FixtureEventDispatcher.cpp
     FixtureSystemChanges.hpp
     Hooks.cpp
+    Main.cpp
     RunInSync.cpp
     RunInSync.hpp
     StepsGpio.cpp
 )
 
 target_link_libraries(integration_test.test PRIVATE
-    cucumber-cpp-runner
+    cucumber-cpp
+    cucumber-cpp.report
+    gherkin-cpp
     integration_test.logic
     hal.windows
+    gtest
+    gmock
 )
