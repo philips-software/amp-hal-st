@@ -1,6 +1,6 @@
+#include "integration_test/test/RunInSync.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "integration_test/test/FixtureSystemChanges.hpp"
-#include "integration_test/test/RunInSync.hpp"
 #include "gmock/gmock.h"
 #include <barrier>
 #include <future>
