@@ -1,5 +1,5 @@
 add_executable(integration_test.test)
-emil_build_for(integration_test.test HOST All)
+emil_build_for(integration_test.test HOST Windows)
 
 target_sources(integration_test.test PRIVATE
     FixtureEcho.hpp
