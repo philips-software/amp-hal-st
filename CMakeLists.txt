@@ -42,6 +42,7 @@ endif()
 
 if (NOT CMAKE_CROSSCOMPILING)
     add_subdirectory(amp-cucumber-cpp-runner-poc)
+    set_target_properties(gherkin-cpp gherkin-generate-tokens-bin cucumber-messages PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
 add_subdirectory(st)
