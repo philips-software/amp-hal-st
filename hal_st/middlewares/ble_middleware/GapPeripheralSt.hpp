@@ -11,7 +11,7 @@ namespace hal
         , public GapSt
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const hal::GapSt::RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration);
 
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;

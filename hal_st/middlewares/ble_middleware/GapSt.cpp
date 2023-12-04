@@ -32,6 +32,11 @@ namespace hal
                         return services::GapPairingObserver::PairingErrorType::unknown;
                 }
         }
+
+        constexpr uint8_t RfWakeupClockSelection(const hal::GapSt::RfWakeupClock& rfWakeupClock)
+        {
+            return static_cast<uint8_t>(rfWakeupClock == hal::GapSt::RfWakeupClock::highSpeedExternal ? SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024 : SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE);
+        }
     }
 
     const services::GapConnectionParameters GapSt::connectionParameters{
@@ -41,18 +46,18 @@ namespace hal
         500,
     };
 
-    GapSt::GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage)
+    GapSt::GapSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration)
         : HciEventSink(hciEventSource)
-        , txPowerLevel(txPowerLevel)
+        , txPowerLevel(configuration.txPowerLevel)
     {
-        really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
+        really_assert(configuration.maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && configuration.maxAttMtuSize <= 251);
         // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
 
         connectionContext.connectionHandle = GapSt::invalidConnection;
 
         const uint8_t maxNumberOfBleLinks = 0x01;
-        const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(maxAttMtuSize);
-        const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, maxAttMtuSize, maxNumberOfBleLinks);
+        const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(configuration.maxAttMtuSize);
+        const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, configuration.maxAttMtuSize, maxNumberOfBleLinks);
         const uint8_t bleStackOptions = (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 |
             SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 | SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY | SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED);
 
@@ -61,7 +66,7 @@ namespace hal
             SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
             SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
             0, // Spare
-            reinterpret_cast<uint32_t>(&bleBondsStorage),
+            reinterpret_cast<uint32_t>(&bleBondStorage.bleBondsStorage),
             0, // ThreadNvmRamAddress
             static_cast<uint16_t>(LL_DBGMCU_GetRevisionID()),
             static_cast<uint16_t>(LL_DBGMCU_GetDeviceID()),
@@ -82,10 +87,10 @@ namespace hal
                 0x01,       // Enable or disable the Extended Packet length feature
                 prepareWriteListSize,
                 numberOfBleMemoryBlocks,
-                maxAttMtuSize,
+                configuration.maxAttMtuSize,
                 0x1FA,      // Sleep clock accuracy in Slave mode
                 0x00,       // Sleep clock accuracy in Master mode
-                0x00,       // Source for the low speed clock for RF wake-up
+                RfWakeupClockSelection(configuration.rfWakeupClock),       // Source for the low speed clock for RF wake-up
                 0xFFFFFFFF, // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
                 0x148,      // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
                 0x01,       // Viterbi Mode
@@ -110,17 +115,17 @@ namespace hal
         hci_reset();
 
         // Write Identity root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, rootKeys.identity.data());
+        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, configuration.rootKeys.identity.data());
 
         // Write Encryption root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, rootKeys.encryption.data());
+        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, configuration.rootKeys.encryption.data());
 
-        bondStorageSynchronizer.Emplace(bondStorageSynchronizerCreator);
+        bondStorageSynchronizer.Emplace(bleBondStorage.bondStorageSynchronizerCreator);
 
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
 
-        aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, address.data());
+        aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());
 
         SVCCTL_Init();
     }

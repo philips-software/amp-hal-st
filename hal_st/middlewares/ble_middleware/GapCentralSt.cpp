@@ -26,10 +26,10 @@ namespace hal
         }
     }
 
-    GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
-        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, bondStorageSynchronizerCreator, *bleBondsStorage)
+    GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration)
+        : GapSt(hciEventSource, bleBondStorage, configuration)
     {
-        Initialize(gapService);
+        Initialize(configuration.gapService);
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
     }
