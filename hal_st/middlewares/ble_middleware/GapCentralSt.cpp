@@ -31,7 +31,10 @@ namespace hal
     {
         Initialize(configuration.gapService);
 
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+            {
+                observer.StateChanged(services::GapState::standby);
+            });
     }
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
