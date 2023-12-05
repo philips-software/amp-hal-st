@@ -84,7 +84,7 @@ namespace hal
                 0x08,       // Maximum number of Services that can be stored in the GATT database
                 0x540,      // Size of the storage area for Attribute values
                 maxNumberOfBleLinks,
-                0x01,       // Enable or disable the Extended Packet length feature
+                0x01, // Enable or disable the Extended Packet length feature
                 prepareWriteListSize,
                 numberOfBleMemoryBlocks,
                 configuration.maxAttMtuSize,
