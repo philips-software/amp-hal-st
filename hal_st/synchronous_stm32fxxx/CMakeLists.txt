@@ -1,4 +1,5 @@
-add_library(hal_st.synchronous_stm32fxxx ${HALST_EXCLUDE_FROM_ALL} STATIC)
+add_library(hal_st.synchronous_stm32fxxx STATIC)
+emil_build_for(hal_st.synchronous_stm32fxxx TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_STANDALONE)
 
 target_include_directories(hal_st.synchronous_stm32fxxx PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"
