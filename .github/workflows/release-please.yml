@@ -30,6 +30,5 @@ jobs:
       - uses: google-github-actions/release-please-action@a6d1fd9854c8c40688a72f7e4b072a1e965860a0 # v4.0.0
         id: release
         with:
-          command: manifest
           #token: ${{ steps.token.outputs.token }}
           token: ${{ secrets.AUTOMATIC_RELEASE_TOKEN }}
