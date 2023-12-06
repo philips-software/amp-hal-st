@@ -29,8 +29,7 @@
           "--query-driver=/**/arm-none-eabi-*"
         ],
         "cmake.copyCompileCommands": "${workspaceFolder}/build/compile_commands.json",
-        "cmake.statusbar.visibility": "default",
-        "cmake.useProjectStatusView": false,
+        "cmake.options.statusBarVisibility": "compact",
         "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
       }
     }
