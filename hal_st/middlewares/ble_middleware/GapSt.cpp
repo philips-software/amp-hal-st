@@ -33,9 +33,9 @@ namespace hal
                 }
         }
 
-        constexpr uint8_t RfWakeupClockSelection(const hal::GapSt::RfWakeupClock& rfWakeupClock)
+        constexpr auto RfWakeupClockSelection(const hal::GapSt::RfWakeupClock& rfWakeupClock)
         {
-            return static_cast<uint8_t>(rfWakeupClock == hal::GapSt::RfWakeupClock::highSpeedExternal ? SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024 : SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE);
+            return infra::enum_cast(rfWakeupClock);
         }
     }
 

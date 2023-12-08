@@ -30,10 +30,10 @@ namespace hal
             std::array<uint8_t, 16> encryption;
         };
 
-        enum class RfWakeupClock
+        enum class RfWakeupClock : uint8_t
         {
-            highSpeedExternal,
-            lowSpeedExternal,
+            highSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024,
+            lowSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE,
         };
 
         struct Configuration
