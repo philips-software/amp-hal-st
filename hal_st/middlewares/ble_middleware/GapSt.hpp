@@ -8,6 +8,7 @@
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include "shci.h"
 
 namespace hal
 {

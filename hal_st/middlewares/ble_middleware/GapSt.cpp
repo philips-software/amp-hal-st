@@ -2,7 +2,6 @@
 #include "ble_gap_aci.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "services/ble/Gap.hpp"
-#include "shci.h"
 #include "stm32wbxx_ll_system.h"
 
 namespace hal
