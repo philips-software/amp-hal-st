@@ -14,7 +14,7 @@ jobs:
       pull-requests: write
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
-      - uses: actions/first-interaction@1d8459ca65b335265f1285568221e229d45a995e
+      - uses: actions/first-interaction@34f15e814fe48ac9312ccf29db4e74fa767cbab7
         continue-on-error: true
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}

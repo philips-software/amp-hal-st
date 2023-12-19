@@ -78,7 +78,7 @@ namespace main_
     // UM2179: MB1312 reference board with L496ZG, L496ZG-P, L4A6ZG, L4P5ZG, LR5ZI, L4R5ZI-P
     struct Nucleo144Ui
     {
-        hal::GpioPinStm buttonOne{ hal::Port::C, 13, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm buttonOne{ hal::Port::C, 13, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Default };
         hal::GpioPinStm ledRed{ hal::Port::B, 14 };
 #if defined(STM32L496ZG) || defined(STM32L496ZG) || defined(STM32L496ZG_P) || defined(STM32L4A6ZG) || defined(STM32L4P5ZG) || defined(STM32LR5ZI) || defined(STM32L4R5ZI_P)
         hal::GpioPinStm ledGreen{ hal::Port::C, 7 };
