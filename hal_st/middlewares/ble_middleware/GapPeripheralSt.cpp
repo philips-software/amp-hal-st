@@ -11,10 +11,10 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, hal::MacAddress address, const hal::GapSt::RootKeys& rootKeys, uint16_t maxAttMtuSize, uint8_t txPowerLevel, const GapService gapService, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t* bleBondsStorage)
-        : GapSt(hciEventSource, address, rootKeys, maxAttMtuSize, txPowerLevel, bondStorageSynchronizerCreator, *bleBondsStorage)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration)
+        : GapSt(hciEventSource, bleBondStorage, configuration)
     {
-        Initialize(gapService);
+        Initialize(configuration.gapService);
     }
 
     services::GapAddress GapPeripheralSt::GetAddress() const

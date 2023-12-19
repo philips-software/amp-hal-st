@@ -8,6 +8,7 @@
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include "shci.h"
 
 namespace hal
 {
@@ -30,6 +31,28 @@ namespace hal
             std::array<uint8_t, 16> encryption;
         };
 
+        enum class RfWakeupClock : uint8_t
+        {
+            highSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024,
+            lowSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE,
+        };
+
+        struct Configuration
+        {
+            const hal::MacAddress& address;
+            const GapService& gapService;
+            const RootKeys& rootKeys;
+            uint16_t maxAttMtuSize;
+            uint8_t txPowerLevel;
+            RfWakeupClock rfWakeupClock;
+        };
+
+        struct BleBondStorage
+        {
+            infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator;
+            uint32_t& bleBondsStorage;
+        };
+
         // Implementation of AttMtuExchange
         uint16_t EffectiveMaxAttMtuSize() const override;
 
@@ -47,7 +70,7 @@ namespace hal
         void NumericComparisonConfirm(bool accept) override;
 
     protected:
-        GapSt(hal::HciEventSource& hciEventSource, hal::MacAddress& address, const RootKeys& rootKeys, uint16_t& maxAttMtuSize, uint8_t& txPowerLevel, infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator, uint32_t& bleBondsStorage);
+        GapSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
@@ -103,7 +126,7 @@ namespace hal
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
-        uint8_t& txPowerLevel;
+        const uint8_t& txPowerLevel;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
         infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
     };
