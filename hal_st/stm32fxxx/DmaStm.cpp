@@ -585,6 +585,49 @@ namespace hal
 #endif
     }
 
+    void DmaStm::TransceiveStream::StartTransmit(infra::ConstByteRange data)
+    {
+        SetMemoryToPeripheralMode();
+        EnableMemoryIncrement();
+        SetTransferSize(data.size());
+        SetMemoryAddress(data.begin());
+        Enable();
+    }
+
+    void DmaStm::TransceiveStream::StartTransmitDummy(uint16_t size)
+    {
+        SetMemoryToPeripheralMode();
+        DisableMemoryIncrement();
+        SetTransferSize(size);
+        SetMemoryAddress(&dummy);
+        Enable();
+    }
+
+    void DmaStm::TransceiveStream::StartReceive(infra::ByteRange data)
+    {
+        this->data = data;
+
+        SetPeripheralToMemoryMode();
+        EnableMemoryIncrement();
+        SetTransferSize(data.size());
+        SetMemoryAddress(data.begin());
+        Enable();
+    }
+
+    void DmaStm::TransceiveStream::StartReceiveDummy(uint16_t size)
+    {
+        SetPeripheralToMemoryMode();
+        DisableMemoryIncrement();
+        SetTransferSize(size);
+        SetMemoryAddress(&dummy);
+        Enable();
+    }
+
+    size_t DmaStm::TransceiveStream::ReceivedSize() const
+    {
+        return (data.size() - BytesToTransfer()) / DataSize();
+    }
+
     DmaStm::StreamInterruptHandler::StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete)
         : stream{ stream }
         , dispatchedInterruptHandler{ dmaIrq[stream.dmaIndex][stream.streamIndex], [this]
@@ -652,57 +695,101 @@ namespace hal
         }
     }
 
-    DmaStm::PeripheralStream::PeripheralStream(Stream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+    DmaStm::PeripheralTransceiveStream::PeripheralTransceiveStream(TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+        : stream{ stream }
     {
         stream.SetPeripheralAddress(peripheralAddress);
         stream.SetPeripheralDataSize(peripheralTransferSize);
     }
 
-    DmaStm::PeripheralTransmitStream::PeripheralTransmitStream(TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
-        : peripheralStream{ transmitStream, peripheralAddress, peripheralTransferSize }
-        , stream{ transmitStream }
-    {}
+    void DmaStm::PeripheralTransceiveStream::SetPeripheralTransferSize(uint8_t peripheralTransferSize)
+    {
+        stream.SetPeripheralDataSize(peripheralTransferSize);
+    }
 
-    DmaStm::PeripheralReceiveStream::PeripheralReceiveStream(ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
-        : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
-        , stream{ receiveStream }
-    {}
+    bool DmaStm::PeripheralTransceiveStream::StopTransfer()
+    {
+        return stream.StopTransfer();
+    }
 
-    DmaStm::PeripheralTransceiveStream::PeripheralTransceiveStream(TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
-        : peripheralStream{ transceiveStreamBase, peripheralAddress, peripheralTransferSize }
-        , stream{ transceiveStreamBase }
-    {}
+    void DmaStm::PeripheralTransceiveStream::StartTransmitDummy(uint16_t size, uint8_t dataSize)
+    {
+        stream.SetMemoryDataSize(dataSize);
+        stream.StartTransmitDummy(size);
+    }
 
-    TransmitDmaChannel::TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ transmitStream, peripheralAddress, peripheralTransferSize }
-        , streamInterruptHandler{ transmitStream, transferFullComplete }
+    void DmaStm::PeripheralTransceiveStream::StartReceiveDummy(uint16_t size, uint8_t dataSize)
+    {
+        stream.SetMemoryDataSize(dataSize);
+        stream.StartReceiveDummy(size);
+    }
+
+    size_t DmaStm::PeripheralTransceiveStream::ReceivedSize() const
+    {
+        return stream.ReceivedSize();
+    }
+
+    ///////////////////////////////
+
+    TransceiverDmaChannelBase::TransceiverDmaChannelBase(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+        : peripheralStream{ stream, peripheralAddress, peripheralTransferSize }
     {
     }
 
-    CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ transmitStream, peripheralAddress, peripheralTransferSize }
-        , circularStreamInterruptHandler{ transmitStream, transferHalfComplete, transferFullComplete }
+    bool TransceiverDmaChannelBase::StopTransfer()
     {
+        return peripheralStream.StopTransfer();
     }
 
-    ReceiveDmaChannel::ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
-        , streamInterruptHandler{ receiveStream, transferFullComplete }
+    void TransceiverDmaChannelBase::SetPeripheralTransferSize(uint8_t peripheralTransferSize)
+    {
+        peripheralStream.SetPeripheralTransferSize(peripheralTransferSize);
+    }
+
+    void TransceiverDmaChannelBase::StartTransmitDummy(uint16_t size, uint8_t dataSize)
+    {
+        peripheralStream.StartTransmitDummy(size, dataSize);
+    }
+
+    size_t TransceiverDmaChannelBase::ReceivedSize() const
+    {
+        return peripheralStream.ReceivedSize();
+    }
+
+    void TransceiverDmaChannelBase::StartReceiveDummy(uint16_t size, uint8_t dataSize)
+    {
+        peripheralStream.StartReceiveDummy(size, dataSize);
+    }
+
+    TransceiverDmaChannel::TransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
+        : TransceiverDmaChannelBase{ stream, peripheralAddress, peripheralTransferSize }
+        , streamInterruptHandler{ stream, transferFullComplete }
     {}
 
-    CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ receiveStream, peripheralAddress, peripheralTransferSize }
-        , circularStreamInterruptHandler{ receiveStream, transferHalfComplete, transferFullComplete }
+    TransmitDmaChannel::TransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
+        : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete }
     {}
 
-    bool CircularReceiveDmaChannel::IsInterruptPending() const
+    ReceiveDmaChannel::ReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
+        : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete }
+    {}
+
+    CircularTransceiverDmaChannel::CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+        : TransceiverDmaChannelBase{ stream, peripheralAddress, peripheralTransferSize }
+        , circularStreamInterruptHandler{ stream, transferHalfComplete, transferFullComplete }
+    {}
+
+    bool CircularTransceiverDmaChannel::IsInterruptPending() const
     {
         return circularStreamInterruptHandler.IsInterruptPending();
     }
 
-    TransceiverDmaChannel::TransceiverDmaChannel(DmaStm::TransceiveStream& transceiveStreamBase, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete)
-        : peripheralStream{ transceiveStreamBase, peripheralAddress, peripheralTransferSize }
-        , streamInterruptHandler{ transceiveStreamBase, transferFullComplete }
+    CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+        : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete }
+    {}
+
+    CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+        : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete }
     {}
 }
 
