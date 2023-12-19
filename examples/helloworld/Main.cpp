@@ -26,7 +26,7 @@ int main()
 
     services::SetGlobalTracerInstance(tracerWithDateTime);
 
-    static infra::TimerRepeating timerRepeating{ std::chrono::milliseconds{ 1000 }, []
+    static infra::TimerRepeating timerRepeating{ std::chrono::seconds{ 1 }, []
         {
             services::GlobalTracer().Trace() << "Hello World !";
         } };
