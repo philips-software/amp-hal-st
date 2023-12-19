@@ -12,7 +12,8 @@ namespace main_
         hal::GpioPinStm hostUartTxPin{ hal::Port::C, 10 };
         hal::GpioPinStm hostUartRxPin{ hal::Port::C, 11 };
         hal::DmaStm dma;
-        hal::UartStmDma hostUart{ dma, 4, hostUartTxPin, hostUartRxPin };
+        hal::DmaStm::TransmitStream transmitStream{ dma, hal::DmaChannelId{ 1, 4, 4 } };
+        hal::UartStmDma hostUart{ transmitStream, 4, hostUartTxPin, hostUartRxPin };
         services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
         main_::EchoOnSerialCommunication<256> echo{ hostUart, serializerFactory };
     };
