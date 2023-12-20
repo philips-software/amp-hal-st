@@ -1,5 +1,6 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/util/EnumCast.hpp"
 #include <array>
 #include <cassert>
 
@@ -30,15 +31,96 @@ namespace
 
 namespace hal
 {
-    AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc)
-        : pin(pin)
-        , adc(adc)
+    AdcStm::AdcStm(uint8_t oneBasedIndex, const Config& config)
+        : index(oneBasedIndex - 1)
+#if defined(STM32WB) || defined(STM32G0)
+        , interruptHandler(ADC1_IRQn, [this]()
+#elif defined(STM32G4)
+        , interruptHandler(ADC1_2_IRQn, [this]()
+#else
+        , interruptHandler(ADC_IRQn, [this]()
+#endif
+                {
+                        MeasurementDone();
+                })
+    {
+        EnableClockAdc(index);
+
+        handle.Instance = peripheralAdc[index];
+#if !defined(STM32F3)
+        handle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
+        handle.Init.Resolution = ADC_RESOLUTION_12B;
+#endif
+        handle.Init.ScanConvMode = DISABLE;
+        handle.Init.ContinuousConvMode = DISABLE;
+        handle.Init.DiscontinuousConvMode = DISABLE;
+#if !defined(STM32G0)
+        handle.Init.NbrOfDiscConversion = 0;
+#endif
+#if !defined(STM32F3)
+        handle.Init.ExternalTrigConvEdge = infra::enum_cast(config.triggerEdge);
+#endif
+        handle.Init.ExternalTrigConv = infra::enum_cast(config.triggerSource);
+        handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+        handle.Init.NbrOfConversion = 1;
+#if !defined(STM32F3)
+        handle.Init.DMAContinuousRequests = config.isDmaUsed ? ENABLE : DISABLE;
+#endif
+#if defined(STM32WB)
+        handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+        handle.Init.Overrun = infra::enum_cast(config.overrun);
+        handle.Init.OversamplingMode = DISABLE;
+#elif !defined(STM32F3)
+        handle.Init.EOCSelection = DISABLE;
+#endif
+        HAL_StatusTypeDef result = HAL_ADC_Init(&handle);
+        assert(result == HAL_OK);
+    }
+
+    AdcStm::~AdcStm()
+    {
+        DisableClockAdc(index);
+    }
+
+    void AdcStm::Measure(const infra::Function<void(int32_t value)>& onDone)
+    {
+        this->onDone = onDone;
+
+        HAL_StatusTypeDef result = HAL_ADC_Start_IT(&handle);
+        assert(result == HAL_OK);
+    }
+
+    uint32_t AdcStm::Channel(const hal::AnalogPinStm& pin) const
+    {
+        return adcChannel[pin.AdcChannel(index + 1)];
+    }
+
+    ADC_HandleTypeDef& AdcStm::Handle()
+    {
+        return handle;
+    }
+
+    void AdcStm::MeasurementDone()
+    {
+        assert(onDone != nullptr);
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
+        handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
+#else
+        handle.Instance->SR &= ~ADC_SR_EOC;
+#endif
+        interruptHandler.ClearPending();
+        onDone(HAL_ADC_GetValue(&handle));
+    }
+
+    AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(uint8_t adcIndex, hal::GpioPinStm& pin)
+        : AdcStm(adcIndex, config)
+        , pin(pin)
     {}
 
     void AnalogToDigitalPinImplStm::Measure(const infra::Function<void(int32_t value)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = adcChannel[pin.AdcChannel(adc.index + 1)];
+        channelConfig.Channel = Channel(pin);
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -60,77 +142,9 @@ namespace hal
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
         channelConfig.Offset = 0;
 #endif
-        HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.handle, &channelConfig);
+        HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&Handle(), &channelConfig);
         assert(result == HAL_OK);
 
-        adc.Measure(pin, onDone);
-    }
-
-    AdcStm::AdcStm(uint8_t oneBasedIndex)
-        : index(oneBasedIndex - 1)
-        , handle()
-#if defined(STM32WB) || defined(STM32G0)
-        , interruptHandler(ADC1_IRQn, [this]()
-#elif defined(STM32G4)
-        , interruptHandler(ADC1_2_IRQn, [this]()
-#else
-        , interruptHandler(ADC_IRQn, [this]()
-#endif
-              { MeasurementDone(); })
-    {
-        EnableClockAdc(index);
-
-        handle.Instance = peripheralAdc[index];
-#if !defined(STM32F3)
-        handle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
-        handle.Init.Resolution = ADC_RESOLUTION_12B;
-#endif
-        handle.Init.ScanConvMode = DISABLE;
-        handle.Init.ContinuousConvMode = DISABLE;
-        handle.Init.DiscontinuousConvMode = DISABLE;
-#if !defined(STM32G0)
-        handle.Init.NbrOfDiscConversion = 0;
-#endif
-#if !defined(STM32F3)
-        handle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-#endif
-        handle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-        handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-        handle.Init.NbrOfConversion = 1;
-#if !defined(STM32F3)
-        handle.Init.DMAContinuousRequests = DISABLE;
-#endif
-#if defined(STM32WB)
-        handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-#elif !defined(STM32F3)
-        handle.Init.EOCSelection = DISABLE;
-#endif
-        HAL_StatusTypeDef result = HAL_ADC_Init(&handle);
-        assert(result == HAL_OK);
-    }
-
-    AdcStm::~AdcStm()
-    {
-        DisableClockAdc(index);
-    }
-
-    void AdcStm::Measure(AnalogPinStm& pin, const infra::Function<void(int32_t value)>& onDone)
-    {
-        this->onDone = onDone;
-
-        HAL_StatusTypeDef result = HAL_ADC_Start_IT(&handle);
-        assert(result == HAL_OK);
-    }
-
-    void AdcStm::MeasurementDone()
-    {
-        assert(onDone != nullptr);
-#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
-        handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
-#else
-        handle.Instance->SR &= ~ADC_SR_EOC;
-#endif
-        interruptHandler.ClearPending();
-        onDone(HAL_ADC_GetValue(&handle));
+        AdcStm::Measure(onDone);
     }
 }
