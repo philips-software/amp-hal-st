@@ -15,6 +15,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:AdcDmaStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:AdcDmaStm.hpp>
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
     BackupRamStm.cpp
