@@ -47,7 +47,7 @@ namespace hal
 
     private:
         uint8_t timerIndex;
-        const Config& config;
+        Config config;
         TIM_HandleTypeDef handle = {};
     };
 }
