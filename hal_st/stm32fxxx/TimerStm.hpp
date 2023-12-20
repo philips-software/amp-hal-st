@@ -12,7 +12,7 @@ namespace hal
     class TimerBaseStm
     {
     public:
-        enum class CounterMode : uint8_t
+        enum class CounterMode : uint32_t
         {
             up = TIM_COUNTERMODE_UP,
             down = TIM_COUNTERMODE_DOWN
@@ -20,11 +20,11 @@ namespace hal
 
         struct Trigger
         {
-            enum class TriggerOutput
+            enum class TriggerOutput : uint32_t
             {
                 reset = TIM_TRGO_RESET,
                 enable = TIM_TRGO_ENABLE,
-                update = TIM_TRGO_UPDATE
+                update = TIM_TRGO_UPDATE,
             };
 
             TriggerOutput triggerOutput;
