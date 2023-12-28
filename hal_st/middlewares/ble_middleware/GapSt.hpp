@@ -75,10 +75,10 @@ namespace hal
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) {};
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent){};
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
 
         virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
