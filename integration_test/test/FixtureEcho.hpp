@@ -10,7 +10,8 @@ namespace main_
     {
         hal::UartWindows serial{ "COM43" };
         services::MethodSerializerFactory::OnHeap serializerFactory;
-        main_::EchoOnSerialCommunication<256> echo{ serial, serializerFactory };
+        hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedSerial{ serial };
+        main_::EchoOnSesame<256> echo{ bufferedSerial, serializerFactory };
     };
 }
 
