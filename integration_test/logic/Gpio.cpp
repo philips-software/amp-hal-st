@@ -30,7 +30,7 @@ namespace application
             RequestSend([this]()
                 {
                     sending = false;
-                    TestedGpioChanged(in.Get());
+                    GpioChanged(in.Get());
                 });
 
         sending = true;
@@ -47,6 +47,11 @@ namespace application
         MethodDone();
     }
 
+    void GpioTester::GpioChanged(bool state)
+    {
+        TesterGpioChanged(state);
+    }
+
     GpioTested::GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
         : GpioBase(echo, inPin, outPin)
         , testing::GpioTested(echo)
@@ -56,5 +61,10 @@ namespace application
     {
         GpioBase::SetGpio(state);
         MethodDone();
+    }
+
+    void GpioTested::GpioChanged(bool state)
+    {
+        TestedGpioChanged(state);
     }
 }

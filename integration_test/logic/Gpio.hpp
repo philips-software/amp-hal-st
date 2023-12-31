@@ -15,6 +15,9 @@ namespace application
 
         void SetGpio(bool state);
 
+    protected:
+        virtual void GpioChanged(bool state) = 0;
+
     private:
         void InChanged();
 
@@ -33,6 +36,9 @@ namespace application
 
         // Implementation of GpioTester
         void SetGpio(bool state) override;
+
+    protected:
+        virtual void GpioChanged(bool state) override;
     };
 
     class GpioTested
@@ -44,6 +50,9 @@ namespace application
 
         // Implementation of GpioTested
         void SetGpio(bool state) override;
+
+    protected:
+        virtual void GpioChanged(bool state) override;
     };
 }
 
