@@ -40,9 +40,8 @@ else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
-if (NOT CMAKE_CROSSCOMPILING)
+if (EMIL_HOST_BUILD)
     add_subdirectory(amp-cucumber-cpp-runner-poc)
-    set_target_properties(gherkin-cpp gherkin-generate-tokens-bin cucumber-messages PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
 add_subdirectory(st)
