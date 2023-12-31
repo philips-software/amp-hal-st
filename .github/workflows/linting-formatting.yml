@@ -28,7 +28,7 @@ jobs:
           clangFormatVersion: 15
           inplace: true
           extensions: "cpp,hpp"
-      - uses: reviewdog/action-suggester@94877e550e6b522dc1d21231974b645ff2f084ce # v1.8.0
+      - uses: reviewdog/action-suggester@4daff13db10cd0ddb200b45c8c7166dd0d5c85a9 # v1.9.0
         with:
           tool_name: clang-format
           filter_mode: diff_context
@@ -42,7 +42,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Linter
-        uses: oxsecurity/megalinter@b48455a119cc28045eee8f1e9d0a542a85e71f4f # v7.5.0
+        uses: oxsecurity/megalinter/flavors/documentation@5364b811bbe86576d832227be174ebc2aa0f5f49 # v7.6.0
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
@@ -54,7 +54,7 @@ jobs:
           name: linter
           path: |
             megalinter-reports
-      - uses: reviewdog/action-suggester@94877e550e6b522dc1d21231974b645ff2f084ce # v1.8.0
+      - uses: reviewdog/action-suggester@4daff13db10cd0ddb200b45c8c7166dd0d5c85a9 # v1.9.0
         with:
           tool_name: MegaLinter
           filter_mode: diff_context
