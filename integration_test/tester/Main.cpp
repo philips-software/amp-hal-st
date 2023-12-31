@@ -1,3 +1,4 @@
+#include "hal_st/instantiations/NucleoTracerInfrastructure.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
@@ -24,12 +25,16 @@ int main()
     ConfigureDefaultClockNucleo767ZI();
 
     static main_::StmEventInfrastructure eventInfrastructure;
+    static main_::NucleoF767ziTracerInfrastructure tracerInfrastructure;
+    services::SetGlobalTracerInstance(tracerInfrastructure.tracer);
     static main_::Nucleo144Ui ui;
     static services::DebugLed debugLed(ui.ledBlue);
 
     static main_::EchoFromCloud echo;
     static main_::Tester tester(echo.echo);
     static main_::ForwardingEchoToTested forwarder(echo.echo);
+
+    services::GlobalTracer().Trace() << "Starting tester!";
 
     eventInfrastructure.Run();
     __builtin_unreachable();
