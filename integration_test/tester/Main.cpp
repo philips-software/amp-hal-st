@@ -30,9 +30,10 @@ int main()
     static main_::Nucleo144Ui ui;
     static services::DebugLed debugLed(ui.ledBlue);
 
-    static main_::EchoFromCloud echo;
+    static hal::DmaStm dma;
+    static main_::EchoFromCloud echo(dma);
     static main_::Tester tester(echo.echo);
-    static main_::ForwardingEchoToTested forwarder(echo.echo);
+    static main_::ForwardingEchoToTested forwarder(echo.echo, dma);
 
     services::GlobalTracer().Trace() << "Starting tester!";
 
