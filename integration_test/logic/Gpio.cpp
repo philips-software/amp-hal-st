@@ -26,14 +26,12 @@ namespace application
 
     void GpioBase::InChanged()
     {
-        if (!sending)
+        if (!std::exchange(sending, true))
             RequestSend([this]()
                 {
                     sending = false;
                     GpioChanged(in.Get());
                 });
-
-        sending = true;
     }
 
     GpioTester::GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
