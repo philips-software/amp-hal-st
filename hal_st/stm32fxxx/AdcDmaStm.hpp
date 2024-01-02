@@ -28,7 +28,7 @@ namespace hal
         DmaStm::StreamGeneric<int16_t> stream;
         AnalogPinStm pin;
         TimerBaseStm::Config timerConfig{ 1, 39999, TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) };
-        AdcStm::Config adcConfig{ AdcStm::TriggerSource::timer2, AdcStm::TriggerEdge::rising, AdcStm::OverrunBehavior::overwrite, true };
+        AdcStm::Config adcConfig{ AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising, true };
         TimerBaseStm timer;
         infra::Function<void(infra::BoundedVector<int16_t>&)> onDone;
     };

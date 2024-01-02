@@ -28,19 +28,25 @@ namespace
         ADC_CHANNEL_18
     };
 
+    constexpr std::array<uint32_t, 3> triggerSource = {
+        ADC_SOFTWARE_START,
+
 #if defined(STM32F4) || defined(STM32F7)
-    constexpr std::array<uint32_t, 3> triggerSource = {
-        ADC_SOFTWARE_START,
         ADC_EXTERNALTRIGCONV_T2_TRGO,
-        ADC_EXTERNALTRIGCONV_Ext_IT11,
-    };
+#elif defined(STM32G0)
+        ADC_EXTERNALTRIG_T3_TRGO,
 #else
-    constexpr std::array<uint32_t, 3> triggerSource = {
-        ADC_SOFTWARE_START,
         ADC_EXTERNALTRIG_T2_TRGO,
-        ADC_EXTERNALTRIG_EXT_IT11,
-    };
 #endif
+
+#if defined(STM32F4)
+        ADC_EXTERNALTRIG_Ext_IT11,
+#elif defined(STM32F7)
+        ADC_EXTERNALTRIG7_EXT_IT11,
+#else
+        ADC_EXTERNALTRIG_EXT_IT11,
+#endif
+    };
 }
 
 namespace hal

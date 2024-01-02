@@ -14,7 +14,11 @@ namespace hal
                 TransferDone();
             })
         , pin(pin)
+#if defined(STM32G0)
+        , timer(3, timerConfig)
+#else
         , timer(2, timerConfig)
+#endif
     {
         ADC_ChannelConfTypeDef channelConfig;
         channelConfig.Channel = Channel(pin);

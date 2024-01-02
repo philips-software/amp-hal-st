@@ -15,7 +15,7 @@ namespace hal
         enum class TriggerSource : uint32_t
         {
             software,
-            timer2,
+            timer,
             external,
         };
 
