@@ -63,7 +63,7 @@ namespace hal
 
     void GapPeripheralSt::UpdateAdvertisementData()
     {
-        //First clear the data set by the aci_gap_set_discoverable call by default
+        // First clear the data set by the aci_gap_set_discoverable call by default
         aci_gap_delete_ad_type(AD_TYPE_TX_POWER_LEVEL);
         aci_gap_delete_ad_type(AD_TYPE_FLAGS);
 
@@ -75,7 +75,13 @@ namespace hal
     void GapPeripheralSt::UpdateState(services::GapState newState)
     {
         state = newState;
-        infra::EventDispatcher::Instance().Schedule([this]() { GapPeripheral::NotifyObservers([this](auto& obs) { obs.StateChanged(state); }); });
+        infra::EventDispatcher::Instance().Schedule([this]()
+            {
+                GapPeripheral::NotifyObservers([this](auto& obs)
+                    {
+                        obs.StateChanged(state);
+                    });
+            });
     }
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
@@ -133,8 +139,8 @@ namespace hal
         {
             aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
 
-            std::copy(std::begin(bondedDevices[numberOfBondedAddress-1].Address), std::end(bondedDevices[numberOfBondedAddress-1].Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress-1].Address_Type;
+            std::copy(std::begin(bondedDevices[numberOfBondedAddress - 1].Address), std::end(bondedDevices[numberOfBondedAddress - 1].Address), connectionContext.peerAddress.begin());
+            connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress - 1].Address_Type;
 
             for (uint8_t i = 0; i < numberOfBondedAddress; i++)
                 hci_le_set_privacy_mode(bondedDevices[i].Address_Type, bondedDevices[i].Address, HCI_PRIV_MODE_DEVICE);

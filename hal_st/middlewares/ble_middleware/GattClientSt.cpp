@@ -19,21 +19,30 @@ namespace hal
 
     void GattClientSt::StartServiceDiscovery()
     {
-        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer) { observer.ServiceDiscoveryComplete(); };
+        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
+        {
+            observer.ServiceDiscoveryComplete();
+        };
 
         aci_gatt_disc_all_primary_services(connectionHandle);
     }
 
     void GattClientSt::StartCharacteristicDiscovery(const services::GattService& service)
     {
-        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer) { observer.CharacteristicDiscoveryComplete(); };
+        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
+        {
+            observer.CharacteristicDiscoveryComplete();
+        };
 
         aci_gatt_disc_all_char_of_service(connectionHandle, service.Handle(), service.EndHandle());
     }
 
     void GattClientSt::StartDescriptorDiscovery(const services::GattService& service)
     {
-        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer) { observer.DescriptorDiscoveryComplete(); };
+        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
+        {
+            observer.DescriptorDiscoveryComplete();
+        };
 
         aci_gatt_disc_all_char_desc(connectionHandle, service.Handle(), service.EndHandle());
     }
@@ -89,17 +98,17 @@ namespace hal
     {
         switch (event.evt)
         {
-        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-            HandleHciDisconnectEvent(event);
-            break;
-        case HCI_LE_META_EVT_CODE:
-            HandleHciLeMetaEvent(event);
-            break;
-        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-            HandleHciVendorSpecificDebugEvent(event);
-            break;
-        default:
-            break;
+            case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
+                HandleHciDisconnectEvent(event);
+                break;
+            case HCI_LE_META_EVT_CODE:
+                HandleHciLeMetaEvent(event);
+                break;
+            case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
+                HandleHciVendorSpecificDebugEvent(event);
+                break;
+            default:
+                break;
         }
     }
 
@@ -109,14 +118,14 @@ namespace hal
 
         switch (metaEvent->subevent)
         {
-        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionCompleteEvent(metaEvent);
-            break;
-        default:
-            break;
+            case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
+                HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+                break;
+            case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
+                HandleHciLeConnectionCompleteEvent(metaEvent);
+                break;
+            default:
+                break;
         }
     }
 
@@ -126,26 +135,26 @@ namespace hal
 
         switch (vendorEvent->ecode)
         {
-        case ACI_ATT_READ_BY_GROUP_TYPE_RESP_VSEVT_CODE:
-            HandleAttReadByGroupTypeResponse(vendorEvent);
-            break;
-        case ACI_ATT_READ_BY_TYPE_RESP_VSEVT_CODE:
-            HandleAttReadByTypeResponse(vendorEvent);
-            break;
-        case ACI_ATT_FIND_INFO_RESP_VSEVT_CODE:
-            HandleAttFindInfoResponse(vendorEvent);
-            break;
-        case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
-            HandleGattCompleteResponse(vendorEvent);
-            break;
-        case ACI_GATT_INDICATION_VSEVT_CODE:
-            HandleGattIndicationEvent(vendorEvent);
-            break;
-        case ACI_GATT_NOTIFICATION_VSEVT_CODE:
-            HandleGattNotificationEvent(vendorEvent);
-            break;
-        default:
-            break;
+            case ACI_ATT_READ_BY_GROUP_TYPE_RESP_VSEVT_CODE:
+                HandleAttReadByGroupTypeResponse(vendorEvent);
+                break;
+            case ACI_ATT_READ_BY_TYPE_RESP_VSEVT_CODE:
+                HandleAttReadByTypeResponse(vendorEvent);
+                break;
+            case ACI_ATT_FIND_INFO_RESP_VSEVT_CODE:
+                HandleAttFindInfoResponse(vendorEvent);
+                break;
+            case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
+                HandleGattCompleteResponse(vendorEvent);
+                break;
+            case ACI_GATT_INDICATION_VSEVT_CODE:
+                HandleGattIndicationEvent(vendorEvent);
+                break;
+            case ACI_GATT_NOTIFICATION_VSEVT_CODE:
+                HandleGattNotificationEvent(vendorEvent);
+                break;
+            default:
+                break;
         }
     }
 
@@ -248,9 +257,15 @@ namespace hal
 
         really_assert(gattIndicationEvent.Connection_Handle == connectionHandle);
 
-        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattIndicationEvent, &data](auto& observer) { observer.UpdateReceived(gattIndicationEvent.Attribute_Handle, data); });
+        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattIndicationEvent, &data](auto& observer)
+            {
+                observer.UpdateReceived(gattIndicationEvent.Attribute_Handle, data);
+            });
 
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, &gattIndicationEvent]() { this->HandleGattConfirmIndication(gattIndicationEvent.Attribute_Handle); });
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, &gattIndicationEvent]()
+            {
+                this->HandleGattConfirmIndication(gattIndicationEvent.Attribute_Handle);
+            });
     }
 
     void GattClientSt::HandleGattNotificationEvent(evt_blecore_aci* vendorEvent)
@@ -261,7 +276,10 @@ namespace hal
 
         really_assert(gattNotificationEvent.Connection_Handle == connectionHandle);
 
-        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattNotificationEvent, &data](auto& observer) { observer.UpdateReceived(gattNotificationEvent.Attribute_Handle, data); });
+        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattNotificationEvent, &data](auto& observer)
+            {
+                observer.UpdateReceived(gattNotificationEvent.Attribute_Handle, data);
+            });
     }
 
     void GattClientSt::HandleGattConfirmIndication(services::AttAttribute::Handle handle)
@@ -281,7 +299,10 @@ namespace hal
 
             really_assert(!stream.Failed());
 
-            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([&attributes](auto& observer) { observer.ServiceDiscovered(attributes.type, attributes.startHandle, attributes.endHandle); });
+            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([&attributes](auto& observer)
+                {
+                    observer.ServiceDiscovered(attributes.type, attributes.startHandle, attributes.endHandle);
+                });
         }
     }
 
@@ -297,7 +318,10 @@ namespace hal
 
             really_assert(!stream.Failed());
 
-            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([&attributes](auto& observer) { observer.CharacteristicDiscovered(attributes.type, attributes.startHandle, attributes.endHandle, attributes.properties); });
+            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([&attributes](auto& observer)
+                {
+                    observer.CharacteristicDiscovered(attributes.type, attributes.startHandle, attributes.endHandle, attributes.properties);
+                });
         }
     }
 
@@ -313,7 +337,10 @@ namespace hal
 
             really_assert(!stream.Failed());
 
-            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([&attributes](auto& observer) { observer.DescriptorDiscovered(attributes.type, attributes.startHandle); });
+            infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([&attributes](auto& observer)
+                {
+                    observer.DescriptorDiscovered(attributes.type, attributes.startHandle);
+                });
         }
     }
 

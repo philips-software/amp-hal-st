@@ -2,7 +2,7 @@
 
 extern "C"
 {
-    #include "ble/core/ble_core.h"
+#include "ble/core/ble_core.h"
 }
 
 namespace
@@ -65,10 +65,10 @@ namespace hal
     {
         constexpr uint8_t valueOffset = 0;
         auto result = aci_gatt_update_char_value(characteristic.ServiceHandle(),
-                                                 characteristic.CharacteristicHandle(),
-                                                 valueOffset,
-                                                 data.size(),
-                                                 data.begin());
+            characteristic.CharacteristicHandle(),
+            valueOffset,
+            data.size(),
+            data.begin());
 
         if (result != BLE_STATUS_SUCCESS)
             ReportError(result);
@@ -105,15 +105,15 @@ namespace hal
         constexpr uint8_t variableLength = 0x01;
 
         auto result = aci_gatt_add_char(characteristic.ServiceHandle(),
-                                        UuidToType(characteristic.Type()),
-                                        ConvertUuid<Char_UUID_t>(characteristic.Type()),
-                                        characteristic.ValueLength(),
-                                        ConvertProperties(characteristic.Properties()),
-                                        ConvertPermissions(characteristic.Permissions()),
-                                        notifyAttributeWrite,
-                                        encryptionKeySize,
-                                        variableLength,
-                                        &characteristic.Handle());
+            UuidToType(characteristic.Type()),
+            ConvertUuid<Char_UUID_t>(characteristic.Type()),
+            characteristic.ValueLength(),
+            ConvertProperties(characteristic.Properties()),
+            ConvertPermissions(characteristic.Permissions()),
+            notifyAttributeWrite,
+            encryptionKeySize,
+            variableLength,
+            &characteristic.Handle());
 
         if (result == BLE_STATUS_SUCCESS)
             characteristic.Attach(*this);
@@ -124,12 +124,15 @@ namespace hal
     void GattServerSt::HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event)
     {
         constexpr uint16_t valueAttributeOffset = 1;
-        infra::ByteRange data{event.Attr_Data, event.Attr_Data + event.Attr_Data_Length};
+        infra::ByteRange data{ event.Attr_Data, event.Attr_Data + event.Attr_Data_Length };
 
         for (auto& service : services)
             for (auto& characteristic : service.Characteristics())
                 if (event.Attr_Handle == characteristic.Handle() + valueAttributeOffset)
-                    characteristic.NotifyObservers([data](auto& observer) { observer.DataReceived(data); });
+                    characteristic.NotifyObservers([data](auto& observer)
+                        {
+                            observer.DataReceived(data);
+                        });
     }
 
     void GattServerSt::ReportError(tBleStatus status) const

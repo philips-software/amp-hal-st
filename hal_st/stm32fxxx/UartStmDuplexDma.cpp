@@ -44,20 +44,32 @@ namespace hal
         , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
               dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #else
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
               dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #endif
     {
         Configure(config);
@@ -74,20 +86,32 @@ namespace hal
         , dma(dma)
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
               dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #else
         , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { TransferComplete(); })
+              {
+                  TransferComplete();
+              })
         , receiveDmaChannel(
               dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              { ReceiveComplete(this->rxBuffer.size() / 2); },
+              {
+                  ReceiveComplete(this->rxBuffer.size() / 2);
+              },
               [this]()
-              { ReceiveComplete(this->rxBuffer.size()); })
+              {
+                  ReceiveComplete(this->rxBuffer.size());
+              })
 #endif
     {
         Configure(config);

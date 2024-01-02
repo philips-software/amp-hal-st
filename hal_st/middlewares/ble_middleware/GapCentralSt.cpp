@@ -5,8 +5,7 @@
 
 namespace hal
 {
-    const services::GapConnectionParameters GapCentralSt::connectionUpdateParameters
-    {
+    const services::GapConnectionParameters GapCentralSt::connectionUpdateParameters{
         6, // 7.5 ms
         6, // 7.5 ms
         0,
@@ -46,7 +45,6 @@ namespace hal
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
             minConnectionEventLength, maxConnectionEventLength);
-
     }
 
     void GapCentralSt::Disconnect()
@@ -65,7 +63,10 @@ namespace hal
         {
             aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, GAP_RESOLVABLE_PRIVATE_ADDR, filterDuplicatesEnabled);
             discovering = true;
-            infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::scanning); });
+            infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+                {
+                    observer.StateChanged(services::GapState::scanning);
+                });
         }
     }
 
@@ -86,7 +87,10 @@ namespace hal
     {
         GapSt::HandleHciDisconnectEvent(eventPacket);
 
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer) { observer.StateChanged(services::GapState::standby); });
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+            {
+                observer.StateChanged(services::GapState::standby);
+            });
     }
 
     void GapCentralSt::HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent)
