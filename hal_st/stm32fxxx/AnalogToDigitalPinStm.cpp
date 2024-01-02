@@ -27,6 +27,20 @@ namespace
         ADC_CHANNEL_17,
         ADC_CHANNEL_18
     };
+
+#if defined(STM32F4) || defined(STM32F7)
+    constexpr std::array<uint32_t, 3> triggerSource = {
+        ADC_SOFTWARE_START,
+        ADC_EXTERNALTRIGCONV_T2_TRGO,
+        ADC_EXTERNALTRIGCONV_Ext_IT11,
+    };
+#else
+    constexpr std::array<uint32_t, 3> triggerSource = {
+        ADC_SOFTWARE_START,
+        ADC_EXTERNALTRIG_T2_TRGO,
+        ADC_EXTERNALTRIG_EXT_IT11,
+    };
+#endif
 }
 
 namespace hal
@@ -60,7 +74,7 @@ namespace hal
 #if !defined(STM32F3)
         handle.Init.ExternalTrigConvEdge = infra::enum_cast(config.triggerEdge);
 #endif
-        handle.Init.ExternalTrigConv = infra::enum_cast(config.triggerSource);
+        handle.Init.ExternalTrigConv = triggerSource.at(infra::enum_cast(config.triggerSource));
         handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
         handle.Init.NbrOfConversion = 1;
 #if !defined(STM32F3)
@@ -68,7 +82,7 @@ namespace hal
 #endif
 #if defined(STM32WB)
         handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-        handle.Init.Overrun = infra::enum_cast(config.overrun);
+        handle.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
         handle.Init.OversamplingMode = DISABLE;
 #elif !defined(STM32F3)
         handle.Init.EOCSelection = DISABLE;

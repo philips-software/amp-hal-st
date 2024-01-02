@@ -14,10 +14,9 @@ namespace hal
     public:
         enum class TriggerSource : uint32_t
         {
-            software = ADC_SOFTWARE_START,
-            timer1 = ADC_EXTERNALTRIG_T1_TRGO,
-            timer2 = ADC_EXTERNALTRIG_T2_TRGO,
-            external = ADC_EXTERNALTRIG_EXT_IT11,
+            software,
+            timer2,
+            external,
         };
 
         enum class TriggerEdge : uint32_t
@@ -28,17 +27,10 @@ namespace hal
             both = ADC_EXTERNALTRIGCONVEDGE_RISINGFALLING,
         };
 
-        enum class OverrunBehavior : uint32_t
-        {
-            preserve = ADC_OVR_DATA_PRESERVED,
-            overwrite = ADC_OVR_DATA_OVERWRITTEN,
-        };
-
         struct Config
         {
             TriggerSource triggerSource;
             TriggerEdge triggerEdge;
-            OverrunBehavior overrun;
             bool isDmaUsed;
         };
 
@@ -72,7 +64,7 @@ namespace hal
 
     private:
         AnalogPinStm pin;
-        AdcStm::Config config{ AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none, AdcStm::OverrunBehavior::preserve, false };
+        AdcStm::Config config{ AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none, false };
     };
 }
 
