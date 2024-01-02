@@ -40,7 +40,7 @@ namespace
 #endif
 
 #if defined(STM32F4)
-        ADC_EXTERNALTRIG_Ext_IT11,
+        ADC_EXTERNALTRIGCONV_Ext_IT11,
 #elif defined(STM32F7)
         ADC_EXTERNALTRIG7_EXT_IT11,
 #else
