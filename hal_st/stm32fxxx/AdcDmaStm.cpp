@@ -1,13 +1,18 @@
 #include "hal_st/stm32fxxx/AdcDmaStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/util/Function.hpp"
 #include <array>
 #include <cassert>
 
 namespace hal
 {
-    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::BoundedVector<int16_t>& conversionBuffer, uint8_t adcIndex, hal::GpioPinStm& pin)
+    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::BoundedVector<int16_t>& conversionBuffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, hal::GpioPinStm& pin)
         : AdcStm(adcIndex, adcConfig)
         , conversionBuffer(conversionBuffer)
+        , stream(dma, dmaChannelId, &Handle().Instance->DR, infra::emptyFunction, [this]()
+            {
+                TransferDone();
+            })
         , pin(pin)
         , timer(2, timerConfig)
     {
@@ -34,12 +39,40 @@ namespace hal
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
         channelConfig.Offset = 0;
 #endif
-        HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&Handle(), &channelConfig);
+        auto result = HAL_ADC_ConfigChannel(&Handle(), &channelConfig);
+        assert(result == HAL_OK);
+
+        result = HAL_ADCEx_Calibration_Start(&Handle(), ADC_SINGLE_ENDED);
         assert(result == HAL_OK);
     }
 
     void AdcTriggeredByTimerWithDma::Measure(const infra::Function<void(infra::BoundedVector<int16_t>&)>& onDone)
     {
         this->onDone = onDone;
+
+        timer.Start();
+
+        auto result = LL_ADC_REG_IsConversionOngoing(Handle().Instance);
+        assert(result == 0);
+
+        result = ADC_Enable(&Handle());
+        assert(result == HAL_OK);
+
+        __HAL_ADC_CLEAR_FLAG(&Handle(), (ADC_FLAG_EOC | ADC_FLAG_EOS | ADC_FLAG_OVR));
+        __HAL_ADC_ENABLE_IT(&Handle(), ADC_IT_OVR);
+        SET_BIT(Handle().Instance->CFGR, ADC_CFGR_DMAEN);
+        stream.TransferPeripheralToMemory(infra::MakeRange(conversionBuffer));
+        LL_ADC_REG_StartConversion(Handle().Instance);
+    }
+
+    void AdcTriggeredByTimerWithDma::TransferDone()
+    {
+        auto result = ADC_Disable(&Handle());
+        assert(result == HAL_OK);
+
+        timer.Stop();
+
+        if (this->onDone)
+            this->onDone(conversionBuffer);
     }
 }
