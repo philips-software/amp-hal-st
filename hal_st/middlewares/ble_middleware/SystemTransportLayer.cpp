@@ -1,8 +1,8 @@
 #include "hal_st/middlewares/ble_middleware/SystemTransportLayer.hpp"
+#include "hci_tl.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "shci.h"
 #include "shci_tl.h"
-#include "hci_tl.h"
 #include <atomic>
 
 extern "C"
@@ -22,10 +22,11 @@ extern "C"
         static std::atomic_bool notificationScheduled{ false };
 
         if (!notificationScheduled.exchange(true))
-            infra::EventDispatcher::Instance().Schedule([]() {
-                notificationScheduled = false;
-                hci_user_evt_proc();
-            });
+            infra::EventDispatcher::Instance().Schedule([]()
+                {
+                    notificationScheduled = false;
+                    hci_user_evt_proc();
+                });
     }
 
     void shci_notify_asynch_evt(void* data)
@@ -33,10 +34,11 @@ extern "C"
         static std::atomic_bool notificationScheduled{ false };
 
         if (!notificationScheduled.exchange(true))
-            infra::EventDispatcher::Instance().Schedule([]() {
-                notificationScheduled = false;
-                shci_user_evt_proc();
-            });
+            infra::EventDispatcher::Instance().Schedule([]()
+                {
+                    notificationScheduled = false;
+                    shci_user_evt_proc();
+                });
     }
 }
 
@@ -103,13 +105,14 @@ namespace hal
         WirelessFwInfo_t wirelessInfo;
         SHCI_GetWirelessFwInfo(&wirelessInfo);
 
-        return {wirelessInfo.VersionMajor,
-                wirelessInfo.VersionMinor,
-                wirelessInfo.VersionSub,
-                wirelessInfo.VersionReleaseType,
-                wirelessInfo.FusVersionMajor,
-                wirelessInfo.FusVersionMinor,
-                wirelessInfo.FusVersionSub,
+        return {
+            wirelessInfo.VersionMajor,
+            wirelessInfo.VersionMinor,
+            wirelessInfo.VersionSub,
+            wirelessInfo.VersionReleaseType,
+            wirelessInfo.FusVersionMajor,
+            wirelessInfo.FusVersionMinor,
+            wirelessInfo.FusVersionSub,
         };
     }
 
@@ -130,24 +133,27 @@ namespace hal
 
         switch (event->subevtcode)
         {
-        case SHCI_SUB_EVT_CODE_READY:
-            HandleReadyEvent(payload);
-            break;
-        case SHCI_SUB_EVT_ERROR_NOTIF:
-            HandleErrorNotifyEvent(event);
-            break;
-        case SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE:
-            HandleBleNvmRamUpdateEvent(event);
-            break;
-        default:
-            HandleUnknownEvent(event);
-            break;
+            case SHCI_SUB_EVT_CODE_READY:
+                HandleReadyEvent(payload);
+                break;
+            case SHCI_SUB_EVT_ERROR_NOTIF:
+                HandleErrorNotifyEvent(event);
+                break;
+            case SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE:
+                HandleBleNvmRamUpdateEvent(event);
+                break;
+            default:
+                HandleUnknownEvent(event);
+                break;
         }
     }
 
     void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)
     {
-        infra::Subject<HciEventSink>::NotifyObservers([&event](auto& observer) { observer.HciEvent(event); });
+        infra::Subject<HciEventSink>::NotifyObservers([&event](auto& observer)
+            {
+                observer.HciEvent(event);
+            });
     }
 
     void SystemTransportLayer::HandleWirelessFwEvent(void* payload)
@@ -170,15 +176,15 @@ namespace hal
 
         switch (readyEvent->sysevt_ready_rsp)
         {
-        case WIRELESS_FW_RUNNING:
-            HandleWirelessFwEvent(payload);
-            break;
-        case FUS_FW_RUNNING:
-            HandleFusFwEvent(payload);
-            break;
-        default:
-            HandleUnknwownReadyEvent(payload);
-            break;
+            case WIRELESS_FW_RUNNING:
+                HandleWirelessFwEvent(payload);
+                break;
+            case FUS_FW_RUNNING:
+                HandleFusFwEvent(payload);
+                break;
+            default:
+                HandleUnknwownReadyEvent(payload);
+                break;
         }
     }
 
