@@ -42,6 +42,9 @@ namespace hal
         TimerBaseStm(uint8_t aTimerIndex, const Config& config);
         virtual ~TimerBaseStm();
 
+        void Start();
+        void Stop();
+
     private:
         void ConfigureTrigger();
 

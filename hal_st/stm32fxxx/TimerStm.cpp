@@ -1,5 +1,6 @@
 #include "hal_st/stm32fxxx/TimerStm.hpp"
 #include "infra/util/EnumCast.hpp"
+#include "stm32wbxx_hal_tim.h"
 
 #if defined(HAS_PERIPHERAL_TIMER)
 
@@ -32,6 +33,16 @@ namespace hal
     {
         peripheralTimer[timerIndex]->CR1 &= ~TIM_CR1_CEN;
         DisableClockTimer(timerIndex);
+    }
+
+    void TimerBaseStm::Start()
+    {
+        HAL_TIM_Base_Start(&handle);
+    }
+
+    void TimerBaseStm::Stop()
+    {
+        HAL_TIM_Base_Stop(&handle);
     }
 
     void TimerBaseStm::ConfigureTrigger()
