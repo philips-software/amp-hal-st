@@ -1,6 +1,7 @@
 #ifndef HAL_DMA_STM_HPP
 #define HAL_DMA_STM_HPP
 
+#include "infra/util/MemoryRange.hpp"
 #include DEVICE_HEADER
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
@@ -29,17 +30,19 @@ namespace hal
         protected:
             StreamBase(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress);
             StreamBase(const StreamBase&) = delete;
-            StreamBase(StreamBase&& other);
+            StreamBase(StreamBase&& other) noexcept;
             virtual ~StreamBase();
 
         public:
             uint8_t DataSize() const;
             void SetDataSize(uint8_t dataSizeInBytes);
+            void SetPeripheralDataSize(uint8_t dataSizeInBytes);
+            void SetMemoryDataSize(uint8_t dataSizeInBytes);
             bool StopTransfer();
 
         protected:
             StreamBase& operator=(const StreamBase&) = delete;
-            StreamBase& operator=(StreamBase&& other);
+            StreamBase& operator=(StreamBase&& other) noexcept;
             virtual void OnInterrupt() = 0;
 
         private:
@@ -72,18 +75,19 @@ namespace hal
         public:
             Stream(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, infra::Function<void()> actionOnTransferComplete);
             Stream(const Stream&) = delete;
-            Stream(Stream&& other);
+            Stream(Stream&& other) noexcept;
+            virtual ~Stream() = default;
 
             Stream& operator=(const Stream&) = delete;
-            Stream& operator=(Stream&& other);
+            Stream& operator=(Stream&& other) noexcept;
 
-            void StartTransmit(infra::ConstByteRange data);
+            virtual void StartTransmit(infra::ConstByteRange data);
             void StartTransmitDummy(uint16_t size);
-            void StartReceive(infra::ByteRange data);
+            virtual void StartReceive(infra::ByteRange data);
             void StartReceiveDummy(uint16_t size);
 
         protected:
-            virtual void OnInterrupt() override;
+            void OnInterrupt() override;
 
         private:
             DispatchedInterruptHandler interruptHandler;
@@ -100,7 +104,7 @@ namespace hal
             void StartReceive(infra::ByteRange data);
 
         protected:
-            virtual void OnInterrupt() override;
+            void OnInterrupt() override;
 
         private:
             ImmediateInterruptHandler interruptHandler;
@@ -108,6 +112,18 @@ namespace hal
             infra::Function<void()> actionOnSecondHalfDone;
 
             infra::ByteRange data;
+        };
+
+        template<typename T>
+        class StreamGeneric
+            : public Stream
+        {
+        public:
+            StreamGeneric(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, const infra::Function<void()>& actionOnHalfTransferComplete, const infra::Function<void()>& actionOnTransferComplete);
+            virtual ~StreamGeneric() = default;
+
+            void TransferMemoryToPeripheral(infra::MemoryRange<T> data);
+            void TransferPeripheralToMemory(infra::MemoryRange<T> data);
         };
 
     public:
@@ -121,6 +137,29 @@ namespace hal
     private:
         std::array<uint32_t, 2> streamAllocation = { { 0, 0 } };
     };
+
+    //// Implementation ////
+
+    template<typename T>
+    DmaStm::StreamGeneric<T>::StreamGeneric(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, const infra::Function<void()>& actionOnHalfTransferComplete, const infra::Function<void()>& actionOnTransferComplete)
+        : Stream(dma, channelId, peripheralAddress, actionOnTransferComplete)
+    {}
+
+    template<typename T>
+    void DmaStm::StreamGeneric<T>::TransferMemoryToPeripheral(infra::MemoryRange<T> data)
+    {
+        SetMemoryDataSize(sizeof(T));
+        EnableHalfTransferCompleteInterrupt();
+        StartTransmit(infra::ReinterpretCastByteRange(data));
+    }
+
+    template<typename T>
+    void DmaStm::StreamGeneric<T>::TransferPeripheralToMemory(infra::MemoryRange<T> data)
+    {
+        SetMemoryDataSize(sizeof(T));
+        EnableHalfTransferCompleteInterrupt();
+        StartReceive(infra::ReinterpretCastByteRange(data));
+    }
 }
 
 #endif

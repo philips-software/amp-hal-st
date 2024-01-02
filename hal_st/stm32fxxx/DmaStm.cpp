@@ -131,7 +131,7 @@ namespace hal
             dma.ReleaseStream(dmaIndex, streamIndex);
     }
 
-    DmaStm::StreamBase::StreamBase(StreamBase&& other)
+    DmaStm::StreamBase::StreamBase(StreamBase&& other) noexcept
         : dma(other.dma)
         , dmaIndex(other.dmaIndex)
         , streamIndex(other.streamIndex)
@@ -139,7 +139,7 @@ namespace hal
         other.streamIndex = 0xff;
     }
 
-    DmaStm::StreamBase& DmaStm::StreamBase::operator=(StreamBase&& other)
+    DmaStm::StreamBase& DmaStm::StreamBase::operator=(StreamBase&& other) noexcept
     {
         dmaIndex = other.dmaIndex;
         streamIndex = other.streamIndex;
@@ -161,11 +161,27 @@ namespace hal
 
     void DmaStm::StreamBase::SetDataSize(uint8_t dataSizeInBytes)
     {
+        SetPeripheralDataSize(dataSizeInBytes);
+        SetMemoryDataSize(dataSizeInBytes);
+    }
+
+    void DmaStm::StreamBase::SetPeripheralDataSize(uint8_t dataSizeInBytes)
+    {
         auto streamRegister = dmaStream[dmaIndex][streamIndex];
 #if defined(STM32F7) || defined(STM32F4)
         streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_PSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_PSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_PSIZE_1 : 0);
 #else
         streamRegister->CCR = (streamRegister->CCR & ~DMA_CCR_PSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_CCR_PSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_CCR_PSIZE_1 : 0);
+#endif
+    }
+
+    void DmaStm::StreamBase::SetMemoryDataSize(uint8_t dataSizeInBytes)
+    {
+        auto streamRegister = dmaStream[dmaIndex][streamIndex];
+#if defined(STM32F7) || defined(STM32F4)
+        streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_MSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_MSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_MSIZE_1 : 0);
+#else
+        streamRegister->CCR = (streamRegister->CCR & ~DMA_CCR_MSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_CCR_MSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_CCR_MSIZE_1 : 0);
 #endif
     }
 
@@ -353,7 +369,7 @@ namespace hal
         SetPeripheralAddress(peripheralAddress);
     }
 
-    DmaStm::Stream::Stream(Stream&& other)
+    DmaStm::Stream::Stream(Stream&& other) noexcept
         : StreamBase(std::move(other))
         , interruptHandler(std::move(other.interruptHandler), [this]()
               {
@@ -364,7 +380,7 @@ namespace hal
         other.actionOnTransferComplete = nullptr;
     }
 
-    DmaStm::Stream& DmaStm::Stream::operator=(Stream&& other)
+    DmaStm::Stream& DmaStm::Stream::operator=(Stream&& other) noexcept
     {
         StreamBase::operator=(std::move(other));
 
