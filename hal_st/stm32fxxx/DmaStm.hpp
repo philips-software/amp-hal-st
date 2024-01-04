@@ -149,16 +149,18 @@ namespace hal
     void DmaStm::StreamGeneric<T>::TransferMemoryToPeripheral(infra::MemoryRange<T> data)
     {
         SetMemoryDataSize(sizeof(T));
+        SetPeripheralDataSize(sizeof(T));
         EnableHalfTransferCompleteInterrupt();
-        StartTransmit(infra::ReinterpretCastByteRange(data));
+        StartTransmit(infra::MakeRange(data));
     }
 
     template<typename T>
     void DmaStm::StreamGeneric<T>::TransferPeripheralToMemory(infra::MemoryRange<T> data)
     {
         SetMemoryDataSize(sizeof(T));
+        SetPeripheralDataSize(sizeof(T));
         EnableHalfTransferCompleteInterrupt();
-        StartReceive(infra::ReinterpretCastByteRange(data));
+        StartReceive(infra::ReinterpretCastMemoryRange<uint8_t, T>(data));
     }
 }
 
