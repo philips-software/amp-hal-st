@@ -10,7 +10,7 @@ namespace hal
         : timerIndex(aTimerIndex - 1)
         , config(config)
     {
-        TIM_ClockConfigTypeDef clockSourceConfig{ 0, 0, 0, 0};
+        TIM_ClockConfigTypeDef clockSourceConfig{ 0, 0, 0, 0 };
 
         EnableClockTimer(timerIndex);
 
