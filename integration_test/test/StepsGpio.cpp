@@ -48,74 +48,74 @@ STEP("gpio peripherals are enabled")
 {
     RunInSync([&](const std::function<void()>& done)
         {
-            context.Emplace<GpioObserver>(context.Get<services::Echo>(), context.Get<main_::SystemChanges>());
+            context->Emplace<GpioObserver>(context->Get<services::Echo>(), context->Get<main_::SystemChanges>());
 
-            context.Get<testing::TesterProxy>().RequestSend([&]()
+            context->Get<testing::TesterProxy>().RequestSend([&]()
                 {
-                    context.Get<testing::TesterProxy>().EnablePeripheral(testing::Peripheral::gpio);
+                    context->Get<testing::TesterProxy>().EnablePeripheral(testing::Peripheral::gpio);
                     done();
                 });
 
-            context.Get<testing::TestedProxy>().RequestSend([&]()
+            context->Get<testing::TestedProxy>().RequestSend([&]()
                 {
-                    context.Get<testing::TestedProxy>().EnablePeripheral(testing::Peripheral::gpio);
+                    context->Get<testing::TestedProxy>().EnablePeripheral(testing::Peripheral::gpio);
                     done();
                 });
         },
         2);
 
-    context.Emplace<testing::GpioTesterProxy>(context.Get<services::Echo>());
-    context.Emplace<testing::GpioTestedProxy>(context.Get<services::Echo>());
+    context->Emplace<testing::GpioTesterProxy>(context->Get<services::Echo>());
+    context->Emplace<testing::GpioTestedProxy>(context->Get<services::Echo>());
 }
 
-STEP("the tester sets its output pin (high|low)")
+STEP("the tester sets its output pin (high|low)", (std::string state))
 {
-    context.EmplaceAt<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
+    context->EmplaceAt<bool>("state", ConvertPinState(state));
 
     RunInSync([&](const std::function<void()>& done)
         {
-            context.Get<testing::GpioTesterProxy>().RequestSend([&]()
+            context->Get<testing::GpioTesterProxy>().RequestSend([&]()
                 {
-                    context.Get<testing::GpioTesterProxy>().SetGpio(context.Get<bool>("state"));
+                    context->Get<testing::GpioTesterProxy>().SetGpio(context->Get<bool>("state"));
                     done();
                 });
         });
 }
 
-STEP("the tester sees a (high|low) value")
+STEP("the tester sees a (high|low) value", (std::string state))
 {
-    context.EmplaceAt<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
+    context->EmplaceAt<bool>("state", ConvertPinState(state));
 
     RunInSyncOnSystemChange([&](const std::function<void()>& done)
         {
-            if (context.Get<GpioObserver>().testerGpio == context.Get<bool>("state"))
+            if (context->Get<GpioObserver>().testerGpio == context->Get<bool>("state"))
                 done();
         },
-        context);
+        *context);
 }
 
-STEP("the tested sets its output pin (high|low)")
+STEP("the tested sets its output pin (high|low)", (std::string state))
 {
-    context.EmplaceAt<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
+    context->EmplaceAt<bool>("state", ConvertPinState(state));
 
     RunInSync([&](const std::function<void()>& done)
         {
-            context.Get<testing::GpioTestedProxy>().RequestSend([&]()
+            context->Get<testing::GpioTestedProxy>().RequestSend([&]()
                 {
-                    context.Get<testing::GpioTestedProxy>().SetGpio(context.Get<bool>("state"));
+                    context->Get<testing::GpioTestedProxy>().SetGpio(context->Get<bool>("state"));
                     done();
                 });
         });
 }
 
-STEP("the tested sees a (high|low) value")
+STEP("the tested sees a (high|low) value", (std::string state))
 {
-    context.EmplaceAt<bool>("state", ConvertPinState(parameters[0].get<std::string>()));
+    context->EmplaceAt<bool>("state", ConvertPinState(state));
 
     RunInSyncOnSystemChange([&](const std::function<void()>& done)
         {
-            if (context.Get<GpioObserver>().testedGpio == context.Get<bool>("state"))
+            if (context->Get<GpioObserver>().testedGpio == context->Get<bool>("state"))
                 done();
         },
-        context);
+        *context);
 }
