@@ -6,7 +6,7 @@
 
 namespace hal
 {
-     class TracingSystemTransportLayer
+    class TracingSystemTransportLayer
         : public SystemTransportLayer
     {
     public:

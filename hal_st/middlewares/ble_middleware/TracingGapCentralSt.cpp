@@ -180,7 +180,7 @@ namespace hal
         auto gapProcedureEvent = *reinterpret_cast<aci_gap_proc_complete_event_rp0*>(vendorEvent->data);
 
         if (gapProcedureEvent.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
-            tracer.Trace() << "TracingGapCentralSt::HandleGapProcedureCompleteEvent Direct Connection establishment status: 0x" << infra::hex <<gapProcedureEvent.Status;
+            tracer.Trace() << "TracingGapCentralSt::HandleGapProcedureCompleteEvent Direct Connection establishment status: 0x" << infra::hex << gapProcedureEvent.Status;
 
         GapCentralSt::HandleGapProcedureCompleteEvent(vendorEvent);
     }
@@ -190,7 +190,7 @@ namespace hal
         auto connectionUpdateEvent = *reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data);
 
         tracer.Trace() << "TracingGapCentralSt::HandleL2capConnectionUpdateRequestEvent";
-        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex  << connectionUpdateEvent.Connection_Handle;
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << connectionUpdateEvent.Connection_Handle;
         tracer.Trace() << "\tIdentifier          : 0x" << infra::hex << connectionUpdateEvent.Identifier;
         tracer.Trace() << "\tL2CAP length        : " << connectionUpdateEvent.L2CAP_Length;
         tracer.Trace() << "\tInterval min        : " << connectionUpdateEvent.Interval_Min;

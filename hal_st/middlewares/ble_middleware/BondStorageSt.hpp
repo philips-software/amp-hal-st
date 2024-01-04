@@ -5,7 +5,7 @@
 
 extern "C"
 {
-    #include "ble_gap_aci.h"
+#include "ble_gap_aci.h"
 }
 
 namespace hal

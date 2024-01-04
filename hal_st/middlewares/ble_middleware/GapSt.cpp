@@ -77,34 +77,33 @@ namespace hal
         SHCI_C2_Ble_Init_Cmd_Packet_t bleInitCmdPacket = {
             { { 0, 0, 0 } }, // Header (unused)
             {
-                0x00,       // BLE buffer address (unused)
-                0x00,       // BLE buffer size (unused)
-                0x44,       // Maximum number of GATT Attributes
-                0x08,       // Maximum number of Services that can be stored in the GATT database
-                0x540,      // Size of the storage area for Attribute values
+                0x00,  // BLE buffer address (unused)
+                0x00,  // BLE buffer size (unused)
+                0x44,  // Maximum number of GATT Attributes
+                0x08,  // Maximum number of Services that can be stored in the GATT database
+                0x540, // Size of the storage area for Attribute values
                 maxNumberOfBleLinks,
                 0x01, // Enable or disable the Extended Packet length feature
                 prepareWriteListSize,
                 numberOfBleMemoryBlocks,
                 configuration.maxAttMtuSize,
-                0x1FA,      // Sleep clock accuracy in Slave mode
-                0x00,       // Sleep clock accuracy in Master mode
-                RfWakeupClockSelection(configuration.rfWakeupClock),       // Source for the low speed clock for RF wake-up
-                0xFFFFFFFF, // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
-                0x148,      // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
-                0x01,       // Viterbi Mode
+                0x1FA,                                               // Sleep clock accuracy in Slave mode
+                0x00,                                                // Sleep clock accuracy in Master mode
+                RfWakeupClockSelection(configuration.rfWakeupClock), // Source for the low speed clock for RF wake-up
+                0xFFFFFFFF,                                          // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
+                0x148,                                               // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
+                0x01,                                                // Viterbi Mode
                 bleStackOptions,
-                0,          // HW version (unused)
-                32,         // Maximum number of connection-oriented channels in initiator mode
-                -40,        // Minimum transmit power in dBm supported by the Controller
-                6,          // Maximum transmit power in dBm supported by the Controller
+                0,   // HW version (unused)
+                32,  // Maximum number of connection-oriented channels in initiator mode
+                -40, // Minimum transmit power in dBm supported by the Controller
+                6,   // Maximum transmit power in dBm supported by the Controller
                 SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY,
-                3,          // Maximum number of advertising sets.
-                1650,       // Maximum advertising data length (in bytes)
-                0,          // RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
-                0,          // RF RX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
-                SHCI_C2_BLE_INIT_BLE_CORE_5_3
-            }
+                3,    // Maximum number of advertising sets.
+                1650, // Maximum advertising data length (in bytes)
+                0,    // RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+                0,    // RF RX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+                SHCI_C2_BLE_INIT_BLE_CORE_5_3 }
         };
 
         if (SHCI_C2_BLE_Init(&bleInitCmdPacket) != SHCI_Success)
@@ -308,17 +307,17 @@ namespace hal
     {
         switch (event.evt)
         {
-        case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-            HandleHciDisconnectEvent(event);
-            break;
-        case HCI_LE_META_EVT_CODE:
-            HandleHciLeMetaEvent(event);
-            break;
-        case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-            HandleHciVendorSpecificDebugEvent(event);
-            break;
-        default:
-            break;
+            case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
+                HandleHciDisconnectEvent(event);
+                break;
+            case HCI_LE_META_EVT_CODE:
+                HandleHciLeMetaEvent(event);
+                break;
+            case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
+                HandleHciVendorSpecificDebugEvent(event);
+                break;
+            default:
+                break;
         }
     }
 
@@ -328,26 +327,26 @@ namespace hal
 
         switch (metaEvent->subevent)
         {
-        case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_ADVERTISING_REPORT_SUBEVT_CODE:
-            HandleHciLeAdvertisingReportEvent(metaEvent);
-            break;
-        case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
-            HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
-            HandleHciLeDataLengthChangeEvent(metaEvent);
-            break;
-        case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
-            HandleHciLePhyUpdateCompleteEvent(metaEvent);
-            break;
-        case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-            HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-            break;
-        default:
-            break;
+            case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
+                HandleHciLeConnectionCompleteEvent(metaEvent);
+                break;
+            case HCI_LE_ADVERTISING_REPORT_SUBEVT_CODE:
+                HandleHciLeAdvertisingReportEvent(metaEvent);
+                break;
+            case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
+                HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
+                break;
+            case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
+                HandleHciLeDataLengthChangeEvent(metaEvent);
+                break;
+            case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
+                HandleHciLePhyUpdateCompleteEvent(metaEvent);
+                break;
+            case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
+                HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+                break;
+            default:
+                break;
         }
     }
 
@@ -357,43 +356,43 @@ namespace hal
 
         switch (vendorEvent->ecode)
         {
-        case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
-            HandlePairingCompleteEvent(vendorEvent);
-            break;
-        case ACI_GAP_BOND_LOST_VSEVT_CODE:
-            HandleBondLostEvent(vendorEvent);
-            break;
-        case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
-            HandleGapProcedureCompleteEvent(vendorEvent);
-            break;
-        case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
-            HandleGattCompleteEvent(vendorEvent);
-            break;
-        case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE:
-            HandleL2capConnectionUpdateRequestEvent(vendorEvent);
-            break;
-        case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
-            HandleMtuExchangeResponseEvent(vendorEvent);
-            break;
-        default:
-            break;
+            case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
+                HandlePairingCompleteEvent(vendorEvent);
+                break;
+            case ACI_GAP_BOND_LOST_VSEVT_CODE:
+                HandleBondLostEvent(vendorEvent);
+                break;
+            case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
+                HandleGapProcedureCompleteEvent(vendorEvent);
+                break;
+            case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
+                HandleGattCompleteEvent(vendorEvent);
+                break;
+            case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE:
+                HandleL2capConnectionUpdateRequestEvent(vendorEvent);
+                break;
+            case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
+                HandleMtuExchangeResponseEvent(vendorEvent);
+                break;
+            default:
+                break;
         }
     }
 
     void GapSt::SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress)
     {
         static constexpr auto deducePeerAddressType = [](auto peerAddressType)
+        {
+            enum class PeerAddressType : uint8_t
             {
-                enum class PeerAddressType : uint8_t
-                {
-                    PUBLIC,
-                    RANDOM,
-                    RESOLVED_PUBLIC_IDENTITY,
-                    RESOLVED_RANDOM_STATIC_IDENTITY
-                };
+                PUBLIC,
+                RANDOM,
+                RESOLVED_PUBLIC_IDENTITY,
+                RESOLVED_RANDOM_STATIC_IDENTITY
+            };
 
-                switch (static_cast<PeerAddressType>(peerAddressType))
-                {
+            switch (static_cast<PeerAddressType>(peerAddressType))
+            {
                 case PeerAddressType::PUBLIC:
                 case PeerAddressType::RANDOM:
                     return peerAddressType;
@@ -404,8 +403,8 @@ namespace hal
                 case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY:
                 default:
                     return infra::enum_cast(PeerAddressType::RANDOM);
-                }
-            };
+            }
+        };
 
         connectionContext.connectionHandle = connectionHandle;
         connectionContext.peerAddressType = deducePeerAddressType(peerAddressType);
