@@ -12,6 +12,12 @@ namespace hal
     class TimerBaseStm
     {
     public:
+        struct Timing
+        {
+            uint32_t prescaler;
+            uint32_t period;
+        };
+
         enum class CounterMode : uint32_t
         {
             up = TIM_COUNTERMODE_UP,
@@ -33,13 +39,11 @@ namespace hal
 
         struct Config
         {
-            uint32_t prescaler;
-            uint32_t period;
             CounterMode counterMode;
             infra::Optional<Trigger> trigger;
         };
 
-        TimerBaseStm(uint8_t aTimerIndex, const Config& config);
+        TimerBaseStm(uint8_t aTimerIndex, Timing timing, const Config& config);
         virtual ~TimerBaseStm();
 
         void Start();

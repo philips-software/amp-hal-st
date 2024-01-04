@@ -6,17 +6,17 @@
 
 namespace hal
 {
-    TimerBaseStm::TimerBaseStm(uint8_t aTimerIndex, const Config& config)
+    TimerBaseStm::TimerBaseStm(uint8_t aTimerIndex, Timing timing, const Config& config)
         : timerIndex(aTimerIndex - 1)
         , config(config)
     {
-        TIM_ClockConfigTypeDef clockSourceConfig = { 0 };
+        TIM_ClockConfigTypeDef clockSourceConfig{ 0, 0, 0, 0};
 
         EnableClockTimer(timerIndex);
 
         handle.Instance = peripheralTimer[timerIndex];
-        handle.Init.Prescaler = config.prescaler;
-        handle.Init.Period = config.period;
+        handle.Init.Prescaler = timing.prescaler;
+        handle.Init.Period = timing.period;
         handle.Init.CounterMode = infra::enum_cast(config.counterMode);
         handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
         handle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -47,7 +47,7 @@ namespace hal
 
     void TimerBaseStm::ConfigureTrigger()
     {
-        TIM_MasterConfigTypeDef masterConfig = { 0 };
+        TIM_MasterConfigTypeDef masterConfig = { 0, 0, 0 };
 
         masterConfig.MasterOutputTrigger = infra::enum_cast(config.trigger->triggerOutput);
         masterConfig.MasterSlaveMode = config.trigger->isSlaveMode ? TIM_MASTERSLAVEMODE_ENABLE : TIM_MASTERSLAVEMODE_DISABLE;
