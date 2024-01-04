@@ -15,11 +15,11 @@ namespace main_
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedSerial{ serial };
         main_::EchoOnSesame<256> echo{ bufferedSerial, serializerFactory };
 
-        //testing::TesterTracer testerTracer{ echo.echo };
-        //testing::TestedTracer testedTracer{ echo.echo };
-        //testing::GpioTesterTracer gpioTesterTracer{ echo.echo };
-        //testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
-        //testing::GpioObserverTracer gpioObserverTracer{ echo.echo };
+        // testing::TesterTracer testerTracer{ echo.echo };
+        // testing::TestedTracer testedTracer{ echo.echo };
+        // testing::GpioTesterTracer gpioTesterTracer{ echo.echo };
+        // testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
+        // testing::GpioObserverTracer gpioObserverTracer{ echo.echo };
     };
 }
 

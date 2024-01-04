@@ -4,8 +4,8 @@
 #include "generated/echo/Testing.pb.hpp"
 #include "generated/echo/TracingTesting.pb.hpp"
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
-#include "services/tracer/TracingEchoInstantiation.hpp"
 #include "services/tracer/GlobalTracer.hpp"
+#include "services/tracer/TracingEchoInstantiation.hpp"
 
 namespace main_
 {
