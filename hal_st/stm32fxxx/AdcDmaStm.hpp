@@ -4,8 +4,6 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/TimerStm.hpp"
-#include "infra/util/BoundedVector.hpp"
-#include "infra/util/Optional.hpp"
 
 namespace hal
 {
@@ -13,24 +11,22 @@ namespace hal
         : private AdcStm
     {
     public:
-        template<std::size_t Max>
-        using WithNumberOfConversions = infra::WithStorage<AdcTriggeredByTimerWithDma, infra::BoundedVector<int16_t>::WithMaxSize<Max>>;
+        template<std::size_t Size>
+        using WithNumberOfSamples = infra::WithStorage<AdcTriggeredByTimerWithDma, std::array<uint16_t, Size>>;
 
-        explicit AdcTriggeredByTimerWithDma(infra::BoundedVector<int16_t>& conversionBuffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, hal::GpioPinStm& pin);
-
-        void Measure(const infra::Function<void(infra::BoundedVector<int16_t>&)>& onDone);
+        AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
+        void Measure(const infra::Function<void(infra::MemoryRange<uint16_t>&)>& onDone);
 
     private:
         void TransferDone();
+        void Configure();
 
     private:
-        infra::BoundedVector<int16_t>& conversionBuffer;
-        DmaStm::StreamGeneric<int16_t> stream;
+        infra::MemoryRange<uint16_t> buffer;
+        DmaStm::StreamGeneric<uint16_t> stream;
         AnalogPinStm pin;
-        TimerBaseStm::Config timerConfig{ 1, 39999, TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) };
-        AdcStm::Config adcConfig{ AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising, true };
         TimerBaseStm timer;
-        infra::Function<void(infra::BoundedVector<int16_t>&)> onDone;
+        infra::Function<void(infra::MemoryRange<uint16_t>&)> onDone;
     };
 }
 

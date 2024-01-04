@@ -1,27 +1,24 @@
 #include "hal_st/stm32fxxx/AdcDmaStm.hpp"
-#include "generated/stm32fxxx/PeripheralTable.hpp"
-#include "infra/util/Function.hpp"
-#include <array>
-#include <cassert>
 
 namespace hal
 {
-    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::BoundedVector<int16_t>& conversionBuffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, hal::GpioPinStm& pin)
-        : AdcStm(adcIndex, adcConfig)
-        , conversionBuffer(conversionBuffer)
+    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
+        : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising, true })
+        , buffer(buffer)
         , stream(dma, dmaChannelId, &Handle().Instance->DR, infra::emptyFunction, [this]()
             {
                 TransferDone();
             })
         , pin(pin)
 #if defined(STM32G0)
-        , timer(3, timerConfig)
+        , timer(3, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #else
-        , timer(2, timerConfig)
+        , timer(2, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #endif
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = Channel(pin);
+        //channelConfig.Channel = Channel(pin);
+        channelConfig.Channel = ADC_CHANNEL_1;
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -50,12 +47,18 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    void AdcTriggeredByTimerWithDma::Measure(const infra::Function<void(infra::BoundedVector<int16_t>&)>& onDone)
+    void AdcTriggeredByTimerWithDma::Measure(const infra::Function<void(infra::MemoryRange<uint16_t>&)>& onDone)
     {
         this->onDone = onDone;
 
         timer.Start();
+        Configure();
+        stream.TransferPeripheralToMemory(buffer);
+        LL_ADC_REG_StartConversion(Handle().Instance);
+    }
 
+    void AdcTriggeredByTimerWithDma::Configure()
+    {
         auto result = LL_ADC_REG_IsConversionOngoing(Handle().Instance);
         assert(result == 0);
 
@@ -63,10 +66,7 @@ namespace hal
         assert(result == HAL_OK);
 
         __HAL_ADC_CLEAR_FLAG(&Handle(), (ADC_FLAG_EOC | ADC_FLAG_EOS | ADC_FLAG_OVR));
-        __HAL_ADC_ENABLE_IT(&Handle(), ADC_IT_OVR);
         SET_BIT(Handle().Instance->CFGR, ADC_CFGR_DMAEN);
-        stream.TransferPeripheralToMemory(infra::MakeRange(conversionBuffer));
-        LL_ADC_REG_StartConversion(Handle().Instance);
     }
 
     void AdcTriggeredByTimerWithDma::TransferDone()
@@ -77,6 +77,6 @@ namespace hal
         timer.Stop();
 
         if (this->onDone)
-            this->onDone(conversionBuffer);
+            this->onDone(buffer);
     }
 }
