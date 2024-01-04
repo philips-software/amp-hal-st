@@ -15,12 +15,14 @@ void RunInSync(const std::function<void(const std::function<void()>&)>& action, 
             promise.set_value();
         } };
 
+    std::function<void()> onDone{ [&]()
+        {
+            barrier.arrive_and_drop();
+        } };
+
     infra::EventDispatcher::Instance().Schedule([&]
         {
-            action([&]()
-                {
-                    barrier.arrive_and_drop();
-                });
+            action(onDone);
         });
 
     ASSERT_THAT(future.wait_for(timeout), testing::Eq(std::future_status::ready));
@@ -29,37 +31,41 @@ void RunInSync(const std::function<void(const std::function<void()>&)>& action, 
 void RunInSyncOnSystemChange(const std::function<void(const std::function<void()>&)>& action, cucumber_cpp::Context& context, std::ptrdiff_t barrierCount, infra::Duration timeout)
 {
     auto timeoutMoment = infra::Now() + timeout;
-    bool reached = false;
-    std::promise<void> promise;
-    std::future<void> future{ promise.get_future() };
+    bool timedOut = false;
 
-    std::barrier barrier{ barrierCount, [&]() noexcept
-        {
-            reached = true;
-            promise.set_value();
-        } };
-
-    auto changer = context.get<main_::SystemChanges>()->Register([&]()
-        {
-            promise.set_value();
-        });
-
-    while (!reached)
+    struct
     {
+        std::mutex mutex;
+        std::condition_variable condition;
+        bool running = false;
+
+        std::function<void()> onDone;
+    } sync;
+
+    sync.onDone = [&]()
+    {
+        --barrierCount;
+    };
+
+    std::unique_lock<std::mutex> lock(sync.mutex);
+    while (barrierCount != 0 && !timedOut)
+    {
+        sync.running = true;
         infra::EventDispatcher::Instance().Schedule([&]
             {
-                action([&]()
-                    {
-                        barrier.arrive_and_drop();
-                    });
+                std::lock_guard<std::mutex> lock(sync.mutex);
+                action(sync.onDone);
+                sync.running = false;
+                sync.condition.notify_all();
             });
 
-        if (future.wait_until(timeoutMoment) == std::future_status::timeout)
-            break;
-
-        promise = std::promise<void>{};
-        future = promise.get_future();
+        while (sync.running)
+            if (sync.condition.wait_until(lock, timeoutMoment) == std::cv_status::timeout)
+                timedOut = true;
     }
 
-    ASSERT_THAT(reached, testing::IsTrue());
+    while (sync.running)
+        sync.condition.wait(lock);
+
+    ASSERT_THAT(barrierCount, testing::Eq(0));
 }
