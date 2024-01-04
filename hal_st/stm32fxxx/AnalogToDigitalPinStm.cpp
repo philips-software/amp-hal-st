@@ -95,6 +95,10 @@ namespace hal
         assert(result == HAL_OK);
     }
 
+    AdcStm::AdcStm(uint8_t adcIndex)
+        : AdcStm(adcIndex, { AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none })
+    {}
+
     AdcStm::~AdcStm()
     {
         DisableClockAdc(index);
@@ -130,15 +134,15 @@ namespace hal
         onDone(HAL_ADC_GetValue(&handle));
     }
 
-    AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(uint8_t adcIndex, hal::GpioPinStm& pin)
-        : AdcStm(adcIndex, config)
-        , pin(pin)
+    AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc)
+        : analogPin(pin)
+        , adc(adc)
     {}
 
     void AnalogToDigitalPinImplStm::Measure(const infra::Function<void(int32_t value)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = Channel(pin);
+        channelConfig.Channel = adc.Channel(analogPin);
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -160,9 +164,9 @@ namespace hal
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
         channelConfig.Offset = 0;
 #endif
-        HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&Handle(), &channelConfig);
+        HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
 
-        AdcStm::Measure(onDone);
+        adc.Measure(onDone);
     }
 }

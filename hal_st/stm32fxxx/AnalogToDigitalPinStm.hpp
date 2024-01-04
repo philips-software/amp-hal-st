@@ -9,9 +9,17 @@
 
 namespace hal
 {
+    class AnalogToDigitalPinImplStm;
+
     class AdcStm
     {
     public:
+        AdcStm(uint8_t adcIndex);
+        ~AdcStm();
+
+        void Measure(const infra::Function<void(int32_t value)>& onDone);
+
+    protected:
         enum class TriggerSource : uint32_t
         {
             software,
@@ -33,16 +41,12 @@ namespace hal
             TriggerEdge triggerEdge;
         };
 
-        explicit AdcStm(uint8_t oneBasedIndex, const Config& config);
-        ~AdcStm();
-
-        void Measure(const infra::Function<void(int32_t value)>& onDone);
-
-    protected:
+        AdcStm(uint8_t adcIndex, const Config& config);
         uint32_t Channel(const hal::AnalogPinStm& pin) const;
         ADC_HandleTypeDef& Handle();
 
     private:
+        friend class AnalogToDigitalPinImplStm;
         void MeasurementDone();
 
         uint8_t index;
@@ -53,17 +57,16 @@ namespace hal
 
     class AnalogToDigitalPinImplStm
         : public AnalogToDigitalPinImplBase
-        , private AdcStm
     {
     public:
-        explicit AnalogToDigitalPinImplStm(uint8_t adcIndex, hal::GpioPinStm& pin);
+        explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
         virtual ~AnalogToDigitalPinImplStm() = default;
 
         void Measure(const infra::Function<void(int32_t value)>& onDone) override;
 
     private:
-        AnalogPinStm pin;
-        AdcStm::Config config{ AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none };
+        AnalogPinStm analogPin;
+        AdcStm& adc;
     };
 }
 
