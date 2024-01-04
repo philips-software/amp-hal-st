@@ -3,7 +3,7 @@
 namespace hal
 {
     AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
-        : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising, true })
+        : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
         , buffer(buffer)
         , stream(dma, dmaChannelId, &Handle().Instance->DR, infra::emptyFunction, [this]()
             {
@@ -17,8 +17,7 @@ namespace hal
 #endif
     {
         ADC_ChannelConfTypeDef channelConfig;
-        //channelConfig.Channel = Channel(pin);
-        channelConfig.Channel = ADC_CHANNEL_1;
+        channelConfig.Channel = Channel(pin);
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -27,10 +26,10 @@ namespace hal
 #if defined(STM32F0) || defined(STM32F3)
         channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
 #elif defined(STM32WB)
+        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
         channelConfig.SamplingTime = ADC_SAMPLETIME_92CYCLES_5;
         channelConfig.Offset = 0;
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
-        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
 #elif defined(STM32G0)
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
 #elif defined(STM32G4)

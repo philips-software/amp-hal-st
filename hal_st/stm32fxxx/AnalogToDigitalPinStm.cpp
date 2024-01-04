@@ -84,7 +84,7 @@ namespace hal
         handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
         handle.Init.NbrOfConversion = 1;
 #if !defined(STM32F3)
-        handle.Init.DMAContinuousRequests = config.isDmaUsed ? ENABLE : DISABLE;
+        handle.Init.DMAContinuousRequests = DISABLE;
 #endif
 #if defined(STM32WB)
         handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -110,7 +110,7 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    uint32_t AdcStm::Channel(const hal::AnalogPinStm& pin) const
+    const uint32_t& AdcStm::Channel(const hal::AnalogPinStm& pin) const
     {
         return adcChannel[pin.AdcChannel(index + 1)];
     }

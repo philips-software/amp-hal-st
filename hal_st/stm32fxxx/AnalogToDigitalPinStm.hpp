@@ -31,7 +31,6 @@ namespace hal
         {
             TriggerSource triggerSource;
             TriggerEdge triggerEdge;
-            bool isDmaUsed;
         };
 
         explicit AdcStm(uint8_t oneBasedIndex, const Config& config);
@@ -40,7 +39,7 @@ namespace hal
         void Measure(const infra::Function<void(int32_t value)>& onDone);
 
     protected:
-        uint32_t Channel(const hal::AnalogPinStm& pin) const;
+        const uint32_t& Channel(const hal::AnalogPinStm& pin) const;
         ADC_HandleTypeDef& Handle();
 
     private:
@@ -64,7 +63,7 @@ namespace hal
 
     private:
         AnalogPinStm pin;
-        AdcStm::Config config{ AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none, false };
+        AdcStm::Config config{ AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none };
     };
 }
 
