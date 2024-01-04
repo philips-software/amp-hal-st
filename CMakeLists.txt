@@ -41,7 +41,7 @@ else()
 endif()
 
 if (EMIL_HOST_BUILD)
-    add_subdirectory(amp-cucumber-cpp-runner-poc)
+    add_subdirectory(amp-cucumber-cpp-runner)
 endif()
 
 add_subdirectory(st)
