@@ -60,9 +60,7 @@ namespace hal
 #else
         , interruptHandler(ADC_IRQn, [this]()
 #endif
-                {
-                        MeasurementDone();
-                })
+              { MeasurementDone(); })
     {
         EnableClockAdc(index);
 

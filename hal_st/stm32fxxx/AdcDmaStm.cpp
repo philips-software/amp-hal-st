@@ -6,9 +6,9 @@ namespace hal
         : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
         , buffer(buffer)
         , stream(dma, dmaChannelId, &Handle().Instance->DR, infra::emptyFunction, [this]()
-            {
-                TransferDone();
-            })
+              {
+                  TransferDone();
+              })
         , pin(pin)
 #if defined(STM32G0)
         , timer(3, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })

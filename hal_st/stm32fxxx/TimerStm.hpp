@@ -44,7 +44,7 @@ namespace hal
         };
 
         TimerBaseStm(uint8_t aTimerIndex, Timing timing, const Config& config);
-        virtual ~TimerBaseStm();
+        ~TimerBaseStm();
 
         void Start();
         void Stop();
