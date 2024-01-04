@@ -18,6 +18,7 @@ target_link_libraries(integration_test.test PRIVATE
     cucumber-cpp.report
     gherkin-cpp
     integration_test.logic
+    hal.generic
     hal.windows
     gtest
     gmock
