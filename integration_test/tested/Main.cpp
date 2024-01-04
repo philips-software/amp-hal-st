@@ -4,6 +4,7 @@
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 #include "integration_test/tested/EchoFromTester.hpp"
 #include "integration_test/tested/Tested.hpp"
+#include "services/tracer/GlobalTracer.hpp"
 #include "services/util/DebugLed.hpp"
 
 unsigned int hse_value = 8000000;
