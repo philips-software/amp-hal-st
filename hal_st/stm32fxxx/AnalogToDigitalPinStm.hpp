@@ -39,7 +39,7 @@ namespace hal
         void Measure(const infra::Function<void(int32_t value)>& onDone);
 
     protected:
-        const uint32_t& Channel(const hal::AnalogPinStm& pin) const;
+        uint32_t Channel(const hal::AnalogPinStm& pin) const;
         ADC_HandleTypeDef& Handle();
 
     private:

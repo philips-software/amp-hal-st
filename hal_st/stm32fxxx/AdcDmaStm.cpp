@@ -5,11 +5,11 @@ namespace hal
     AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
         : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
         , buffer(buffer)
-        , stream(dma, dmaChannelId, &Handle().Instance->DR, infra::emptyFunction, [this]()
+        , stream(dma, dmaChannelId, &Handle().Instance->DR, [this]()
             {
                 TransferDone();
             })
-        , pin(pin)
+        , analogPin(pin)
 #if defined(STM32G0)
         , timer(3, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #else
@@ -17,7 +17,7 @@ namespace hal
 #endif
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = Channel(pin);
+        channelConfig.Channel = Channel(analogPin);
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -52,7 +52,7 @@ namespace hal
 
         timer.Start();
         Configure();
-        stream.TransferPeripheralToMemory(buffer);
+        stream.Receive(buffer);
         LL_ADC_REG_StartConversion(Handle().Instance);
     }
 

@@ -23,8 +23,8 @@ namespace hal
 
     private:
         infra::MemoryRange<uint16_t> buffer;
-        DmaStm::StreamGeneric<uint16_t> stream;
-        AnalogPinStm pin;
+        DmaStm::StreamWithConfigurableDataSize<uint16_t> stream;
+        AnalogPinStm analogPin;
         TimerBaseStm timer;
         infra::Function<void(infra::MemoryRange<uint16_t>&)> onDone;
     };

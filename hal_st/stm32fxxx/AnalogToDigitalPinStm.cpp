@@ -110,7 +110,7 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    const uint32_t& AdcStm::Channel(const hal::AnalogPinStm& pin) const
+    uint32_t AdcStm::Channel(const hal::AnalogPinStm& pin) const
     {
         return adcChannel[pin.AdcChannel(index + 1)];
     }

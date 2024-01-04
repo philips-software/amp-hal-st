@@ -115,15 +115,15 @@ namespace hal
         };
 
         template<typename T>
-        class StreamGeneric
+        class StreamWithConfigurableDataSize
             : public Stream
         {
         public:
-            StreamGeneric(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, const infra::Function<void()>& actionOnHalfTransferComplete, const infra::Function<void()>& actionOnTransferComplete);
-            virtual ~StreamGeneric() = default;
+            StreamWithConfigurableDataSize(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, const infra::Function<void()>& actionOnTransferComplete);
+            virtual ~StreamWithConfigurableDataSize() = default;
 
-            void TransferMemoryToPeripheral(infra::MemoryRange<T> data);
-            void TransferPeripheralToMemory(infra::MemoryRange<T> data);
+            void Transmit(infra::MemoryRange<T> data);
+            void Receive(infra::MemoryRange<T> data);
         };
 
     public:
@@ -141,12 +141,12 @@ namespace hal
     //// Implementation ////
 
     template<typename T>
-    DmaStm::StreamGeneric<T>::StreamGeneric(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, const infra::Function<void()>& actionOnHalfTransferComplete, const infra::Function<void()>& actionOnTransferComplete)
+    DmaStm::StreamWithConfigurableDataSize<T>::StreamWithConfigurableDataSize(DmaStm& dma, DmaChannelId channelId, volatile void* peripheralAddress, const infra::Function<void()>& actionOnTransferComplete)
         : Stream(dma, channelId, peripheralAddress, actionOnTransferComplete)
     {}
 
     template<typename T>
-    void DmaStm::StreamGeneric<T>::TransferMemoryToPeripheral(infra::MemoryRange<T> data)
+    void DmaStm::StreamWithConfigurableDataSize<T>::Transmit(infra::MemoryRange<T> data)
     {
         SetMemoryDataSize(sizeof(T));
         SetPeripheralDataSize(sizeof(T));
@@ -155,7 +155,7 @@ namespace hal
     }
 
     template<typename T>
-    void DmaStm::StreamGeneric<T>::TransferPeripheralToMemory(infra::MemoryRange<T> data)
+    void DmaStm::StreamWithConfigurableDataSize<T>::Receive(infra::MemoryRange<T> data)
     {
         SetMemoryDataSize(sizeof(T));
         SetPeripheralDataSize(sizeof(T));
