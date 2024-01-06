@@ -11,8 +11,9 @@ namespace main_
 {
     struct EchoFromCloud
     {
-        EchoFromCloud(hal::DmaStm& dma)
+        EchoFromCloud(hal::DmaStm& dma, services::Tracer& tracer)
             : hostUart(dma, 4, hostUartTxPin, hostUartRxPin)
+            , redTracer(services::TracerColoured::red, tracer)
         {}
 
         hal::GpioPinStm hostUartTxPin{ hal::Port::C, 10 };
@@ -20,7 +21,7 @@ namespace main_
         hal::UartStmDuplexDma::WithRxBuffer<256> hostUart;
         services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedHostUart{ hostUart };
-        services::TracerColoured redTracer{ services::TracerColoured::red, services::GlobalTracer() };
+        services::TracerColoured redTracer;
         main_::TracingEchoOnSesame<256> echo{ bufferedHostUart, serializerFactory, redTracer };
 
         testing::TesterTracer testerTracer{ echo.echo };

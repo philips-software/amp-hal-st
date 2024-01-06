@@ -27,14 +27,15 @@ int main()
 
     static main_::StmEventInfrastructure eventInfrastructure;
     static main_::NucleoF767ziTracerInfrastructure tracerInfrastructure;
-    services::SetGlobalTracerInstance(tracerInfrastructure.tracer);
+    services::TracerColoured tracer{ services::TracerColoured::resetColour, tracerInfrastructure.tracer };
+    services::SetGlobalTracerInstance(tracer);
     static main_::Nucleo144Ui ui;
     static services::DebugLed debugLed(ui.ledBlue);
 
     static hal::DmaStm dma;
-    static main_::EchoFromCloud echo(dma);
+    static main_::EchoFromCloud echo(dma, tracerInfrastructure.tracer);
     static main_::Tester tester(echo.echo);
-    static main_::ForwardingEchoToTested forwarder(echo.echo, dma);
+    static main_::ForwardingEchoToTested forwarder(echo.echo, dma, tracerInfrastructure.tracer);
 
     services::GlobalTracer().Trace() << "Starting tester!";
 
