@@ -20,7 +20,7 @@ HOOK_BEFORE_ALL()
     context.Emplace<testing::TestedProxy>(*echo);
 }
 
-HOOK_BEFORE()
+HOOK_BEFORE_SCENARIO()
 {
     RunInSync([&](const std::function<void()>& done)
         {

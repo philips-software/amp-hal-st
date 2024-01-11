@@ -23,12 +23,27 @@
             "overrideRestartCommands": [ "monitor reset" ]
         },
         {
-            "name": "stm32f767 without container",
+            "name": "tester",
             "cwd": "${workspaceRoot}",
             "request": "launch",
-            "executable": "${command:cmake.launchTargetPath}",
+            "executable": "C:\\DEV\\amp-hal-st\\build\\stm32f767\\integration_test\\tester\\Debug\\integration_test.tester.elf",
             "type": "cortex-debug",
             "servertype": "jlink",
+            "serverpath": "C:\\Program Files\\SEGGER\\JLink\\JLinkGDBServerCL.exe",
+            "serialNumber": "771815202",
+            "svdPath": "C:\\Dev\\amp-hal-st\\STM32F767.svd",
+            "device": "STM32F767ZI"
+        },
+        {
+            "name": "tested",
+            "cwd": "${workspaceRoot}",
+            "request": "launch",
+            "executable": "C:\\DEV\\amp-hal-st\\build\\stm32f767\\integration_test\\tested\\Debug\\integration_test.tested.elf",
+            "type": "cortex-debug",
+            "servertype": "jlink",
+            "serverpath": "C:\\Program Files\\SEGGER\\JLink\\JLinkGDBServerCL.exe",
+            "serialNumber": "775426461",
+            "svdPath": "C:\\Dev\\amp-hal-st\\STM32F767.svd",
             "device": "STM32F767ZI"
         },
         {
