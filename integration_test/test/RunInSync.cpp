@@ -59,13 +59,13 @@ void RunInSyncOnSystemChange(const std::function<void(const std::function<void()
                 sync.condition.notify_all();
             });
 
-        while (sync.running)
+        while (sync.running && !timedOut)
             if (sync.condition.wait_until(lock, timeoutMoment) == std::cv_status::timeout)
                 timedOut = true;
     }
 
+    ASSERT_THAT(barrierCount, testing::Eq(0));
+
     while (sync.running)
         sync.condition.wait(lock);
-
-    ASSERT_THAT(barrierCount, testing::Eq(0));
 }

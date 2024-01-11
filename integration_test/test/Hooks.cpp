@@ -4,6 +4,7 @@
 #include "integration_test/test/FixtureEcho.hpp"
 #include "integration_test/test/FixtureEventDispatcher.hpp"
 #include "integration_test/test/FixtureSystemChanges.hpp"
+#include "integration_test/test/RunInSync.hpp"
 
 HOOK_BEFORE_ALL()
 {
@@ -17,4 +18,16 @@ HOOK_BEFORE_ALL()
 
     context.Emplace<testing::TesterProxy>(*echo);
     context.Emplace<testing::TestedProxy>(*echo);
+}
+
+HOOK_BEFORE()
+{
+    RunInSync([&](const std::function<void()>& done)
+        {
+            context.Get<testing::TesterProxy>().RequestSend([&]()
+                {
+                    context.Get<testing::TesterProxy>().Reset();
+                    done();
+                });
+        });
 }

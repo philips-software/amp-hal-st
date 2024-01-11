@@ -19,7 +19,7 @@ namespace main_
 
     struct Tester
     {
-        Tester(services::Echo& echo);
+        Tester(services::Echo& echo, services::EchoOnSesame& echoToTested);
 
         hal::GpioPinStm nResetTester{ hal::Port::E, 6, hal::Drive::OpenDrain };
         application::Tester tester;

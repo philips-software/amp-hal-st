@@ -16,10 +16,14 @@ namespace application
         Tested(services::Echo& echo);
 
         // Implementation of Tested
+        void Ping() override;
         void EnablePeripheral(testing::Peripheral type) override;
 
         // Implementation of Peripherals
         services::Echo& GetEcho() const override;
+
+    private:
+        testing::TestedObserverProxy testedObserver;
     };
 }
 

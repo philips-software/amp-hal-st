@@ -29,6 +29,7 @@ namespace application
         virtual services::Echo& GetEcho() const = 0;
 
         void EnablePeripheral(testing::Peripheral type);
+        void Reset();
 
     private:
         infra::SharedPtr<void> currentPeripheral;

@@ -6,7 +6,7 @@ namespace main_
         : gpioTester{ echo, inPin, outPin }
     {}
 
-    Tester::Tester(services::Echo& echo)
-        : tester(echo, nResetTester)
+    Tester::Tester(services::Echo& echo, services::EchoOnSesame& echoToTested)
+        : tester(echo, nResetTester, echoToTested)
     {}
 }

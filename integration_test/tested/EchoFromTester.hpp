@@ -21,6 +21,7 @@ namespace main_
         main_::TracingEchoOnSesame<256> echo{ bufferedEchoUart, serializerFactory, services::GlobalTracer() };
 
         testing::TestedTracer testedTracer{ echo.echo };
+        testing::TestedObserverTracer testedObserverTracer{ echo.echo };
         testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
         testing::GpioObserverTracer gpioObserverTracer{ echo.echo };
     };

@@ -26,6 +26,7 @@ namespace main_
 
         testing::TesterTracer testerTracer{ echo.echo };
         testing::TestedTracer testedTracer{ echo.echo };
+        testing::TestedObserverTracer testedObserverTracer{ echo.echo };
         testing::GpioTesterTracer gpioTesterTracer{ echo.echo };
         testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
         testing::GpioObserverTracer gpioObserverTracer{ echo.echo };

@@ -27,6 +27,7 @@ namespace main_
         main_::TracingEchoOnSesame<256> echo{ bufferedEchoUart, serializerFactory, blueTracer };
 
         testing::TestedTracer testedTracer{ echo.echo };
+        testing::TestedObserverTracer testedObserverTracer{ echo.echo };
         testing::GpioTestedTracer gpiotestedTracer{ echo.echo };
         testing::GpioObserverTracer gpioObserverTracer{ echo.echo };
     };
@@ -37,6 +38,7 @@ namespace main_
 
         main_::EchoToTested echoToTested;
         services::ServiceForwarder forwardTested;
+        services::ServiceForwarder forwardTestedObserver;
         services::ServiceForwarder forwardGpioTested;
         services::ServiceForwarder forwardGpioObserver;
     };

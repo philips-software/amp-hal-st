@@ -34,8 +34,8 @@ int main()
 
     static hal::DmaStm dma;
     static main_::EchoFromCloud echo(dma, tracerInfrastructure.tracer);
-    static main_::Tester tester(echo.echo);
     static main_::ForwardingEchoToTested forwarder(echo.echo, dma, tracerInfrastructure.tracer);
+    static main_::Tester tester(echo.echo, forwarder.echoToTested.echo.echo);
 
     services::GlobalTracer().Trace() << "Starting tester!";
 

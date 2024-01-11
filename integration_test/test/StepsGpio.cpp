@@ -44,11 +44,33 @@ public:
     main_::SystemChanges& systemChanges;
 };
 
+class TestedObserver
+    : public testing::TestedObserver
+{
+public:
+    using testing::TestedObserver::TestedObserver;
+
+    void Pong() override
+    {
+        pongReceived = true;
+        MethodDone();
+    }
+
+    bool ReceivedPong()
+    {
+        return std::exchange(pongReceived, false);
+    }
+
+private:
+    bool pongReceived = false;
+};
+
 STEP("gpio peripherals are enabled")
 {
     RunInSync([&](const std::function<void()>& done)
         {
             context->Emplace<GpioObserver>(context->Get<services::Echo>(), context->Get<main_::SystemChanges>());
+            context->Emplace<TestedObserver>(context->Get<services::Echo>());
 
             context->Get<testing::TesterProxy>().RequestSend([&]()
                 {
@@ -59,10 +81,21 @@ STEP("gpio peripherals are enabled")
             context->Get<testing::TestedProxy>().RequestSend([&]()
                 {
                     context->Get<testing::TestedProxy>().EnablePeripheral(testing::Peripheral::gpio);
-                    done();
+                    context->Get<testing::TestedProxy>().RequestSend([&]()
+                        {
+                            context->Get<testing::TestedProxy>().Ping();
+                            done();
+                        });
                 });
         },
         2);
+
+    RunInSyncOnSystemChange([&](const std::function<void()>& done)
+        {
+            if (context->Get<TestedObserver>().ReceivedPong())
+                done();
+        },
+        *context);
 
     context->Emplace<testing::GpioTesterProxy>(context->Get<services::Echo>());
     context->Emplace<testing::GpioTestedProxy>(context->Get<services::Echo>());
