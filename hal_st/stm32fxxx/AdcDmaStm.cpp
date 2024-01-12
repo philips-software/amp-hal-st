@@ -2,9 +2,8 @@
 
 namespace hal
 {
-    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
+    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
         : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
-        , buffer(buffer)
         , stream(dma, dmaChannelId, &Handle().Instance->DR, [this]()
             {
                 TransferDone();
@@ -16,6 +15,8 @@ namespace hal
         , timer(2, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #endif
     {
+        really_assert(!InterfaceConnector<AdcTriggeredByTimerWithDma>::InstanceSet());
+
         ADC_ChannelConfTypeDef channelConfig;
         channelConfig.Channel = Channel(analogPin);
 #if !defined(STM32WB)
@@ -46,7 +47,7 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    void AdcTriggeredByTimerWithDma::Measure(const infra::Function<void(infra::MemoryRange<uint16_t>&)>& onDone)
+    void AdcTriggeredByTimerWithDma::Measure(infra::MemoryRange<uint16_t> buffer, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
 
@@ -76,6 +77,6 @@ namespace hal
         timer.Stop();
 
         if (this->onDone)
-            this->onDone(buffer);
+            this->onDone();
     }
 }

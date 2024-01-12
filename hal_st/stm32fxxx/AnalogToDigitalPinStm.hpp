@@ -9,7 +9,21 @@
 
 namespace hal
 {
-    class AnalogToDigitalPinImplStm;
+    class AdcStm;
+
+    class AnalogToDigitalPinImplStm
+        : private AnalogToDigitalPinImplBase
+    {
+    public:
+        explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
+        virtual ~AnalogToDigitalPinImplStm() = default;
+
+        void Measure(const infra::Function<void(int32_t value)>& onDone) override;
+
+    private:
+        AnalogPinStm analogPin;
+        AdcStm& adc;
+    };
 
     class AdcStm
     {
@@ -46,27 +60,15 @@ namespace hal
         ADC_HandleTypeDef& Handle();
 
     private:
-        friend class AnalogToDigitalPinImplStm;
         void MeasurementDone();
+
+    private:
+        friend class AnalogToDigitalPinImplStm;
 
         uint8_t index;
         ADC_HandleTypeDef handle{};
         DispatchedInterruptHandler interruptHandler;
         infra::AutoResetFunction<void(int32_t value)> onDone;
-    };
-
-    class AnalogToDigitalPinImplStm
-        : public AnalogToDigitalPinImplBase
-    {
-    public:
-        explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
-        virtual ~AnalogToDigitalPinImplStm() = default;
-
-        void Measure(const infra::Function<void(int32_t value)>& onDone) override;
-
-    private:
-        AnalogPinStm analogPin;
-        AdcStm& adc;
     };
 }
 
