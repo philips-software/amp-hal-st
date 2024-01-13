@@ -20,7 +20,7 @@ jobs:
           persist-credentials: false
           submodules: true
           token: ${{ secrets.AMP_ACCESS_TOKEN }}
-      - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
+      - uses: hendrikmuhs/ccache-action@2a51777f6f64b7b7bea213601acba8f5f4fdbe03 # v1.2.11
         with:
           key: ${{ github.job }}-ubuntu-latest
           variant: sccache
@@ -54,7 +54,7 @@ jobs:
           persist-credentials: false
           submodules: true
           token: ${{ secrets.AMP_ACCESS_TOKEN }}
-      - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
+      - uses: hendrikmuhs/ccache-action@2a51777f6f64b7b7bea213601acba8f5f4fdbe03 # v1.2.11
         with:
           key: ${{ github.job }}-${{ matrix.os }}
           variant: sccache
@@ -106,7 +106,7 @@ jobs:
         with:
           release: ${{ matrix.gcc }}
       - run: sudo apt-get update && sudo apt-get install ninja-build xsltproc
-      - uses: hendrikmuhs/ccache-action@6d1841ec156c39a52b1b23a810da917ab98da1f4 # v1.2.10
+      - uses: hendrikmuhs/ccache-action@2a51777f6f64b7b7bea213601acba8f5f4fdbe03 # v1.2.11
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
       - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
