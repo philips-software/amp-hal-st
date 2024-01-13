@@ -1,13 +1,14 @@
 #include "cucumber-cpp/Hooks.hpp"
 #include "generated/echo/Testing.pb.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
+#include "infra/event/EventDispatcherThreadAware.hpp"
 #include "integration_test/test/FixtureEcho.hpp"
-#include "integration_test/test/FixtureEventDispatcher.hpp"
 #include "integration_test/test/Waiting.hpp"
+#include "gtest/gtest.h"
 
 HOOK_BEFORE_ALL()
 {
-    context.Emplace<infra::EventDispatcherThreadAware>();
+    context.Emplace<infra::EventDispatcherThreadAware::WithSize<50>>();
     context.Emplace<hal::TimerServiceGeneric>();
 
     auto echoFixture = std::make_shared<main_::FixtureEcho>();

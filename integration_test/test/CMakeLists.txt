@@ -3,8 +3,6 @@ emil_build_for(integration_test.test HOST Windows)
 
 target_sources(integration_test.test PRIVATE
     FixtureEcho.hpp
-    FixtureEventDispatcher.hpp
-    FixtureEventDispatcher.cpp
     Hooks.cpp
     StepsGpio.cpp
     Waiting.cpp

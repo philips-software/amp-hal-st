@@ -1,4 +1,5 @@
 #include "integration_test/test/Waiting.hpp"
+#include "infra/event/EventDispatcherThreadAware.hpp"
 #include "gmock/gmock.h"
 
 namespace infra
@@ -20,7 +21,7 @@ namespace infra
                 timedOut = true;
             } };
 
-        context.Get<infra::EventDispatcherThreadAware>().ExecuteUntil([&done, &timedOut]()
+        context.Get<infra::EventDispatcherThreadAware::WithSize<50>>().ExecuteUntil([&done, &timedOut]()
             {
                 return done || timedOut;
             });
@@ -37,7 +38,7 @@ namespace infra
                 timedOut = true;
             } };
 
-        context.Get<infra::EventDispatcherThreadAware>().ExecuteUntil([&pred, &timedOut]()
+        context.Get<infra::EventDispatcherThreadAware::WithSize<50>>().ExecuteUntil([&pred, &timedOut]()
             {
                 return pred() || timedOut;
             });
@@ -54,7 +55,7 @@ namespace infra
                 done = true;
             } };
 
-        context.Get<infra::EventDispatcherThreadAware>().ExecuteUntil([&done]()
+        context.Get<infra::EventDispatcherThreadAware::WithSize<50>>().ExecuteUntil([&done]()
             {
                 return done;
             });

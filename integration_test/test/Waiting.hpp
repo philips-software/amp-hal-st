@@ -3,7 +3,6 @@
 
 #include "cucumber-cpp/Context.hpp"
 #include "infra/timer/Timer.hpp"
-#include "integration_test/test/FixtureEventDispatcher.hpp"
 
 namespace infra
 {
@@ -33,7 +32,7 @@ namespace infra
 
         void Notify();
 
-        [[nodiscard]] bool Wait(infra::Duration timeout) const;
+        [[nodiscard]] bool Wait(infra::Duration timeout = defaultTimeout) const;
 
     private:
         cucumber_cpp::Context& context;
