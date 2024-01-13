@@ -1,5 +1,4 @@
 #include "integration_test/test/FixtureEventDispatcher.hpp"
-#include <iostream>
 
 namespace infra
 {
@@ -21,15 +20,13 @@ namespace infra
             });
         ready = false;
     }
-}
 
-namespace main_
-{
-    FixtureEventDispatcher ::~FixtureEventDispatcher()
+    void EventDispatcherThreadAware::ExecuteUntil(const infra::Function<bool()>& pred)
     {
-        eventDispatcher.Schedule([]
-            {
-                throw ExitException{};
-            });
+        while (!pred())
+        {
+            ExecuteAllActions();
+            Idle();
+        }
     }
 }

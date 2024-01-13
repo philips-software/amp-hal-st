@@ -4,11 +4,11 @@
 #include "integration_test/test/FixtureEcho.hpp"
 #include "integration_test/test/FixtureEventDispatcher.hpp"
 #include "integration_test/test/FixtureSystemChanges.hpp"
-#include "integration_test/test/RunInSync.hpp"
+#include "integration_test/test/Waiting.hpp"
 
 HOOK_BEFORE_ALL()
 {
-    context.Emplace<main_::FixtureEventDispatcher>();
+    context.Emplace<infra::EventDispatcherThreadAware>();
     context.Emplace<hal::TimerServiceGeneric>();
     context.Emplace<main_::SystemChanges>();
 
@@ -22,7 +22,7 @@ HOOK_BEFORE_ALL()
 
 HOOK_BEFORE_SCENARIO()
 {
-    RunInSync([&](const std::function<void()>& done)
+    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Get<testing::TesterProxy>().RequestSend([&]()
                 {

@@ -7,9 +7,9 @@ target_sources(integration_test.test PRIVATE
     FixtureEventDispatcher.cpp
     FixtureSystemChanges.hpp
     Hooks.cpp
-    RunInSync.cpp
-    RunInSync.hpp
     StepsGpio.cpp
+    Waiting.cpp
+    Waiting.hpp
 )
 
 target_link_libraries(integration_test.test PRIVATE
