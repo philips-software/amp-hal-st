@@ -5,7 +5,6 @@ target_sources(integration_test.test PRIVATE
     FixtureEcho.hpp
     FixtureEventDispatcher.hpp
     FixtureEventDispatcher.cpp
-    FixtureSystemChanges.hpp
     Hooks.cpp
     StepsGpio.cpp
     Waiting.cpp

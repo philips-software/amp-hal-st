@@ -1,6 +1,5 @@
 #include "cucumber-cpp/Steps.hpp"
 #include "generated/echo/Testing.pb.hpp"
-#include "integration_test/test/FixtureSystemChanges.hpp"
 #include "integration_test/test/Waiting.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -19,29 +18,24 @@ class GpioObserver
     : public testing::GpioObserver
 {
 public:
-    GpioObserver(services::Echo& echo, main_::SystemChanges& systemChanges)
+    GpioObserver(services::Echo& echo)
         : testing::GpioObserver(echo)
-        , systemChanges(systemChanges)
     {}
 
     void TesterGpioChanged(bool state) override
     {
         testerGpio = state;
-        systemChanges.Trigger();
         MethodDone();
     }
 
     void TestedGpioChanged(bool state) override
     {
         testedGpio = state;
-        systemChanges.Trigger();
         MethodDone();
     }
 
     bool testerGpio = false;
     bool testedGpio = false;
-
-    main_::SystemChanges& systemChanges;
 };
 
 class TestedObserver
@@ -69,7 +63,7 @@ STEP("gpio peripherals are enabled")
 {
     infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
-            context.Emplace<GpioObserver>(context.Get<services::Echo>(), context.Get<main_::SystemChanges>());
+            context.Emplace<GpioObserver>(context.Get<services::Echo>());
             context.Emplace<TestedObserver>(context.Get<services::Echo>());
 
             context.Get<testing::TesterProxy>().RequestSend([&]()
