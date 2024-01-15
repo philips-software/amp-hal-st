@@ -54,7 +54,7 @@ namespace hal
 
         timer.Start();
         Configure();
-        stream.Receive(AnalogToDigitalPinImplBase<uint16_t>::buffer);
+        stream.Receive(AnalogToDigitalPinImplBase<uint16_t>::samplesBuffer);
         LL_ADC_REG_StartConversion(Handle().Instance);
     }
 
