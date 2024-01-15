@@ -12,15 +12,16 @@ namespace hal
     class AdcStm;
 
     class AnalogToDigitalPinImplStm
-        : private AnalogToDigitalPinImplBase
+        : protected AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
         explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
         virtual ~AnalogToDigitalPinImplStm() = default;
 
-        void Measure(const infra::Function<void(int32_t value)>& onDone) override;
+        void Measure(const infra::Function<void()>& onDone) override;
 
     private:
+        std::array<uint16_t, 1> buffer;
         AnalogPinStm analogPin;
         AdcStm& adc;
     };
@@ -28,10 +29,8 @@ namespace hal
     class AdcStm
     {
     public:
-        AdcStm(uint8_t adcIndex);
+        explicit AdcStm(uint8_t adcIndex);
         ~AdcStm();
-
-        void Measure(const infra::Function<void(int32_t value)>& onDone);
 
     protected:
         enum class TriggerSource : uint32_t
@@ -60,6 +59,7 @@ namespace hal
         ADC_HandleTypeDef& Handle();
 
     private:
+        void Measure(infra::MemoryRange<uint16_t> buffer, const infra::Function<void()>& onDone);
         void MeasurementDone();
 
     private:
@@ -68,7 +68,8 @@ namespace hal
         uint8_t index;
         ADC_HandleTypeDef handle{};
         DispatchedInterruptHandler interruptHandler;
-        infra::AutoResetFunction<void(int32_t value)> onDone;
+        infra::MemoryRange<uint16_t> buffer;
+        infra::AutoResetFunction<void()> onDone;
     };
 }
 

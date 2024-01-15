@@ -11,13 +11,16 @@
 namespace hal
 {
     class AdcTriggeredByTimerWithDma
-        : public AnalogToDigitalBulkSamples<uint16_t>
-        , public infra::InterfaceConnector<AdcTriggeredByTimerWithDma>
+        : public infra::InterfaceConnector<AdcTriggeredByTimerWithDma>
+        , protected AnalogToDigitalPinImplBase<uint16_t>
         , private AdcStm
     {
     public:
-        explicit AdcTriggeredByTimerWithDma(hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
-        void Measure(infra::MemoryRange<uint16_t> buffer, const infra::Function<void()>& onDone) override;
+        template<std::size_t Max>
+        using WithNumberOfSamples = infra::WithStorage<AdcTriggeredByTimerWithDma, std::array<uint16_t, Max>>;
+
+        explicit AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
+        void Measure(const infra::Function<void()>& onDone) override;
 
     private:
         void TransferDone();

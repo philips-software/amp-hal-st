@@ -104,8 +104,9 @@ namespace hal
         DisableClockAdc(index);
     }
 
-    void AdcStm::Measure(const infra::Function<void(int32_t value)>& onDone)
+    void AdcStm::Measure(infra::MemoryRange<uint16_t> buffer, const infra::Function<void()>& onDone)
     {
+        this->buffer = buffer;
         this->onDone = onDone;
 
         HAL_StatusTypeDef result = HAL_ADC_Start_IT(&handle);
@@ -131,15 +132,17 @@ namespace hal
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif
         interruptHandler.ClearPending();
-        onDone(HAL_ADC_GetValue(&handle));
+        buffer.front() = HAL_ADC_GetValue(&handle);
+        onDone();
     }
 
     AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc)
-        : analogPin(pin)
+        : AnalogToDigitalPinImplBase<uint16_t>(infra::MakeRange(buffer))
+        , analogPin(pin)
         , adc(adc)
     {}
 
-    void AnalogToDigitalPinImplStm::Measure(const infra::Function<void(int32_t value)>& onDone)
+    void AnalogToDigitalPinImplStm::Measure(const infra::Function<void()>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
         channelConfig.Channel = adc.Channel(analogPin);
@@ -167,6 +170,6 @@ namespace hal
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
 
-        adc.Measure(onDone);
+        adc.Measure(buffer, onDone);
     }
 }
