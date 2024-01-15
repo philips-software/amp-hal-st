@@ -6,6 +6,10 @@ namespace main_
         : gpioTested(echo, inPin, outPin)
     {}
 
+    UartTested::UartTested(services::Echo& echo)
+        : uartTested{ echo, bufferedUart }
+    {}
+
     Tested::Tested(services::Echo& echo)
         : tested(echo)
     {}

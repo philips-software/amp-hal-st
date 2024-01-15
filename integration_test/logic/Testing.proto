@@ -9,9 +9,15 @@ message GpioState
     bool state = 1;
 }
 
+message Data
+{
+    bytes data = 1 [(bytes_size) = 32];
+}
+
 enum Peripheral
 {
     gpio = 0;
+    uart = 1;
 }
 
 message PeripheralType
@@ -62,4 +68,26 @@ service GpioObserver
 
     rpc TesterGpioChanged(GpioState) returns (Nothing) { option (method_id) = 1; }
     rpc TestedGpioChanged(GpioState) returns (Nothing) { option (method_id) = 2; }
+}
+
+service UartTester
+{
+    option (service_id) = 7;
+
+    rpc SendData(Data) returns (Nothing) { option (method_id) = 1; }
+}
+
+service UartTested
+{
+    option (service_id) = 8;
+
+    rpc SendData(Data) returns (Nothing) { option (method_id) = 1; }
+}
+
+service UartObserver
+{
+    option (service_id) = 9;
+
+    rpc TesterReceivedData(Data) returns (Nothing) { option (method_id) = 1; }
+    rpc TestedReceivedData(Data) returns (Nothing) { option (method_id) = 2; }
 }

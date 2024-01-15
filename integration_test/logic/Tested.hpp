@@ -25,6 +25,27 @@ namespace application
     private:
         testing::TestedObserverProxy testedObserver;
     };
+
+    class TestedObserver
+        : public testing::TestedObserver
+    {
+    public:
+        using testing::TestedObserver::TestedObserver;
+
+        void Pong() override
+        {
+            pongReceived = true;
+            MethodDone();
+        }
+
+        bool ReceivedPong()
+        {
+            return std::exchange(pongReceived, false);
+        }
+
+    private:
+        bool pongReceived = false;
+    };
 }
 
 #endif

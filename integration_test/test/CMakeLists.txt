@@ -5,6 +5,7 @@ target_sources(integration_test.test PRIVATE
     FixtureEcho.hpp
     Hooks.cpp
     StepsGpio.cpp
+    StepsUart.cpp
     Waiting.cpp
     Waiting.hpp
 )

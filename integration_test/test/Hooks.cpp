@@ -2,6 +2,7 @@
 #include "generated/echo/Testing.pb.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
 #include "infra/event/EventDispatcherThreadAware.hpp"
+#include "integration_test/logic/Tested.hpp"
 #include "integration_test/test/FixtureEcho.hpp"
 #include "integration_test/test/Waiting.hpp"
 #include "gtest/gtest.h"
@@ -17,6 +18,7 @@ HOOK_BEFORE_ALL()
 
     context.Emplace<testing::TesterProxy>(*echo);
     context.Emplace<testing::TestedProxy>(*echo);
+    context.Emplace<application::TestedObserver>(context.Get<services::Echo>());
 }
 
 HOOK_BEFORE_SCENARIO()
@@ -28,5 +30,19 @@ HOOK_BEFORE_SCENARIO()
                     context.Get<testing::TesterProxy>().Reset();
                     done();
                 });
+        });
+
+    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+        {
+            context.Get<testing::TestedProxy>().RequestSend([&]()
+                {
+                    context.Get<testing::TestedProxy>().Ping();
+                    done();
+                });
+        });
+
+    infra::WaitFor(context, [&]()
+        {
+            return context.Get<application::TestedObserver>().ReceivedPong();
         });
 }

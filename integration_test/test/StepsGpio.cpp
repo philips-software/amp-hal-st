@@ -1,70 +1,52 @@
 #include "cucumber-cpp/Steps.hpp"
 #include "generated/echo/Testing.pb.hpp"
+#include "integration_test/logic/Tested.hpp"
 #include "integration_test/test/Waiting.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-bool ConvertPinState(const std::string& state)
+namespace
 {
-    if (state == "high")
-        return true;
-    else if (state == "low")
-        return false;
-    else
-        std::abort();
+    bool ConvertPinState(const std::string& state)
+    {
+        if (state == "high")
+            return true;
+        else if (state == "low")
+            return false;
+        else
+            std::abort();
+    }
+
+    class GpioObserver
+        : public testing::GpioObserver
+    {
+    public:
+        GpioObserver(services::Echo& echo)
+            : testing::GpioObserver(echo)
+        {}
+
+        void TesterGpioChanged(bool state) override
+        {
+            testerGpio = state;
+            MethodDone();
+        }
+
+        void TestedGpioChanged(bool state) override
+        {
+            testedGpio = state;
+            MethodDone();
+        }
+
+        bool testerGpio = false;
+        bool testedGpio = false;
+    };
 }
-
-class GpioObserver
-    : public testing::GpioObserver
-{
-public:
-    GpioObserver(services::Echo& echo)
-        : testing::GpioObserver(echo)
-    {}
-
-    void TesterGpioChanged(bool state) override
-    {
-        testerGpio = state;
-        MethodDone();
-    }
-
-    void TestedGpioChanged(bool state) override
-    {
-        testedGpio = state;
-        MethodDone();
-    }
-
-    bool testerGpio = false;
-    bool testedGpio = false;
-};
-
-class TestedObserver
-    : public testing::TestedObserver
-{
-public:
-    using testing::TestedObserver::TestedObserver;
-
-    void Pong() override
-    {
-        pongReceived = true;
-        MethodDone();
-    }
-
-    bool ReceivedPong()
-    {
-        return std::exchange(pongReceived, false);
-    }
-
-private:
-    bool pongReceived = false;
-};
 
 STEP("gpio peripherals are enabled")
 {
     infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Emplace<GpioObserver>(context.Get<services::Echo>());
-            context.Emplace<TestedObserver>(context.Get<services::Echo>());
 
             context.Get<testing::TesterProxy>().RequestSend([&]()
                 {
@@ -88,7 +70,7 @@ STEP("gpio peripherals are enabled")
 
     infra::WaitFor(context, [&]()
         {
-            return context.Get<TestedObserver>().ReceivedPong();
+            return context.Get<application::TestedObserver>().ReceivedPong();
         });
 
     context.Emplace<testing::GpioTesterProxy>(context.Get<services::Echo>());

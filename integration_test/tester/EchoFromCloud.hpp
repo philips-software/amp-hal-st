@@ -19,7 +19,7 @@ namespace main_
         hal::GpioPinStm hostUartTxPin{ hal::Port::C, 10 };
         hal::GpioPinStm hostUartRxPin{ hal::Port::C, 11 };
         hal::UartStmDuplexDma::WithRxBuffer<256> hostUart;
-        services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
+        services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested, testing::UartObserverProxy, testing::UartTester, testing::UartTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy, testing::UartObserver, testing::UartTesterProxy, testing::UartTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedHostUart{ hostUart };
         services::TracerColoured redTracer;
         main_::TracingEchoOnSesame<256> echo{ bufferedHostUart, serializerFactory, redTracer };
@@ -30,6 +30,9 @@ namespace main_
         testing::GpioTesterTracer gpioTesterTracer{ echo.echo };
         testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
         testing::GpioObserverTracer gpioObserverTracer{ echo.echo };
+        testing::UartTesterTracer uartTesterTracer{ echo.echo };
+        testing::UartTestedTracer uartTestedTracer{ echo.echo };
+        testing::UartObserverTracer uartObserverTracer{ echo.echo };
     };
 }
 
