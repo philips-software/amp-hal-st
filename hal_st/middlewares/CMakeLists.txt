@@ -1,4 +1,4 @@
 add_subdirectory(STM32_WPAN)
 add_subdirectory(ble_middleware)
 
-emil_exclude_directory_from_clang_format(.)
+emil_exclude_directory_from_clang_format(STM32_WPAN)

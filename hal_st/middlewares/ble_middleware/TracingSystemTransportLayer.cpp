@@ -1,13 +1,13 @@
 #include "hal_st/middlewares/ble_middleware/TracingSystemTransportLayer.hpp"
+#include "ble/svc/Inc/svc_ctl.h"
+#include "hci_tl.h"
 #include "shci.h"
 #include "shci_tl.h"
-#include "hci_tl.h"
-#include "ble/svc/Inc/svc_ctl.h"
 
 extern "C"
 {
-    #include "app_conf.h"
-    #include "ble.h"
+#include "app_conf.h"
+#include "ble.h"
 }
 
 namespace hal
@@ -43,7 +43,7 @@ namespace hal
     void TracingSystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
     {
         auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(sysEvent->payload);
-        tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : size: " << bleNvmRamUpdateEvent.Size  << ", address: 0x" << infra::hex << bleNvmRamUpdateEvent.StartAddress;
+        tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : size: " << bleNvmRamUpdateEvent.Size << ", address: 0x" << infra::hex << bleNvmRamUpdateEvent.StartAddress;
         SystemTransportLayer::HandleBleNvmRamUpdateEvent(sysEvent);
     }
 
