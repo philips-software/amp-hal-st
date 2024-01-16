@@ -18,7 +18,7 @@ namespace hal
         explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
         virtual ~AnalogToDigitalPinImplStm() = default;
 
-        void Measure(const infra::Function<void()>& onDone) override;
+        void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
         std::array<uint16_t, 1> buffer;
@@ -59,7 +59,7 @@ namespace hal
         ADC_HandleTypeDef& Handle();
 
     private:
-        void Measure(infra::MemoryRange<uint16_t> buffer, const infra::Function<void()>& onDone);
+        void Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone);
         void MeasurementDone();
 
     private:
@@ -68,8 +68,8 @@ namespace hal
         uint8_t index;
         ADC_HandleTypeDef handle{};
         DispatchedInterruptHandler interruptHandler;
-        infra::MemoryRange<uint16_t> buffer;
-        infra::AutoResetFunction<void()> onDone;
+        uint16_t sample;
+        infra::AutoResetFunction<void(infra::MemoryRange<uint16_t>)> onDone;
     };
 }
 

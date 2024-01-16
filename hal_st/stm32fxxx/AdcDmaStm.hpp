@@ -20,17 +20,18 @@ namespace hal
         using WithNumberOfSamples = infra::WithStorage<AdcTriggeredByTimerWithDma, std::array<uint16_t, Max>>;
 
         explicit AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
-        void Measure(const infra::Function<void()>& onDone) override;
+        void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
         void TransferDone();
         void Configure();
 
     private:
+        infra::MemoryRange<uint16_t> buffer;
         DmaStm::StreamWithConfigurableDataSize<uint16_t> stream;
         AnalogPinStm analogPin;
         TimerBaseStm timer;
-        infra::AutoResetFunction<void()> onDone;
+        infra::AutoResetFunction<void(infra::MemoryRange<uint16_t>)> onDone;
     };
 }
 

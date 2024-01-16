@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/util/EnumCast.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include <array>
 #include <cassert>
 
@@ -104,9 +105,8 @@ namespace hal
         DisableClockAdc(index);
     }
 
-    void AdcStm::Measure(infra::MemoryRange<uint16_t> buffer, const infra::Function<void()>& onDone)
+    void AdcStm::Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
-        this->buffer = buffer;
         this->onDone = onDone;
 
         HAL_StatusTypeDef result = HAL_ADC_Start_IT(&handle);
@@ -132,17 +132,16 @@ namespace hal
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif
         interruptHandler.ClearPending();
-        buffer.front() = HAL_ADC_GetValue(&handle);
-        onDone();
+        sample = HAL_ADC_GetValue(&handle);
+        onDone(infra::MakeRangeFromSingleObject(sample));
     }
 
     AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc)
-        : AnalogToDigitalPinImplBase<uint16_t>(infra::MakeRange(buffer))
-        , analogPin(pin)
+        : analogPin(pin)
         , adc(adc)
     {}
 
-    void AnalogToDigitalPinImplStm::Measure(const infra::Function<void()>& onDone)
+    void AnalogToDigitalPinImplStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
         channelConfig.Channel = adc.Channel(analogPin);
@@ -170,6 +169,6 @@ namespace hal
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
 
-        adc.Measure(buffer, onDone);
+        adc.Measure(onDone);
     }
 }

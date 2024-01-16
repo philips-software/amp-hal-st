@@ -3,8 +3,8 @@
 namespace hal
 {
     AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
-        : AnalogToDigitalPinImplBase<uint16_t>(buffer)
-        , AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
+        : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
+        , buffer(buffer)
         , stream(dma, dmaChannelId, &Handle().Instance->DR, [this]()
             {
                 TransferDone();
@@ -48,13 +48,13 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    void AdcTriggeredByTimerWithDma::Measure(const infra::Function<void()>& onDone)
+    void AdcTriggeredByTimerWithDma::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         this->onDone = onDone;
 
         timer.Start();
         Configure();
-        stream.Receive(AnalogToDigitalPinImplBase<uint16_t>::samplesBuffer);
+        stream.Receive(buffer);
         LL_ADC_REG_StartConversion(Handle().Instance);
     }
 
@@ -78,6 +78,6 @@ namespace hal
         timer.Stop();
 
         if (this->onDone)
-            this->onDone();
+            this->onDone(buffer);
     }
 }
