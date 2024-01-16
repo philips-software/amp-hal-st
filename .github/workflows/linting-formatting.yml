@@ -23,12 +23,12 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           persist-credentials: false
-      - uses: DoozyX/clang-format-lint-action@a83a8fb7d371f66da7dd1c4f33a193023899494b # v0.16
+      - uses: DoozyX/clang-format-lint-action@11b773b1598aa4ae3b32f023701bca5201c3817d # v0.17
         with:
           clangFormatVersion: 15
           inplace: true
           extensions: "cpp,hpp"
-      - uses: reviewdog/action-suggester@94877e550e6b522dc1d21231974b645ff2f084ce # v1.8.0
+      - uses: reviewdog/action-suggester@4daff13db10cd0ddb200b45c8c7166dd0d5c85a9 # v1.9.0
         with:
           tool_name: clang-format
           filter_mode: diff_context
@@ -54,7 +54,7 @@ jobs:
           name: linter
           path: |
             megalinter-reports
-      - uses: reviewdog/action-suggester@94877e550e6b522dc1d21231974b645ff2f084ce # v1.8.0
+      - uses: reviewdog/action-suggester@4daff13db10cd0ddb200b45c8c7166dd0d5c85a9 # v1.9.0
         with:
           tool_name: MegaLinter
           filter_mode: diff_context
