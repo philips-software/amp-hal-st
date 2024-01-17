@@ -14,7 +14,22 @@ namespace main_
 {
     struct FixtureEcho
     {
-        FixtureEcho(const std::string& portName)
+        FixtureEcho(services::Echo& echo)
+            : echo(echo)
+        {}
+
+        services::Echo& echo;
+        // testing::TesterTracer testerTracer{ echo };
+        // testing::TestedTracer testedTracer{ echo };
+        // testing::TestedObserverTracer testedObserverTracer{ echo };
+        // testing::GpioTesterTracer gpioTesterTracer{ echo };
+        // testing::GpioTestedTracer gpioTestedTracer{ echo };
+        // testing::GpioObserverTracer gpioObserverTracer{ echo };
+    };
+
+    struct FixtureEchoSerial
+    {
+        FixtureEchoSerial(const std::string& portName)
             : serial(portName)
         {}
 
@@ -25,14 +40,10 @@ namespace main_
 #endif
         services::MethodSerializerFactory::OnHeap serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedSerial{ serial };
-        main_::EchoOnSesame<256> echo{ bufferedSerial, serializerFactory };
+        main_::EchoOnSesame<256> echoOnSesame{ bufferedSerial, serializerFactory };
 
-        // testing::TesterTracer testerTracer{ echo.echo };
-        // testing::TestedTracer testedTracer{ echo.echo };
-        // testing::TestedObserverTracer testedObserverTracer{ echo.echo };
-        // testing::GpioTesterTracer gpioTesterTracer{ echo.echo };
-        // testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
-        // testing::GpioObserverTracer gpioObserverTracer{ echo.echo };
+        services::Echo& echo{ echoOnSesame.echo };
+        FixtureEcho fixture{ echo };
     };
 }
 

@@ -25,8 +25,8 @@ HOOK_BEFORE_ALL()
         context.Emplace<infra::EventDispatcherThreadAware::WithSize<50>>();
         context.Emplace<hal::TimerServiceGeneric>();
 
-        auto echoFixture = std::make_shared<main_::FixtureEcho>(get(serialPort));
-        auto echo = std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo.echo);
+        auto echoFixture = std::make_shared<main_::FixtureEchoSerial>(get(serialPort));
+        auto echo = std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo);
         context.SetShared(echo);
 
         context.Emplace<testing::TesterProxy>(*echo);
