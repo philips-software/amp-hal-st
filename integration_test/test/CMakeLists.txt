@@ -15,7 +15,14 @@ target_link_libraries(integration_test.test PRIVATE
     cucumber-cpp-runner
     integration_test.logic
     hal.generic
-    hal.windows
     gtest
     gmock
 )
+
+if (EMIL_BUILD_WIN)
+    target_link_libraries(integration_test.test PRIVATE hal.windows)
+endif()
+
+if (EMIL_BUILD_UNIX OR EMIL_BUILD_DARWIN)
+    target_link_libraries(integration_test.test PRIVATE hal.unix)
+endif()
