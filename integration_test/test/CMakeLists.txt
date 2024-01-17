@@ -11,8 +11,8 @@ target_sources(integration_test.test PRIVATE
 )
 
 target_link_libraries(integration_test.test PRIVATE
+    args
     cucumber-cpp-runner
-    gherkin-cpp
     integration_test.logic
     hal.generic
     hal.windows

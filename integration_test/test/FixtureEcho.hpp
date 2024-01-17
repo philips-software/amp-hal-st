@@ -10,7 +10,11 @@ namespace main_
 {
     struct FixtureEcho
     {
-        hal::UartWindows serial{ "COM7" };
+        FixtureEcho(const std::string& portName)
+            : serial(portName)
+        {}
+
+        hal::UartWindows serial;
         services::MethodSerializerFactory::OnHeap serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedSerial{ serial };
         main_::EchoOnSesame<256> echo{ bufferedSerial, serializerFactory };
