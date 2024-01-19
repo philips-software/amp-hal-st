@@ -31,14 +31,14 @@ namespace
 namespace hal
 {
     AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc)
-        : pin(pin)
+        : analogPin(pin)
         , adc(adc)
     {}
 
-    void AnalogToDigitalPinImplStm::Measure(const infra::Function<void(int32_t value)>& onDone)
+    void AnalogToDigitalPinImplStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = adcChannel[pin.AdcChannel(adc.index + 1)];
+        channelConfig.Channel = adcChannel[analogPin.AdcChannel(adc.index + 1)];
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -63,7 +63,7 @@ namespace hal
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.handle, &channelConfig);
         assert(result == HAL_OK);
 
-        adc.Measure(pin, onDone);
+        adc.Measure(onDone);
     }
 
     AdcStm::AdcStm(uint8_t oneBasedIndex)
@@ -114,7 +114,7 @@ namespace hal
         DisableClockAdc(index);
     }
 
-    void AdcStm::Measure(AnalogPinStm& pin, const infra::Function<void(int32_t value)>& onDone)
+    void AdcStm::Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         this->onDone = onDone;
 
@@ -131,6 +131,7 @@ namespace hal
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif
         interruptHandler.ClearPending();
-        onDone(HAL_ADC_GetValue(&handle));
+        sample = HAL_ADC_GetValue(&handle);
+        onDone(infra::MakeRangeFromSingleObject(sample));
     }
 }
