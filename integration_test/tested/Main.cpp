@@ -20,8 +20,9 @@ int main()
     static main_::Nucleo144Ui ui;
     static services::DebugLed debugLed(ui.ledBlue);
 
-    static main_::EchoFromTester echo;
-    static main_::Tested tested(echo.echo);
+    static hal::DmaStm dma;
+    static main_::EchoFromTester echo(dma);
+    static main_::Tested tested(echo.echo, dma);
 
     services::GlobalTracer().Trace() << "Starting tested!";
 

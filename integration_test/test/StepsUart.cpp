@@ -67,6 +67,41 @@ STEP("uart peripherals are enabled")
     context.Emplace<testing::UartTestedProxy>(context.Get<services::Echo>());
 }
 
+STEP("uart duplex dma peripherals are enabled")
+{
+    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+        {
+            context.Emplace<UartObserver>(context.Get<services::Echo>());
+
+            context.Get<testing::TesterProxy>().RequestSend([&]()
+                {
+                    context.Get<testing::TesterProxy>().EnablePeripheral(testing::Peripheral::uartDuplexDma);
+                    done();
+                });
+        });
+
+    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+        {
+            context.Get<testing::TestedProxy>().RequestSend([&]()
+                {
+                    context.Get<testing::TestedProxy>().EnablePeripheral(testing::Peripheral::uartDuplexDma);
+                    context.Get<testing::TestedProxy>().RequestSend([&]()
+                        {
+                            context.Get<testing::TestedProxy>().Ping();
+                            done();
+                        });
+                });
+        });
+
+    infra::WaitFor(context, [&]()
+        {
+            return context.Get<application::TestedObserver>().ReceivedPong();
+        });
+
+    context.Emplace<testing::UartTesterProxy>(context.Get<services::Echo>());
+    context.Emplace<testing::UartTestedProxy>(context.Get<services::Echo>());
+}
+
 STEP("the tester sends UART data")
 {
     static const infra::BoundedVector<uint8_t>::WithMaxSize<32> expectedData{ { 1, 2, 3, 4, 5, 6 } };

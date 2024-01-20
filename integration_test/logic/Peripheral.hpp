@@ -35,32 +35,32 @@ namespace application
         infra::SharedPtr<void> currentPeripheral;
     };
 
-    template<class Constructed>
-    class Perpipheral
+    template<class Constructed, class... Args>
+    class Peripheral
         : public PeripheralBase
     {
     public:
-        Perpipheral(Peripherals& subject, testing::Peripheral type);
+        Peripheral(Peripherals& subject, testing::Peripheral type, Args&&... args);
 
         infra::SharedPtr<void> Construct() override;
 
     private:
-        services::Echo& echo;
+        std::tuple<services::Echo&, Args...> args;
         infra::SharedOptional<Constructed> constructed;
     };
 
     //// Implementation ////
 
-    template<class Constructed>
-    Perpipheral<Constructed>::Perpipheral(Peripherals& subject, testing::Peripheral type)
+    template<class Constructed, class... Args>
+    Peripheral<Constructed, Args...>::Peripheral(Peripherals& subject, testing::Peripheral type, Args&&... args)
         : PeripheralBase(subject, type)
-        , echo(subject.GetEcho())
+        , args(subject.GetEcho(), std::forward<Args>(args)...)
     {}
 
-    template<class Constructed>
-    infra::SharedPtr<void> Perpipheral<Constructed>::Construct()
+    template<class Constructed, class... Args>
+    infra::SharedPtr<void> Peripheral<Constructed, Args...>::Construct()
     {
-        return constructed.Emplace(echo);
+        return std::apply(&infra::SharedOptional<Constructed>::template Emplace<services::Echo&, Args...>, std::tuple_cat(std::tuple<infra::SharedOptional<Constructed>&>(constructed), args));
     }
 }
 

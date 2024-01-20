@@ -18,6 +18,7 @@ enum Peripheral
 {
     gpio = 0;
     uart = 1;
+    uartDuplexDma = 2;
 }
 
 message PeripheralType

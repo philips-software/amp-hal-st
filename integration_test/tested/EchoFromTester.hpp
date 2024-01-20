@@ -12,10 +12,13 @@ namespace main_
 {
     struct EchoFromTester
     {
+        EchoFromTester(hal::DmaStm& dma)
+            : echoUart{ dma, 5, echoUartTx, echoUartRx }
+        {}
+
         hal::GpioPinStm echoUartTx{ hal::Port::C, 12 };
         hal::GpioPinStm echoUartRx{ hal::Port::D, 2 };
-        hal::DmaStm dma;
-        hal::UartStmDuplexDma::WithRxBuffer<256> echoUart{ dma, 5, echoUartTx, echoUartRx };
+        hal::UartStmDuplexDma::WithRxBuffer<256> echoUart;
         services::MethodSerializerFactory ::ForServices<testing::Tested, testing::GpioObserverProxy, testing::GpioTested, testing::UartObserverProxy, testing::UartTested>::AndProxies<testing::TestedProxy, testing::GpioObserver, testing::GpioTestedProxy, testing::UartObserver, testing::UartTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedEchoUart{ echoUart };
         main_::TracingEchoOnSesame<256> echo{ bufferedEchoUart, serializerFactory, services::GlobalTracer() };

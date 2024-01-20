@@ -4,6 +4,7 @@
 #include "generated/echo/Testing.pb.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/UartStm.hpp"
+#include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
 #include "integration_test/logic/Gpio.hpp"
 #include "integration_test/logic/Tested.hpp"
 #include "integration_test/logic/Uart.hpp"
@@ -30,13 +31,25 @@ namespace main_
         application::UartTested uartTested;
     };
 
+    struct UartDuplexDmaTested
+    {
+        UartDuplexDmaTested(services::Echo& echo, hal::DmaStm& dma);
+
+        hal::GpioPinStm tx{ hal::Port::D, 5 };
+        hal::GpioPinStm rx{ hal::Port::D, 6 };
+        hal::UartStmDuplexDma::WithRxBuffer<32> uart;
+        hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<32> bufferedUart{ uart };
+        application::UartTested uartTested;
+    };
+
     struct Tested
     {
-        Tested(services::Echo& echo);
+        Tested(services::Echo& echo, hal::DmaStm& dma);
 
         application::Tested tested;
-        application::Perpipheral<main_::GpioTested> gpioTested{ tested, testing::Peripheral::gpio };
-        application::Perpipheral<main_::UartTested> uartTested{ tested, testing::Peripheral::uart };
+        application::Peripheral<main_::GpioTested> gpioTested{ tested, testing::Peripheral::gpio };
+        application::Peripheral<main_::UartTested> uartTested{ tested, testing::Peripheral::uart };
+        application::Peripheral<main_::UartDuplexDmaTested, hal::DmaStm&> uartDuplexDmaTested;
     };
 }
 

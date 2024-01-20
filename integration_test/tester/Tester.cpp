@@ -10,7 +10,13 @@ namespace main_
         : uartTester{ echo, bufferedUart }
     {}
 
-    Tester::Tester(services::Echo& echo, services::EchoOnSesame& echoToTested)
+    UartDuplexDmaTester::UartDuplexDmaTester(services::Echo& echo, hal::DmaStm& dma)
+        : uartTester{ echo, bufferedUart }
+        , uart{ dma, 2, tx, rx }
+    {}
+
+    Tester::Tester(services::Echo& echo, services::EchoOnSesame& echoToTested, hal::DmaStm& dma)
         : tester(echo, nResetTester, echoToTested)
+        , uartDuplexDmaTester{ tester, testing::Peripheral::uartDuplexDma, dma }
     {}
 }
