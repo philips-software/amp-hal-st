@@ -1,4 +1,4 @@
-#include "integration_test/test/FixtureEcho.hpp"
+#include "integration_test/runner/FixtureEcho.hpp"
 
 namespace main_
 {

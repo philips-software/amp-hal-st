@@ -1,7 +1,7 @@
 #include "cucumber-cpp/Steps.hpp"
 #include "generated/echo/Testing.pb.hpp"
 #include "integration_test/logic/Tested.hpp"
-#include "integration_test/test/Waiting.hpp"
+#include "integration_test/runner/Waiting.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

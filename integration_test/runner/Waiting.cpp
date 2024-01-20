@@ -1,4 +1,4 @@
-#include "integration_test/test/Waiting.hpp"
+#include "integration_test/runner/Waiting.hpp"
 #include "infra/event/EventDispatcherThreadAware.hpp"
 #include "gmock/gmock.h"
 

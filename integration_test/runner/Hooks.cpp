@@ -5,8 +5,8 @@
 #include "hal/generic/TimerServiceGeneric.hpp"
 #include "infra/event/EventDispatcherThreadAware.hpp"
 #include "integration_test/logic/Tested.hpp"
-#include "integration_test/test/FixtureEcho.hpp"
-#include "integration_test/test/Waiting.hpp"
+#include "integration_test/runner/FixtureEcho.hpp"
+#include "integration_test/runner/Waiting.hpp"
 #include "services/network_instantiations/NetworkAdapter.hpp"
 #include "gtest/gtest.h"
 
