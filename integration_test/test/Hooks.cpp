@@ -1,18 +1,20 @@
 #include "cucumber-cpp/Hooks.hpp"
 #include "args.hxx"
 #include "generated/echo/Testing.pb.hpp"
+#include "hal/generic/SynchronousRandomDataGeneratorGeneric.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
 #include "infra/event/EventDispatcherThreadAware.hpp"
 #include "integration_test/logic/Tested.hpp"
 #include "integration_test/test/FixtureEcho.hpp"
 #include "integration_test/test/Waiting.hpp"
+#include "services/network_instantiations/NetworkAdapter.hpp"
 #include "gtest/gtest.h"
 
 HOOK_BEFORE_ALL()
 {
     args::ArgumentParser parser("Integration test runner for amp-hal-st");
     args::Group arguments(parser, "Arguments:");
-    args::Positional<std::string> serialPort(arguments, "port", "Serial port of the amp-hal-st integration test board", args::Options::Required);
+    args::Positional<std::string> target(arguments, "target", "COM port or hostname of the amp-hal-st integration test board", args::Options::Required);
     args::Group flags(parser, "Optional flags:");
     args::HelpFlag help(flags, "help", "Display this help menu.", { 'h', "help" });
 
@@ -22,15 +24,40 @@ HOOK_BEFORE_ALL()
         std::vector<std::string> stringArgs(args.begin(), args.end());
         parser.ParseArgs(stringArgs);
 
-        context.Emplace<infra::EventDispatcherThreadAware::WithSize<50>>();
+        auto networkAdapter = std::make_shared<main_::NetworkAdapter>();
+        context.SetShared(std::shared_ptr<infra::EventDispatcherWithWeakPtrWorker>(networkAdapter, &networkAdapter->EventDispatcher()));
+        context.SetShared(std::shared_ptr<services::ConnectionFactoryWithNameResolver>(networkAdapter, &networkAdapter->ConnectionFactoryWithNameResolver()));
         context.Emplace<hal::TimerServiceGeneric>();
 
-        auto echoFixture = std::make_shared<main_::FixtureEchoSerial>(get(serialPort));
-        auto echo = std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo);
-        context.SetShared(echo);
+        if (get(target).substr(0, 3) == "COM" || get(target).substr(0, 4) == "/dev")
+        {
+            auto echoFixture = std::make_shared<main_::FixtureEchoSerial>(get(target));
+            context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo));
+        }
+        else if (services::SchemeFromUrl(get(target)) == "ws")
+        {
+            if (!infra::WaitUntilDone(
+                    context, [&](const std::function<void()>& done)
+                    {
+                        static hal::SynchronousRandomDataGeneratorGeneric randomDataGenerator;
 
-        context.Emplace<testing::TesterProxy>(*echo);
-        context.Emplace<testing::TestedProxy>(*echo);
+                        auto echoFixture = std::make_shared<main_::EchoClientWebSocket>(
+                            context.Get<services::ConnectionFactoryWithNameResolver>(),
+                            get(target), randomDataGenerator);
+                        echoFixture->OnDone([&, echoFixture](services::Echo& echo)
+                            {
+                                context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echo));
+                                done();
+                            });
+                    },
+                    std::chrono::seconds(10)))
+                throw std::runtime_error("Couldn't open websocket connection");
+        }
+        else
+            throw std::runtime_error("Don't know how to open " + get(target));
+
+        context.Emplace<testing::TesterProxy>(context.Get<services::Echo>());
+        context.Emplace<testing::TestedProxy>(context.Get<services::Echo>());
         context.Emplace<application::TestedObserver>(context.Get<services::Echo>());
     }
     catch (const args::Error& error)

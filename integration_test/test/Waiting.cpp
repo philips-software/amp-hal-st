@@ -21,7 +21,7 @@ namespace infra
                 timedOut = true;
             } };
 
-        context.Get<infra::EventDispatcherThreadAware::WithSize<50>>().ExecuteUntil([&done, &timedOut]()
+        context.Get<infra::EventDispatcherWithWeakPtrWorker>().ExecuteUntil([&done, &timedOut]()
             {
                 return done || timedOut;
             });
@@ -38,7 +38,7 @@ namespace infra
                 timedOut = true;
             } };
 
-        context.Get<infra::EventDispatcherThreadAware::WithSize<50>>().ExecuteUntil([&pred, &timedOut]()
+        context.Get<infra::EventDispatcherWithWeakPtrWorker>().ExecuteUntil([&pred, &timedOut]()
             {
                 return pred() || timedOut;
             });
@@ -55,7 +55,7 @@ namespace infra
                 done = true;
             } };
 
-        context.Get<infra::EventDispatcherThreadAware::WithSize<50>>().ExecuteUntil([&done]()
+        context.Get<infra::EventDispatcherWithWeakPtrWorker>().ExecuteUntil([&done]()
             {
                 return done;
             });

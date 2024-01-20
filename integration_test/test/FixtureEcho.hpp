@@ -7,6 +7,9 @@
 #else
 #include "hal/unix/UartUnix.hpp"
 #endif
+#include "services/network/EchoOnConnection.hpp"
+#include "services/network/HttpClientImpl.hpp"
+#include "services/network/WebSocketClientConnectionObserver.hpp"
 #include "services/tracer/GlobalTracer.hpp"
 #include "services/tracer/TracingEchoInstantiation.hpp"
 
@@ -47,6 +50,34 @@ namespace main_
         testing::GpioTesterTracer gpioTesterTracer{ echoOnSesame.echo };
         testing::GpioTestedTracer gpioTestedTracer{ echoOnSesame.echo };
         testing::GpioObserverTracer gpioObserverTracer{ echoOnSesame.echo };
+    };
+
+    class EchoClientWebSocket
+        : private services::WebSocketClientObserverFactory
+    {
+    public:
+        using OnDoneType = infra::Function<void(services::Echo&), 2 * sizeof(void*) + sizeof(std::shared_ptr<void>)>;
+
+        EchoClientWebSocket(services::ConnectionFactoryWithNameResolver& connectionFactory,
+            infra::BoundedString url, hal::SynchronousRandomDataGenerator& randomDataGenerator);
+
+        void OnDone(const OnDoneType& onDone);
+
+    private:
+        infra::BoundedString Url() const override;
+        uint16_t Port() const override;
+        void ConnectionEstablished(infra::AutoResetFunction<void(infra::SharedPtr<services::ConnectionObserver> client)>&& createdClientObserver) override;
+        void ConnectionFailed(ConnectFailReason reason) override;
+
+    private:
+        infra::BoundedString url;
+        services::HttpClientConnectorWithNameResolverImpl<> clientConnector;
+        infra::Creator<services::Stoppable, services::HttpClientWebSocketInitiation, void(services::WebSocketClientObserverFactory& clientObserverFactory, services::HttpClientWebSocketInitiationResult& result, hal::SynchronousRandomDataGenerator& randomDataGenerator)> httpClientInitiationCreator;
+        services::WebSocketClientFactorySingleConnection webSocketFactory;
+
+        infra::SharedOptional<services::EchoOnConnection> echoConnection;
+        OnDoneType onDone;
+        services::MethodSerializerFactory::OnHeap serializerFactory;
     };
 }
 

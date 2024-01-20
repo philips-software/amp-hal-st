@@ -2,6 +2,7 @@ add_executable(integration_test.test)
 emil_build_for(integration_test.test HOST Windows)
 
 target_sources(integration_test.test PRIVATE
+    FixtureEcho.cpp
     FixtureEcho.hpp
     Hooks.cpp
     StepsGpio.cpp
@@ -17,6 +18,7 @@ target_link_libraries(integration_test.test PRIVATE
     hal.generic
     gtest
     gmock
+    services.network_instantiations
 )
 
 if (EMIL_BUILD_WIN)
