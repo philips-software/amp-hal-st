@@ -21,7 +21,6 @@ namespace hal
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
-        std::array<uint16_t, 1> buffer;
         AnalogPinStm analogPin;
         AdcStm& adc;
     };
