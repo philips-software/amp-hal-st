@@ -13,8 +13,8 @@ namespace hal
     public:
         explicit TimeKeeperSt(infra::Duration duration, hal::SystemTickTimerService& timeService);
 
-        virtual bool Timeout() override;
-        virtual void Reset() override;
+        bool Timeout() override;
+        void Reset() override;
 
     private:
         const infra::Duration duration;

@@ -83,7 +83,7 @@ namespace hal
             void StartReceiveDummy(uint16_t size);
 
         protected:
-            virtual void OnInterrupt() override;
+            void OnInterrupt() override;
 
         private:
             DispatchedInterruptHandler interruptHandler;
@@ -100,7 +100,7 @@ namespace hal
             void StartReceive(infra::ByteRange data);
 
         protected:
-            virtual void OnInterrupt() override;
+            void OnInterrupt() override;
 
         private:
             ImmediateInterruptHandler interruptHandler;
