@@ -10,7 +10,7 @@ namespace hal
         : hal::BackupRam<volatile uint32_t>
     {
     public:
-        virtual infra::MemoryRange<volatile uint32_t> Get() const override;
+        infra::MemoryRange<volatile uint32_t> Get() const override;
     };
 }
 

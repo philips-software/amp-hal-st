@@ -18,10 +18,10 @@ namespace hal
         EthernetMacStm(EthernetSmi& ethernetSmi, LinkSpeed linkSpeed, MacAddress macAddress);
         ~EthernetMacStm();
 
-        virtual void SendBuffer(infra::ConstByteRange data, bool last) override;
-        virtual void RetryAllocation() override;
-        virtual void AddMacAddressFilter(MacAddress address) override;
-        virtual void RemoveMacAddressFilter(MacAddress address) override;
+        void SendBuffer(infra::ConstByteRange data, bool last) override;
+        void RetryAllocation() override;
+        void AddMacAddressFilter(MacAddress address) override;
+        void RemoveMacAddressFilter(MacAddress address) override;
 
     private:
         void ResetDma();

@@ -106,16 +106,16 @@ namespace hal
     public:
         GpioPinStm(Port port, uint8_t index, Drive drive = Drive::Default, Speed speed = Speed::Default, WeakPull weakPull = WeakPull::Default);
 
-        virtual bool Get() const override;
-        virtual void Set(bool value) override;
-        virtual bool GetOutputLatch() const override;
-        virtual void SetAsInput() override;
-        virtual bool IsInput() const override;
-        virtual void Config(PinConfigType config) override;
-        virtual void Config(PinConfigType config, bool startOutputState) override;
-        virtual void ResetConfig() override;
-        virtual void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger) override;
-        virtual void DisableInterrupt() override;
+        bool Get() const override;
+        void Set(bool value) override;
+        bool GetOutputLatch() const override;
+        void SetAsInput() override;
+        bool IsInput() const override;
+        void Config(PinConfigType config) override;
+        void Config(PinConfigType config, bool startOutputState) override;
+        void ResetConfig() override;
+        void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger) override;
+        void DisableInterrupt() override;
 
         virtual void ConfigAnalog();
         virtual void ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral);
@@ -137,18 +137,18 @@ namespace hal
     public:
         DummyPinStm();
 
-        virtual bool Get() const override;
-        virtual void Set(bool value) override;
-        virtual bool GetOutputLatch() const override;
-        virtual void SetAsInput() override;
-        virtual bool IsInput() const override;
-        virtual void Config(PinConfigType config) override;
-        virtual void Config(PinConfigType config, bool startOutputState) override;
-        virtual void ResetConfig() override;
-        virtual void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger) override;
-        virtual void DisableInterrupt() override;
-        virtual void ConfigAnalog() override;
-        virtual void ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral) override;
+        bool Get() const override;
+        void Set(bool value) override;
+        bool GetOutputLatch() const override;
+        void SetAsInput() override;
+        bool IsInput() const override;
+        void Config(PinConfigType config) override;
+        void Config(PinConfigType config, bool startOutputState) override;
+        void ResetConfig() override;
+        void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger) override;
+        void DisableInterrupt() override;
+        void ConfigAnalog() override;
+        void ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral) override;
     };
 
     extern DummyPinStm dummyPinStm;
