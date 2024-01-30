@@ -14,13 +14,16 @@ namespace main_
     struct EchoToTested
     {
         EchoToTested(hal::DmaStm& dma, services::Tracer& tracer)
-            : echoUart(dma, 5, echoUartTx, echoUartRx)
+            : transmitStream{ dma, hal::DmaChannelId{ 1, 7, 4 } }
+            , receiveStream{ dma, hal::DmaChannelId{ 1, 0, 4 } }
             , blueTracer(services::TracerColoured::blue, tracer)
         {}
 
         hal::GpioPinStm echoUartTx{ hal::Port::C, 12 };
         hal::GpioPinStm echoUartRx{ hal::Port::D, 2 };
-        hal::UartStmDuplexDma::WithRxBuffer<256> echoUart;
+        hal::DmaStm::TransmitStream transmitStream;
+        hal::DmaStm::ReceiveStream receiveStream;
+        hal::UartStmDuplexDma::WithRxBuffer<256> echoUart{ transmitStream, receiveStream, 5, echoUartTx, echoUartRx };
         services::MethodSerializerFactory ::ForServices<testing::Tested, testing::GpioObserverProxy, testing::GpioTested, testing::UartObserverProxy, testing::UartTested>::AndProxies<testing::TestedProxy, testing::GpioObserver, testing::GpioTestedProxy, testing::UartObserver, testing::UartTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedEchoUart{ echoUart };
         services::TracerColoured blueTracer;

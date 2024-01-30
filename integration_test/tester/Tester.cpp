@@ -12,7 +12,8 @@ namespace main_
 
     UartDuplexDmaTester::UartDuplexDmaTester(services::Echo& echo, hal::DmaStm& dma)
         : uartTester{ echo, bufferedUart }
-        , uart{ dma, 2, tx, rx }
+        , transmitStream{ dma, hal::DmaChannelId{ 1, 6, 4 } }
+        , receiveStream{ dma, hal::DmaChannelId{ 1, 5, 4 } }
     {}
 
     Tester::Tester(services::Echo& echo, services::EchoOnSesame& echoToTested, hal::DmaStm& dma)

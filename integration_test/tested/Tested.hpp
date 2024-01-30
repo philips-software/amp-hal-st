@@ -37,7 +37,9 @@ namespace main_
 
         hal::GpioPinStm tx{ hal::Port::D, 5 };
         hal::GpioPinStm rx{ hal::Port::D, 6 };
-        hal::UartStmDuplexDma::WithRxBuffer<32> uart;
+        hal::DmaStm::TransmitStream transmitStream;
+        hal::DmaStm::ReceiveStream receiveStream;
+        hal::UartStmDuplexDma::WithRxBuffer<32> uart{ transmitStream, receiveStream, 2, tx, rx };
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<32> bufferedUart{ uart };
         application::UartTested uartTested;
     };

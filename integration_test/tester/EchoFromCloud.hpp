@@ -12,13 +12,16 @@ namespace main_
     struct EchoFromCloud
     {
         EchoFromCloud(hal::DmaStm& dma, services::Tracer& tracer)
-            : hostUart(dma, 4, hostUartTxPin, hostUartRxPin)
-            , redTracer(services::TracerColoured::red, tracer)
+            : transmitStream{ dma, hal::DmaChannelId{ 1, 4, 4 } }
+            , receiveStream{ dma, hal::DmaChannelId{ 1, 2, 4 } }
+            , redTracer{ services::TracerColoured::red, tracer }
         {}
 
         hal::GpioPinStm hostUartTxPin{ hal::Port::C, 10 };
         hal::GpioPinStm hostUartRxPin{ hal::Port::C, 11 };
-        hal::UartStmDuplexDma::WithRxBuffer<256> hostUart;
+        hal::DmaStm::TransmitStream transmitStream;
+        hal::DmaStm::ReceiveStream receiveStream;
+        hal::UartStmDuplexDma::WithRxBuffer<256> hostUart{ transmitStream, receiveStream, 4, hostUartTxPin, hostUartRxPin };
         services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested, testing::UartObserverProxy, testing::UartTester, testing::UartTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy, testing::UartObserver, testing::UartTesterProxy, testing::UartTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedHostUart{ hostUart };
         services::TracerColoured redTracer;
