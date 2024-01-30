@@ -25,10 +25,10 @@ namespace hal
 
         SpiMasterStm(uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
 
-        virtual void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
-        virtual void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
-        virtual void SetCommunicationConfigurator(CommunicationConfigurator& configurator) override;
-        virtual void ResetCommunicationConfigurator() override;
+        void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
+        void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
+        void SetCommunicationConfigurator(CommunicationConfigurator& configurator) override;
+        void ResetCommunicationConfigurator() override;
 
     private:
         void HandleInterrupt();
