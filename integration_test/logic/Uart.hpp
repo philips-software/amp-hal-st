@@ -16,7 +16,7 @@ namespace application
         void SendData(const infra::ConstByteRange& data, const infra::Function<void()>& onDone);
 
     protected:
-        virtual void ReceivedData(const infra::BoundedVector<uint8_t>& data) = 0;
+        virtual void ReceivedData(infra::ConstByteRange data) = 0;
 
     private:
         // Implementation of BufferedSerialCommunicationObserver
@@ -35,10 +35,10 @@ namespace application
         UartTester(services::Echo& echo, hal::BufferedSerialCommunication& uart);
 
         // Implementation of UartTester
-        void SendData(const infra::BoundedVector<uint8_t>& data) override;
+        void SendData(infra::ConstByteRange data) override;
 
     protected:
-        virtual void ReceivedData(const infra::BoundedVector<uint8_t>& data) override;
+        virtual void ReceivedData(infra::ConstByteRange data) override;
     };
 
     class UartTested
@@ -49,10 +49,10 @@ namespace application
         UartTested(services::Echo& echo, hal::BufferedSerialCommunication& uart);
 
         // Implementation of UartTested
-        void SendData(const infra::BoundedVector<uint8_t>& data) override;
+        void SendData(infra::ConstByteRange data) override;
 
     protected:
-        virtual void ReceivedData(const infra::BoundedVector<uint8_t>& data) override;
+        virtual void ReceivedData(infra::ConstByteRange data) override;
     };
 }
 

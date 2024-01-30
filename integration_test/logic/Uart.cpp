@@ -27,7 +27,7 @@ namespace application
             RequestSend([this]()
                 {
                     sending = false;
-                    ReceivedData(receivedData);
+                    ReceivedData(infra::MakeRange(receivedData));
                     receivedData.clear();
                 });
     }
@@ -37,15 +37,15 @@ namespace application
         , testing::UartTester(echo)
     {}
 
-    void UartTester::SendData(const infra::BoundedVector<uint8_t>& data)
+    void UartTester::SendData(infra::ConstByteRange data)
     {
-        UartBase::SendData(infra::MakeRange(data), [this]()
+        UartBase::SendData(data, [this]()
             {
                 MethodDone();
             });
     }
 
-    void UartTester::ReceivedData(const infra::BoundedVector<uint8_t>& data)
+    void UartTester::ReceivedData(infra::ConstByteRange data)
     {
         TesterReceivedData(data);
     }
@@ -55,15 +55,15 @@ namespace application
         , testing::UartTested(echo)
     {}
 
-    void UartTested::SendData(const infra::BoundedVector<uint8_t>& data)
+    void UartTested::SendData(infra::ConstByteRange data)
     {
-        UartBase::SendData(infra::MakeRange(data), [this]()
+        UartBase::SendData(data, [this]()
             {
                 MethodDone();
             });
     }
 
-    void UartTested::ReceivedData(const infra::BoundedVector<uint8_t>& data)
+    void UartTested::ReceivedData(infra::ConstByteRange data)
     {
         TestedReceivedData(data);
     }

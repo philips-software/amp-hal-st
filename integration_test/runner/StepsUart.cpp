@@ -15,13 +15,13 @@ namespace
             : testing::UartObserver(echo)
         {}
 
-        void TesterReceivedData(const infra::BoundedVector<uint8_t>& data) override
+        void TesterReceivedData(infra::ConstByteRange data) override
         {
             testerData.insert(testerData.end(), data.begin(), data.end());
             MethodDone();
         }
 
-        void TestedReceivedData(const infra::BoundedVector<uint8_t>& data) override
+        void TestedReceivedData(infra::ConstByteRange data) override
         {
             testedData.insert(testedData.end(), data.begin(), data.end());
             MethodDone();
@@ -110,7 +110,7 @@ STEP("the tester sends UART data")
         {
             context.Get<testing::UartTesterProxy>().RequestSend([&]()
                 {
-                    context.Get<testing::UartTesterProxy>().SendData(expectedData);
+                    context.Get<testing::UartTesterProxy>().SendData(expectedData.range());
                     done();
                 });
         });
@@ -124,7 +124,7 @@ STEP("the tested sends UART data")
         {
             context.Get<testing::UartTestedProxy>().RequestSend([&]()
                 {
-                    context.Get<testing::UartTestedProxy>().SendData(expectedData);
+                    context.Get<testing::UartTestedProxy>().SendData(expectedData.range());
                     done();
                 });
         });
