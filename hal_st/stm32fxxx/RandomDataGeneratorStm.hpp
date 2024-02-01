@@ -16,10 +16,10 @@ namespace hal
         RandomDataGeneratorStm();
         ~RandomDataGeneratorStm();
 
-        virtual void GenerateRandomData(infra::ByteRange result, const infra::Function<void()>& onDone) override;
+        void GenerateRandomData(infra::ByteRange result, const infra::Function<void()>& onDone) override;
 
     private:
-        virtual void Invoke() override;
+        void Invoke() override;
 
     private:
         infra::ByteRange result;
