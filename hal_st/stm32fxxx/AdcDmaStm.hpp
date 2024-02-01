@@ -12,7 +12,7 @@ namespace hal
 {
     class AdcTriggeredByTimerWithDma
         : public infra::InterfaceConnector<AdcTriggeredByTimerWithDma>
-        , protected AnalogToDigitalPinImplBase<uint16_t>
+        , public AnalogToDigitalPinImplBase<uint16_t>
         , private AdcStm
     {
     public:
