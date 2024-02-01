@@ -33,15 +33,15 @@ namespace hal
         UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
         ~UartStmDuplexDma();
 
-        virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
-        virtual void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
+        void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
+        void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
         void Configure(const Config& config);
         void ReceiveComplete(size_t currentPosition);
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
-        virtual void Invoke() override;
+        void Invoke() override;
 
     private:
         infra::MemoryRange<uint8_t> rxBuffer;

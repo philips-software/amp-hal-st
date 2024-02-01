@@ -15,7 +15,7 @@ namespace hal
         SynchronousRandomDataGeneratorStm();
         ~SynchronousRandomDataGeneratorStm();
 
-        virtual void GenerateRandomData(infra::ByteRange result) override;
+        void GenerateRandomData(infra::ByteRange result) override;
     };
 }
 

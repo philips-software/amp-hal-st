@@ -38,7 +38,7 @@ namespace hal
         PeripheralPinStm mosi;
         PeripheralPinStm slaveSelect;
 
-        SPI_HandleTypeDef spiHandle;
+        SPI_HandleTypeDef spiHandle{};
         infra::ConstByteRange sendData;
         infra::ByteRange receiveData;
         bool sending;

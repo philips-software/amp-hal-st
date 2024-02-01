@@ -1,3 +1,5 @@
+# cmake-dependency-scan pkg:github/STMicroelectronics/STM32CubeWB@9c2f0efe94efd420f9810108e303a9e9cf500802#Middlewares/ST/STM32_WPAN
+
 add_library(hal_st.stm32_wpan STATIC)
 emil_build_for(hal_st.stm32_wpan TARGET_MCU_FAMILY stm32wbxx PREREQUISITE_BOOL HALST_STANDALONE)
 

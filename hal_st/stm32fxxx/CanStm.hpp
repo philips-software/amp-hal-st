@@ -27,8 +27,8 @@ namespace hal
         ~CanStm();
 
     public:
-        virtual void SendData(Id id, const Message& data, const infra::Function<void(bool success)>& actionOnCompletion = infra::emptyFunction) override;
-        virtual void ReceiveData(const infra::Function<void(Id id, const Message& data)>& receivedAction) override;
+        void SendData(Id id, const Message& data, const infra::Function<void(bool success)>& actionOnCompletion = infra::emptyFunction) override;
+        void ReceiveData(const infra::Function<void(Id id, const Message& data)>& receivedAction) override;
 
     private:
         void HandleTxInterrupt();

@@ -77,8 +77,8 @@ namespace main_
         EthernetSmiObserver(hal::EthernetSmi& ethernetSmi, services::LightweightIpOverEthernetFactory& lightweightIpOverEthernetFactory, hal::GpioPinStm& ethernetRmiiRefClk);
         ~EthernetSmiObserver();
 
-        virtual void LinkUp(hal::LinkSpeed linkSpeed) override;
-        virtual void LinkDown() override;
+        void LinkUp(hal::LinkSpeed linkSpeed) override;
+        void LinkDown() override;
 
     private:
         services::LightweightIpOverEthernetFactory& lightweightIpOverEthernetFactory;

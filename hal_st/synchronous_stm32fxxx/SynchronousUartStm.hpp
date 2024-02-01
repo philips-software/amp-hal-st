@@ -42,7 +42,7 @@ namespace hal
         bool ReceiveData(infra::ByteRange data) override;
 
     private:
-        virtual void Invoke() override;
+        void Invoke() override;
 
         bool Full() const;
         bool Empty() const;
