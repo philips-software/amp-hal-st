@@ -1,4 +1,5 @@
 #include "hal_st/stm32fxxx/AdcDmaStm.hpp"
+#include "infra/event/EventDispatcher.hpp"
 
 namespace hal
 {
@@ -78,6 +79,9 @@ namespace hal
         timer.Stop();
 
         if (this->onDone)
-            this->onDone(buffer);
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    onDone(buffer);
+                });
     }
 }
