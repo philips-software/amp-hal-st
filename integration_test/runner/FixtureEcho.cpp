@@ -43,4 +43,38 @@ namespace main_
     {
         throw std::runtime_error("Creating ECHO over WebSocket failed");
     }
+
+    EchoClientTcp::EchoClientTcp(services::ConnectionFactoryWithNameResolver& connectionFactory, infra::BoundedConstString hostname, uint16_t port)
+        : hostname(hostname)
+        , port(port)
+    {
+        connectionFactory.Connect(*this);
+    }
+
+    void EchoClientTcp::OnDone(const OnDoneType& onDone)
+    {
+        this->onDone = onDone;
+    }
+
+    infra::BoundedConstString EchoClientTcp::Hostname() const
+    {
+        return hostname;
+    }
+
+    uint16_t EchoClientTcp::Port() const
+    {
+        return port;
+    }
+
+    void EchoClientTcp::ConnectionEstablished(infra::AutoResetFunction<void(infra::SharedPtr<services::ConnectionObserver> connectionObserver)>&& createdObserver)
+    {
+        auto echoConnectionPtr = echoConnection.Emplace(serializerFactory);
+        createdObserver(echoConnectionPtr);
+        onDone(*echoConnectionPtr);
+    }
+
+    void EchoClientTcp::ConnectionFailed(services::ClientConnectionObserverFactoryWithNameResolver::ConnectFailReason reason)
+    {
+        throw std::runtime_error("Creating ECHO over TCP/IP failed");
+    }
 }

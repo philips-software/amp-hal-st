@@ -79,6 +79,32 @@ namespace main_
         OnDoneType onDone;
         services::MethodSerializerFactory::OnHeap serializerFactory;
     };
+
+    class EchoClientTcp
+        : private services::ClientConnectionObserverFactoryWithNameResolver
+    {
+    public:
+        using OnDoneType = infra::Function<void(services::Echo&), 2 * sizeof(void*) + sizeof(std::shared_ptr<void>)>;
+
+        EchoClientTcp(services::ConnectionFactoryWithNameResolver& connectionFactory, infra::BoundedConstString hostname, uint16_t port);
+
+        void OnDone(const OnDoneType& onDone);
+
+    private:
+        // Implementation of ClientConnectionObserverFactoryWithNameResolver
+        infra::BoundedConstString Hostname() const override;
+        uint16_t Port() const override;
+        void ConnectionEstablished(infra::AutoResetFunction<void(infra::SharedPtr<services::ConnectionObserver> connectionObserver)>&& createdObserver) override;
+        void ConnectionFailed(services::ClientConnectionObserverFactoryWithNameResolver::ConnectFailReason reason) override;
+
+    private:
+        infra::BoundedConstString hostname;
+        uint16_t port;
+
+        infra::SharedOptional<services::EchoOnConnection> echoConnection;
+        OnDoneType onDone;
+        services::MethodSerializerFactory::OnHeap serializerFactory;
+    };
 }
 
 #endif
