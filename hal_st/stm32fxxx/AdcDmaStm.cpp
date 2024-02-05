@@ -17,8 +17,6 @@ namespace hal
         , timer(2, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #endif
     {
-        really_assert(!InterfaceConnector<AdcTriggeredByTimerWithDma>::InstanceSet());
-
         ADC_ChannelConfTypeDef channelConfig;
         channelConfig.Channel = Channel(analogPin);
 #if !defined(STM32WB)
