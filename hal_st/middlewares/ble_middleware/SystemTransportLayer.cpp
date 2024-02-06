@@ -87,15 +87,21 @@ namespace
 
 namespace hal
 {
-    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
+    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer)
         : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
         , protocolStackInitialized(protocolStackInitialized)
+        , tracer(tracer)
     {
         TL_Init();
+        tracer.Trace() << "SystemTransportLayer TL_Init done";
         ShciInit();
+        tracer.Trace() << "SystemTransportLayer ShciInit done";
         HciInit();
+        tracer.Trace() << "SystemTransportLayer HciInit done";
         MemoryChannelInit();
+        tracer.Trace() << "SystemTransportLayer MemoryChannelInit done";
         TL_Enable();
+        tracer.Trace() << "SystemTransportLayer TL_Enable done";
     }
 
     SystemTransportLayer::Version SystemTransportLayer::GetVersion() const

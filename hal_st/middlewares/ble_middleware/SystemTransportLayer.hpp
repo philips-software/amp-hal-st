@@ -7,6 +7,7 @@
 #include "infra/util/InterfaceConnector.hpp"
 #include "interface/patterns/ble_thread/tl/tl.h"
 #include "services/ble/BondBlobPersistence.hpp"
+#include "services/tracer/Tracer.hpp"
 
 namespace hal
 {
@@ -28,7 +29,7 @@ namespace hal
         };
 
     public:
-        SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized);
+        SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer);
 
         Version GetVersion() const;
 
@@ -53,6 +54,8 @@ namespace hal
     private:
         services::BondBlobPersistence bondBlobPersistence;
         infra::Function<void(uint32_t*)> protocolStackInitialized;
+
+        services::Tracer& tracer;
     };
 }
 
