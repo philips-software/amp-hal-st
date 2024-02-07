@@ -11,12 +11,25 @@ namespace hal
     class WatchDogStm
     {
     public:
-        WatchDogStm(const infra::Function<void()>& onExpired);
+        enum Prescalers
+        {
+            Prescaler1,
+            Prescaler2,
+            Prescaler4,
+            Prescaler8,
+            Prescaler16,
+            Prescaler32,
+            Prescaler64,
+            Prescaler128,
+        };
+
+        WatchDogStm(const infra::Function<void()>& onExpired, Prescalers prescaler = Prescalers::Prescaler8);
 
         void Interrupt();
 
     private:
         void Feed();
+        uint32_t GetPrescaler(Prescalers prescaler) const;
 
         ImmediateInterruptHandler interruptRegistration;
         infra::TimerRepeating feedingTimer;

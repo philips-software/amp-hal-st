@@ -1,8 +1,9 @@
 #include "hal_st/stm32fxxx/WatchDogStm.hpp"
+#include "stm32wbxx_hal_wwdg.h"
 
 namespace hal
 {
-    WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired)
+    WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, Prescalers prescaler)
         : onExpired(onExpired)
         , interruptRegistration(WWDG_IRQn, [this]()
               {
@@ -17,7 +18,7 @@ namespace hal
         // min time (mS) = 1000 * (Counter _ Window) / WWDG clock           --> 0
         // max time (mS) = 1000 * (Counter _ 0x40) / WWDG clock             --> 36 ms
         handle.Instance = WWDG;
-        handle.Init.Prescaler = WWDG_PRESCALER_8;
+        handle.Init.Prescaler = GetPrescaler(prescaler);
         handle.Init.Window = WWDG_CR_T;
         handle.Init.Counter = WWDG_CR_T;
 #ifdef STM32F7
@@ -51,4 +52,38 @@ namespace hal
     {
         delay = 0;
     }
+
+    uint32_t WatchDogStm::GetPrescaler(Prescalers prescaler) const
+    {
+        uint32_t result = WWDG_PRESCALER_1;
+        switch (prescaler)
+        {
+            case Prescaler2:
+                result = WWDG_PRESCALER_2;
+                break;
+            case Prescaler4:
+                result = WWDG_PRESCALER_4;
+                break;
+            case Prescaler8:
+                result = WWDG_PRESCALER_8;
+                break;
+            case Prescaler16:
+                result = WWDG_PRESCALER_16;
+                break;
+            case Prescaler32:
+                result = WWDG_PRESCALER_32;
+                break;
+            case Prescaler64:
+                result = WWDG_PRESCALER_64;
+                break;
+            case Prescaler128:
+                result = WWDG_PRESCALER_128;
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
 }
