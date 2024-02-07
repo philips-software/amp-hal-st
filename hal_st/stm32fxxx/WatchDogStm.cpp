@@ -2,7 +2,7 @@
 
 namespace hal
 {
-    WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired)
+    WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, uint32_t prescaler)
         : onExpired(onExpired)
         , interruptRegistration(WWDG_IRQn, [this]()
               {
@@ -17,7 +17,7 @@ namespace hal
         // min time (mS) = 1000 * (Counter _ Window) / WWDG clock           --> 0
         // max time (mS) = 1000 * (Counter _ 0x40) / WWDG clock             --> 36 ms
         handle.Instance = WWDG;
-        handle.Init.Prescaler = WWDG_PRESCALER_8;
+        handle.Init.Prescaler = prescaler;
         handle.Init.Window = WWDG_CR_T;
         handle.Init.Counter = WWDG_CR_T;
 #ifdef STM32F7

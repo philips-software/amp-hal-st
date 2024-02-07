@@ -11,7 +11,7 @@ namespace hal
     class WatchDogStm
     {
     public:
-        WatchDogStm(const infra::Function<void()>& onExpired);
+        WatchDogStm(const infra::Function<void()>& onExpired, uint32_t prescaler = WWDG_PRESCALER_8);
 
         void Interrupt();
 
