@@ -1,5 +1,4 @@
 #include "hal_st/stm32fxxx/WatchDogStm.hpp"
-#include "stm32wbxx_hal_wwdg.h"
 
 namespace hal
 {
