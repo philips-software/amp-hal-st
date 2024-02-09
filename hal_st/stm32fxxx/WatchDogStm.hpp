@@ -16,8 +16,8 @@ namespace hal
         {
             constexpr Config()
             {}
-            uint32_t prescaler = WWDG_PRESCALER_8;
-            uint32_t feedTimerIntervalMs = 25;
+            uint32_t prescaler { WWDG_PRESCALER_8 };
+            infra::Duration feedTimerInterval{ std::chrono::milliseconds(25) };
         };
 
         WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
