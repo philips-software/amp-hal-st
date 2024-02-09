@@ -33,7 +33,7 @@ namespace hal
         NVIC_SetPriority(WWDG_IRQn, 0);
         WWDG->CFR |= WWDG_CFR_EWI;
 
-        feedingTimer.Start(std::chrono::milliseconds(config.feedTimerIntervalMs), [this]()
+        feedingTimer.Start(config.feedTimerInterval, [this]()
             {
                 Feed();
             });
