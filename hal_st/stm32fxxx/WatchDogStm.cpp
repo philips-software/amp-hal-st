@@ -51,5 +51,4 @@ namespace hal
     {
         delay = 0;
     }
-
 }
