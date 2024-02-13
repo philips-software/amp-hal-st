@@ -3,7 +3,22 @@
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "services/ble/Gap.hpp"
 #include "shci.h"
+#include "hci_tl.h"
 #include "stm32wbxx_ll_system.h"
+
+extern "C"
+{
+    void hci_notify_asynch_evt(void* data)
+    {
+        static std::atomic_bool notificationScheduled{ false };
+
+        if (!notificationScheduled.exchange(true))
+            infra::EventDispatcher::Instance().Schedule([]() {
+                notificationScheduled = false;
+                hci_user_evt_proc();
+            });
+    }
+}
 
 namespace hal
 {
@@ -31,6 +46,23 @@ namespace hal
                     default:
                         return services::GapPairingObserver::PairingErrorType::unknown;
                 }
+        }
+
+        [[gnu::section("MB_MEM1")]] alignas(4) TL_CmdPacket_t bleCmdBuffer;
+
+        // To be used in a multi-thread application where the BLE commands may be sent from different threads
+        void HciCommandStatus(HCI_TL_CmdStatus_t status)
+        {}
+
+        void HciUserEventHandler(void* payload)
+        {
+            auto pParam = static_cast<tHCI_UserEvtRxParam*>(payload);
+            auto svctlReturnStatus = SVCCTL_UserEvtRx(static_cast<void*>(&(pParam->pckt->evtserial)));
+
+            if (svctlReturnStatus != SVCCTL_UserEvtFlowDisable)
+                pParam->status = HCI_TL_UserEventFlow_Enable;
+            else
+                pParam->status = HCI_TL_UserEventFlow_Disable;
         }
     }
 
@@ -69,6 +101,8 @@ namespace hal
 
         if (SHCI_C2_Config(&configParam) != SHCI_Success)
             std::abort();
+
+        HciInit();
 
         SHCI_C2_Ble_Init_Cmd_Packet_t bleInitCmdPacket = {
             { { 0, 0, 0 } }, // Header (unused)
@@ -406,5 +440,13 @@ namespace hal
         connectionContext.connectionHandle = connectionHandle;
         connectionContext.peerAddressType = deducePeerAddressType(peerAddressType);
         std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
+    }
+
+    void GapSt::HciInit()
+    {
+        HCI_TL_HciInitConf_t config;
+        config.p_cmdbuffer = reinterpret_cast<uint8_t*>(&bleCmdBuffer);
+        config.StatusNotCallBack = HciCommandStatus;
+        hci_init(HciUserEventHandler, static_cast<void*>(&config));
     }
 }

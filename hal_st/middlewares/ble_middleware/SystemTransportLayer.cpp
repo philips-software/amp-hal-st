@@ -2,7 +2,6 @@
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "shci.h"
 #include "shci_tl.h"
-#include "hci_tl.h"
 #include <atomic>
 
 extern "C"
@@ -15,17 +14,6 @@ extern "C"
         hal::SystemTransportLayer::Instance().HciEventHandler(event);
 
         return SVCCTL_UserEvtFlowEnable;
-    }
-
-    void hci_notify_asynch_evt(void* data)
-    {
-        static std::atomic_bool notificationScheduled{ false };
-
-        if (!notificationScheduled.exchange(true))
-            infra::EventDispatcher::Instance().Schedule([]() {
-                notificationScheduled = false;
-                hci_user_evt_proc();
-            });
     }
 
     void shci_notify_asynch_evt(void* data)
@@ -56,7 +44,6 @@ namespace
 
     // Buffer to be used by the mailbox driver to send a BLE command
     [[gnu::section("MB_MEM2")]] alignas(4) TL_CmdPacket_t systemCmdBuffer;
-    [[gnu::section("MB_MEM1")]] alignas(4) TL_CmdPacket_t bleCmdBuffer;
 
     // This is the registered callback in shci_init() to acknowledge if a system command can be
     // sent. It must be used in a multi-thread application where system commands may be sent
@@ -64,44 +51,22 @@ namespace
     void ShciCommandStatus(SHCI_TL_CmdStatus_t status)
     {}
 
-    // To be used in a multi-thread application where the BLE commands may be sent from different threads
-    void HciCommandStatus(HCI_TL_CmdStatus_t status)
-    {}
-
     void ShciUserEventHandler(void* payload)
     {
         hal::SystemTransportLayer::Instance().UserEventHandler(payload);
-    }
-
-    void HciUserEventHandler(void* payload)
-    {
-        auto pParam = static_cast<tHCI_UserEvtRxParam*>(payload);
-        auto svctlReturnStatus = SVCCTL_UserEvtRx(static_cast<void*>(&(pParam->pckt->evtserial)));
-
-        if (svctlReturnStatus != SVCCTL_UserEvtFlowDisable)
-            pParam->status = HCI_TL_UserEventFlow_Enable;
-        else
-            pParam->status = HCI_TL_UserEventFlow_Disable;
     }
 }
 
 namespace hal
 {
-    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer)
+    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
         : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
         , protocolStackInitialized(protocolStackInitialized)
-        , tracer(tracer)
     {
         TL_Init();
-        tracer.Trace() << "SystemTransportLayer TL_Init done";
         ShciInit();
-        tracer.Trace() << "SystemTransportLayer ShciInit done";
-        HciInit();
-        tracer.Trace() << "SystemTransportLayer HciInit done";
         MemoryChannelInit();
-        tracer.Trace() << "SystemTransportLayer MemoryChannelInit done";
         TL_Enable();
-        tracer.Trace() << "SystemTransportLayer TL_Enable done";
     }
 
     SystemTransportLayer::Version SystemTransportLayer::GetVersion() const
@@ -194,14 +159,6 @@ namespace hal
         config.p_cmdbuffer = reinterpret_cast<uint8_t*>(&systemCmdBuffer);
         config.StatusNotCallBack = ShciCommandStatus;
         shci_init(ShciUserEventHandler, static_cast<void*>(&config));
-    }
-
-    void SystemTransportLayer::HciInit()
-    {
-        HCI_TL_HciInitConf_t config;
-        config.p_cmdbuffer = reinterpret_cast<uint8_t*>(&bleCmdBuffer);
-        config.StatusNotCallBack = HciCommandStatus;
-        hci_init(HciUserEventHandler, static_cast<void*>(&config));
     }
 
     void SystemTransportLayer::MemoryChannelInit()

@@ -29,7 +29,7 @@ namespace hal
         };
 
     public:
-        SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer);
+        SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized);
 
         Version GetVersion() const;
 
@@ -48,14 +48,11 @@ namespace hal
 
     private:
         void ShciInit();
-        void HciInit();
         void MemoryChannelInit();
 
     private:
         services::BondBlobPersistence bondBlobPersistence;
         infra::Function<void(uint32_t*)> protocolStackInitialized;
-
-        services::Tracer& tracer;
     };
 }
 

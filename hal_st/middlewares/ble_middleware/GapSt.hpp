@@ -68,6 +68,8 @@ namespace hal
         void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
 
     private:
+        void HciInit();
+
         // Implementation of HciEventSink
         void HciEvent(hci_event_pckt& event) override;
 
