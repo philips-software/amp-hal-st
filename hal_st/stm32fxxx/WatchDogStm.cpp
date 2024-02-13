@@ -10,12 +10,6 @@ namespace hal
               })
     {
         __WWDG_CLK_ENABLE();
-
-        // WWDG clock (Hz) = PCLK1 / (4096 * Prescaler)                     --> 54Mhz / 32768 = 1728 Hz
-        // WWDG timeout (mS) = 1000 * Counter / WWDG clock                  -->  73 ms
-        // WWDG Counter refresh is allowed between the following limits :
-        // min time (mS) = 1000 * (Counter _ Window) / WWDG clock           --> 0
-        // max time (mS) = 1000 * (Counter _ 0x40) / WWDG clock             --> 36 ms
         handle.Instance = WWDG;
         handle.Init.Prescaler = config.prescaler;
         handle.Init.Window = WWDG_CR_T;
