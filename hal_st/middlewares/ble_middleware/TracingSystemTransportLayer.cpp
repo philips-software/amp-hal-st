@@ -13,7 +13,7 @@ extern "C"
 namespace hal
 {
     TracingSystemTransportLayer::TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer)
-        : SystemTransportLayer(flashStorage, protocolStackInitialized, tracer)
+        : SystemTransportLayer(flashStorage, protocolStackInitialized)
         , tracer(tracer)
     {}
 
