@@ -136,6 +136,7 @@ namespace hal
     void GapSt::RemoveAllBonds()
     {
         (*bondStorageSynchronizer)->RemoveAllBonds();
+        UpdateNrBonds();
     }
 
     void GapSt::RemoveOldestBond()
@@ -281,6 +282,7 @@ namespace hal
             hal::MacAddress address = connectionContext.peerAddress;
             aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
             (*bondStorageSynchronizer)->UpdateBondedDevice(address);
+            UpdateNrBonds();
         }
 
         if (pairingComplete->Status == SMP_PAIRING_STATUS_SUCCESS)
@@ -409,5 +411,14 @@ namespace hal
         connectionContext.connectionHandle = connectionHandle;
         connectionContext.peerAddressType = deducePeerAddressType(peerAddressType);
         std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
+    }
+
+    void GapSt::UpdateNrBonds()
+    {
+        auto nrBonds = this->GetNumberOfBonds();
+        services::GapBonding::NotifyObservers([nrBonds](auto& obs)
+            {
+                obs.NumberOfBondsChanged(nrBonds);
+            });
     }
 }
