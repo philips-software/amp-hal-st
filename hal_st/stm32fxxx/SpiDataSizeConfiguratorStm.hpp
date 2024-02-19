@@ -11,8 +11,8 @@ namespace hal
     public:
         SpiDataSizeConfiguratorStm(SpiMasterStmDma& spi, uint32_t dataSize); // dataSize = SPI_DATASIZE_4BIT .. SPI_DATASIZE_16BIT
 
-        virtual void ActivateConfiguration() override;
-        virtual void DeactivateConfiguration() override;
+        void ActivateConfiguration() override;
+        void DeactivateConfiguration() override;
 
     private:
         SpiMasterStmDma& spi;

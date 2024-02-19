@@ -98,6 +98,7 @@ namespace hal
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
 
         void SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress);
+        void UpdateNrBonds();
 
     protected:
         struct ConnectionContext

@@ -18,7 +18,7 @@ namespace hal
         ~EthernetSmiStm();
 
     public:
-        virtual uint16_t PhyAddress() const override;
+        uint16_t PhyAddress() const override;
 
     private:
         void RunPhy();

@@ -37,13 +37,13 @@ namespace hal
         UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
 
     public:
-        virtual void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
-        virtual void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
+        void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
+        void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
-        virtual void Invoke() override;
+        void Invoke() override;
 
     private:
         uint8_t uartIndex;

@@ -17,7 +17,7 @@ namespace hal
     public:
         SystemTickTimerService(infra::Duration tickDuration = std::chrono::milliseconds(1), uint32_t id = infra::systemTimerServiceId);
 
-        virtual infra::TimePoint Now() const override;
+        infra::TimePoint Now() const override;
 
     private:
         friend uint32_t ::HAL_GetTick();
