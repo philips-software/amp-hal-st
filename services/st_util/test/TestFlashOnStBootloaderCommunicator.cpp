@@ -40,15 +40,15 @@ private:
     infra::Function<void()> onCalled;
 };
 
-class FlasOnStBootloaderCommunicatorTest
+class FlashOnStBootloaderCommunicatorTest
     : public testing::Test
 {
 public:
     services::StBootloaderCommunicatorMock stBootloaderCommunicator;
-    services::FlasHomogeneousOnStBootloaderCommunicator flasOnStBootloaderCommunicator{ 10, 1, stBootloaderCommunicator };
+    services::FlashHomogeneousOnStBootloaderCommunicator flashOnStBootloaderCommunicator{ 10, 1, stBootloaderCommunicator };
 };
 
-TEST_F(FlasOnStBootloaderCommunicatorTest, erase_all_sectors)
+TEST_F(FlashOnStBootloaderCommunicatorTest, erase_all_sectors)
 {
     infra::VerifyingFunctionMock<void()> onDone;
 
@@ -56,10 +56,10 @@ TEST_F(FlasOnStBootloaderCommunicatorTest, erase_all_sectors)
         {
             onDone();
         });
-    flasOnStBootloaderCommunicator.EraseAll(onDone);
+    flashOnStBootloaderCommunicator.EraseAll(onDone);
 }
 
-TEST_F(FlasOnStBootloaderCommunicatorTest, erase_some_sectors)
+TEST_F(FlashOnStBootloaderCommunicatorTest, erase_some_sectors)
 {
     infra::VerifyingFunctionMock<void()> onDone;
     uint8_t iterator = 0;
@@ -71,10 +71,10 @@ TEST_F(FlasOnStBootloaderCommunicatorTest, erase_some_sectors)
             EXPECT_EQ(pages.back(), iterator++);
             onDone();
         });
-    flasOnStBootloaderCommunicator.EraseSectors(0, 5, onDone);
+    flashOnStBootloaderCommunicator.EraseSectors(0, 5, onDone);
 }
 
-TEST_F(FlasOnStBootloaderCommunicatorTest, read_small_buffer)
+TEST_F(FlashOnStBootloaderCommunicatorTest, read_small_buffer)
 {
     std::array<uint8_t, 4> readData = {};
     std::array<uint8_t, 4> simulatedData = { 0, 1, 2, 3 };
@@ -91,10 +91,10 @@ TEST_F(FlasOnStBootloaderCommunicatorTest, read_small_buffer)
             EXPECT_TRUE(readData == simulatedData);
         });
 
-    flasOnStBootloaderCommunicator.ReadBuffer(infra::MakeByteRange(readData), 0, onDone);
+    flashOnStBootloaderCommunicator.ReadBuffer(infra::MakeByteRange(readData), 0, onDone);
 }
 
-TEST_F(FlasOnStBootloaderCommunicatorTest, read_big_buffer)
+TEST_F(FlashOnStBootloaderCommunicatorTest, read_big_buffer)
 {
     std::array<uint8_t, 500> readData = {};
     std::array<uint8_t, 500> simulatedData = { 0 };
@@ -116,10 +116,10 @@ TEST_F(FlasOnStBootloaderCommunicatorTest, read_big_buffer)
             EXPECT_TRUE(readData == simulatedData);
         });
 
-    flasOnStBootloaderCommunicator.ReadBuffer(infra::MakeByteRange(readData), 0, onDone);
+    flashOnStBootloaderCommunicator.ReadBuffer(infra::MakeByteRange(readData), 0, onDone);
 }
 
-TEST_F(FlasOnStBootloaderCommunicatorTest, write_small_buffer)
+TEST_F(FlashOnStBootloaderCommunicatorTest, write_small_buffer)
 {
     std::array<uint8_t, 4> writeData = { 0, 1, 2, 3 };
     std::array<uint8_t, 4> targetBuffer = { 0 };
@@ -136,10 +136,10 @@ TEST_F(FlasOnStBootloaderCommunicatorTest, write_small_buffer)
             EXPECT_TRUE(writeData == targetBuffer);
         });
 
-    flasOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
+    flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
 }
 
-TEST_F(FlasOnStBootloaderCommunicatorTest, write_big_buffer)
+TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
 {
     std::array<uint8_t, 500> writeData = { 0 };
     std::fill(writeData.begin(), writeData.end(), 15);
@@ -162,5 +162,5 @@ TEST_F(FlasOnStBootloaderCommunicatorTest, write_big_buffer)
             EXPECT_TRUE(writeData == targetBuffer);
         });
 
-    flasOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
+    flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
 }

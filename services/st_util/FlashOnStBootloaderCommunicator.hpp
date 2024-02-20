@@ -32,11 +32,11 @@ namespace services
     };
 
     template<class T, class... Args>
-    class FlasOnStBootloaderCommunicator
+    class FlashOnStBootloaderCommunicator
         : public T
     {
     public:
-        FlasOnStBootloaderCommunicator(Args... args, StBootloaderCommunicator& communicator);
+        FlashOnStBootloaderCommunicator(Args... args, StBootloaderCommunicator& communicator);
 
         // Implementation of T (a partially derived class of hal::FlashBase)
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
@@ -47,8 +47,8 @@ namespace services
         FlashOnStBootloaderCommunicatorBase flashOnStBootloaderCommunicator;
     };
 
-    using FlasHomogeneousOnStBootloaderCommunicator = FlasOnStBootloaderCommunicator<hal::FlashHomogeneous, uint32_t, uint32_t>;
-    using FlasHeterogeneousOnStBootloaderCommunicator = FlasOnStBootloaderCommunicator<hal::FlashHeterogeneous, infra::MemoryRange<uint32_t>>;
+    using FlashHomogeneousOnStBootloaderCommunicator = FlashOnStBootloaderCommunicator<hal::FlashHomogeneous, uint32_t, uint32_t>;
+    using FlashHeterogeneousOnStBootloaderCommunicator = FlashOnStBootloaderCommunicator<hal::FlashHeterogeneous, infra::MemoryRange<uint32_t>>;
 }
 
 #endif
