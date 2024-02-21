@@ -1,5 +1,5 @@
 #include DEVICE_HEADER
-#include "hal_st/stm32fxxx/DefaultClockNucleoG474RET.hpp"
+#include "hal_st/stm32fxxx/DefaultClockNucleoG474RE.hpp"
 
 /* The system Clock is configured as follows:
  *    System Clock source            = PLL (HSE)
@@ -12,7 +12,7 @@
  *    VDD(V)                         = 3.3
  *    Main regulator output voltage  = Scale1 mode
  */
-void ConfigureDefaultClockNucleo474RET()
+void ConfigureDefaultClockNucleo474RE()
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
