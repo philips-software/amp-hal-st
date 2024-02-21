@@ -19,8 +19,23 @@ int main()
     static main_::StmEventInfrastructure eventInfrastructure;
     static main_::NUCLEO ui;
     static services::DebugLed debugLed(ui.ledGreen);
+    static hal::DmaStm dmaStm;
 
-    static services::StreamWriterOnSerialCommunication::WithStorage<64> streamWriterOnSerialCommunication{ ui.stLinkUartDma };
+#if defined(STM32G0) || defined(STM32G4)
+    static hal::GpioPinStm stLinkUartTxPin{ hal::Port::A, 2 };
+    static hal::GpioPinStm stLinkUartRxPin{ hal::Port::A, 3 };
+    static hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, DMA_REQUEST_USART2_TX } };
+    static hal::UartStmDma stLinkUartDma{ transmitStream, 2, stLinkUartTxPin, stLinkUartRxPin };
+#endif
+
+#if defined(STM32WB)
+    static hal::GpioPinStm stLinkUartTxPin{ hal::Port::B, 6 };
+    static hal::GpioPinStm stLinkUartRxPin{ hal::Port::B, 7 };
+    static hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, DMA_REQUEST_USART1_TX } };
+    static hal::UartStmDma stLinkUartDma{ transmitStream, 1, stLinkUartTxPin, stLinkUartRxPin };
+#endif
+
+    static services::StreamWriterOnSerialCommunication::WithStorage<64> streamWriterOnSerialCommunication{ stLinkUartDma };
     static infra::TextOutputStream::WithErrorPolicy textOutputStream{ streamWriterOnSerialCommunication };
     static services::TracerWithDateTime tracerWithDateTime{ textOutputStream };
 

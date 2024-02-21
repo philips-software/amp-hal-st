@@ -19,15 +19,6 @@ namespace main_
 #else
         hal::GpioPinStm ledGreen{ hal::Port::B, 3 };
 #endif
-
-#if defined(STM32G0) || defined(STM32G4)
-        hal::GpioPinStm stLinkUartTxPin{ hal::Port::A, 2 };
-        hal::GpioPinStm stLinkUartRxPin{ hal::Port::A, 3 };
-
-        hal::DmaStm dmaStm;
-        hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, DMA_REQUEST_USART2_TX } };
-        hal::UartStmDma stLinkUartDma{ transmitStream, 2, stLinkUartTxPin, stLinkUartRxPin };
-#endif
     };
 
     // UM1724: MB1136 reference board with F030R8, F070RB, F072RB, F091RC, F103RB, F302R8, F303RE, F334R8, F401RE, F410RB, F411RE, F446RE, L010RB, L053R8, L073RZ, L152RE, L452RE, L476RG
@@ -43,15 +34,6 @@ namespace main_
 #else
         hal::GpioPinStm ledGreen{ hal::Port::A, 5 }; // STM32G0, STM32G4
 #endif
-
-#if defined(STM32G0) || defined(STM32G4)
-        hal::GpioPinStm stLinkUartTxPin{ hal::Port::A, 2 };
-        hal::GpioPinStm stLinkUartRxPin{ hal::Port::A, 3 };
-
-        hal::DmaStm dmaStm;
-        hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, DMA_REQUEST_USART2_TX } };
-        hal::UartStmDma stLinkUartDma{ transmitStream, 2, stLinkUartTxPin, stLinkUartRxPin };
-#endif
     };
 
     // UM2435: MB1355 reference board with STM32WB55RG
@@ -63,15 +45,6 @@ namespace main_
         hal::GpioPinStm ledRed{ hal::Port::B, 1 };
         hal::GpioPinStm ledGreen{ hal::Port::B, 0 };
         hal::GpioPinStm ledBlue{ hal::Port::B, 5 };
-
-#if defined(STM32WB)
-        hal::GpioPinStm stLinkUartTxPin{ hal::Port::B, 6 };
-        hal::GpioPinStm stLinkUartRxPin{ hal::Port::B, 7 };
-
-        hal::DmaStm dmaStm;
-        hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, DMA_REQUEST_USART1_TX } };
-        hal::UartStmDma stLinkUartDma{ transmitStream, 1, stLinkUartTxPin, stLinkUartRxPin };
-#endif
     };
 
     // UM1974: MB1137 reference board with F207ZG, F303ZE, F412ZG, F413ZH, F429ZI, F439ZI, F446ZE, F722ZE, F746ZG, F756ZG, F767ZI, H743ZI
