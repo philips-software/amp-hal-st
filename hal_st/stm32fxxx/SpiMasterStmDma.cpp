@@ -3,29 +3,19 @@
 
 namespace hal
 {
-    namespace
-    {
-        const std::array<std::pair<DmaChannelId, DmaChannelId>, 6> defaultDmaChannelId = { { std::make_pair(DmaChannelId{ 2, 3, 3 }, DmaChannelId{ 2, 0, 3 }),
-            std::make_pair(DmaChannelId{ 1, 4, 0 }, DmaChannelId{ 1, 3, 0 }),
-            std::make_pair(DmaChannelId{ 1, 5, 0 }, DmaChannelId{ 1, 0, 0 }),
-            std::make_pair(DmaChannelId{ 2, 1, 4 }, DmaChannelId{ 2, 0, 4 }),
-            std::make_pair(DmaChannelId{ 2, 4, 2 }, DmaChannelId{ 2, 3, 2 }),
-            std::make_pair(DmaChannelId{ 2, 5, 1 }, DmaChannelId{ 2, 6, 1 }) } };
-    }
-
-    SpiMasterStmDma::SpiMasterStmDma(hal::DmaStm& dmaStm, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config, GpioPinStm& slaveSelect)
+    SpiMasterStmDma::SpiMasterStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config, GpioPinStm& slaveSelect)
         : spiInstance(oneBasedSpiIndex - 1)
         , clock(clock, PinConfigTypeStm::spiClock, oneBasedSpiIndex)
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
-        , rx(dmaStm, config.dmaChannelRx.ValueOr(defaultDmaChannelId[spiInstance].second), &peripheralSpi[spiInstance]->DR, [this]()
-              {
-                  ReceiveDone();
-              })
-        , tx(dmaStm, config.dmaChannelTx.ValueOr(defaultDmaChannelId[spiInstance].first), &peripheralSpi[spiInstance]->DR, [this]()
+        , tx(transmitStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
               {
                   SendDone();
+              })
+        , rx(receiveStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
+              {
+                  ReceiveDone();
               })
     {
         EnableClockSpi(spiInstance);
@@ -65,7 +55,9 @@ namespace hal
 
     void SpiMasterStmDma::SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData)
     {
-        uint32_t maxDmaSize = 65535 - (DataSize() > 8 ? 1 : 0);
+        const auto dataSize = DataSize();
+        const auto maxDmaSize = 65535 - (dataSize > 8 ? 1 : 0);
+
         sendBuffer = infra::DiscardHead(sendData, maxDmaSize);
         sendData = infra::Head(sendData, maxDmaSize);
         receiveBuffer = infra::DiscardHead(receiveData, maxDmaSize);
@@ -77,18 +69,35 @@ namespace hal
         if (!sendData.empty() && !receiveData.empty())
         {
             assert(sendData.size() == receiveData.size());
-            rx.StartReceive(receiveData);
-            tx.StartTransmit(sendData);
+
+            if (dataSize <= 8)
+            {
+                rx.StartReceive(receiveData);
+                tx.StartTransmit(sendData);
+            }
+            else
+            {
+                rx.StartReceive(infra::ReinterpretCastMemoryRange<uint16_t>(receiveData));
+                tx.StartTransmit(infra::ReinterpretCastMemoryRange<const uint16_t>(sendData));
+            }
         }
         else if (!sendData.empty())
         {
-            rx.StartReceiveDummy(sendData.size());
-            tx.StartTransmit(sendData);
+            rx.StartReceiveDummy(sendData.size(), dataSize <= 8 ? 1 : 2);
+
+            if (dataSize <= 8)
+                tx.StartTransmit(sendData);
+            else
+                tx.StartTransmit(infra::ReinterpretCastMemoryRange<const uint16_t>(sendData));
         }
         else if (!receiveData.empty())
         {
-            rx.StartReceive(receiveData);
-            tx.StartTransmitDummy(receiveData.size());
+            if (dataSize <= 8)
+                rx.StartReceive(receiveData);
+            else
+                rx.StartReceive(infra::ReinterpretCastMemoryRange<uint16_t>(receiveData));
+
+            tx.StartTransmitDummy(receiveData.size(), dataSize <= 8 ? 1 : 2);
         }
         else
             std::abort();
@@ -119,6 +128,9 @@ namespace hal
         DisableDma();
         peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
 
+        tx.SetPeripheralTransferSize(dataSizeInBits <= 8 ? 1 : 2);
+        rx.SetPeripheralTransferSize(dataSizeInBits <= 8 ? 1 : 2);
+
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         assert(dataSizeInBits >= 4 && dataSizeInBits <= 16);
         peripheralSpi[spiInstance]->CR2 = (peripheralSpi[spiInstance]->CR2 & ~SPI_CR2_DS) | ((dataSizeInBits - 1) << POSITION_VAL(SPI_CR2_DS)) | (dataSizeInBits <= 8 ? SPI_CR2_FRXTH : 0);
@@ -126,10 +138,9 @@ namespace hal
         assert(dataSizeInBits == 8 || dataSizeInBits == 16);
         peripheralSpi[spiInstance]->CR1 = peripheralSpi[spiInstance]->CR1 & ~SPI_CR1_DFF | (dataSizeInBits == 16 ? SPI_CR1_DFF : 0);
 #endif
-        tx.SetDataSize(dataSizeInBits <= 8 ? 1 : 2);
-        rx.SetDataSize(dataSizeInBits <= 8 ? 1 : 2);
 
         peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
+
         EnableDma();
     }
 

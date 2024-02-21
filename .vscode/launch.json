@@ -47,6 +47,26 @@
             "type": "cortex-debug",
             "servertype": "jlink",
             "device": "STM32G070RB"
+        },
+        {
+            "name": "stm32wb55rg",
+            "cwd": "${workspaceFolder}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32WB55RG",
+            "servertype": "external",
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "both",
+            "gdbTarget": "host.docker.internal:61234",
+            "overrideLaunchCommands": [
+                "monitor reset",
+                "-target-download",
+                "monitor reset"
+            ],
+            "overrideRestartCommands": [
+                "monitor reset"
+            ]
         }
     ]
 }

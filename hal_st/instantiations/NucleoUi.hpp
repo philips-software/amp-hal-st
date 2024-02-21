@@ -1,7 +1,9 @@
 #ifndef HAL_ST_NUCLEO_UI_HPP
 #define HAL_ST_NUCLEO_UI_HPP
 
+#include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/UartStmDma.hpp"
 
 namespace main_
 {
