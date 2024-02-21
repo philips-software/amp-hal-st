@@ -20,7 +20,6 @@ namespace hal
         struct UartStmConfig
         {
             uint32_t baudrate{ 115200 };
-            uint32_t hwFlowControl{ UART_HWCONTROL_NONE };
             uint32_t parity{ USART_PARITY_NONE };
             InterruptPriority priority{ InterruptPriority::Normal };
         };
@@ -41,6 +40,9 @@ namespace hal
 #endif
     private:
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
+#if defined(STM32WB)
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config, bool hasFlowControl);
+#endif
 
     public:
         ~UartStm();
@@ -49,7 +51,7 @@ namespace hal
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
-        void UartStmHalInit(const Config& config);
+        void UartStmHalInit(const Config& config, bool hasFlowControl);
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
         void Invoke() override;
