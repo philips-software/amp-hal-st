@@ -12,7 +12,7 @@
  *    VDD(V)                         = 3.3
  *    Main regulator output voltage  = Scale1 mode
  */
-void ConfigureDefaultClockNucleo070RB()
+void ConfigureDefaultClockNucleoG070RB()
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };

@@ -22,6 +22,8 @@ SECTIONS
 
         KEEP(*(.isr_vector))
         *(.after_vectors .after_vectors.*)
+        *(.text.Reset_Handler)
+        *(.text.Default_Handler)
     } >FLASH
 
     .inits : ALIGN(4)
