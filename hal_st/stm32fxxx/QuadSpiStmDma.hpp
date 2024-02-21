@@ -24,7 +24,7 @@ namespace hal
     public:
         using Config = QuadSpiStmDmaConfig;
 
-        QuadSpiStmDma(hal::DmaStm::TransceiveStream& transceiveStreamBase, GpioPinStm& clock, GpioPinStm& slaveSelect, GpioPinStm& data0, GpioPinStm& data1, GpioPinStm& data2, GpioPinStm& data3, const Config& config = Config());
+        QuadSpiStmDma(hal::DmaStm::TransceiveStream& transceiveStream, GpioPinStm& clock, GpioPinStm& slaveSelect, GpioPinStm& data0, GpioPinStm& data1, GpioPinStm& data2, GpioPinStm& data3, const Config& config = Config());
         ~QuadSpiStmDma();
 
         void SendData(const Header& header, infra::ConstByteRange data, Lines lines, const infra::Function<void()>& actionOnCompletion) override;
