@@ -9,7 +9,7 @@ namespace hal
         : public Reset
     {
     public:
-        virtual void ResetModule(const char* resetReason) override;
+        void ResetModule(const char* resetReason) override;
     };
 }
 

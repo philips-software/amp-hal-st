@@ -8,27 +8,27 @@
 
 namespace hal
 {
+    namespace detail
+    {
+        struct SpiMasterStmDmaConfig
+        {
+            bool msbFirst{ true };
+            uint32_t baudRatePrescaler{ SPI_BAUDRATEPRESCALER_16 };
+        };
+    }
+
     class SpiMasterStmDma
         : public SpiMaster
     {
     public:
-        struct Config
-        {
-            constexpr Config()
-            {}
+        using Config = detail::SpiMasterStmDmaConfig;
 
-            bool msbFirst = true;
-            uint32_t baudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-            infra::Optional<DmaChannelId> dmaChannelTx;
-            infra::Optional<DmaChannelId> dmaChannelRx;
-        };
+        SpiMasterStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
 
-        SpiMasterStmDma(hal::DmaStm& dmaStm, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
-
-        virtual void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
-        virtual void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
-        virtual void SetCommunicationConfigurator(CommunicationConfigurator& configurator) override;
-        virtual void ResetCommunicationConfigurator() override;
+        void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
+        void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
+        void SetCommunicationConfigurator(CommunicationConfigurator& configurator) override;
+        void ResetCommunicationConfigurator() override;
 
         void SetDataSize(uint8_t dataSizeInBits);
         uint8_t DataSize() const;
@@ -59,8 +59,8 @@ namespace hal
         bool receiveDone = false;
         bool sendDone = false;
 
-        hal::DmaStm::Stream tx;
-        hal::DmaStm::Stream rx;
+        hal::TransmitDmaChannel tx;
+        hal::ReceiveDmaChannel rx;
     };
 }
 
