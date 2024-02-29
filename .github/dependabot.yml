@@ -7,11 +7,11 @@ updates:
     schedule:
       interval: daily
     groups:
-      patch-minor-action-updates:
+      github-actions:
         update-types:
           - patch
           - minor
   - package-ecosystem: docker
-    directory: /
+    directory: .devcontainer
     schedule:
       interval: daily
