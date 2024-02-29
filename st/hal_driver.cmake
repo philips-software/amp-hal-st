@@ -21,6 +21,10 @@ function(add_hal_driver target_name hal_driver cmsis)
         $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT=1>
     )
 
+    target_compile_options(${target_name} PUBLIC
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
+    )
+
     # Assembler does not understand -Werror
     set_target_properties(${target_name} PROPERTIES COMPILE_WARNING_AS_ERROR Off)
 

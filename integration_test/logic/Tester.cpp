@@ -2,8 +2,9 @@
 
 namespace application
 {
-    Tester::Tester(services::Echo& echo, hal::GpioPin& resetTesterPin)
+    Tester::Tester(services::Echo& echo, hal::GpioPin& resetTesterPin, services::EchoOnSesame& echoToTested)
         : testing::Tester(echo)
+        , echoToTested(echoToTested)
         , resetTester(resetTesterPin, true)
     {}
 
@@ -11,7 +12,10 @@ namespace application
     {
         resetTester.Set(false);
 
-        resetTimer.Start(std::chrono::milliseconds(3000), [this]()
+        Peripherals::Reset();
+        echoToTested.Reset();
+
+        resetTimer.Start(std::chrono::milliseconds(10), [this]()
             {
                 resetTester.Set(true);
                 MethodDone();

@@ -15,6 +15,8 @@ target_sources(integration_test.logic PRIVATE
     Tested.hpp
     Tester.cpp
     Tester.hpp
+    Uart.cpp
+    Uart.hpp
 )
 
 target_link_libraries(integration_test.logic PUBLIC
