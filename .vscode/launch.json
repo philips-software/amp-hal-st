@@ -18,9 +18,7 @@
         "-target-download",
         "monitor reset"
       ],
-      "overrideRestartCommands": [
-        "monitor reset"
-      ]
+      "overrideRestartCommands": ["monitor reset"]
     },
     {
       "name": "stm32f767 without container",
@@ -67,9 +65,7 @@
         "-target-download",
         "monitor reset"
       ],
-      "overrideRestartCommands": [
-        "monitor reset"
-      ]
+      "overrideRestartCommands": ["monitor reset"]
     }
   ]
 }
