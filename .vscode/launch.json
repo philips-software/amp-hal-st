@@ -1,7 +1,4 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
@@ -11,6 +8,8 @@
             "request": "launch",
             "type": "cortex-debug",
             "device": "STM32F767ZI",
+            "svdPath": "Keil::STM32F7xx_DFP@2.15.2",
+            "deviceName": "STM32F767ZITx",
             "servertype": "external",
             "showDevDebugOutput": "both",
             "gdbTarget": "host.docker.internal:2331",
@@ -28,7 +27,9 @@
             "executable": "${command:cmake.launchTargetPath}",
             "type": "cortex-debug",
             "servertype": "jlink",
-            "device": "STM32F767ZI"
+            "device": "STM32F767ZI",
+            "svdPath": "Keil::STM32F7xx_DFP@2.15.2",
+            "deviceName": "STM32F767ZITx"
         },
         {
             "name": "stm32g431 without container",
