@@ -1,72 +1,71 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "stm32f767",
-            "cwd": "${workspaceFolder}",
-            "executable": "${command:cmake.launchTargetPath}",
-            "request": "launch",
-            "type": "cortex-debug",
-            "device": "STM32F767ZI",
-            "servertype": "external",
-            "showDevDebugOutput": "both",
-            "gdbTarget": "host.docker.internal:2331",
-            "overrideLaunchCommands": [
-                "monitor reset",
-                "-target-download",
-                "monitor reset"
-            ],
-            "overrideRestartCommands": [ "monitor reset" ]
-        },
-        {
-            "name": "stm32f767 without container",
-            "cwd": "${workspaceRoot}",
-            "request": "launch",
-            "executable": "${command:cmake.launchTargetPath}",
-            "type": "cortex-debug",
-            "servertype": "jlink",
-            "device": "STM32F767ZI"
-        },
-        {
-            "name": "stm32g431 without container",
-            "cwd": "${workspaceRoot}",
-            "request": "launch",
-            "executable": "${command:cmake.launchTargetPath}",
-            "type": "cortex-debug",
-            "servertype": "jlink",
-            "device": "STM32G431RB"
-        },
-        {
-            "name": "stm32g070 without container",
-            "cwd": "${workspaceRoot}",
-            "request": "launch",
-            "executable": "${command:cmake.launchTargetPath}",
-            "type": "cortex-debug",
-            "servertype": "jlink",
-            "device": "STM32G070RB"
-        },
-        {
-            "name": "stm32wb55rg",
-            "cwd": "${workspaceFolder}",
-            "executable": "${command:cmake.launchTargetPath}",
-            "request": "launch",
-            "type": "cortex-debug",
-            "device": "STM32WB55RG",
-            "servertype": "external",
-            "runToEntryPoint": "main",
-            "showDevDebugOutput": "both",
-            "gdbTarget": "host.docker.internal:61234",
-            "overrideLaunchCommands": [
-                "monitor reset",
-                "-target-download",
-                "monitor reset"
-            ],
-            "overrideRestartCommands": [
-                "monitor reset"
-            ]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "stm32f767",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "request": "launch",
+      "type": "cortex-debug",
+      "device": "STM32F767ZI",
+      "svdPath": "Keil::STM32F7xx_DFP@2.15.2",
+      "deviceName": "STM32F767ZITx",
+      "servertype": "external",
+      "showDevDebugOutput": "both",
+      "gdbTarget": "host.docker.internal:2331",
+      "overrideLaunchCommands": [
+        "monitor reset",
+        "-target-download",
+        "monitor reset"
+      ],
+      "overrideRestartCommands": ["monitor reset"]
+    },
+    {
+      "name": "stm32f767 without container",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "executable": "${command:cmake.launchTargetPath}",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "device": "STM32F767ZI",
+      "svdPath": "Keil::STM32F7xx_DFP@2.15.2",
+      "deviceName": "STM32F767ZITx"
+    },
+    {
+      "name": "stm32g431 without container",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "executable": "${command:cmake.launchTargetPath}",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "device": "STM32G431RB"
+    },
+    {
+      "name": "stm32g070 without container",
+      "cwd": "${workspaceRoot}",
+      "request": "launch",
+      "executable": "${command:cmake.launchTargetPath}",
+      "type": "cortex-debug",
+      "servertype": "jlink",
+      "device": "STM32G070RB"
+    },
+    {
+      "name": "stm32wb55rg",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "request": "launch",
+      "type": "cortex-debug",
+      "device": "STM32WB55RG",
+      "servertype": "external",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both",
+      "gdbTarget": "host.docker.internal:61234",
+      "overrideLaunchCommands": [
+        "monitor reset",
+        "-target-download",
+        "monitor reset"
+      ],
+      "overrideRestartCommands": ["monitor reset"]
+    }
+  ]
 }
