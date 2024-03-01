@@ -3,10 +3,10 @@
 
 namespace hal
 {
-    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, hal::DmaStm& dma, DmaChannelId dmaChannelId, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
+    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, DmaStm::ReceiveStream& receiveStream, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
         : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
         , buffer(buffer)
-        , stream(dma, dmaChannelId, &Handle().Instance->DR, [this]()
+        , dmaStream(receiveStream, &Handle().Instance->DR, sizeof(uint16_t), [this]()
             {
                 TransferDone();
             })
@@ -53,7 +53,7 @@ namespace hal
 
         timer.Start();
         Configure();
-        stream.Receive(buffer);
+        dmaStream.StartReceive(buffer);
         LL_ADC_REG_StartConversion(Handle().Instance);
     }
 

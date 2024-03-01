@@ -19,13 +19,13 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        419f636bd76f2c0ee2f7524ca548e724bf479e27 # unreleased
+        GIT_TAG        16dde0b5e8a10acae790e00e1cbb75e891f5925f # unreleased
     )
 
     FetchContent_MakeAvailable(emil)
 endif()
 
-project(hal_st LANGUAGES C CXX ASM VERSION 2.1.0) # x-release-please-version
+project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED On)

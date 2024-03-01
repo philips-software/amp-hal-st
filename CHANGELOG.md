@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.0.0](https://github.com/philips-software/amp-hal-st/compare/v2.1.0...v3.0.0) (2024-02-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* update DmaStm to support new dma peripherals in G0, G4 and WB devices ([#169](https://github.com/philips-software/amp-hal-st/issues/169))
+
+### Features
+
+* Add configuration struct to init ([#262](https://github.com/philips-software/amp-hal-st/issues/262)) ([59d9331](https://github.com/philips-software/amp-hal-st/commit/59d9331329ec7260a18ad24b942e1a3874198f3f))
+* Update DmaStm to support new dma peripherals in G0, G4 and WB devices ([#169](https://github.com/philips-software/amp-hal-st/issues/169)) ([d62e03e](https://github.com/philips-software/amp-hal-st/commit/d62e03e2e4eeef6c26dbf6e0f5620617642f443a))
+* Update WB55 GAP constructor ([0c8e2e4](https://github.com/philips-software/amp-hal-st/commit/0c8e2e4a89b9cfd34c85f6e4e5ae456bff707c0b))
+
+
+### Bug Fixes
+
+* Add purl specifier for st middleware ([#228](https://github.com/philips-software/amp-hal-st/issues/228)) ([f3cc25c](https://github.com/philips-software/amp-hal-st/commit/f3cc25cffa1763b6ddff5c384ca15be9ed1cea87))
+* Report number of bonds in GapSt ([#263](https://github.com/philips-software/amp-hal-st/issues/263)) ([85dceea](https://github.com/philips-software/amp-hal-st/commit/85dceeabe45f3e3dad178c2a81048874e46e2ce7))
+* Zero initialize SynchronousSpiMasterStm::spiHandle ([#245](https://github.com/philips-software/amp-hal-st/issues/245)) ([581db4e](https://github.com/philips-software/amp-hal-st/commit/581db4e7545d343c7fc52eb6913941c737e73a48))
+
 ## [2.1.0](https://github.com/philips-software/amp-hal-st/compare/v2.0.0...v2.1.0) (2023-11-09)
 
 
