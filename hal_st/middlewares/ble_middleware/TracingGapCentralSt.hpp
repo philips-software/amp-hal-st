@@ -47,6 +47,9 @@ namespace hal
 
     private:
         services::Tracer& tracer;
+        uint32_t numberOfConnections = 0;
+        uint32_t numberOfFailedConnections = 0;
+        uint8_t txPower = 0;
     };
 }
 

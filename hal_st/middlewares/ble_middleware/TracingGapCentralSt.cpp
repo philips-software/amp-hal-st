@@ -5,7 +5,9 @@ namespace hal
     TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration, services::Tracer& tracer)
         : GapCentralSt(hciEventSource, bleBondStorage, configuration)
         , tracer(tracer)
-    {}
+    {
+        txPower = configuration.txPowerLevel;
+    }
 
     void TracingGapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
     {
@@ -106,6 +108,9 @@ namespace hal
         tracer.Trace() << "\tReason              : 0x" << infra::hex << disconnectEvt->Reason;
 
         GapCentralSt::HandleHciDisconnectEvent(eventPacket);
+
+        if (disconnectEvt->Reason != 0x16)
+            ++numberOfFailedConnections;
     }
 
     void TracingGapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -173,6 +178,10 @@ namespace hal
         tracer.Trace() << "\tPeer address type   : " << enhancedConnectionCompleteEvt->Peer_Address_Type;
 
         GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+
+        ++numberOfConnections;
+
+        tracer.Trace() << "\033[0;32mBLE CENTRAL PERF TEST: Total connections = " << numberOfConnections << ", failed connections = " << numberOfFailedConnections << ", TX power = 0x" << infra::hex << txPower << "\033[0m";
     }
 
     void TracingGapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)

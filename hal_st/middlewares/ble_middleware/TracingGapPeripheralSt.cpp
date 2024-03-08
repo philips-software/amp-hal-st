@@ -5,7 +5,9 @@ namespace hal
     TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration, services::Tracer& tracer)
         : GapPeripheralSt(hciEventSource, bleBondStorage, configuration)
         , tracer(tracer)
-    {}
+    {
+        txPower = configuration.txPowerLevel;
+    }
 
     void TracingGapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
@@ -13,6 +15,9 @@ namespace hal
         tracer.Trace() << "GapPeripheralSt::HandleHciDisconnectEvent Handle = " << disconnectEvt->Connection_Handle;
         tracer.Continue() << " : Reason = " << disconnectEvt->Reason;
         GapPeripheralSt::HandleHciDisconnectEvent(eventPacket);
+
+        if (disconnectEvt->Reason != 0x16)
+            ++numberOfFailedConnections;
     }
 
     void TracingGapPeripheralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
@@ -53,6 +58,10 @@ namespace hal
             std::end(enhancedConnectionCompleteEvt->Peer_Address), std::begin(mac));
         tracer.Continue() << " Peer address - " << infra::AsMacAddress(mac) << " type - " << enhancedConnectionCompleteEvt->Peer_Address_Type;
         GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+
+        ++numberOfConnections;
+
+        tracer.Trace() << "\033[0;32mBLE PERIPHERAL PERF TEST: Master Clock Accuracy = " << enhancedConnectionCompleteEvt->Master_Clock_Accuracy << ", total connections = " << numberOfConnections << ", failed connections = " << numberOfFailedConnections << ", TX power = 0x" << infra::hex << txPower << "\033[0m";
     }
 
     void TracingGapPeripheralSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
