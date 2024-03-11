@@ -82,7 +82,14 @@ namespace hal
 
         this->onDone = onDone;
 
+#if !defined(STM32G4)
         channelConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+#else
+        if (adc.index == 1)
+            channelConfig.Channel = ADC_CHANNEL_TEMPSENSOR_ADC1;
+        else
+            channelConfig.Channel = ADC_CHANNEL_TEMPSENSOR_ADC5;
+#endif
 #if defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         channelConfig.Rank = ADC_REGULAR_RANK_1;
 #else
