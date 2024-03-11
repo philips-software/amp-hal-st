@@ -114,7 +114,7 @@ namespace hal
         adc.Measure([this](infra::MemoryRange<uint16_t> samples)
             {
                 for (auto& sample : samples)
-                    sample = static_cast<uint16_t>(__HAL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, ADC_RESOLUTION_12B));
+                    sample = static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B));
 
                 this->onDone(samples);
             });
