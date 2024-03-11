@@ -62,7 +62,7 @@ namespace hal
 
     void AdcTriggeredByTimerWithDma::ReconfigureTrigger()
     {
-        ADC_Disable(&adc.Handle());
+        HAL_ADC_Stop(&adc.Handle());
 
 #if defined(STM32F4) || defined(STM32F7)
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIGCONV_T2_TRGO);

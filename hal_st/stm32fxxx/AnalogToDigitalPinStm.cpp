@@ -36,7 +36,7 @@ namespace hal
         : analogPin(pin)
         , adc(adc)
     {
-        ADC_Disable(&adc.Handle());
+        HAL_ADC_Stop(&adc.Handle());
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
     }
 
@@ -72,7 +72,7 @@ namespace hal
         : adc(adc)
         , voltageReferenceMiliVolts(voltageReferenceMiliVolts)
     {
-        ADC_Disable(&adc.Handle());
+        HAL_ADC_Stop(&adc.Handle());
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
     }
 
