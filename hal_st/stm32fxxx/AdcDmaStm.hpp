@@ -13,20 +13,21 @@ namespace hal
     class AdcTriggeredByTimerWithDma
         : public infra::InterfaceConnector<AdcTriggeredByTimerWithDma>
         , public AnalogToDigitalPinImplBase<uint16_t>
-        , private AdcStm
     {
     public:
         template<std::size_t Max>
         using WithNumberOfSamples = infra::WithStorage<AdcTriggeredByTimerWithDma, std::array<uint16_t, Max>>;
 
-        explicit AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, DmaStm::ReceiveStream& receiveStream, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
+        explicit AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, AdcStm& adc, DmaStm::ReceiveStream& receiveStream, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
+        void ReconfigureTrigger();
         void TransferDone();
         void Configure();
 
     private:
+        AdcStm& adc;
         infra::MemoryRange<uint16_t> buffer;
         ReceiveDmaChannel dmaStream;
         AnalogPinStm analogPin;

@@ -12,7 +12,7 @@ namespace hal
     class AdcStm;
 
     class AnalogToDigitalPinImplStm
-        : protected AnalogToDigitalPinImplBase<uint16_t>
+        : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
         explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
@@ -25,6 +25,23 @@ namespace hal
         AdcStm& adc;
     };
 
+    class AnalogToDigitalInternalTemperatureImplStm
+        : public AnalogToDigitalPinImplBase<uint16_t>
+    {
+    public:
+        explicit AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc, uint16_t voltageReferenceMiliVolts);
+        virtual ~AnalogToDigitalInternalTemperatureImplStm() = default;
+
+        void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
+
+    private:
+        AdcStm& adc;
+        uint16_t voltageReferenceMiliVolts;
+        infra::Function<void(infra::MemoryRange<uint16_t>)> onDone;
+    };
+
+    class AdcTriggeredByTimerWithDma;
+
     class AdcStm
     {
     public:
@@ -32,28 +49,6 @@ namespace hal
         ~AdcStm();
 
     protected:
-        enum class TriggerSource : uint32_t
-        {
-            software,
-            timer,
-            external,
-        };
-
-        enum class TriggerEdge : uint32_t
-        {
-            none = ADC_EXTERNALTRIGCONVEDGE_NONE,
-            rising = ADC_EXTERNALTRIGCONVEDGE_RISING,
-            falling = ADC_EXTERNALTRIGCONVEDGE_FALLING,
-            both = ADC_EXTERNALTRIGCONVEDGE_RISINGFALLING,
-        };
-
-        struct Config
-        {
-            TriggerSource triggerSource;
-            TriggerEdge triggerEdge;
-        };
-
-        AdcStm(uint8_t adcIndex, const Config& config);
         uint32_t Channel(const hal::AnalogPinStm& pin) const;
         ADC_HandleTypeDef& Handle();
 
@@ -63,6 +58,8 @@ namespace hal
 
     private:
         friend class AnalogToDigitalPinImplStm;
+        friend class AnalogToDigitalInternalTemperatureImplStm;
+        friend class AdcTriggeredByTimerWithDma;
 
         uint8_t index;
         ADC_HandleTypeDef handle{};

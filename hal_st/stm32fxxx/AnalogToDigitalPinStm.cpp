@@ -28,26 +28,6 @@ namespace
         ADC_CHANNEL_17,
         ADC_CHANNEL_18
     };
-
-    constexpr std::array<uint32_t, 3> triggerSource = {
-        ADC_SOFTWARE_START,
-
-#if defined(STM32F4) || defined(STM32F7)
-        ADC_EXTERNALTRIGCONV_T2_TRGO,
-#elif defined(STM32G0)
-        ADC_EXTERNALTRIG_T3_TRGO,
-#else
-        ADC_EXTERNALTRIG_T2_TRGO,
-#endif
-
-#if defined(STM32F4)
-        ADC_EXTERNALTRIGCONV_Ext_IT11,
-#elif defined(STM32F7)
-        ADC_EXTERNALTRIG7_EXT_IT11,
-#else
-        ADC_EXTERNALTRIG_EXT_IT11,
-#endif
-    };
 }
 
 namespace hal
@@ -55,7 +35,10 @@ namespace hal
     AnalogToDigitalPinImplStm::AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc)
         : analogPin(pin)
         , adc(adc)
-    {}
+    {
+        ADC_Disable(&adc.Handle());
+        LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
+    }
 
     void AnalogToDigitalPinImplStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
@@ -85,7 +68,52 @@ namespace hal
         adc.Measure(onDone);
     }
 
-    AdcStm::AdcStm(uint8_t oneBasedIndex, const Config& config)
+    AnalogToDigitalInternalTemperatureImplStm::AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc, uint16_t voltageReferenceMiliVolts)
+        : adc(adc)
+        , voltageReferenceMiliVolts(voltageReferenceMiliVolts)
+    {
+        ADC_Disable(&adc.Handle());
+        LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
+    }
+
+    void AnalogToDigitalInternalTemperatureImplStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
+    {
+        ADC_ChannelConfTypeDef channelConfig;
+
+        this->onDone = onDone;
+
+        channelConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+#if defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
+        channelConfig.Rank = ADC_REGULAR_RANK_1;
+#else
+        channelConfig.Rank = 1;
+#endif
+#if defined(STM32F0) || defined(STM32F3)
+        channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+#elif defined(STM32WB) || defined(STM32G4)
+        channelConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+        channelConfig.Offset = 0;
+        channelConfig.OffsetNumber = ADC_OFFSET_NONE;
+        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
+#elif defined(STM32G0)
+        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
+#else
+        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+        channelConfig.Offset = 0;
+#endif
+        HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
+        assert(result == HAL_OK);
+
+        adc.Measure([this](infra::MemoryRange<uint16_t> samples)
+            {
+                for (auto& sample : samples)
+                    sample = static_cast<uint16_t>(__HAL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, ADC_RESOLUTION_12B));
+
+                this->onDone(samples);
+            });
+    }
+
+    AdcStm::AdcStm(uint8_t oneBasedIndex)
         : index(oneBasedIndex - 1)
 #if defined(STM32WB) || defined(STM32G0)
         , interruptHandler(ADC1_IRQn, [this]()
@@ -110,9 +138,9 @@ namespace hal
         handle.Init.NbrOfDiscConversion = 0;
 #endif
 #if !defined(STM32F3)
-        handle.Init.ExternalTrigConvEdge = infra::enum_cast(config.triggerEdge);
+        handle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
 #endif
-        handle.Init.ExternalTrigConv = triggerSource.at(infra::enum_cast(config.triggerSource));
+        handle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
         handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
         handle.Init.NbrOfConversion = 1;
 #if !defined(STM32F3)
@@ -128,10 +156,6 @@ namespace hal
         HAL_StatusTypeDef result = HAL_ADC_Init(&handle);
         assert(result == HAL_OK);
     }
-
-    AdcStm::AdcStm(uint8_t adcIndex)
-        : AdcStm(adcIndex, { AdcStm::TriggerSource::software, AdcStm::TriggerEdge::none })
-    {}
 
     AdcStm::~AdcStm()
     {
@@ -165,7 +189,7 @@ namespace hal
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif
         interruptHandler.ClearPending();
-        sample = HAL_ADC_GetValue(&handle);
+        sample = static_cast<uint16_t>(HAL_ADC_GetValue(&handle));
         onDone(infra::MakeRangeFromSingleObject(sample));
     }
 }

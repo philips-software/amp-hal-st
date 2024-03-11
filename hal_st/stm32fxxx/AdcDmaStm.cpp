@@ -1,12 +1,13 @@
 #include "hal_st/stm32fxxx/AdcDmaStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "stm32wbxx_ll_adc.h"
 
 namespace hal
 {
-    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, DmaStm::ReceiveStream& receiveStream, uint8_t adcIndex, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
-        : AdcStm(adcIndex, { AdcStm::TriggerSource::timer, AdcStm::TriggerEdge::rising })
+    AdcTriggeredByTimerWithDma::AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, AdcStm& adc, DmaStm::ReceiveStream& receiveStream, TimerBaseStm::Timing timing, hal::GpioPinStm& pin)
+        : adc(adc)
         , buffer(buffer)
-        , dmaStream(receiveStream, &Handle().Instance->DR, sizeof(uint16_t), [this]()
+        , dmaStream(receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), [this]()
             {
                 TransferDone();
             })
@@ -18,7 +19,7 @@ namespace hal
 #endif
     {
         ADC_ChannelConfTypeDef channelConfig;
-        channelConfig.Channel = Channel(analogPin);
+        channelConfig.Channel = adc.Channel(analogPin);
 #if !defined(STM32WB)
         channelConfig.Rank = 1;
 #else
@@ -40,10 +41,12 @@ namespace hal
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
         channelConfig.Offset = 0;
 #endif
-        auto result = HAL_ADC_ConfigChannel(&Handle(), &channelConfig);
+        ReconfigureTrigger();
+
+        auto result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
 
-        result = HAL_ADCEx_Calibration_Start(&Handle(), ADC_SINGLE_ENDED);
+        result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_SINGLE_ENDED);
         assert(result == HAL_OK);
     }
 
@@ -54,24 +57,38 @@ namespace hal
         timer.Start();
         Configure();
         dmaStream.StartReceive(buffer);
-        LL_ADC_REG_StartConversion(Handle().Instance);
+        LL_ADC_REG_StartConversion(adc.Handle().Instance);
+    }
+
+    void AdcTriggeredByTimerWithDma::ReconfigureTrigger()
+    {
+        ADC_Disable(&adc.Handle());
+
+#if defined(STM32F4) || defined(STM32F7)
+        LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIGCONV_T2_TRGO);
+#elif defined(STM32G0)
+        LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIG_T3_TRGO);
+#else
+        LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIG_T2_TRGO);
+#endif
+        LL_ADC_REG_SetTriggerEdge(adc.Handle().Instance, LL_ADC_REG_TRIG_EXT_RISING);
     }
 
     void AdcTriggeredByTimerWithDma::Configure()
     {
-        auto result = LL_ADC_REG_IsConversionOngoing(Handle().Instance);
+        auto result = LL_ADC_REG_IsConversionOngoing(adc.Handle().Instance);
         assert(result == 0);
 
-        result = ADC_Enable(&Handle());
+        result = ADC_Enable(&adc.Handle());
         assert(result == HAL_OK);
 
-        __HAL_ADC_CLEAR_FLAG(&Handle(), (ADC_FLAG_EOC | ADC_FLAG_EOS | ADC_FLAG_OVR));
-        SET_BIT(Handle().Instance->CFGR, ADC_CFGR_DMAEN);
+        __HAL_ADC_CLEAR_FLAG(&adc.Handle(), (ADC_FLAG_EOC | ADC_FLAG_EOS | ADC_FLAG_OVR));
+        LL_ADC_REG_SetDMATransfer(adc.Handle().Instance, LL_ADC_REG_DMA_TRANSFER_LIMITED);
     }
 
     void AdcTriggeredByTimerWithDma::TransferDone()
     {
-        auto result = ADC_Disable(&Handle());
+        auto result = ADC_Disable(&adc.Handle());
         assert(result == HAL_OK);
 
         timer.Stop();
