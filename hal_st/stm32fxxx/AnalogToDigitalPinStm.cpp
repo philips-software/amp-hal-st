@@ -73,9 +73,8 @@ namespace hal
         adc.Measure(onDone);
     }
 
-    AnalogToDigitalInternalTemperatureImplStm::AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc, uint16_t voltageReferenceMiliVolts)
+    AnalogToDigitalInternalTemperatureImplStm::AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc)
         : adc(adc)
-        , voltageReferenceMiliVolts(voltageReferenceMiliVolts)
     {
         HAL_ADC_Stop(&adc.Handle());
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
@@ -84,9 +83,6 @@ namespace hal
     void AnalogToDigitalInternalTemperatureImplStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
-
-        this->onDone = onDone;
-
 #if !defined(STM32G4)
         channelConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
 #else
@@ -116,13 +112,7 @@ namespace hal
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
 
-        adc.Measure([this](infra::MemoryRange<uint16_t> samples)
-            {
-                for (auto& sample : samples)
-                    sample = static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B));
-
-                this->onDone(samples);
-            });
+        adc.Measure(onDone);
     }
 
     AdcStm::AdcStm(uint8_t oneBasedIndex)
@@ -203,5 +193,22 @@ namespace hal
         interruptHandler.ClearPending();
         sample = static_cast<uint16_t>(HAL_ADC_GetValue(&handle));
         onDone(infra::MakeRangeFromSingleObject(sample));
+    }
+
+    ConvertToCelsiusDegreesHelperStm::ConvertToCelsiusDegreesHelperStm(infra::MemoryRange<uint16_t> samples, uint16_t voltageReferenceMiliVolts)
+        : samples(samples)
+        , voltageReferenceMiliVolts(voltageReferenceMiliVolts)
+    {}
+
+    infra::MemoryRange<uint16_t> ConvertToCelsiusDegreesHelperStm::ToCelsiusDegrees()
+    {
+        for (auto& sample : samples)
+#if defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
+            sample = static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE_TYP_PARAMS(2500, 760, 25, voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B));
+#else
+            sample = static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B));
+#endif
+
+        return samples;
     }
 }

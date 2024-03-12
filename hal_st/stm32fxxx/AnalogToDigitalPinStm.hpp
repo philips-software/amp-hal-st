@@ -29,15 +29,24 @@ namespace hal
         : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        explicit AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc, uint16_t voltageReferenceMiliVolts);
+        explicit AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc);
         virtual ~AnalogToDigitalInternalTemperatureImplStm() = default;
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
         AdcStm& adc;
+    };
+
+    class ConvertToCelsiusDegreesHelperStm
+    {
+    public:
+        ConvertToCelsiusDegreesHelperStm(infra::MemoryRange<uint16_t> samples, uint16_t voltageReferenceMiliVolts);
+        infra::MemoryRange<uint16_t> ToCelsiusDegrees();
+
+    private:
+        infra::MemoryRange<uint16_t> samples;
         uint16_t voltageReferenceMiliVolts;
-        infra::Function<void(infra::MemoryRange<uint16_t>)> onDone;
     };
 
     class AdcTriggeredByTimerWithDma;
