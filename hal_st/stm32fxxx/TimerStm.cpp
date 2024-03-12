@@ -1,6 +1,5 @@
 #include "hal_st/stm32fxxx/TimerStm.hpp"
 #include "infra/util/EnumCast.hpp"
-#include "stm32wbxx_hal_tim.h"
 
 #if defined(HAS_PERIPHERAL_TIMER)
 
