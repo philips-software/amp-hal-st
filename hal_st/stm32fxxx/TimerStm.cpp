@@ -46,7 +46,7 @@ namespace hal
 
     void TimerBaseStm::ConfigureTrigger()
     {
-        TIM_MasterConfigTypeDef masterConfig = { 0, 0, 0 };
+        TIM_MasterConfigTypeDef masterConfig = { 0 };
 
         masterConfig.MasterOutputTrigger = infra::enum_cast(config.trigger->triggerOutput);
         masterConfig.MasterSlaveMode = config.trigger->isSlaveMode ? TIM_MASTERSLAVEMODE_ENABLE : TIM_MASTERSLAVEMODE_DISABLE;
