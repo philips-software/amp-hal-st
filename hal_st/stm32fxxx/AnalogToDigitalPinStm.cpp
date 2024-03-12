@@ -1,9 +1,14 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
-#include "infra/util/EnumCast.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <array>
 #include <cassert>
+#if defined(STM32F7)
+extern "C"
+{
+    #include "stm32f7xx_ll_adc.h"
+}
+#endif
 
 namespace
 {
