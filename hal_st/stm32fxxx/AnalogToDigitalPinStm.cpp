@@ -195,20 +195,16 @@ namespace hal
         onDone(infra::MakeRangeFromSingleObject(sample));
     }
 
-    ConvertToCelsiusDegreesHelperStm::ConvertToCelsiusDegreesHelperStm(infra::MemoryRange<uint16_t> samples, uint16_t voltageReferenceMiliVolts)
-        : samples(samples)
-        , voltageReferenceMiliVolts(voltageReferenceMiliVolts)
+    ConvertToCelsiusDegreesHelperStm::ConvertToCelsiusDegreesHelperStm(uint16_t sample, uint16_t voltageReferenceMiliVolts)
+#if defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
+        : convertedValue(static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE_TYP_PARAMS(2500, 760, 25, voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B)))
+#else
+        : convertedValue(static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B)))
+#endif
     {}
 
-    infra::MemoryRange<uint16_t> ConvertToCelsiusDegreesHelperStm::ToCelsiusDegrees()
+    uint16_t ConvertToCelsiusDegreesHelperStm::Value() const
     {
-        for (auto& sample : samples)
-#if defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
-            sample = static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE_TYP_PARAMS(2500, 760, 25, voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B));
-#else
-            sample = static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B));
-#endif
-
-        return samples;
+        return convertedValue;
     }
 }

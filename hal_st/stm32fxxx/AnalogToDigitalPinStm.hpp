@@ -41,12 +41,11 @@ namespace hal
     class ConvertToCelsiusDegreesHelperStm
     {
     public:
-        ConvertToCelsiusDegreesHelperStm(infra::MemoryRange<uint16_t> samples, uint16_t voltageReferenceMiliVolts);
-        infra::MemoryRange<uint16_t> ToCelsiusDegrees();
+        ConvertToCelsiusDegreesHelperStm(uint16_t sample, uint16_t voltageReferenceMiliVolts);
+        uint16_t Value() const;
 
     private:
-        infra::MemoryRange<uint16_t> samples;
-        uint16_t voltageReferenceMiliVolts;
+        uint16_t convertedValue;
     };
 
     class AdcTriggeredByTimerWithDma;
