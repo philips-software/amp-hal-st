@@ -79,8 +79,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SystemTickStm.hpp
     SystemTickTimerService.cpp
     SystemTickTimerService.hpp
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:TimerStm.cpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:TimerStm.hpp>
+    TimerStm.cpp
+    TimerStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStmDma.cpp>
