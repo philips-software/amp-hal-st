@@ -37,7 +37,7 @@ extern "C"
         hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
     }
 
-    void abort()
+    [[gnu::weak]] void abort()
     {
         __BKPT();
         HAL_NVIC_SystemReset();
