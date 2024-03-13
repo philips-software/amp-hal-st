@@ -6,13 +6,11 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/TimerStm.hpp"
 #include "infra/util/AutoResetFunction.hpp"
-#include "infra/util/InterfaceConnector.hpp"
 
 namespace hal
 {
     class AdcTriggeredByTimerWithDma
-        : public infra::InterfaceConnector<AdcTriggeredByTimerWithDma>
-        , public AnalogToDigitalPinImplBase<uint16_t>
+        : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
         template<std::size_t Max>
