@@ -1,8 +1,7 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/event/EventDispatcher.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include <array>
-#include <cassert>
 #if defined(STM32F7)
 extern "C"
 {
@@ -192,7 +191,12 @@ namespace hal
 #endif
         interruptHandler.ClearPending();
         sample = static_cast<uint16_t>(HAL_ADC_GetValue(&handle));
-        onDone(infra::MakeRangeFromSingleObject(sample));
+
+        if (onDone)
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    onDone(infra::MakeRangeFromSingleObject(sample));
+                });
     }
 
     ConvertToCelsiusDegreesHelperStm::ConvertToCelsiusDegreesHelperStm(uint16_t sample, uint16_t voltageReferenceMiliVolts)

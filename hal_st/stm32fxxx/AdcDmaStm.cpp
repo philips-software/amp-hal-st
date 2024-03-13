@@ -1,6 +1,5 @@
 #include "hal_st/stm32fxxx/AdcDmaStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
-#include "stm32wbxx_ll_adc.h"
 
 namespace hal
 {
