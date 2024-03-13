@@ -17,6 +17,7 @@ namespace hal
         using WithNumberOfSamples = infra::WithStorage<AdcTriggeredByTimerWithDma, std::array<uint16_t, Max>>;
 
         explicit AdcTriggeredByTimerWithDma(infra::MemoryRange<uint16_t> buffer, AdcStm& adc, DmaStm::ReceiveStream& receiveStream, TimerBaseStm::Timing timing, hal::GpioPinStm& pin);
+
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
