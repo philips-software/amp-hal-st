@@ -117,9 +117,9 @@ namespace hal
         public:
             using Stream::Stream;
 
-            virtual void StartTransmit(infra::ConstByteRange data);
+            void StartTransmit(infra::ConstByteRange data);
             void StartTransmitDummy(uint16_t size);
-            virtual void StartReceive(infra::ByteRange data);
+            void StartReceive(infra::ByteRange data);
             void StartReceiveDummy(uint16_t size);
             size_t ReceivedSize() const;
 
