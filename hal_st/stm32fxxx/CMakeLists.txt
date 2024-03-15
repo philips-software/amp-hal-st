@@ -15,6 +15,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:AdcDmaStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:AdcDmaStm.hpp>
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
     BackupRamStm.cpp
@@ -77,6 +79,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SystemTickStm.hpp
     SystemTickTimerService.cpp
     SystemTickTimerService.hpp
+    TimerStm.cpp
+    TimerStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStmDma.cpp>

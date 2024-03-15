@@ -131,7 +131,8 @@ namespace hal
             infra::ByteRange data;
         };
 
-        class TransmitStream : private TransceiveStream
+        class TransmitStream
+            : private TransceiveStream
         {
         public:
             using TransceiveStream::TransceiveStream;
@@ -143,7 +144,8 @@ namespace hal
             friend CircularTransmitDmaChannel;
         };
 
-        class ReceiveStream : private TransceiveStream
+        class ReceiveStream
+            : private TransceiveStream
         {
         public:
             using TransceiveStream::TransceiveStream;
@@ -211,7 +213,8 @@ namespace hal
             TransceiveStream& stream;
         };
 
-        class PeripheralTransmitStream : private PeripheralTransceiveStream
+        class PeripheralTransmitStream
+            : private PeripheralTransceiveStream
         {
         public:
             using PeripheralTransceiveStream::PeripheralTransceiveStream;
@@ -223,7 +226,8 @@ namespace hal
             using PeripheralTransceiveStream::StartTransmitDummy;
         };
 
-        class PeripheralReceiveStream : private PeripheralTransceiveStream
+        class PeripheralReceiveStream
+            : private PeripheralTransceiveStream
         {
         public:
             using PeripheralTransceiveStream::PeripheralTransceiveStream;
@@ -271,7 +275,8 @@ namespace hal
         DmaStm::PeripheralTransceiveStream peripheralStream;
     };
 
-    class TransceiverDmaChannel : public TransceiverDmaChannelBase
+    class TransceiverDmaChannel
+        : public TransceiverDmaChannelBase
     {
     public:
         TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
@@ -280,7 +285,8 @@ namespace hal
         DmaStm::StreamInterruptHandler streamInterruptHandler;
     };
 
-    class TransmitDmaChannel : private TransceiverDmaChannel
+    class TransmitDmaChannel
+        : private TransceiverDmaChannel
     {
     public:
         TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
@@ -297,7 +303,8 @@ namespace hal
         using TransceiverDmaChannel::ReceivedSize;
     };
 
-    class ReceiveDmaChannel : private TransceiverDmaChannel
+    class ReceiveDmaChannel
+        : private TransceiverDmaChannel
     {
     public:
         ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
@@ -314,7 +321,8 @@ namespace hal
         using TransceiverDmaChannel::ReceivedSize;
     };
 
-    class CircularTransceiverDmaChannel : public TransceiverDmaChannelBase
+    class CircularTransceiverDmaChannel
+        : public TransceiverDmaChannelBase
     {
     public:
         CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
@@ -325,7 +333,8 @@ namespace hal
         DmaStm::CircularStreamInterruptHandler circularStreamInterruptHandler;
     };
 
-    class CircularTransmitDmaChannel : private CircularTransceiverDmaChannel
+    class CircularTransmitDmaChannel
+        : private CircularTransceiverDmaChannel
     {
     public:
         CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
@@ -342,7 +351,8 @@ namespace hal
         using CircularTransceiverDmaChannel::ReceivedSize;
     };
 
-    class CircularReceiveDmaChannel : private CircularTransceiverDmaChannel
+    class CircularReceiveDmaChannel
+        : private CircularTransceiverDmaChannel
     {
     public:
         CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);

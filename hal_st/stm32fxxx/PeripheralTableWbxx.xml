@@ -23,4 +23,7 @@
   </peripheral>
   <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral>
   <peripheral name="Rtc" type="RTC_TypeDef*"><item name="RTC"/></peripheral>
+  <peripheral name="Timer" type="TIM_TypeDef*" prefix="TIM">
+    <item name="TIM1_8WB5"/>
+  </peripheral>
 </peripherals>
