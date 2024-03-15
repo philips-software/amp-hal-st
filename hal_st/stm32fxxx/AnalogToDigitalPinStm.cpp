@@ -156,6 +156,11 @@ namespace hal
 #endif
         HAL_StatusTypeDef result = HAL_ADC_Init(&handle);
         assert(result == HAL_OK);
+
+#if defined(STM32WB)
+        result = HAL_ADCEx_Calibration_Start(&handle, ADC_SINGLE_ENDED);
+        assert(result == HAL_OK);
+#endif
     }
 
     AdcStm::~AdcStm()
