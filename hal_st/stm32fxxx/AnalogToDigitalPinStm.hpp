@@ -16,7 +16,6 @@ namespace hal
     {
     public:
         explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
-        virtual ~AnalogToDigitalPinImplStm() = default;
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
@@ -25,27 +24,16 @@ namespace hal
         AdcStm& adc;
     };
 
-    class AnalogToDigitalInternalTemperatureImplStm
+    class AnalogToDigitalInternalTemperatureStm
         : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        explicit AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc);
-        virtual ~AnalogToDigitalInternalTemperatureImplStm() = default;
+        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc);
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
         AdcStm& adc;
-    };
-
-    class ConvertToCelsiusDegreesHelperStm
-    {
-    public:
-        ConvertToCelsiusDegreesHelperStm(uint16_t sample, uint16_t voltageReferenceMiliVolts);
-        uint16_t Value() const;
-
-    private:
-        uint16_t convertedValue;
     };
 
     class AdcTriggeredByTimerWithDma;
@@ -66,7 +54,7 @@ namespace hal
 
     private:
         friend class AnalogToDigitalPinImplStm;
-        friend class AnalogToDigitalInternalTemperatureImplStm;
+        friend class AnalogToDigitalInternalTemperatureStm;
         friend class AdcTriggeredByTimerWithDma;
 
         uint8_t index;

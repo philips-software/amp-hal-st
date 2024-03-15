@@ -72,14 +72,14 @@ namespace hal
         adc.Measure(onDone);
     }
 
-    AnalogToDigitalInternalTemperatureImplStm::AnalogToDigitalInternalTemperatureImplStm(AdcStm& adc)
+    AnalogToDigitalInternalTemperatureStm::AnalogToDigitalInternalTemperatureStm(AdcStm& adc)
         : adc(adc)
     {
         HAL_ADC_Stop(&adc.Handle());
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
     }
 
-    void AnalogToDigitalInternalTemperatureImplStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
+    void AnalogToDigitalInternalTemperatureStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
 #if !defined(STM32G4)
@@ -197,18 +197,5 @@ namespace hal
                 {
                     onDone(infra::MakeRangeFromSingleObject(sample));
                 });
-    }
-
-    ConvertToCelsiusDegreesHelperStm::ConvertToCelsiusDegreesHelperStm(uint16_t sample, uint16_t voltageReferenceMiliVolts)
-#if defined(STM32F429xx) || defined(STM32F439xx) || defined(STM32F469xx) || defined(STM32F479xx)
-        : convertedValue(static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE_TYP_PARAMS(2500, 760, 25, voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B)))
-#else
-        : convertedValue(static_cast<uint16_t>(__LL_ADC_CALC_TEMPERATURE(voltageReferenceMiliVolts, sample, LL_ADC_RESOLUTION_12B)))
-#endif
-    {}
-
-    uint16_t ConvertToCelsiusDegreesHelperStm::Value() const
-    {
-        return convertedValue;
     }
 }
