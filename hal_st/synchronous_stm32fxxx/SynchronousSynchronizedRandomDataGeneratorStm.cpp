@@ -3,7 +3,6 @@
 
 namespace hal
 {
-
     SynchronousSynchronizedRandomDataGeneratorStm::SynchronousSynchronizedRandomDataGeneratorStm(infra::CreatorBase<hal::SynchronousRandomDataGenerator, void()>& hwRngCreator, hal::SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMasterStm)
         : hwRngCreator(hwRngCreator)
         , synchronousHardwareSemaphoreMasterStm(synchronousHardwareSemaphoreMasterStm)
@@ -15,7 +14,7 @@ namespace hal
 
         LL_RCC_HSI48_Enable();
         while (!LL_RCC_HSI48_IsReady())
-            ;
+        {}
 
         hwRngCreator.Emplace();
         hwRngCreator->GenerateRandomData(result);
@@ -23,5 +22,4 @@ namespace hal
 
         LL_RCC_HSI48_Disable();
     }
-
 }

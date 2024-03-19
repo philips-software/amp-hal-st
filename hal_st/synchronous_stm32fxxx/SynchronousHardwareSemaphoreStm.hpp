@@ -42,7 +42,6 @@ namespace hal
         SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMaster;
         hal::Semaphore semaphore;
     };
-
 }
 
 #endif
