@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.1.0](https://github.com/philips-software/amp-hal-st/compare/v3.0.0...v3.1.0) (2024-03-25)
+
+
+### Features
+
+* Add ADC triggered by timer using DMA ([#238](https://github.com/philips-software/amp-hal-st/issues/238)) ([31adf4e](https://github.com/philips-software/amp-hal-st/commit/31adf4ea988ce87f796520c9e3145720244577bc))
+* Add hw semaphore sync for rng on stm32wb ([#286](https://github.com/philips-software/amp-hal-st/issues/286)) ([3e4a41d](https://github.com/philips-software/amp-hal-st/commit/3e4a41d3698df6541b0d45497205444c79507251))
+
 ## [3.0.0](https://github.com/philips-software/amp-hal-st/compare/v2.1.0...v3.0.0) (2024-02-29)
 
 
