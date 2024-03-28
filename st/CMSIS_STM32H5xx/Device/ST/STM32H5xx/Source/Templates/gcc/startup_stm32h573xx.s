@@ -32,6 +32,7 @@
 
 .global	g_pfnVectors
 .global	Default_Handler
+.global Default_Handler_Forwarded
 
 /* start address for the initialization values of the .data section.
 defined in linker script */
@@ -116,7 +117,7 @@ LoopForever:
   .section .text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
-  b Infinite_Loop
+  b  Default_Handler_Forwarded
   .size Default_Handler, .-Default_Handler
 
 /******************************************************************************
