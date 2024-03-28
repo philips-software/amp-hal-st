@@ -15,7 +15,8 @@ namespace main_
         hal::DmaStm::TransmitStream transmitStream{ dma, hal::DmaChannelId{ 1, 4, 4 } };
         hal::UartStmDma hostUart{ transmitStream, 4, hostUartTxPin, hostUartRxPin };
         services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
-        main_::EchoOnSerialCommunication<256> echo{ hostUart, serializerFactory };
+        hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedHostUart{ hostUart };
+        main_::EchoOnSesame<256> echo{ bufferedHostUart, serializerFactory };
     };
 }
 
