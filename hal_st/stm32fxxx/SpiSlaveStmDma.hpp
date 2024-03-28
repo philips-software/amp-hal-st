@@ -12,16 +12,7 @@ namespace hal
         : public SpiSlave
     {
     public:
-        struct Config
-        {
-            constexpr Config()
-            {}
-
-            infra::Optional<DmaChannelId> dmaChannelTx;
-            infra::Optional<DmaChannelId> dmaChannelRx;
-        };
-
-        SpiSlaveStmDma(hal::DmaStm& dmaStm, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect, const Config& config = Config());
+        SpiSlaveStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect);
 
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, const infra::Function<void()>& onDone) override;
         bool CancelTransmission() override;
@@ -47,8 +38,8 @@ namespace hal
         bool receiveDone = false;
         bool sendDone = false;
 
-        hal::DmaStm::Stream tx;
-        hal::DmaStm::Stream rx;
+        hal::TransmitDmaChannel tx;
+        hal::ReceiveDmaChannel rx;
     };
 }
 

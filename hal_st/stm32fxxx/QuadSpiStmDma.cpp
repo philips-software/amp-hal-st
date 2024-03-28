@@ -4,23 +4,14 @@
 
 namespace hal
 {
-    namespace
-    {
-#if defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx)
-        const DmaChannelId quadSpiDmaChannel{ 2, 2, 11 };
-#else
-        const DmaChannelId quadSpiDmaChannel{ 2, 7, 3 };
-#endif
-    }
-
-    QuadSpiStmDma::QuadSpiStmDma(hal::DmaStm& dma, GpioPinStm& clock, GpioPinStm& slaveSelect, GpioPinStm& data0, GpioPinStm& data1, GpioPinStm& data2, GpioPinStm& data3, const Config& config)
+    QuadSpiStmDma::QuadSpiStmDma(hal::DmaStm::TransceiveStream& transceiveStream, GpioPinStm& clock, GpioPinStm& slaveSelect, GpioPinStm& data0, GpioPinStm& data1, GpioPinStm& data2, GpioPinStm& data3, const Config& config)
         : clock(clock, PinConfigTypeStm::quadSpiClock, 0)
         , slaveSelect(slaveSelect, PinConfigTypeStm::quadSpiSlaveSelect, 0)
         , data0(data0, PinConfigTypeStm::quadSpiData0, 0)
         , data1(data1, PinConfigTypeStm::quadSpiData1, 0)
         , data2(data2, PinConfigTypeStm::quadSpiData2, 0)
         , data3(data3, PinConfigTypeStm::quadSpiData3, 0)
-        , dmaStream(dma, quadSpiDmaChannel, &QUADSPI->DR, [this]()
+        , dmaStream(transceiveStream, &QUADSPI->DR, 1, [this]()
               {
                   OnDmaTransferDone();
               })

@@ -12,10 +12,10 @@ namespace hal
     class AdcStm;
 
     class AnalogToDigitalPinImplStm
-        : protected AnalogToDigitalPinImplBase<uint16_t>
+        : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
+        explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
@@ -24,11 +24,29 @@ namespace hal
         AdcStm& adc;
     };
 
+    class AnalogToDigitalInternalTemperatureStm
+        : public AnalogToDigitalPinImplBase<uint16_t>
+    {
+    public:
+        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc);
+
+        void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
+
+    private:
+        AdcStm& adc;
+    };
+
+    class AdcTriggeredByTimerWithDma;
+
     class AdcStm
     {
     public:
-        AdcStm(uint8_t oneBasedIndex);
+        explicit AdcStm(uint8_t adcIndex);
         ~AdcStm();
+
+    protected:
+        uint32_t Channel(const hal::AnalogPinStm& pin) const;
+        ADC_HandleTypeDef& Handle();
 
     private:
         void Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone);
@@ -36,6 +54,8 @@ namespace hal
 
     private:
         friend class AnalogToDigitalPinImplStm;
+        friend class AnalogToDigitalInternalTemperatureStm;
+        friend class AdcTriggeredByTimerWithDma;
 
         uint8_t index;
         ADC_HandleTypeDef handle{};

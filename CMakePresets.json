@@ -7,7 +7,8 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "installDir": "${sourceDir}/install",
       "cacheVariables": {
-        "HALST_BUILD_EXAMPLES": true
+        "HALST_BUILD_EXAMPLES": true,
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "On"
       }
     },
     {
@@ -133,6 +134,18 @@
         "TARGET_MCU": "stm32f767",
         "HALST_BUILD_EXAMPLES_FREERTOS": true,
         "FREERTOS_CONFIG_FILE_DIRECTORY": "${sourceDir}/examples/freertos/config"
+      }
+    },
+    {
+      "name": "stm32g474",
+      "displayName": "stm32g474",
+      "description": "Build for stm32g474",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m4",
+        "TARGET_MCU_FAMILY": "stm32g4xx",
+        "TARGET_MCU": "stm32g474"
       }
     }
   ],
