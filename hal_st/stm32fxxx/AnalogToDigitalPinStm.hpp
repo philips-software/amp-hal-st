@@ -13,7 +13,15 @@ namespace hal
     {
         struct AdcStmChannelConfig
         {
+#if defined(STM32F0) || defined(STM32F3)
+            uint32_t samplingTime { ADC_SAMPLETIME_7CYCLES_5 };
+#elif defined(STM32WB) || defined(STM32G4)
             uint32_t samplingTime { ADC_SAMPLETIME_2CYCLES_5 };
+#elif defined(STM32G0)
+            uint32_t samplingTime { ADC_SAMPLETIME_3CYCLES_5 };
+#else
+            uint32_t samplingTime { ADC_SAMPLETIME_3CYCLES };
+#endif
         };
     }
 
