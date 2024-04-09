@@ -50,6 +50,7 @@ namespace hal
 
     private:
         AdcStm& adc;
+        detail::AdcStmChannelConfig adcStmChannelConfig;
     };
 
     class AdcTriggeredByTimerWithDma;
