@@ -97,16 +97,16 @@ namespace hal
         channelConfig.Rank = 1;
 #endif
 #if defined(STM32F0) || defined(STM32F3)
-        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;;
+        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;
 #elif defined(STM32WB) || defined(STM32G4)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;
         channelConfig.Offset = 0;
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
         channelConfig.SingleDiff = ADC_SINGLE_ENDED;
 #elif defined(STM32G0)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
+        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;
 #else
-        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;
         channelConfig.Offset = 0;
 #endif
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
