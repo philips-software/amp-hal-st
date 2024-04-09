@@ -9,6 +9,14 @@
 
 namespace hal
 {
+    namespace detail
+    {
+        struct AdcStmChannelConfig
+        {
+            uint32_t samplingTime { ADC_SAMPLETIME_2CYCLES_5 };
+        };
+    }
+
     class AdcStm;
 
     class AnalogToDigitalPinImplStm
@@ -28,7 +36,7 @@ namespace hal
         : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc);
+        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc, detail::AdcStmChannelConfig adcStmChannelConfig);
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
