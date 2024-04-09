@@ -97,7 +97,7 @@ namespace hal
         channelConfig.Rank = 1;
 #endif
 #if defined(STM32F0) || defined(STM32F3)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
+        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;;
 #elif defined(STM32WB) || defined(STM32G4)
         channelConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
         channelConfig.Offset = 0;
