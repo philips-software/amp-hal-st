@@ -100,7 +100,9 @@ namespace hal
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
         channelConfig.SingleDiff = ADC_SINGLE_ENDED;
 #endif
+#if !defined(STM32F0) && !defined(STM32F3) && !defined(STM32G0)
         channelConfig.Offset = 0;
+#endif
         channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;
 
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
