@@ -50,9 +50,9 @@
       }
     },
     {
-      "name": "stm32wb55",
-      "displayName": "stm32wb55",
-      "description": "Build for stm32wb55",
+      "name": "stm32wb55rg",
+      "displayName": "stm32wb55rg",
+      "description": "Build for stm32wb55rg",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
@@ -63,89 +63,106 @@
       }
     },
     {
-      "name": "stm32g070",
-      "displayName": "stm32g070",
-      "description": "Build for stm32g070",
+      "name": "stm32g070rbt",
+      "displayName": "stm32g070rbt",
+      "description": "Build for stm32g070rbt",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m0plus.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m0+",
         "TARGET_MCU_FAMILY": "stm32g0xx",
-        "TARGET_MCU": "stm32g070"
+        "TARGET_MCU": "stm32g070",
+        "TARGET_MCU_VARIANT": "stm32g070rbt"
       }
     },
     {
-      "name": "stm32g431",
-      "displayName": "stm32g431",
-      "description": "Build for stm32g431",
+      "name": "stm32g431r",
+      "displayName": "stm32g431r",
+      "description": "Build for stm32g431r",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32g4xx",
-        "TARGET_MCU": "stm32g431"
+        "TARGET_MCU": "stm32g431",
+        "TARGET_MCU_VARIANT": "stm32g431r"
       }
     },
     {
-      "name": "stm32f407",
-      "displayName": "stm32f407",
-      "description": "Build for stm32f407",
+      "name": "stm32f407v",
+      "displayName": "stm32f407v",
+      "description": "Build for stm32f407v",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32f4xx",
-        "TARGET_MCU": "stm32f407"
+        "TARGET_MCU": "stm32f407",
+        "TARGET_MCU_VARIANT": "stm32f407v"
       }
     },
     {
-      "name": "stm32f429",
-      "displayName": "stm32f429",
-      "description": "Build for stm32f429",
+      "name": "stm32f429z",
+      "displayName": "stm32f429z",
+      "description": "Build for stm32f429z",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32f4xx",
-        "TARGET_MCU": "stm32f429"
+        "TARGET_MCU": "stm32f429",
+        "TARGET_MCU_VARIANT": "stm32f429z"
       }
     },
     {
-      "name": "stm32f746",
-      "displayName": "stm32f746",
-      "description": "Build for stm32f746",
+      "name": "stm32f746z",
+      "displayName": "stm32f746z",
+      "description": "Build for stm32f746z",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m7",
         "TARGET_MCU_FAMILY": "stm32f7xx",
-        "TARGET_MCU": "stm32f746"
+        "TARGET_MCU": "stm32f746",
+        "TARGET_MCU_VARIANT": "stm32f746z"
       }
     },
     {
-      "name": "stm32f767",
-      "displayName": "stm32f767",
-      "description": "Build for stm32f767",
+      "name": "stm32f767z",
+      "displayName": "stm32f767z",
+      "description": "Build for stm32f767z",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m7-fpv5-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m7",
         "TARGET_MCU_FAMILY": "stm32f7xx",
         "TARGET_MCU": "stm32f767",
+        "TARGET_MCU_VARIANT": "stm32f767z",
         "HALST_BUILD_EXAMPLES_FREERTOS": true,
         "FREERTOS_CONFIG_FILE_DIRECTORY": "${sourceDir}/examples/freertos/config"
       }
     },
     {
+<<<<<<< Updated upstream
       "name": "stm32g474",
       "displayName": "stm32g474",
       "description": "Build for stm32g474",
+=======
+      "name": "stm32g474r",
+      "displayName": "stm32g474r",
+      "description": "Build for stm32g474r",
+>>>>>>> Stashed changes
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m4-fpv4-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32g4xx",
+<<<<<<< Updated upstream
         "TARGET_MCU": "stm32g474"
+=======
+        "TARGET_MCU": "stm32g474",
+        "TARGET_MCU_VARIANT": "stm32g474r"
+>>>>>>> Stashed changes
       }
     }
   ],
@@ -178,44 +195,44 @@
       "targets": ["package"]
     },
     {
-      "name": "stm32wb55-RelWithDebInfo",
+      "name": "stm32wb55rg-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32wb55"
+      "configurePreset": "stm32wb55rg"
     },
     {
-      "name": "stm32g070-RelWithDebInfo",
+      "name": "stm32g070rbt-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32g070"
+      "configurePreset": "stm32g070rbt"
     },
     {
-      "name": "stm32g431-RelWithDebInfo",
+      "name": "stm32g431r-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32g431"
+      "configurePreset": "stm32g431r"
     },
     {
-      "name": "stm32f407-RelWithDebInfo",
+      "name": "stm32f407v-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f407"
+      "configurePreset": "stm32f407v"
     },
     {
-      "name": "stm32f429-RelWithDebInfo",
+      "name": "stm32f429z-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f429"
+      "configurePreset": "stm32f429z"
     },
     {
-      "name": "stm32f746-RelWithDebInfo",
+      "name": "stm32f746z-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f746"
+      "configurePreset": "stm32f746z"
     },
     {
-      "name": "stm32f767-RelWithDebInfo",
+      "name": "stm32f767z-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
-      "configurePreset": "stm32f767"
+      "configurePreset": "stm32f767z"
     },
     {
-      "name": "stm32f767-Debug",
+      "name": "stm32f767z-Debug",
       "configuration": "Debug",
-      "configurePreset": "stm32f767"
+      "configurePreset": "stm32f767z"
     }
   ],
   "testPresets": [

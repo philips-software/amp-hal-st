@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<IP DBVersion="V3.0" IPType="service" Name="GPIO" Version="STM32WB55x_gpio_v1_0" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu IP_Modes_V3_0.xsd" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
+<IP DBVersion="V3.0" IPType="service" Name="GPIO" Version="STM32WB5Mx_gpio_v1_0" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu IP_Modes_V3_0.xsd" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
     <About>GPIO: General Purpose Input Output</About>
     <RefParameter Name="GPIO_AF" Comment="GPIO Alternate Function" Type="list" DefaultValue="null" Visible="false"/>
     <RefParameter Name="GPIOx" Comment="GPIO address" Type="list" Visible="false">
@@ -1571,11 +1571,6 @@
                 <PossibleValue>GPIO_AF11_LCD</PossibleValue>
             </SpecificParameter>
         </PinSignal>
-        <PinSignal Name="RCC_MCO">
-            <SpecificParameter Name="GPIO_AF">
-                <PossibleValue>GPIO_AF6_MCO</PossibleValue>
-            </SpecificParameter>
-        </PinSignal>
         <PinSignal Name="SPI1_NSS">
             <SpecificParameter Name="GPIO_AF">
                 <PossibleValue>GPIO_AF5_SPI1</PossibleValue>
@@ -2821,9 +2816,6 @@
         </PinSignal>
     </GPIO_Pin>
     <GPIO_Pin PortName="PC" Name="PC14-OSC32_IN">
-        <SpecificParameter Name="GPIO_Pin">
-            <PossibleValue>GPIO_PIN_14</PossibleValue>
-        </SpecificParameter>
         <SpecificParameter Name="GPIO_Speed">
             <PossibleValue>GPIO_SPEED_FREQ_LOW</PossibleValue>
         </SpecificParameter>
@@ -2832,17 +2824,24 @@
                 <PossibleValue>GPIO_AF15_EVENTOUT</PossibleValue>
             </SpecificParameter>
         </PinSignal>
+        <PinSignal Name="RF_DTB0">
+            <SpecificParameter Name="GPIO_AF">
+                <PossibleValue>GPIO_AF6_RF</PossibleValue>
+            </SpecificParameter>
+        </PinSignal>
     </GPIO_Pin>
     <GPIO_Pin PortName="PC" Name="PC15-OSC32_OUT">
-        <SpecificParameter Name="GPIO_Pin">
-            <PossibleValue>GPIO_PIN_15</PossibleValue>
-        </SpecificParameter>
         <SpecificParameter Name="GPIO_Speed">
             <PossibleValue>GPIO_SPEED_FREQ_LOW</PossibleValue>
         </SpecificParameter>
         <PinSignal Name="CM4_EVENTOUT">
             <SpecificParameter Name="GPIO_AF">
                 <PossibleValue>GPIO_AF15_EVENTOUT</PossibleValue>
+            </SpecificParameter>
+        </PinSignal>
+        <PinSignal Name="RF_DTB1">
+            <SpecificParameter Name="GPIO_AF">
+                <PossibleValue>GPIO_AF6_RF</PossibleValue>
             </SpecificParameter>
         </PinSignal>
     </GPIO_Pin>

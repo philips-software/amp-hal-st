@@ -1,0 +1,649 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Mcu ClockTree="STM32W" DBVersion="V3.0" Family="STM32WB" HasPowerPad="false" IOType="" Line="STM32WBxM Modules" Package="LGA86" RefName="STM32WB5MMGHx" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
+    <Core>ARM Cortex-M4</Core>
+    <Frequency>64</Frequency>
+    <MemoryMap>Available</MemoryMap>
+    <Ram>256</Ram>
+    <IONb>73</IONb>
+    <Die>DIE495</Die>
+    <Flash>1024</Flash>
+    <Voltage Max="3.6" Min="1.71"/>
+    <Current Lowest="0.04" Run="90"/>
+    <Temperature Max="85" Min="-40"/>
+    <IP ClockEnableMode="__HAL_RCC_ADC_CLK_ENABLE" ConfigFile="ADC-STM32WBxx" InstanceName="ADC1" Name="ADC" Version="aditf5_v2_0_Cube"/>
+    <IP ConfigFile="AES-STM32WBxx" InstanceName="AES1" Name="AES" Version="aes3_v1_0_WB_Cube"/>
+    <IP ConfigFile="AES-STM32WBxx" InstanceName="AES2" Name="AES" Version="aes3_v1_0_WB_Cube"/>
+    <IP ClockEnableMode="none" ConfigFile="COMP-STM32WBxx" InstanceName="COMP1" Name="COMP" Version="TSMC90_Dory_Cube"/>
+    <IP ClockEnableMode="none" ConfigFile="COMP-STM32WBxx" InstanceName="COMP2" Name="COMP" Version="TSMC90_Dory_Cube"/>
+    <IP ConfigFile="CRC-STM32WBxx" InstanceName="CRC" Name="CRC" Version="integtest1_v2_0"/>
+    <IP ConfigFile="FATFS-STM32WBxx" InstanceName="FATFS" Name="FATFS" Version="v0.1.0_Cube"/>
+    <IP ConfigFile="FREERTOS-STM32WBxx" InstanceName="FREERTOS" Name="FREERTOS" Version="v8.0.0_Cube"/>
+    <IP ClockEnableMode="__HAL_RCC_HSEM_CLK_ENABLE" InstanceName="HSEM" Name="HSEM" Version="hsem1_v1_0_Cube"/>
+    <IP InstanceName="I2C1" Name="I2C" Version="i2c2_v1_1_Cube"/>
+    <IP InstanceName="I2C3" Name="I2C" Version="i2c2_v1_1_Cube"/>
+    <IP ConfigFile="IPCC-STM32WBxx" InstanceName="IPCC" Name="IPCC" Version="v1_0_Cube"/>
+    <IP ConfigFile="IRTIM-STM32WBxx" InstanceName="IRTIM" Name="IRTIM" Version="irtim_v1_0_Cube"/>
+    <IP ClockEnableMode="none" ConfigFile="IWDG-STM32WBxx" InstanceName="IWDG" Name="IWDG" Version="iwdg1_v2_0"/>
+    <IP ClockEnableMode="__HAL_RCC_LCD_CLK_ENABLE" ConfigFile="LCD-STM32WBxx" InstanceName="LCD" Name="LCD" Version="lcdc1_v1_2_Cube"/>
+    <IP ConfigFile="LPTIM-STM32WBxx" InstanceName="LPTIM1" Name="LPTIM" Version="WB5_lptimer1_v1_0_Cube"/>
+    <IP ConfigFile="LPTIM-STM32WBxx" InstanceName="LPTIM2" Name="LPTIM" Version="WB5_lptimer1_v1_0_Cube"/>
+    <IP InstanceName="LPUART1" Name="LPUART" Version="sci3_v1_3_Cube"/>
+    <IP ClockEnableMode="__HAL_RCC_PKA_CLK_ENABLE" ConfigFile="PKA-STM32WBxx" InstanceName="PKA" Name="PKA" Version="pka32_v1_0_Cube"/>
+    <IP ClockEnableMode="__HAL_RCC_QSPI_CLK_ENABLE" InstanceName="QUADSPI" Name="QUADSPI" Version="quadspi1_v2_2_Cube"/>
+    <IP InstanceName="RCC" Name="RCC" Version="STM32W_rcc_v1_0"/>
+    <IP InstanceName="RF" Name="RF" Version="rf2g4ctrl_v1_0_Cube"/>
+    <IP ConfigFile="RNG-STM32WBxx" InstanceName="RNG" Name="RNG" Version="rng1_v2_0"/>
+    <IP ClockEnableMode="__HAL_RCC_RTC_ENABLE;__HAL_RCC_RTCAPB_CLK_ENABLE" ConfigFile="RTC-STM32WBxx" InstanceName="RTC" Name="RTC" Version="rtc2_v2_WB_Cube"/>
+    <IP ConfigFile="SAI-STM32WBxx" InstanceName="SAI1" Name="SAI" Version="sai1_v2_0_Cube"/>
+    <IP ConfigFile="SEQUENCER-STM32WBxx" InstanceName="SEQUENCER" Name="SEQUENCER" Version="v1.0_Cube"/>
+    <IP ConfigFile="SPI-STM32WBxx" InstanceName="SPI1" Name="SPI" Version="spi2s1_v3_1_Cube"/>
+    <IP ConfigFile="SPI-STM32WBxx" InstanceName="SPI2" Name="SPI" Version="spi2s1_v3_5_Cube"/>
+    <IP ConfigFile="STM32_WPAN-STM32WBxx" InstanceName="STM32_WPAN" Name="STM32_WPAN" Version="v1.2_Cube"/>
+    <IP InstanceName="SYS" Name="SYS" Version="STM32WB55_sys_v1_0"/>
+    <IP ConfigFile="TIM-STM32WBxx" InstanceName="TIM1" Name="TIM1_8WB5" Version="gptimer2_v3_x_Cube"/>
+    <IP ConfigFile="TIM-STM32WBxx" InstanceName="TIM2" Name="TIM1_8WB5" Version="gptimer2_v3_x_Cube"/>
+    <IP ConfigFile="TIM-STM32WBxx" InstanceName="TIM16" Name="TIM1_8WB5" Version="gptimer2_v3_x_Cube"/>
+    <IP ConfigFile="TIM-STM32WBxx" InstanceName="TIM17" Name="TIM1_8WB5" Version="gptimer2_v3_x_Cube"/>
+    <IP ConfigFile="TINY_LPM-STM32WBxx" InstanceName="TINY_LPM" Name="TINY_LPM" Version="v1.0_Cube"/>
+    <IP ConfigFile="TOUCHSENSING-STM32WBxx" InstanceName="TOUCHSENSING" Name="TOUCHSENSING" Version="v2_2_11_Cube"/>
+    <IP InstanceName="TSC" Name="TSC" Version="tsc1_v1_0_Cube"/>
+    <IP InstanceName="USART1" Name="USART" Version="sci3_v2_1_Cube"/>
+    <IP InstanceName="USB" Name="USB" Version="usb1_v2_1_Cube"/>
+    <IP ConfigFile="USB_DEVICE-STM32WBxx" InstanceName="USB_DEVICE" Name="USB_Device" Version="v3.0_Cube"/>
+    <IP InstanceName="WWDG" Name="WWDG" Version="wwdg1_v2_0"/>
+    <IP ConfigFile="MEMORYMAP-STM32xx" InstanceName="MEMORYMAP" Name="MEMORYMAP" Version="STM32xx"/>
+    <IP ConfigFile="GPIO-STM32WBxx" InstanceName="GPIO" Name="GPIO" Version="STM32WB5Mx_gpio_v1_0"/>
+    <IP ConfigFile="DMA-STM32WBxx" InstanceName="DMA" Name="DMA" Version="STM32WB52_dma1_v1_3"/>
+    <IP ConfigFile="NVIC-STM32WBxx" InstanceName="NVIC" Name="NVIC" Version="STM32WB52"/>
+    <Pin Name="PA2" Position="1" Type="I/O">
+        <Signal Name="ADC1_IN7"/>
+        <Signal Name="COMP2_INM"/>
+        <Signal Name="COMP2_OUT"/>
+        <Signal Name="LCD_SEG1"/>
+        <Signal Name="LPUART1_TX"/>
+        <Signal Name="QUADSPI_BK1_NCS"/>
+        <Signal Name="RCC_LSCO"/>
+        <Signal Name="SYS_WKUP4"/>
+        <Signal Name="TIM2_CH3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA1" Position="2" Type="I/O">
+        <Signal Name="ADC1_IN6"/>
+        <Signal Name="COMP1_INP"/>
+        <Signal Name="I2C1_SMBA"/>
+        <Signal Name="LCD_SEG0"/>
+        <Signal Name="SPI1_SCK"/>
+        <Signal Name="TIM2_CH2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA0" Position="3" Type="I/O">
+        <Signal Name="ADC1_IN5"/>
+        <Signal Name="COMP1_INM"/>
+        <Signal Name="COMP1_OUT"/>
+        <Signal Name="RTC_TAMP2"/>
+        <Signal Name="SAI1_EXTCLK"/>
+        <Signal Name="SYS_WKUP1"/>
+        <Signal Name="TIM2_CH1"/>
+        <Signal Name="TIM2_ETR"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VREF+" Position="4" Type="MonoIO">
+        <Signal Name="VREFBUF_OUT"/>
+    </Pin>
+    <Pin Name="VSS" Position="5" Type="Power"/>
+    <Pin Name="VDDA" Position="6" Type="Power"/>
+    <Pin Name="PC3" Position="7" Type="I/O">
+        <Signal Name="ADC1_IN4"/>
+        <Signal Name="LCD_VLCD"/>
+        <Signal Name="LPTIM1_ETR"/>
+        <Signal Name="LPTIM2_ETR"/>
+        <Signal Name="SAI1_D1"/>
+        <Signal Name="SAI1_SD_A"/>
+        <Signal Name="SPI2_MOSI"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC2" Position="8" Type="I/O">
+        <Signal Name="ADC1_IN3"/>
+        <Signal Name="LCD_SEG20"/>
+        <Signal Name="LPTIM1_IN2"/>
+        <Signal Name="SPI2_MISO"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC1" Position="9" Type="I/O">
+        <Signal Name="ADC1_IN2"/>
+        <Signal Name="I2C3_SDA"/>
+        <Signal Name="LCD_SEG19"/>
+        <Signal Name="LPTIM1_OUT"/>
+        <Signal Name="LPUART1_TX"/>
+        <Signal Name="SPI2_MOSI"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="NRST" Position="10" Type="Reset"/>
+    <Pin Name="PB9" Position="11" Type="I/O">
+        <Signal Name="I2C1_SDA"/>
+        <Signal Name="IR_OUT"/>
+        <Signal Name="LCD_COM3"/>
+        <Signal Name="QUADSPI_BK1_IO0"/>
+        <Signal Name="SAI1_D2"/>
+        <Signal Name="SAI1_FS_A"/>
+        <Signal Name="SPI2_NSS"/>
+        <Signal Name="TIM17_CH1"/>
+        <Signal Name="TIM1_CH3N"/>
+        <Signal Name="TSC_G7_IO4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC0" Position="12" Type="I/O">
+        <Signal Name="ADC1_IN1"/>
+        <Signal Name="I2C3_SCL"/>
+        <Signal Name="LCD_SEG18"/>
+        <Signal Name="LPTIM1_IN1"/>
+        <Signal Name="LPTIM2_IN1"/>
+        <Signal Name="LPUART1_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PH3-BOOT0" Position="13" Type="I/O">
+        <Signal Name="RCC_LSCO"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB8" Position="14" Type="I/O">
+        <Signal Name="I2C1_SCL"/>
+        <Signal Name="LCD_SEG16"/>
+        <Signal Name="QUADSPI_BK1_IO1"/>
+        <Signal Name="SAI1_CK1"/>
+        <Signal Name="SAI1_MCLK_A"/>
+        <Signal Name="TIM16_CH1"/>
+        <Signal Name="TIM1_CH2N"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VBAT" Position="15" Type="Power"/>
+    <Pin Name="VSSSMPS" Position="16" Type="Power"/>
+    <Pin Name="VDDSMPS" Position="17" Type="Power"/>
+    <Pin Name="PB7" Position="18" Type="I/O">
+        <Signal Name="COMP2_INM"/>
+        <Signal Name="I2C1_SDA"/>
+        <Signal Name="LCD_SEG21"/>
+        <Signal Name="LPTIM1_IN2"/>
+        <Signal Name="SYS_PVD_IN"/>
+        <Signal Name="TIM17_CH1N"/>
+        <Signal Name="TIM1_BKIN"/>
+        <Signal Name="TSC_G2_IO4"/>
+        <Signal Name="USART1_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB5" Position="19" Type="I/O">
+        <Signal Name="COMP2_OUT"/>
+        <Signal Name="I2C1_SMBA"/>
+        <Signal Name="LCD_SEG9"/>
+        <Signal Name="LPTIM1_IN1"/>
+        <Signal Name="LPUART1_TX"/>
+        <Signal Name="SAI1_SD_B"/>
+        <Signal Name="SPI1_MOSI"/>
+        <Signal Name="TIM16_BKIN"/>
+        <Signal Name="TSC_G2_IO2"/>
+        <Signal Name="USART1_CK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB4" Position="20" Type="I/O">
+        <Signal Name="COMP2_INP"/>
+        <Signal Name="I2C3_SDA"/>
+        <Signal Name="LCD_SEG8"/>
+        <Signal Name="SAI1_MCLK_B"/>
+        <Signal Name="SPI1_MISO"/>
+        <Signal Name="SYS_JTRST"/>
+        <Signal Name="TIM17_BKIN"/>
+        <Signal Name="TSC_G2_IO1"/>
+        <Signal Name="USART1_CTS"/>
+        <Signal Name="USART1_NSS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB3" Position="21" Type="I/O">
+        <Signal Name="COMP2_INM"/>
+        <Signal Name="LCD_SEG7"/>
+        <Signal Name="SAI1_SCK_B"/>
+        <Signal Name="SPI1_SCK"/>
+        <Signal Name="SYS_JTDO-SWO"/>
+        <Signal Name="TIM2_CH2"/>
+        <Signal Name="USART1_DE"/>
+        <Signal Name="USART1_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC10" Position="22" Type="I/O">
+        <Signal Name="LCD_COM4"/>
+        <Signal Name="LCD_SEG28"/>
+        <Signal Name="LCD_SEG40"/>
+        <Signal Name="SYS_TRACED1"/>
+        <Signal Name="TSC_G3_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC11" Position="23" Type="I/O">
+        <Signal Name="ADC1_EXTI11"/>
+        <Signal Name="LCD_COM5"/>
+        <Signal Name="LCD_SEG29"/>
+        <Signal Name="LCD_SEG41"/>
+        <Signal Name="TSC_G3_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC12" Position="24" Type="I/O">
+        <Signal Name="LCD_COM6"/>
+        <Signal Name="LCD_SEG30"/>
+        <Signal Name="LCD_SEG42"/>
+        <Signal Name="RTC_TAMP3"/>
+        <Signal Name="SYS_TRACED3"/>
+        <Signal Name="SYS_WKUP3"/>
+        <Signal Name="TSC_G3_IO4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA13" Position="25" Type="I/O">
+        <Signal Name="IR_OUT"/>
+        <Signal Name="SAI1_SD_B"/>
+        <Signal Name="SYS_JTMS-SWDIO"/>
+        <Signal Name="USB_NOE"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA14" Position="26" Type="I/O">
+        <Signal Name="I2C1_SMBA"/>
+        <Signal Name="LCD_SEG5"/>
+        <Signal Name="LPTIM1_OUT"/>
+        <Signal Name="SAI1_FS_B"/>
+        <Signal Name="SYS_JTCK-SWCLK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA15" Position="27" Type="I/O">
+        <Signal Name="ADC1_EXTI15"/>
+        <Signal Name="LCD_SEG17"/>
+        <Signal Name="SPI1_NSS"/>
+        <Signal Name="SYS_JTDI"/>
+        <Signal Name="TIM2_CH1"/>
+        <Signal Name="TIM2_ETR"/>
+        <Signal Name="TSC_G3_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA10" Position="28" Type="I/O">
+        <Signal Name="CRS_SYNC"/>
+        <Signal Name="I2C1_SDA"/>
+        <Signal Name="LCD_COM2"/>
+        <Signal Name="SAI1_D1"/>
+        <Signal Name="SAI1_SD_A"/>
+        <Signal Name="TIM17_BKIN"/>
+        <Signal Name="TIM1_CH3"/>
+        <Signal Name="USART1_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA12" Position="29" Type="I/O">
+        <Signal Name="LPUART1_RX"/>
+        <Signal Name="SPI1_MOSI"/>
+        <Signal Name="TIM1_ETR"/>
+        <Signal Name="USART1_DE"/>
+        <Signal Name="USART1_RTS"/>
+        <Signal Name="USB_DP"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA11" Position="30" Type="I/O">
+        <Signal Name="ADC1_EXTI11"/>
+        <Signal Name="SPI1_MISO"/>
+        <Signal Name="TIM1_BKIN2"/>
+        <Signal Name="TIM1_CH4"/>
+        <Signal Name="USART1_CTS"/>
+        <Signal Name="USART1_NSS"/>
+        <Signal Name="USB_DM"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VSS" Position="31" Type="Power"/>
+    <Pin Name="VDDUSB" Position="32" Type="Power"/>
+    <Pin Name="PD0" Position="33" Type="I/O">
+        <Signal Name="SPI2_NSS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD1" Position="34" Type="I/O">
+        <Signal Name="SPI2_SCK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB13" Position="35" Type="I/O">
+        <Signal Name="I2C3_SCL"/>
+        <Signal Name="LCD_SEG13"/>
+        <Signal Name="LPUART1_CTS"/>
+        <Signal Name="SAI1_SCK_A"/>
+        <Signal Name="SPI2_SCK"/>
+        <Signal Name="TIM1_CH1N"/>
+        <Signal Name="TSC_G1_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC6" Position="36" Type="I/O">
+        <Signal Name="LCD_SEG24"/>
+        <Signal Name="TSC_G4_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB14" Position="37" Type="I/O">
+        <Signal Name="I2C3_SDA"/>
+        <Signal Name="LCD_SEG14"/>
+        <Signal Name="SAI1_MCLK_A"/>
+        <Signal Name="SPI2_MISO"/>
+        <Signal Name="TIM1_CH2N"/>
+        <Signal Name="TSC_G1_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB15" Position="38" Type="I/O">
+        <Signal Name="ADC1_EXTI15"/>
+        <Signal Name="LCD_SEG15"/>
+        <Signal Name="RTC_REFIN"/>
+        <Signal Name="SAI1_SD_A"/>
+        <Signal Name="SPI2_MOSI"/>
+        <Signal Name="TIM1_CH3N"/>
+        <Signal Name="TSC_G1_IO4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB6" Position="39" Type="I/O">
+        <Signal Name="COMP2_INP"/>
+        <Signal Name="I2C1_SCL"/>
+        <Signal Name="LCD_SEG6"/>
+        <Signal Name="LPTIM1_ETR"/>
+        <Signal Name="RCC_MCO"/>
+        <Signal Name="SAI1_FS_B"/>
+        <Signal Name="TIM16_CH1N"/>
+        <Signal Name="TSC_G2_IO3"/>
+        <Signal Name="USART1_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC13" Position="40" Type="I/O">
+        <Signal Name="RTC_OUT1"/>
+        <Signal Name="RTC_TAMP1"/>
+        <Signal Name="RTC_TS"/>
+        <Signal Name="SYS_WKUP2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+        <Condition Diagnostic="" Expression="!(RTC_OUT &amp; (WakeUp_Outputed | AlarmA_Outputed | AlarmB_Outputed))"/>
+    </Pin>
+    <Pin Name="PB12" Position="41" Type="I/O">
+        <Signal Name="I2C3_SMBA"/>
+        <Signal Name="LCD_SEG12"/>
+        <Signal Name="LPUART1_DE"/>
+        <Signal Name="LPUART1_RTS"/>
+        <Signal Name="SAI1_FS_A"/>
+        <Signal Name="SPI2_NSS"/>
+        <Signal Name="TIM1_BKIN"/>
+        <Signal Name="TSC_G1_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PE4" Position="42" Type="I/O">
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB1" Position="43" Type="I/O">
+        <Signal Name="LPTIM2_IN1"/>
+        <Signal Name="LPUART1_DE"/>
+        <Signal Name="LPUART1_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB0" Position="44" Type="I/O">
+        <Signal Name="COMP1_OUT"/>
+        <Signal Name="RF_TX_MOD_EXT_PA"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC5" Position="45" Type="I/O">
+        <Signal Name="ADC1_IN14"/>
+        <Signal Name="COMP1_INP"/>
+        <Signal Name="LCD_SEG23"/>
+        <Signal Name="SAI1_D3"/>
+        <Signal Name="SYS_WKUP5"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB11" Position="46" Type="I/O">
+        <Signal Name="ADC1_EXTI11"/>
+        <Signal Name="COMP2_OUT"/>
+        <Signal Name="I2C3_SDA"/>
+        <Signal Name="LCD_SEG11"/>
+        <Signal Name="LPUART1_TX"/>
+        <Signal Name="QUADSPI_BK1_NCS"/>
+        <Signal Name="TIM2_CH4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB10" Position="47" Type="I/O">
+        <Signal Name="COMP1_OUT"/>
+        <Signal Name="I2C3_SCL"/>
+        <Signal Name="LCD_SEG10"/>
+        <Signal Name="LPUART1_RX"/>
+        <Signal Name="QUADSPI_CLK"/>
+        <Signal Name="SAI1_SCK_A"/>
+        <Signal Name="SPI2_SCK"/>
+        <Signal Name="TIM2_CH3"/>
+        <Signal Name="TSC_SYNC"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB2" Position="48" Type="I/O">
+        <Signal Name="COMP1_INP"/>
+        <Signal Name="I2C3_SMBA"/>
+        <Signal Name="LCD_VLCD"/>
+        <Signal Name="LPTIM1_OUT"/>
+        <Signal Name="RTC_OUT2"/>
+        <Signal Name="SAI1_EXTCLK"/>
+        <Signal Name="SPI1_NSS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+        <Condition Diagnostic="" Expression="!(RTC_OUT &amp; CALIBRATION)"/>
+    </Pin>
+    <Pin Name="PC4" Position="49" Type="I/O">
+        <Signal Name="ADC1_IN13"/>
+        <Signal Name="COMP1_INM"/>
+        <Signal Name="LCD_SEG22"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA8" Position="50" Type="I/O">
+        <Signal Name="ADC1_IN15"/>
+        <Signal Name="LCD_COM0"/>
+        <Signal Name="LPTIM2_OUT"/>
+        <Signal Name="RCC_MCO"/>
+        <Signal Name="SAI1_CK2"/>
+        <Signal Name="SAI1_SCK_A"/>
+        <Signal Name="TIM1_CH1"/>
+        <Signal Name="USART1_CK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA9" Position="51" Type="I/O">
+        <Signal Name="ADC1_IN16"/>
+        <Signal Name="COMP1_INM"/>
+        <Signal Name="I2C1_SCL"/>
+        <Signal Name="LCD_COM1"/>
+        <Signal Name="SAI1_D2"/>
+        <Signal Name="SAI1_FS_A"/>
+        <Signal Name="SPI2_SCK"/>
+        <Signal Name="TIM1_CH2"/>
+        <Signal Name="USART1_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA7" Position="52" Type="I/O">
+        <Signal Name="ADC1_IN12"/>
+        <Signal Name="COMP2_OUT"/>
+        <Signal Name="I2C3_SCL"/>
+        <Signal Name="LCD_SEG4"/>
+        <Signal Name="QUADSPI_BK1_IO2"/>
+        <Signal Name="SPI1_MOSI"/>
+        <Signal Name="TIM17_CH1"/>
+        <Signal Name="TIM1_CH1N"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA6" Position="53" Type="I/O">
+        <Signal Name="ADC1_IN11"/>
+        <Signal Name="LCD_SEG3"/>
+        <Signal Name="LPUART1_CTS"/>
+        <Signal Name="QUADSPI_BK1_IO3"/>
+        <Signal Name="SPI1_MISO"/>
+        <Signal Name="TIM16_CH1"/>
+        <Signal Name="TIM1_BKIN"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA5" Position="54" Type="I/O">
+        <Signal Name="ADC1_IN10"/>
+        <Signal Name="COMP1_INM"/>
+        <Signal Name="COMP2_INM"/>
+        <Signal Name="LPTIM2_ETR"/>
+        <Signal Name="SAI1_SD_B"/>
+        <Signal Name="SPI1_SCK"/>
+        <Signal Name="TIM2_CH1"/>
+        <Signal Name="TIM2_ETR"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA4" Position="55" Type="I/O">
+        <Signal Name="ADC1_IN9"/>
+        <Signal Name="COMP1_INM"/>
+        <Signal Name="COMP2_INM"/>
+        <Signal Name="LCD_SEG5"/>
+        <Signal Name="LPTIM2_OUT"/>
+        <Signal Name="SAI1_FS_B"/>
+        <Signal Name="SPI1_NSS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA3" Position="56" Type="I/O">
+        <Signal Name="ADC1_IN8"/>
+        <Signal Name="COMP2_INP"/>
+        <Signal Name="LCD_SEG2"/>
+        <Signal Name="LPUART1_RX"/>
+        <Signal Name="QUADSPI_CLK"/>
+        <Signal Name="SAI1_CK1"/>
+        <Signal Name="SAI1_MCLK_A"/>
+        <Signal Name="TIM2_CH4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VSS" Position="57" Type="Power"/>
+    <Pin Name="ANT_IN" Position="58" Type="I/O">
+        <Signal IOModes="Input,Output,Analog" Name="GPIO"/>
+    </Pin>
+    <Pin Name="RF_OUT" Position="59" Type="I/O">
+        <Signal IOModes="Input,Output,Analog" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VSS" Position="60" Type="Power"/>
+    <Pin Name="PH0" Position="61" Type="I/O">
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PH1" Position="62" Type="I/O">
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD14" Position="63" Type="I/O">
+        <Signal Name="LCD_SEG34"/>
+        <Signal Name="TIM1_CH1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PE1" Position="64" Type="I/O">
+        <Signal Name="LCD_SEG37"/>
+        <Signal Name="TIM17_CH1"/>
+        <Signal Name="TSC_G7_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD13" Position="65" Type="I/O">
+        <Signal Name="LCD_SEG33"/>
+        <Signal Name="LPTIM2_OUT"/>
+        <Signal Name="TSC_G6_IO4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD12" Position="66" Type="I/O">
+        <Signal Name="LCD_SEG32"/>
+        <Signal Name="LPTIM2_IN1"/>
+        <Signal Name="TSC_G6_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD7" Position="67" Type="I/O">
+        <Signal Name="LCD_SEG39"/>
+        <Signal Name="QUADSPI_BK1_IO3"/>
+        <Signal Name="TSC_G5_IO4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD2" Position="68" Type="I/O">
+        <Signal Name="LCD_COM7"/>
+        <Signal Name="LCD_SEG31"/>
+        <Signal Name="LCD_SEG43"/>
+        <Signal Name="SYS_TRACED2"/>
+        <Signal Name="TSC_SYNC"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC9" Position="69" Type="I/O">
+        <Signal Name="LCD_SEG27"/>
+        <Signal Name="SAI1_SCK_B"/>
+        <Signal Name="TIM1_BKIN"/>
+        <Signal Name="TSC_G4_IO4"/>
+        <Signal Name="USB_NOE"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD3" Position="70" Type="I/O">
+        <Signal Name="QUADSPI_BK1_NCS"/>
+        <Signal Name="SPI2_MISO"/>
+        <Signal Name="SPI2_SCK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC7" Position="71" Type="I/O">
+        <Signal Name="LCD_SEG25"/>
+        <Signal Name="TSC_G4_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PE3" Position="72" Type="I/O">
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD4" Position="73" Type="I/O">
+        <Signal Name="QUADSPI_BK1_IO0"/>
+        <Signal Name="SPI2_MOSI"/>
+        <Signal Name="TSC_G5_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD9" Position="74" Type="I/O">
+        <Signal Name="LCD_SEG29"/>
+        <Signal Name="SYS_TRACED0"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD8" Position="75" Type="I/O">
+        <Signal Name="LCD_SEG28"/>
+        <Signal Name="TIM1_BKIN2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD15" Position="76" Type="I/O">
+        <Signal Name="ADC1_EXTI15"/>
+        <Signal Name="LCD_SEG35"/>
+        <Signal Name="TIM1_CH2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD10" Position="77" Type="I/O">
+        <Signal Name="LCD_SEG30"/>
+        <Signal Name="SYS_TRIG_INOUT"/>
+        <Signal Name="TSC_G6_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PE2" Position="78" Type="I/O">
+        <Signal Name="LCD_SEG38"/>
+        <Signal Name="SAI1_CK1"/>
+        <Signal Name="SAI1_MCLK_A"/>
+        <Signal Name="SYS_TRACECLK"/>
+        <Signal Name="TSC_G7_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PE0" Position="79" Type="I/O">
+        <Signal Name="LCD_SEG36"/>
+        <Signal Name="TIM16_CH1"/>
+        <Signal Name="TIM1_ETR"/>
+        <Signal Name="TSC_G7_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD5" Position="80" Type="I/O">
+        <Signal Name="QUADSPI_BK1_IO1"/>
+        <Signal Name="SAI1_MCLK_B"/>
+        <Signal Name="TSC_G5_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD6" Position="81" Type="I/O">
+        <Signal Name="QUADSPI_BK1_IO2"/>
+        <Signal Name="SAI1_D1"/>
+        <Signal Name="SAI1_SD_A"/>
+        <Signal Name="TSC_G5_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PD11" Position="82" Type="I/O">
+        <Signal Name="ADC1_EXTI11"/>
+        <Signal Name="LCD_SEG31"/>
+        <Signal Name="LPTIM2_ETR"/>
+        <Signal Name="TSC_G6_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC8" Position="83" Type="I/O">
+        <Signal Name="LCD_SEG26"/>
+        <Signal Name="TSC_G4_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VSS" Position="84" Type="Power"/>
+    <Pin Name="ANT_NC" Position="85" Type="I/O">
+        <Signal IOModes="Input,Output,Analog" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VSS" Position="86" Type="Power"/>
+</Mcu>
