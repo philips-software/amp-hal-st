@@ -134,16 +134,10 @@ if (TARGET_MCU_VENDOR STREQUAL st)
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G070RBTx.xml")
     elseif (TARGET_MCU_VARIANT STREQUAL stm32g431r)
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G431R(6-8-B)Tx.xml")
-<<<<<<< Updated upstream
-    elseif (TARGET_MCU STREQUAL stm32g474)
-        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G47x_gpio_v1_0_Modes.xml")
-        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G474R(B-C-E)Tx.xml")
-=======
     elseif (TARGET_MCU_VARIANT STREQUAL stm32g474r)
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G474R(B-C-E)Tx.xml")
     elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55cg)
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55CGUx.xml")
->>>>>>> Stashed changes
     elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55rg)
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55RGVx.xml")
     elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55re)
