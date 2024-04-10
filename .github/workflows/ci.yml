@@ -78,13 +78,13 @@ jobs:
         include:
           - gcc: "7-2018-q2"
             configuration: "RelWithDebInfo"
-            target: "stm32f767"
+            target: "stm32f767z"
           - gcc: "8-2019-q3"
             configuration: "RelWithDebInfo"
-            target: "stm32f767"
+            target: "stm32f767z"
           - gcc: "9-2020-q2"
             configuration: "RelWithDebInfo"
-            target: "stm32f767"
+            target: "stm32f767z"
     steps:
       - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
