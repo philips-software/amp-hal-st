@@ -72,9 +72,9 @@ namespace hal
         adc.Measure(onDone);
     }
 
-    AnalogToDigitalInternalTemperatureStm::AnalogToDigitalInternalTemperatureStm(AdcStm& adc, detail::AdcStmChannelConfig adcStmChannelConfig)
+    AnalogToDigitalInternalTemperatureStm::AnalogToDigitalInternalTemperatureStm(AdcStm& adc, const Config& config)
         : adc(adc)
-        , adcStmChannelConfig(adcStmChannelConfig)
+        , adcStmChannelConfig(config)
     {
         HAL_ADC_Stop(&adc.Handle());
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
