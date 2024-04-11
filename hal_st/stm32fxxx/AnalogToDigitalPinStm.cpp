@@ -74,7 +74,7 @@ namespace hal
 
     AnalogToDigitalInternalTemperatureStm::AnalogToDigitalInternalTemperatureStm(AdcStm& adc, const Config& config)
         : adc(adc)
-        , adcStmChannelConfig(config)
+        , config(config)
     {
         HAL_ADC_Stop(&adc.Handle());
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_SOFTWARE_START);
@@ -103,7 +103,7 @@ namespace hal
 #if !defined(STM32F0) && !defined(STM32F3) && !defined(STM32G0)
         channelConfig.Offset = 0;
 #endif
-        channelConfig.SamplingTime = adcStmChannelConfig.samplingTime;
+        channelConfig.SamplingTime = config.samplingTime;
 
         HAL_StatusTypeDef result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
