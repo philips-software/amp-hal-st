@@ -44,7 +44,9 @@ namespace hal
         : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc, detail::AdcStmChannelConfig adcStmChannelConfig);
+        using Config = detail::AdcStmChannelConfig;
+
+        AnalogToDigitalInternalTemperatureStm(AdcStm& adc, const Config& config = Config());
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
