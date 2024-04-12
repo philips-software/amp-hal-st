@@ -76,10 +76,11 @@ namespace application
     void FlashProxy::EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone)
     {
         this->onDone = onDone;
+        x = endIndex;
 
-        proxy.RequestSend([this, beginIndex, endIndex]()
+        proxy.RequestSend([this, beginIndex]()
             {
-                proxy.EraseSectors(beginIndex, endIndex - beginIndex);
+                proxy.EraseSectors(beginIndex, x - beginIndex);
             });
     }
 
@@ -108,13 +109,16 @@ namespace application
     void FlashProxy::ReadPartialBuffer(uint32_t address, uint32_t start)
     {
         if (readingBuffer.size() - start > 0)
-            proxy.RequestSend([this, address, start]()
+        {
+            x = start;
+            proxy.RequestSend([this, address]()
                 {
                     ++transferBuffers;
-                    auto size = std::min<uint32_t>(readingBuffer.size() - start, std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value);
-                    proxy.Read(address + start, size);
-                    ReadPartialBuffer(address, start + size);
+                    auto size = std::min<uint32_t>(readingBuffer.size() - x, std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value);
+                    proxy.Read(address + x, size);
+                    ReadPartialBuffer(address, x + size);
                 });
+        }
     }
 
     FlashHomogeneousProxy::FlashHomogeneousProxy(services::Echo& echo, uint32_t numberOfSectors, uint32_t sizeOfEachSector)
