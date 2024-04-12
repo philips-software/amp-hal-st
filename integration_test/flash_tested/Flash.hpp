@@ -51,7 +51,8 @@ namespace application
         infra::ConstByteRange writingBuffer;
         infra::ByteRange readingBuffer;
         uint32_t transferBuffers = 0;
-        uint32_t x;
+        uint32_t start;
+        uint32_t endIndex;
     };
 
     class FlashHomogeneousProxy

@@ -13,8 +13,8 @@ set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
 set(HALST_XML_STM32 "" CACHE STRING "XML STM32 table")
 
 if (HALST_BUILD_TESTS)
-    # CTest cannot be included before the first project() statement, but Embedded Infastructure
-    # Library needs to see that test utilities need to be built.
+    # CTest cannot be included before the first project() statement, but amp-embedded-infa-lib
+    # needs to see that test utilities need to be built.
     set(BUILD_TESTING On)
 endif()
 

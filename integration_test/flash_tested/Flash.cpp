@@ -76,11 +76,11 @@ namespace application
     void FlashProxy::EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone)
     {
         this->onDone = onDone;
-        x = endIndex;
+        this->endIndex = endIndex;
 
         proxy.RequestSend([this, beginIndex]()
             {
-                proxy.EraseSectors(beginIndex, x - beginIndex);
+                proxy.EraseSectors(beginIndex, this->endIndex - beginIndex);
             });
     }
 
@@ -110,13 +110,13 @@ namespace application
     {
         if (readingBuffer.size() - start > 0)
         {
-            x = start;
+            this->start = start;
             proxy.RequestSend([this, address]()
                 {
                     ++transferBuffers;
-                    auto size = std::min<uint32_t>(readingBuffer.size() - x, std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value);
-                    proxy.Read(address + x, size);
-                    ReadPartialBuffer(address, x + size);
+                    auto size = std::min<uint32_t>(readingBuffer.size() - this->start, std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value);
+                    proxy.Read(address + this->start, size);
+                    ReadPartialBuffer(address, this->start + size);
                 });
         }
     }
