@@ -6,6 +6,7 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include <cstdint>
+
 #include DEVICE_HEADER
 
 namespace hal
@@ -19,6 +20,10 @@ namespace hal
             uint32_t parity{ USART_PARITY_NONE };
 
             hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+            bool swapTxRx{ false };
+#endif
         };
     }
 
