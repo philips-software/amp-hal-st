@@ -1,53 +1,60 @@
 #include "hal_st/stm32fxxx/UartStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
 
 namespace hal
 {
-    UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, const Config& config)
-        : uartIndex(aUartIndex - 1)
-        , uartTx(uartTxPin, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRxPin, PinConfigTypeStm::uartRx, aUartIndex)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, const Config& config)
+        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, dummyPinStm, dummyPinStm, config, false)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config)
+        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, uartRtsPin, uartCtsPin, config, true)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config, bool hasFlowControl)
+        : uartIndex(oneBasedIndex - 1)
+        , uartTx(uartTxPin, PinConfigTypeStm::uartTx, oneBasedIndex)
+        , uartRx(uartRxPin, PinConfigTypeStm::uartRx, oneBasedIndex)
+        , uartRts(uartRtsPin, PinConfigTypeStm::uartRts, oneBasedIndex)
+        , uartCts(uartCtsPin, PinConfigTypeStm::uartCts, oneBasedIndex)
         , uartHandle()
     {
         uartArray = peripheralUart;
         uartIrqArray = peripheralUartIrq;
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
-        UartStmHalInit(config);
-    }
-
-    UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config)
-        : UartStm(aUartIndex, uartTxPin, uartRxPin, config)
-    {
-        uartRts.Emplace(uartRtsPin, PinConfigTypeStm::uartRts, aUartIndex);
-        uartCts.Emplace(uartCtsPin, PinConfigTypeStm::uartCts, aUartIndex);
+        UartStmHalInit(config, hasFlowControl);
     }
 
 #if defined(STM32WB)
-    UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config)
-        : uartIndex(aUartIndex - 1)
-        , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, aUartIndex)
-        , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, aUartIndex)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config)
+        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, dummyPinStm, dummyPinStm, lpUart, config, false)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config)
+        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, uartRtsPin, uartCtsPin, lpUart, config, true)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config, bool hasFlowControl)
+        : uartIndex(oneBasedIndex - 1)
+        , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, oneBasedIndex)
+        , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, oneBasedIndex)
+        , uartRts(uartRtsPin, PinConfigTypeStm::lpuartRts, oneBasedIndex)
+        , uartCts(uartCtsPin, PinConfigTypeStm::lpuartCts, oneBasedIndex)
         , uartHandle()
     {
         uartArray = peripheralLpuart;
         uartIrqArray = peripheralLpuartIrq;
         RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
-        UartStmHalInit(config);
-    }
-
-    UartStm::UartStm(uint8_t aUartIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config)
-        : UartStm(aUartIndex, uartTxPin, uartRxPin, lpUart, config)
-    {
-        uartRts.Emplace(uartRtsPin, PinConfigTypeStm::lpuartRts, aUartIndex);
-        uartCts.Emplace(uartCtsPin, PinConfigTypeStm::lpuartCts, aUartIndex);
+        UartStmHalInit(config, hasFlowControl);
     }
 #endif
 
-    void UartStm::UartStmHalInit(const Config& config)
+    void UartStm::UartStmHalInit(const Config& config, bool hasFlowControl)
     {
         uartHandle.Instance = uartArray[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
@@ -55,12 +62,24 @@ namespace hal
         uartHandle.Init.StopBits = USART_STOPBITS_1;
         uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
-        uartHandle.Init.HwFlowCtl = config.hwFlowControl;
+        uartHandle.Init.HwFlowCtl = hasFlowControl ? UART_HWCONTROL_RTS_CTS : UART_HWCONTROL_NONE;
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
 #else
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
+#endif
+
+#if defined(UART_ADVFEATURE_NO_INIT)
+        uartHandle.AdvancedInit = {};
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+        if (config.swapTxRx)
+        {
+            uartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_SWAP_INIT;
+            uartHandle.AdvancedInit.Swap = UART_ADVFEATURE_SWAP_ENABLE;
+        }
+#endif
 #endif
 
         HAL_UART_Init(&uartHandle);
@@ -101,10 +120,7 @@ namespace hal
 
     void UartStm::RegisterInterrupt(const Config& config)
     {
-        if (config.priority)
-            Register(uartIrqArray[uartIndex], *config.priority);
-        else
-            Register(uartIrqArray[uartIndex]);
+        Register(uartIrqArray[uartIndex], config.priority);
     }
 
     void UartStm::TransferComplete()

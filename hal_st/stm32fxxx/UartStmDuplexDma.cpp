@@ -1,120 +1,101 @@
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
-#include "infra/util/BoundedVector.hpp"
 
 namespace hal
 {
     namespace
     {
-        uint16_t defaultRxTimeout = 16;
+        uint32_t defaultRxTimeout = 16;
+
+        volatile void* TransmitRegister(uint8_t uartIndex)
+        {
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+            return &peripheralUart[uartIndex]->TDR;
+#else
+            return &peripheralUart[uartIndex]->DR;
+#endif
+        }
+
+        volatile void* ReceiveRegister(uint8_t uartIndex)
+        {
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+            return &peripheralUart[uartIndex]->RDR;
+#else
+            return &peripheralUart[uartIndex]->DR;
+#endif
+        }
+    }
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, uartTx, uartRx, hal::dummyPinStm, hal::dummyPinStm, config, false }
+    {}
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config, true }
+    {}
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
+        : rxBuffer{ rxBuffer }
+        , uartIndex{ static_cast<uint8_t>(oneBasedIndex - 1) }
+        , uartTx{ uartTx, PinConfigTypeStm::uartTx, oneBasedIndex }
+        , uartRx{ uartRx, PinConfigTypeStm::uartRx, oneBasedIndex }
+        , uartRts{ uartRts, PinConfigTypeStm::uartRts, oneBasedIndex }
+        , uartCts{ uartCts, PinConfigTypeStm::uartCts, oneBasedIndex }
+        , transmitDmaChannel{ transmitStream, TransmitRegister(uartIndex), 1, [this]
+            {
+                TransferComplete();
+            } }
+        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+            {
+                HalfReceiveComplete();
+            },
+            [this]
+            {
+                FullReceiveComplete();
+            } }
+    {
+        RegisterInterrupt(config);
+        EnableClockUart(uartIndex);
+
+        UART_HandleTypeDef uartHandle = {};
+        uartHandle.Instance = peripheralUart[uartIndex];
+        uartHandle.Init.BaudRate = config.baudrate;
+        uartHandle.Init.WordLength = USART_WORDLENGTH_8B;
+        uartHandle.Init.StopBits = USART_STOPBITS_1;
+        uartHandle.Init.Parity = USART_PARITY_NONE;
+        uartHandle.Init.Mode = USART_MODE_TX_RX;
+
+        if (hasFlowControl)
+            uartHandle.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+        else
+            uartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+
+        uartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
+        uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
+
+#if defined(UART_ADVFEATURE_NO_INIT)
+        uartHandle.AdvancedInit = {};
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+        if (config.swapTxRx)
+        {
+            uartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_SWAP_INIT;
+            uartHandle.AdvancedInit.Swap = UART_ADVFEATURE_SWAP_ENABLE;
+        }
+#endif
+#endif
+
+        HAL_UART_Init(&uartHandle);
 
 #if defined(STM32WB)
-        const std::array<DmaChannelId, 1> defaultTxDmaChannelId = { { DmaChannelId{ 1, 0, DMA_REQUEST_USART1_TX } } };
-
-        const std::array<DmaChannelId, 1> defaultRxDmaChannelId = { { DmaChannelId{ 1, 0, DMA_REQUEST_USART1_RX } } };
-#else
-        const std::array<DmaChannelId, 8> defaultTxDmaChannelId = { { DmaChannelId{ 2, 7, 4 },
-            DmaChannelId{ 1, 6, 4 },
-            DmaChannelId{ 1, 3, 4 },
-            DmaChannelId{ 1, 4, 4 },
-            DmaChannelId{ 1, 7, 4 },
-            DmaChannelId{ 2, 6, 5 },
-            DmaChannelId{ 1, 1, 5 },
-            DmaChannelId{ 1, 0, 5 } } };
-
-        const std::array<DmaChannelId, 8> defaultRxDmaChannelId = { { DmaChannelId{ 2, 2, 4 },
-            DmaChannelId{ 1, 5, 4 },
-            DmaChannelId{ 1, 1, 4 },
-            DmaChannelId{ 1, 2, 4 },
-            DmaChannelId{ 1, 0, 4 },
-            DmaChannelId{ 2, 7, 5 },
-            DmaChannelId{ 1, 3, 5 },
-            DmaChannelId{ 1, 6, 5 } } };
+        peripheralUart[uartIndex]->CR1 &= ~USART_CR1_UE;
+        peripheralUart[uartIndex]->CR1 |= USART_CR1_FIFOEN | USART_CR1_UE;
 #endif
 
-    }
-
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-        : rxBuffer(rxBuffer)
-        , uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartHandle()
-        , dma(dma)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#endif
-    {
-        Configure(config);
-    }
-
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
-        : rxBuffer(rxBuffer)
-        , uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
-        , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
-        , uartHandle()
-        , dma(dma)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->RDR, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultTxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  TransferComplete();
-              })
-        , receiveDmaChannel(
-              dma, config.dmaChannelRx.ValueOr(defaultRxDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size() / 2);
-              },
-              [this]()
-              {
-                  ReceiveComplete(this->rxBuffer.size());
-              })
-#endif
-    {
-        Configure(config);
+        peripheralUart[uartIndex]->CR1 &= ~USART_CR1_RE;
+        peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
+        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
     UartStmDuplexDma::~UartStmDuplexDma()
@@ -146,52 +127,32 @@ namespace hal
         peripheralUart[uartIndex]->RTOR = defaultRxTimeout;
     }
 
-    void UartStmDuplexDma::Configure(const Config& config)
+    void UartStmDuplexDma::HalfReceiveComplete()
     {
-        RegisterInterrupt(config);
-        EnableClockUart(uartIndex);
+        ReceiveComplete(this->rxBuffer.size() / 2);
+    }
 
-        uartHandle.Instance = peripheralUart[uartIndex];
-        uartHandle.Init.BaudRate = config.baudrate;
-        uartHandle.Init.WordLength = USART_WORDLENGTH_8B;
-        uartHandle.Init.StopBits = USART_STOPBITS_1;
-        uartHandle.Init.Parity = USART_PARITY_NONE;
-        uartHandle.Init.Mode = USART_MODE_TX_RX;
-        uartHandle.Init.HwFlowCtl = config.hwFlowControl;
-        uartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
-        uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
-
-        HAL_UART_Init(&uartHandle);
-
-#if defined(STM32WB)
-        peripheralUart[uartIndex]->CR1 &= ~USART_CR1_UE;
-        peripheralUart[uartIndex]->CR1 |= USART_CR1_FIFOEN | USART_CR1_UE;
-#endif
-
-        peripheralUart[uartIndex]->CR1 &= ~USART_CR1_RE;
-        peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
+    void UartStmDuplexDma::FullReceiveComplete()
+    {
+        ReceiveComplete(this->rxBuffer.size());
     }
 
     void UartStmDuplexDma::ReceiveComplete(size_t currentPosition)
     {
-        if (currentPosition == lastReceivedPosition)
+        if (currentPosition == lastReceivedPosition || !dataReceived)
             return;
 
-        if (dataReceived)
-        {
-            infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
-            lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
-            dataReceived(receivedData);
-        }
+        really_assert(lastReceivedPosition <= currentPosition);
+
+        infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
+        lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
+
+        dataReceived(receivedData);
     }
 
     void UartStmDuplexDma::RegisterInterrupt(const Config& config)
     {
-        if (config.priority)
-            Register(peripheralUartIrq[uartIndex], *config.priority);
-        else
-            Register(peripheralUartIrq[uartIndex]);
+        Register(peripheralUartIrq[uartIndex], config.priority);
     }
 
     void UartStmDuplexDma::TransferComplete()
@@ -208,7 +169,13 @@ namespace hal
         if (peripheralUart[uartIndex]->ISR & USART_ISR_RTOF)
         {
             peripheralUart[uartIndex]->ICR = USART_ICR_RTOCF;
-            ReceiveComplete(receiveDmaChannel.ReceivedSize());
+
+            const auto receivedSize = receiveDmaChannel.ReceivedSize();
+
+            if (receiveDmaChannel.IsInterruptPending())
+                return;
+
+            ReceiveComplete(receivedSize);
         }
     }
 }

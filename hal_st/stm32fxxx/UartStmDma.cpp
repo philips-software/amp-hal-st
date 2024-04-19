@@ -7,92 +7,70 @@ namespace hal
 {
     namespace
     {
-        const std::array<DmaChannelId, 8> defaultDmaChannelId = { { DmaChannelId{ 2, 7, 4 },
-            DmaChannelId{ 1, 6, 4 },
-            DmaChannelId{ 1, 3, 4 },
-            DmaChannelId{ 1, 4, 4 },
-            DmaChannelId{ 1, 7, 4 },
-            DmaChannelId{ 2, 6, 5 },
-            DmaChannelId{ 1, 1, 5 },
-            DmaChannelId{ 1, 0, 5 } } };
+        volatile void* PeripheralAddress(uint8_t uartIndex)
+        {
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
+            return &peripheralUart[uartIndex]->TDR;
+#else
+            return &peripheralUart[uartIndex]->DR;
+#endif
+        }
     }
 
-    UartStmDma::UartStmDma(hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-        : uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartHandle()
-        , dma(dma)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              {
-                  TransferComplete();
-              })
-#else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  TransferComplete();
-              })
-#endif
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
+        : UartStmDma{ transmitStream, oneBasedIndex, uartTx, uartRx, hal::dummyPinStm, hal::dummyPinStm, config, false }
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
+        : UartStmDma{ transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config, true }
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
+        : uartIndex(oneBasedIndex - 1)
+        , uartTx(uartTx, PinConfigTypeStm::uartTx, oneBasedIndex)
+        , uartRx(uartRx, PinConfigTypeStm::uartRx, oneBasedIndex)
+        , uartRts(uartRts, PinConfigTypeStm::uartRts, oneBasedIndex)
+        , uartCts(uartCts, PinConfigTypeStm::uartCts, oneBasedIndex)
+        , transmitDmaChannel{ transmitStream, PeripheralAddress(uartIndex), 1, [this]()
+            {
+                TransferComplete();
+            } }
     {
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
 
+        UART_HandleTypeDef uartHandle = {};
         uartHandle.Instance = peripheralUart[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
         uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
         uartHandle.Init.StopBits = USART_STOPBITS_1;
         uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
-        uartHandle.Init.HwFlowCtl = config.hwFlowControl;
+
+        if (hasFlowControl)
+            uartHandle.Init.HwFlowCtl = UART_HWCONTROL_RTS_CTS;
+        else
+            uartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
 #else
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
 #endif
-        HAL_UART_Init(&uartHandle);
 
-        peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT;
-    }
+#if defined(UART_ADVFEATURE_NO_INIT)
+        uartHandle.AdvancedInit = {};
 
-    UartStmDma::UartStmDma(hal::DmaStm& dma, uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
-        : uartIndex(aUartIndex - 1)
-        , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
-        , uartRx(uartRx, PinConfigTypeStm::uartRx, aUartIndex)
-        , uartRts(infra::inPlace, uartRts, PinConfigTypeStm::uartRts, aUartIndex)
-        , uartCts(infra::inPlace, uartCts, PinConfigTypeStm::uartCts, aUartIndex)
-        , uartHandle()
-        , dma(dma)
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->TDR, [this]()
-              {
-                  TransferComplete();
-              })
-#else
-        , transmitDmaChannel(dma, config.dmaChannelTx.ValueOr(defaultDmaChannelId[uartIndex]), &peripheralUart[uartIndex]->DR, [this]()
-              {
-                  TransferComplete();
-              })
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+        if (config.swapTxRx)
+        {
+            uartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_SWAP_INIT;
+            uartHandle.AdvancedInit.Swap = UART_ADVFEATURE_SWAP_ENABLE;
+        }
 #endif
-    {
-        RegisterInterrupt(config);
-        EnableClockUart(uartIndex);
-
-        uartHandle.Instance = peripheralUart[uartIndex];
-        uartHandle.Init.BaudRate = config.baudrate;
-        uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
-        uartHandle.Init.StopBits = USART_STOPBITS_1;
-        uartHandle.Init.Parity = config.parity;
-        uartHandle.Init.Mode = USART_MODE_TX_RX;
-        uartHandle.Init.HwFlowCtl = config.hwFlowControl;
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
-        uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
-        uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
-#else
-        uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
 #endif
+
         HAL_UART_Init(&uartHandle);
 
         peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
@@ -129,10 +107,7 @@ namespace hal
 
     void UartStmDma::RegisterInterrupt(const Config& config)
     {
-        if (config.priority)
-            Register(peripheralUartIrq[uartIndex], *config.priority);
-        else
-            Register(peripheralUartIrq[uartIndex]);
+        Register(peripheralUartIrq[uartIndex], config.priority);
     }
 
     void UartStmDma::TransferComplete()
@@ -149,14 +124,16 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32G4) || defined(STM32WB)
         while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
+#elif defined(STM32G0)
+        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
 #else
         while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
 #endif
         {
             uint8_t receivedByte =
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
                 peripheralUart[uartIndex]->RDR;
 #else
                 peripheralUart[uartIndex]->DR;
@@ -165,7 +142,7 @@ namespace hal
         }
 
         // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
 #else
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));

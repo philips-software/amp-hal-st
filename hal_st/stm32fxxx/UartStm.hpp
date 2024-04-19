@@ -14,35 +14,48 @@ namespace hal
 
     extern const LpUart lpUart;
 #endif
+
+    namespace detail
+    {
+        struct UartStmConfig
+        {
+            uint32_t baudrate{ 115200 };
+            uint32_t parity{ USART_PARITY_NONE };
+            InterruptPriority priority{ InterruptPriority::Normal };
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+            bool swapTxRx{ false };
+#endif
+        };
+    }
+
     class UartStm
         : public SerialCommunication
         , private InterruptHandler
     {
     public:
-        struct Config
-        {
-            constexpr Config()
-            {}
+        using Config = detail::UartStmConfig;
 
-            uint32_t baudrate = 115200;
-            uint32_t hwFlowControl = UART_HWCONTROL_NONE;
-            uint32_t parity = USART_PARITY_NONE;
-            infra::Optional<InterruptPriority> priority;
-        };
-
-        UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
 #if defined(STM32WB)
-        UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
-        UartStm(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
 #endif
+    private:
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
+#if defined(STM32WB)
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config, bool hasFlowControl);
+#endif
+
+    public:
         ~UartStm();
 
         void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
-        void UartStmHalInit(const Config& config);
+        void UartStmHalInit(const Config& config, bool hasFlowControl);
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
         void Invoke() override;
@@ -51,8 +64,8 @@ namespace hal
         uint8_t uartIndex;
         hal::PeripheralPinStm uartTx;
         hal::PeripheralPinStm uartRx;
-        infra::Optional<hal::PeripheralPinStm> uartRts;
-        infra::Optional<hal::PeripheralPinStm> uartCts;
+        hal::PeripheralPinStm uartRts;
+        hal::PeripheralPinStm uartCts;
 
         UART_HandleTypeDef uartHandle = {};
 

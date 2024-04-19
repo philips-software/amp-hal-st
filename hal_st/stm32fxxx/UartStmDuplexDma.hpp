@@ -6,41 +6,56 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include <atomic>
+#include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
+    namespace detail
+    {
+        struct UartStmDuplexDmaConfig
+        {
+            uint32_t baudrate{ 115200 };
+            hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+            bool swapTxRx{ false };
+#endif
+        };
+    }
+
     class UartStmDuplexDma
         : public SerialCommunication
         , private InterruptHandler
     {
     public:
-        struct Config
-        {
-            constexpr Config()
-            {}
-
-            uint32_t baudrate = 115200;
-            uint32_t hwFlowControl = UART_HWCONTROL_NONE;
-            infra::Optional<DmaChannelId> dmaChannelTx;
-            infra::Optional<DmaChannelId> dmaChannelRx;
-            infra::Optional<InterruptPriority> priority;
-        };
+        using Config = detail::UartStmDuplexDmaConfig;
 
         template<std::size_t RxBufferSize>
         using WithRxBuffer = infra::WithStorage<UartStmDuplexDma, std::array<uint8_t, RxBufferSize>>;
 
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm& dmaStm, uint8_t uartIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+
+    private:
+        UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
+
+    public:
         ~UartStmDuplexDma();
 
+        // Implementation of SerialCommunication
         void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
-        void Configure(const Config& config);
+        void HalfReceiveComplete();
+        void FullReceiveComplete();
         void ReceiveComplete(size_t currentPosition);
         void RegisterInterrupt(const Config& config);
         void TransferComplete();
+
+        // Implementation of InterruptHandler
         void Invoke() override;
 
     private:
@@ -48,14 +63,11 @@ namespace hal
         uint8_t uartIndex;
         PeripheralPinStm uartTx;
         PeripheralPinStm uartRx;
-        infra::Optional<PeripheralPinStm> uartRts;
-        infra::Optional<PeripheralPinStm> uartCts;
+        PeripheralPinStm uartRts;
+        PeripheralPinStm uartCts;
 
-        UART_HandleTypeDef uartHandle = {};
-
-        hal::DmaStm& dma;
-        DmaStm::Stream transmitDmaChannel;
-        DmaStm::CircularStream receiveDmaChannel;
+        hal::TransmitDmaChannel transmitDmaChannel;
+        hal::CircularReceiveDmaChannel receiveDmaChannel;
 
         infra::Function<void()> transferDataComplete;
         infra::Function<void(infra::ConstByteRange data)> dataReceived;

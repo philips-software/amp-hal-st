@@ -17,10 +17,14 @@ target_sources(hal_st.synchronous_stm32fxxx PRIVATE
     SynchronousGpioStm.hpp
     SynchronousFlashInternalStm.cpp
     SynchronousFlashInternalStm.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousHardwareSemaphoreStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousHardwareSemaphoreStm.hpp>
     SynchronousRandomDataGeneratorStm.cpp
     SynchronousRandomDataGeneratorStm.hpp
     SynchronousSpiMasterStm.cpp
     SynchronousSpiMasterStm.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousSynchronizedRandomDataGeneratorStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousSynchronizedRandomDataGeneratorStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:SynchronousUartStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:SynchronousUartStm.hpp>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>:SynchronousQuadSpiStm.cpp>
