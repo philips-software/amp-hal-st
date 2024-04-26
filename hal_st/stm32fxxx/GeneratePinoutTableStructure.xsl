@@ -20,7 +20,7 @@
       <xsl:with-param name="by" select="'&#37;20'"/>
     </xsl:call-template>
   </xsl:variable>
-  
+
   <xsl:template name="string-replace-all">
     <xsl:param name="text"/>
     <xsl:param name="replace"/>
@@ -112,24 +112,39 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
-  
+
   <xsl:template match="mcu:PinSignal">
     <xsl:param name="prefix"/>
     <xsl:param name="postfix"/>
-    <xsl:if test="starts-with(@Name, $prefix) and ($postfix = substring(@Name, string-length(@Name) - string-length($postfix) + 1))">
-      <gpio_pin>
-        <xsl:attribute name="port"><xsl:value-of select="substring(../@PortName, 2)"/></xsl:attribute>
-        <xsl:attribute name="pin-index"><xsl:value-of select="substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10)"/></xsl:attribute>
-        <xsl:choose>
-          <xsl:when test="$postfix != '' and concat($prefix, $postfix) != @Name">
-            <xsl:attribute name="peripheral-index"><xsl:value-of select="substring(@Name, string-length($prefix) + 1, string-length(@Name) - string-length($prefix) - string-length($postfix))"/></xsl:attribute>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:attribute name="peripheral-index">0</xsl:attribute>
-          </xsl:otherwise>
-        </xsl:choose>
-        <xsl:attribute name="alternate-function"><xsl:value-of select="mcu:SpecificParameter[@Name='GPIO_AF']"/></xsl:attribute>
-      </gpio_pin>
+    <xsl:if test="starts-with(@Name, $prefix) and ($postfix = substring(@Name, string-length(@Name) - string-length($postfix) + 1)) and (substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10))">
+      <xsl:variable name="pin_signal"><xsl:value-of select="@Name"/></xsl:variable>
+      <xsl:variable name="mcu_has_pin">
+        <xsl:for-each select="document($mcu-document-no-spaces)/mcu:Mcu/mcu:Pin">
+          <xsl:if test="starts-with(@Name, ../@Name)">
+            <xsl:for-each select="mcu:Signal[starts-with(@Name, $pin_signal)]">
+              <xsl:if test="starts-with(@Name, pin_signal)">
+                <xsl:value-of select="$pin_signal"/>
+              </xsl:if>
+            </xsl:for-each>
+          </xsl:if>
+        </xsl:for-each>
+      </xsl:variable>
+
+      <xsl:if test="$mcu_has_pin != ''">
+        <gpio_pin>
+          <xsl:attribute name="port"><xsl:value-of select="substring(../@PortName, 2)"/></xsl:attribute>
+          <xsl:attribute name="pin-index"><xsl:value-of select="substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10)"/></xsl:attribute>
+          <xsl:choose>
+            <xsl:when test="$postfix != '' and concat($prefix, $postfix) != @Name">
+              <xsl:attribute name="peripheral-index"><xsl:value-of select="substring(@Name, string-length($prefix) + 1, string-length(@Name) - string-length($prefix) - string-length($postfix))"/></xsl:attribute>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:attribute name="peripheral-index">0</xsl:attribute>
+            </xsl:otherwise>
+          </xsl:choose>
+          <xsl:attribute name="alternate-function"><xsl:value-of select="mcu:SpecificParameter[@Name='GPIO_AF']"/></xsl:attribute>
+        </gpio_pin>
+      </xsl:if>
     </xsl:if>
   </xsl:template>
 
