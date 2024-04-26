@@ -119,14 +119,10 @@
     <xsl:if test="starts-with(@Name, $prefix) and ($postfix = substring(@Name, string-length(@Name) - string-length($postfix) + 1)) and (substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10))">
       <xsl:variable name="pin_signal"><xsl:value-of select="@Name"/></xsl:variable>
       <xsl:variable name="mcu_has_pin">
-        <xsl:for-each select="document($mcu-document-no-spaces)/mcu:Mcu/mcu:Pin">
-          <xsl:if test="starts-with(@Name, ../@Name)">
-            <xsl:for-each select="mcu:Signal[starts-with(@Name, $pin_signal)]">
-              <xsl:if test="starts-with(@Name, pin_signal)">
-                <xsl:value-of select="$pin_signal"/>
-              </xsl:if>
-            </xsl:for-each>
-          </xsl:if>
+        <xsl:for-each select="document($mcu-document-no-spaces)/mcu:Mcu/mcu:Pin[contains(@Name, ../@Name)]">
+          <xsl:for-each select="mcu:Signal[starts-with(@Name, $pin_signal)]">
+            <xsl:value-of select="$pin_signal"/>
+          </xsl:for-each>
         </xsl:for-each>
       </xsl:variable>
 
