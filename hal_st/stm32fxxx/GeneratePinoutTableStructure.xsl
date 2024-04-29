@@ -116,9 +116,11 @@
   <xsl:template match="mcu:PinSignal">
     <xsl:param name="prefix"/>
     <xsl:param name="postfix"/>
+
     <xsl:if test="starts-with(@Name, $prefix) and ($postfix = substring(@Name, string-length(@Name) - string-length($postfix) + 1)) and (substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10))">
       <xsl:variable name="pin_signal"><xsl:value-of select="@Name"/></xsl:variable>
       <xsl:variable name="mcu_has_pin">
+        <!-- Lookup mcu file to check if this pin exists and supports this signal, as ip file is too generic for a mcu family -->
         <xsl:for-each select="document($mcu-document-no-spaces)/mcu:Mcu/mcu:Pin[contains(@Name, ../@Name)]">
           <xsl:for-each select="mcu:Signal[starts-with(@Name, $pin_signal)]">
             <xsl:value-of select="$pin_signal"/>
