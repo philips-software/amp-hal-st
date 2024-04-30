@@ -29,7 +29,7 @@ namespace hal
         UartStmHalInit(config, hasFlowControl);
     }
 
-#if defined(STM32WB)
+#if defined(STM32WB) | defined(STM32WBA)
     UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config)
         : UartStm(oneBasedIndex, uartTxPin, uartRxPin, dummyPinStm, dummyPinStm, lpUart, config, false)
     {}
@@ -63,7 +63,7 @@ namespace hal
         uartHandle.Init.Parity = config.parity;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
         uartHandle.Init.HwFlowCtl = hasFlowControl ? UART_HWCONTROL_RTS_CTS : UART_HWCONTROL_NONE;
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32WBA)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
 #else
@@ -84,7 +84,7 @@ namespace hal
 
         HAL_UART_Init(&uartHandle);
 
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32WBA)
         // Enable FIFO. FIFO can only be enabled after 'HAL_UART_Init'; but UART must be disabled first.
         uartArray[uartIndex]->CR1 &= ~USART_CR1_UE;
         uartArray[uartIndex]->CR1 |= USART_CR1_FIFOEN | USART_CR1_UE;
@@ -131,7 +131,7 @@ namespace hal
 
     void UartStm::Invoke()
     {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
         if (uartArray[uartIndex]->ISR & USART_ISR_RXNE)
 #else
         if (uartArray[uartIndex]->SR & USART_SR_RXNE)
@@ -139,14 +139,14 @@ namespace hal
         {
             infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
             while (!buffer.full() && (uartArray[uartIndex]->ISR & USART_ISR_RXNE))
 #else
             while (!buffer.full() && (uartArray[uartIndex]->SR & USART_SR_RXNE))
 #endif
             {
                 uint8_t receivedByte =
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
                     uartArray[uartIndex]->RDR;
 #else
                     uartArray[uartIndex]->DR;
@@ -155,7 +155,7 @@ namespace hal
             }
 
             // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
             really_assert(!(uartArray[uartIndex]->ISR & USART_ISR_ORE));
 #else
             really_assert(!(uartArray[uartIndex]->SR & USART_SR_ORE));
@@ -167,13 +167,13 @@ namespace hal
 
         if (sending)
         {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
             while (!sendData.empty() && (uartArray[uartIndex]->ISR & USART_ISR_TXE))
 #else
             while (!sendData.empty() && (uartArray[uartIndex]->SR & USART_SR_TXE))
 #endif
             {
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
                 uartArray[uartIndex]->TDR = sendData.front();
 #else
                 uartArray[uartIndex]->DR = sendData.front();

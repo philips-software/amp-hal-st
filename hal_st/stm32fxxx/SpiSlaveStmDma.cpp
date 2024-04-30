@@ -10,11 +10,19 @@ namespace hal
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
+#if !defined(STM32WBA)
         , tx(transmitStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
+#else
+        , tx(transmitStream, &peripheralSpi[spiInstance]->TXDR, 1, [this]()
+#endif
               {
                   SendDone();
               })
+#if !defined(STM32WBA)
         , rx(receiveStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
+#else
+        , rx(receiveStream, &peripheralSpi[spiInstance]->RXDR, 1, [this]()
+#endif
               {
                   ReceiveDone();
               })
@@ -126,13 +134,23 @@ namespace hal
 
     void SpiSlaveStmDma::EnableDma()
     {
+#if !defined(STM32WBA)
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_RXDMAEN;
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_TXDMAEN;
+#else
+        peripheralSpi[spiInstance]->CR2 |= SPI_CFG1_RXDMAEN;
+        peripheralSpi[spiInstance]->CR2 |= SPI_CFG1_TXDMAEN;
+#endif
     }
 
     void SpiSlaveStmDma::DisableDma()
     {
+#if !defined(STM32WBA)
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_TXDMAEN;
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_RXDMAEN;
+#else
+        peripheralSpi[spiInstance]->CR2 &= ~SPI_CFG1_TXDMAEN;
+        peripheralSpi[spiInstance]->CR2 &= ~SPI_CFG1_RXDMAEN;
+#endif
     }
 }

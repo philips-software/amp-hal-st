@@ -8,11 +8,15 @@ namespace hal
             GPIOA,
             GPIOB,
             GPIOC,
+#if !defined(STM32WBA)
             GPIOD,
-#if !defined(STM32G0)
+#else 
+            GPIOH,
+#endif
+#if !defined(STM32G0) && !defined(STM32WBA)
             GPIOE,
 #endif
-#if !defined(STM32WB) && !defined(STM32G0)
+#if !defined(STM32WB) && !defined(STM32G0) && !defined(STM32WBA)
             GPIOF,
 #endif
 #if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
@@ -55,7 +59,9 @@ namespace hal
             GPIO_SPEED_FREQ_LOW,
             GPIO_SPEED_FREQ_MEDIUM,
             GPIO_SPEED_FREQ_HIGH,
+#if !defined(STM32WBA)
             GPIO_SPEED_FREQ_VERY_HIGH
+#endif
         };
 
         const uint32_t driveToOutputMode[2] = {

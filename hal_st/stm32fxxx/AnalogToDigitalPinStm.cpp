@@ -26,11 +26,13 @@ namespace
         ADC_CHANNEL_11,
         ADC_CHANNEL_12,
         ADC_CHANNEL_13,
+#if !defined(STM32WBA)
         ADC_CHANNEL_14,
         ADC_CHANNEL_15,
         ADC_CHANNEL_16,
         ADC_CHANNEL_17,
         ADC_CHANNEL_18
+#endif
     };
 }
 
@@ -60,7 +62,7 @@ namespace hal
         channelConfig.Offset = 0;
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
         channelConfig.SingleDiff = ADC_SINGLE_ENDED;
-#elif defined(STM32G0)
+#elif defined(STM32G0) || defined(STM32WBA)
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
 #else
         channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
@@ -100,7 +102,7 @@ namespace hal
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
         channelConfig.SingleDiff = ADC_SINGLE_ENDED;
 #endif
-#if !defined(STM32F0) && !defined(STM32F3) && !defined(STM32G0)
+#if !defined(STM32F0) && !defined(STM32F3) && !defined(STM32G0) && !defined(STM32WBA)
         channelConfig.Offset = 0;
 #endif
         channelConfig.SamplingTime = config.samplingTime;
@@ -117,6 +119,8 @@ namespace hal
         , interruptHandler(ADC1_IRQn, [this]()
 #elif defined(STM32G4)
         , interruptHandler(ADC1_2_IRQn, [this]()
+#elif defined(STM32WBA)
+        , interruptHandler(ADC4_IRQn, [this]()
 #else
         , interruptHandler(ADC_IRQn, [this]()
 #endif
@@ -125,25 +129,26 @@ namespace hal
         EnableClockAdc(index);
 
         handle.Instance = peripheralAdc[index];
-#if !defined(STM32F3)
+#if !defined(STM32F3) && !defined(STM32WBA)
         handle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
+        handle.Init.Resolution = ADC_RESOLUTION_12B;
+#elif defined(STM32WBA)
+        handle.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV4;
         handle.Init.Resolution = ADC_RESOLUTION_12B;
 #endif
         handle.Init.ScanConvMode = DISABLE;
         handle.Init.ContinuousConvMode = DISABLE;
         handle.Init.DiscontinuousConvMode = DISABLE;
-#if !defined(STM32G0)
+#if !defined(STM32G0) && !defined(STM32WBA)
         handle.Init.NbrOfDiscConversion = 0;
 #endif
 #if !defined(STM32F3)
         handle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+        handle.Init.DMAContinuousRequests = DISABLE;
 #endif
         handle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
         handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
         handle.Init.NbrOfConversion = 1;
-#if !defined(STM32F3)
-        handle.Init.DMAContinuousRequests = DISABLE;
-#endif
 #if defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
         handle.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
         handle.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
@@ -186,7 +191,7 @@ namespace hal
     void AdcStm::MeasurementDone()
     {
         assert(onDone != nullptr);
-#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0) || defined(STM32WBA)
         handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
 #else
         handle.Instance->SR &= ~ADC_SR_EOC;

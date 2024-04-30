@@ -9,7 +9,7 @@ namespace hal
     {
         volatile void* PeripheralAddress(uint8_t uartIndex)
         {
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4) || defined(STM32WBA)
             return &peripheralUart[uartIndex]->TDR;
 #else
             return &peripheralUart[uartIndex]->DR;
@@ -52,7 +52,7 @@ namespace hal
         else
             uartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
 #else
@@ -98,7 +98,7 @@ namespace hal
     {
         this->dataReceived = dataReceived;
 
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32WBA)
         peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
 #else
         peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
@@ -124,7 +124,7 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32G4) || defined(STM32WB)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA)
         while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
 #elif defined(STM32G0)
         while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
@@ -133,7 +133,7 @@ namespace hal
 #endif
         {
             uint8_t receivedByte =
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4) || defined(STM32WBA)
                 peripheralUart[uartIndex]->RDR;
 #else
                 peripheralUart[uartIndex]->DR;
@@ -142,7 +142,7 @@ namespace hal
         }
 
         // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4)
+#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G0) || defined(STM32G4) || defined(STM32WBA)
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
 #else
         really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));

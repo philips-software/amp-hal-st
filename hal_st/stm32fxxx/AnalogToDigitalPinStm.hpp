@@ -17,7 +17,7 @@ namespace hal
             uint32_t samplingTime { ADC_SAMPLETIME_7CYCLES_5 };
 #elif defined(STM32WB) || defined(STM32G4)
             uint32_t samplingTime { ADC_SAMPLETIME_2CYCLES_5 };
-#elif defined(STM32G0)
+#elif defined(STM32G0) || defined(STM32WBA)
             uint32_t samplingTime { ADC_SAMPLETIME_3CYCLES_5 };
 #else
             uint32_t samplingTime { ADC_SAMPLETIME_3CYCLES };

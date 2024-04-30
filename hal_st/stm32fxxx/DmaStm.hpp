@@ -10,7 +10,7 @@
 
 namespace hal
 {
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
+#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA)
 #define DMA_CHANNEL_BASED
 #else
 #define DMA_STREAM_BASED
@@ -108,6 +108,7 @@ namespace hal
 
             DmaStm& dma;
             uint8_t dmaIndex;
+            uint8_t dmaMux;
             uint8_t streamIndex = 0xff;
         };
 
