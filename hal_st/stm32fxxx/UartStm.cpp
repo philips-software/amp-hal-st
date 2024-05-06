@@ -70,6 +70,18 @@ namespace hal
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
 #endif
 
+#if defined(UART_ADVFEATURE_NO_INIT)
+        uartHandle.AdvancedInit = {};
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+        if (config.swapTxRx)
+        {
+            uartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_SWAP_INIT;
+            uartHandle.AdvancedInit.Swap = UART_ADVFEATURE_SWAP_ENABLE;
+        }
+#endif
+#endif
+
         HAL_UART_Init(&uartHandle);
 
 #if defined(STM32WB)

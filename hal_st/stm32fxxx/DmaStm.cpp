@@ -279,7 +279,7 @@ namespace hal
 
     void DmaStm::ReserveStream(uint8_t dmaIndex, uint8_t streamIndex)
     {
-        assert((streamAllocation[dmaIndex] & (1 << streamIndex)) == 0);
+        really_assert((streamAllocation[dmaIndex] & (1 << streamIndex)) == 0);
         streamAllocation[dmaIndex] |= 1 << streamIndex;
     }
 
