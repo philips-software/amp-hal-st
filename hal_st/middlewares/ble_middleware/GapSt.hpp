@@ -129,7 +129,7 @@ namespace hal
     private:
         const uint8_t& txPowerLevel;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
-        infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
+        std::optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
     };
 }
 

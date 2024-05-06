@@ -59,7 +59,7 @@ namespace application
     template<class Constructed>
     infra::SharedPtr<void> Perpipheral<Constructed>::Construct()
     {
-        return constructed.Emplace(echo);
+        return constructed.emplace(echo);
     }
 }
 

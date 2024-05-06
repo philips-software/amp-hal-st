@@ -19,8 +19,8 @@ namespace hal
     {
         if (flowControl != HwFlowControl::hwControlDisable)
         {
-            this->uartRts.Emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
-            this->uartCts.Emplace(uartCts, PinConfigTypeStm::uartCts, aUartIndex);
+            this->uartRts.emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
+            this->uartCts.emplace(uartCts, PinConfigTypeStm::uartCts, aUartIndex);
         }
         Register(peripheralUartIrq[uartIndex]);
         EnableClockUart(uartIndex);
@@ -62,12 +62,14 @@ namespace hal
         {
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
             while ((peripheralUart[uartIndex]->ISR & USART_ISR_TXE) == 0)
-            {}
+            {
+            }
 
             peripheralUart[uartIndex]->TDR = byte;
 #else
             while ((peripheralUart[uartIndex]->SR & USART_SR_TXE) == 0)
-            {}
+            {
+            }
 
             peripheralUart[uartIndex]->DR = byte;
 #endif
@@ -75,10 +77,12 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         while ((peripheralUart[uartIndex]->ISR & USART_ISR_TXE) == 0)
-        {}
+        {
+        }
 #else
         while ((peripheralUart[uartIndex]->SR & USART_SR_TXE) == 0)
-        {}
+        {
+        }
 #endif
     }
 
@@ -152,7 +156,7 @@ namespace hal
         EnableClockUart(aUartIndex - 1);
 
         if (flowControl != HwFlowControl::hwControlDisable)
-            this->uartRts.Emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
+            this->uartRts.emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
 
         UartStmHalInit(flowControl, baudrate);
     }
@@ -169,7 +173,7 @@ namespace hal
         EnableClockLpuart(aUartIndex - 1);
 
         if (flowControl != HwFlowControl::hwControlDisable)
-            this->uartRts.Emplace(uartRts, PinConfigTypeStm::lpuartRts, aUartIndex);
+            this->uartRts.emplace(uartRts, PinConfigTypeStm::lpuartRts, aUartIndex);
 
         UartStmHalInit(flowControl, baudrate);
     }
@@ -186,12 +190,14 @@ namespace hal
         {
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
             while ((uartBase->ISR & USART_ISR_TXE) == 0)
-            {}
+            {
+            }
 
             uartBase->TDR = byte;
 #else
             while ((uartBase->SR & USART_SR_TXE) == 0)
-            {}
+            {
+            }
 
             uartBase->DR = byte;
 #endif
@@ -199,10 +205,12 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         while ((uartBase->ISR & USART_ISR_TXE) == 0)
-        {}
+        {
+        }
 #else
         while ((uartBase->SR & USART_SR_TXE) == 0)
-        {}
+        {
+        }
 #endif
     }
 
