@@ -31,13 +31,10 @@ emil_build_for(hal_st.blink_nucleo64
     PREREQUISITE_BOOL HALST_BUILD_EXAMPLES
 )
 
-
 target_compile_definitions(hal_st.blink_nucleo64 PUBLIC
-    $<JOIN:stm32g4x,stm32g431>
-    $<JOIN:stm32g4x,stm32g474>
     $<$<STREQUAL:${TARGET_MCU},stm32wba52>:NUCLEO=Nucleo64WBAUi>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:NUCLEO=Nucleo64WBUi>
-    $<$<IN_LIST:${TARGET_MCU},stm32g4x>:NUCLEO=Nucleo64Ui>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32g431>,$<STREQUAL:${TARGET_MCU},stm32g474>>:NUCLEO=Nucleo64Ui>
 )
 
 target_link_libraries(hal_st.blink_nucleo64 PRIVATE

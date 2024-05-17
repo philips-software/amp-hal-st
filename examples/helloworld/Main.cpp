@@ -11,7 +11,7 @@
 #include <chrono>
 
 #if defined(STM32WBA)
-unsigned int hse_value = 32000000;
+unsigned int hse_value = 32'000'000;
 #else
 unsigned int hse_value = 24'000'000;
 #endif

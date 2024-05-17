@@ -5,7 +5,7 @@
 #if defined(STM32F7)
 extern "C"
 {
-    #include "stm32f7xx_ll_adc.h"
+#include "stm32f7xx_ll_adc.h"
 }
 #endif
 
@@ -26,7 +26,7 @@ namespace
         ADC_CHANNEL_11,
         ADC_CHANNEL_12,
         ADC_CHANNEL_13,
-#if !defined(STM32WBA)
+#ifdef ADC_CHANNEL_18
         ADC_CHANNEL_14,
         ADC_CHANNEL_15,
         ADC_CHANNEL_16,
@@ -85,7 +85,7 @@ namespace hal
     void AnalogToDigitalInternalTemperatureStm::Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)
     {
         ADC_ChannelConfTypeDef channelConfig;
-#if !defined(STM32G4)
+#if defined(ADC_CHANNEL_TEMPSENSOR)
         channelConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
 #else
         if (adc.index == 1)
@@ -124,7 +124,9 @@ namespace hal
 #else
         , interruptHandler(ADC_IRQn, [this]()
 #endif
-              { MeasurementDone(); })
+              {
+                  MeasurementDone();
+              })
     {
         EnableClockAdc(index);
 

@@ -79,8 +79,7 @@ namespace main_
               {
                   SYSCFG->CMPCR |= SYSCFG_CMPCR_CMP_PD;
                   while ((SYSCFG->CMPCR & SYSCFG_CMPCR_READY) == 0)
-                  {
-                  }
+                  {}
               })
         , mdio(pins[0].first, pins[0].second)
         , mdc(pins[1].first, pins[1].second)
@@ -106,8 +105,7 @@ namespace main_
               {
                   SYSCFG->CMPCR |= SYSCFG_CMPCR_CMP_PD;
                   while ((SYSCFG->CMPCR & SYSCFG_CMPCR_READY) == 0)
-                  {
-                  }
+                  {}
               })
         , mdio(pins[0].first, pins[0].second)
         , mdc(pins[1].first, pins[1].second)

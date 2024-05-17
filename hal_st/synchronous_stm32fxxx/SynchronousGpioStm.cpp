@@ -8,25 +8,29 @@ namespace hal
             GPIOA,
             GPIOB,
             GPIOC,
-#if !defined(STM32WBA)
+#if defined(GPIOD)
             GPIOD,
-#else 
-            GPIOH,
 #endif
-#if !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOE)
             GPIOE,
 #endif
-#if !defined(STM32WB) && !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOF)
             GPIOF,
 #endif
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
+#if defined(GPIOG)
             GPIOG,
+#endif
+#if defined(GPIOH)
             GPIOH,
+#endif
+#if defined(GPIOI)
             GPIOI,
 #endif
-#if defined(STM32F7)
+#if defined(GPIOJ)
             GPIOJ,
-            GPIOK
+#endif
+#if defined(GPIOK)
+            GPIOK,
 #endif
         };
 
@@ -59,7 +63,7 @@ namespace hal
             GPIO_SPEED_FREQ_LOW,
             GPIO_SPEED_FREQ_MEDIUM,
             GPIO_SPEED_FREQ_HIGH,
-#if !defined(STM32WBA)
+#if defined(GPIO_SPEED_FREQ_VERY_HIGH)
             GPIO_SPEED_FREQ_VERY_HIGH
 #endif
         };

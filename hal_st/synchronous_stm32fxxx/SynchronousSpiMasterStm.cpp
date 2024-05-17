@@ -73,7 +73,7 @@ namespace hal
     void SynchronousSpiMasterStm::HandleInterrupt()
     {
         uint32_t status = peripheralSpi[spiInstance]->SR;
-#if !defined(STM32WBA)
+#ifdef SPI_FLAG_RXNE
         if ((status & SPI_FLAG_RXNE) != 0)
 #else
         if ((status & SPI_FLAG_RXWNE) != 0)
@@ -101,14 +101,14 @@ namespace hal
             receiving &= !receiveData.empty();
 
             if (dummyToReceive == 0 && !receiving)
-#if !defined(STM32WBA)
+#ifdef SPI_IT_RXNE
                 peripheralSpi[spiInstance]->CR2 &= ~SPI_IT_RXNE;
 #else
                 peripheralSpi[spiInstance]->CR2 &= ~SPI_IT_RXP;
 #endif
         }
 
-#if !defined(STM32WBA)
+#ifdef SPI_FLAG_TXE
         if ((status & SPI_FLAG_TXE) != 0)
 #else
         if ((status & SPI_FLAG_TXC) != 0)
@@ -137,7 +137,7 @@ namespace hal
 
             // After the first transmit, disable interrupt on transmit buffer empty,
             // so that a receive is done before each transmit
-#if !defined(STM32WBA)
+#ifdef SPI_IT_TXE
             peripheralSpi[spiInstance]->CR2 &= ~SPI_IT_TXE;
 #else
             peripheralSpi[spiInstance]->CR2 &= ~SPI_IT_TXP;

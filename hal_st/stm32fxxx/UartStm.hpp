@@ -5,10 +5,11 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/Optional.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
 {
-#if defined(STM32WB) | defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
     struct LpUart
     {};
 
@@ -38,13 +39,13 @@ namespace hal
 
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
-#if defined(STM32WB) | defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
 #endif
     private:
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
-#if defined(STM32WB) | defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config, bool hasFlowControl);
 #endif
 

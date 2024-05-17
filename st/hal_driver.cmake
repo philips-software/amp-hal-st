@@ -36,8 +36,6 @@ function(add_hal_driver target_name hal_driver cmsis)
     foreach(source ${sources_in})
         if (NOT ${source} MATCHES "_template.|_s\.c|_ns\.c")
             list(APPEND sources ${source})
-        else()
-            message(STATUS "Removed source from build ${source}")
         endif()
     endforeach()
 

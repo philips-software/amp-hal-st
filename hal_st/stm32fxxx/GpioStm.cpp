@@ -11,25 +11,29 @@ namespace hal
             GPIOA,
             GPIOB,
             GPIOC,
-#if !defined(STM32WBA)
+#if defined(GPIOD)
             GPIOD,
-#else 
-            GPIOH,
 #endif
-#if !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOE)
             GPIOE,
 #endif
-#if !defined(STM32WB) && !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOF)
             GPIOF,
 #endif
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
+#if defined(GPIOG)
             GPIOG,
+#endif
+#if defined(GPIOH)
             GPIOH,
+#endif
+#if defined(GPIOI)
             GPIOI,
 #endif
-#if defined(STM32F7)
+#if defined(GPIOJ)
             GPIOJ,
-            GPIOK
+#endif
+#if defined(GPIOK)
+            GPIOK,
 #endif
         };
 
@@ -62,7 +66,7 @@ namespace hal
             GPIO_SPEED_FREQ_LOW,
             GPIO_SPEED_FREQ_MEDIUM,
             GPIO_SPEED_FREQ_HIGH,
-#if !defined(STM32WBA)
+#if defined(GPIO_SPEED_FREQ_VERY_HIGH)
             GPIO_SPEED_FREQ_VERY_HIGH
 #endif
         };
@@ -473,13 +477,13 @@ namespace hal
         uint32_t extiMask = 0xf << ((index & 0x03) << pos);
         uint32_t extiValue = static_cast<uint8_t>(port) << ((index & 0x03) << pos);
 
-#if defined(STM32G0) | defined(STM32WBA)
+#if defined(EXTI_EXTICR1_EXTI0)
         EXTI->EXTICR[index >> 2] = (EXTI->EXTICR[index >> 2] & ~extiMask) | extiValue;
 #else
         SYSCFG->EXTICR[index >> 2] = (SYSCFG->EXTICR[index >> 2] & ~extiMask) | extiValue;
 #endif
 
-#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0) || defined(STM32WBA)
+#if defined(EXTI_RTSR1_RT0)
         if (trigger != InterruptTrigger::fallingEdge)
             EXTI->RTSR1 |= 1 << index;
         else
@@ -510,7 +514,7 @@ namespace hal
 
     void GpioStm::DisableInterrupt(Port port, uint8_t index)
     {
-#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0) || defined(STM32WBA)
+#if defined(EXTI_IMR1_IM0)
         EXTI->IMR1 &= ~(1 << index);
 #else
         EXTI->IMR &= ~(1 << index);

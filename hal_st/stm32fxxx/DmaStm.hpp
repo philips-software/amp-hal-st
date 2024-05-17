@@ -108,7 +108,9 @@ namespace hal
 
             DmaStm& dma;
             uint8_t dmaIndex;
+#ifdef DMA_CTR2_REQSEL
             uint8_t dmaMux;
+#endif
             uint8_t streamIndex = 0xff;
         };
 

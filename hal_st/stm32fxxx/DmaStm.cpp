@@ -1,7 +1,6 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "infra/util/ByteRange.hpp"
 
-
 #if !defined(STM32F0) && !defined(STM32F1) && !defined(STM32F3)
 
 namespace hal
@@ -39,7 +38,7 @@ namespace hal
                 DMA_CHANNEL_5,
                 DMA_CHANNEL_6,
                 DMA_CHANNEL_7,
-#if defined(STM32F765xx) || defined(STM32F767xx) || defined(STM32F769xx) || defined(STM32F777xx) || defined(STM32F779xx)
+#if defined(DMA_CHANNEL_15)
                 DMA_CHANNEL_8,
                 DMA_CHANNEL_9,
                 DMA_CHANNEL_10,
@@ -60,15 +59,15 @@ namespace hal
         // clang-format off
         const std::array dmaISRDma1
         {
-#if defined(STM32WBA)
+#if defined(GPDMA1_Channel7_NS)
             &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel0_NS->CSR,
+            &GPDMA1_Channel1_NS->CSR,
+            &GPDMA1_Channel2_NS->CSR,
+            &GPDMA1_Channel3_NS->CSR,
+            &GPDMA1_Channel4_NS->CSR,
+            &GPDMA1_Channel5_NS->CSR,
+            &GPDMA1_Channel6_NS->CSR,
+            &GPDMA1_Channel7_NS->CSR,
 #else
             &DMA1->ISR,
             &DMA1->ISR,
@@ -111,7 +110,7 @@ namespace hal
 
         const std::array dmaIFCRDma1
         {
-#if defined(STM32WBA)
+#if defined(GPDMA1_Channel7_NS)
             &GPDMA1_Channel0_NS->CFCR,
             &GPDMA1_Channel1_NS->CFCR,
             &GPDMA1_Channel2_NS->CFCR,
@@ -161,7 +160,7 @@ namespace hal
 
         const std::array DmaChannelDma1
         {
-#if defined(STM32WBA)
+#if defined(GPDMA1_Channel7_NS)
             GPDMA1_Channel0_NS,
             GPDMA1_Channel1_NS,
             GPDMA1_Channel2_NS,
@@ -211,7 +210,7 @@ namespace hal
 
         const std::array dmaIrqDma1
         {
-#if defined(STM32WBA)
+#if defined(GPDMA1)
             GPDMA1_Channel0_IRQn,
             GPDMA1_Channel1_IRQn,
             GPDMA1_Channel2_IRQn,
@@ -261,7 +260,7 @@ namespace hal
 
         const std::array streamToTCIF
         {
-#if defined(STM32WBA)
+#ifdef DMA_CFCR_TCF
             DMA_CFCR_TCF,
             DMA_CFCR_TCF,
             DMA_CFCR_TCF,
@@ -287,7 +286,7 @@ namespace hal
         };
         const std::array streamToHTIF
         {
-#if defined(STM32WBA)
+#ifdef DMA_CFCR_HTF
             DMA_CFCR_HTF,
             DMA_CFCR_HTF,
             DMA_CFCR_HTF,
@@ -313,7 +312,7 @@ namespace hal
         };
         const std::array streamToTEIF
         {
-#if defined(STM32WBA)
+#ifdef DMA_CFCR_DTEF
             DMA_CFCR_DTEF,
             DMA_CFCR_DTEF,
             DMA_CFCR_DTEF,
@@ -352,12 +351,12 @@ namespace hal
 
     DmaStm::DmaStm()
     {
-#if defined(STM32WBA)
+#if defined(__HAL_RCC_GPDMA1_CLK_ENABLE)
         __HAL_RCC_GPDMA1_CLK_ENABLE();
 #else
         __DMA1_CLK_ENABLE();
         __DMA2_CLK_ENABLE();
-#if defined(STM32WB) || defined(STM32G4)
+#if defined(__HAL_RCC_DMAMUX1_CLK_ENABLE)
         __HAL_RCC_DMAMUX1_CLK_ENABLE();
 #endif
 #endif
@@ -365,12 +364,12 @@ namespace hal
 
     DmaStm::~DmaStm()
     {
-#if defined(STM32WBA)
+#if defined(__HAL_RCC_GPDMA1_CLK_DISABLE)
         __HAL_RCC_GPDMA1_CLK_DISABLE();
 #else
         __DMA1_CLK_DISABLE();
         __DMA2_CLK_DISABLE();
-#if defined(STM32WB) || defined(STM32G4)
+#if defined(__HAL_RCC_DMAMUX1_CLK_DISABLE)
         __HAL_RCC_DMAMUX1_CLK_DISABLE();
 #endif
 #endif
@@ -390,7 +389,7 @@ namespace hal
     DmaStm::Stream::Stream(DmaStm& dma, DmaChannelId channelId)
         : dma(dma)
         , dmaIndex(channelId.dma)
-#if defined(STM32WBA)
+#ifdef DMA_CTR2_REQSEL
         , dmaMux(channelId.mux)
 #endif
 
@@ -407,22 +406,19 @@ namespace hal
         DmaChannelHandle.Instance = DmaChannel[dmaIndex][streamIndex];
 
         DmaChannelHandle.Init.Direction = DMA_MEMORY_TO_PERIPH;
+        DmaChannelHandle.Init.Mode = DMA_NORMAL;
 
-#if defined(STM32WBA)
-
-        DmaChannelHandle.Init.Request = GPDMA1_REQUEST_USART1_TX;
+#if defined(GPDMA1)
         DmaChannelHandle.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
         DmaChannelHandle.Init.Priority = DMA_LOW_PRIORITY_MID_WEIGHT;
         DmaChannelHandle.Init.SrcBurstLength = 1;
         DmaChannelHandle.Init.DestBurstLength = 1;
         DmaChannelHandle.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0 | DMA_DEST_ALLOCATED_PORT0;
         DmaChannelHandle.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
-        DmaChannelHandle.Init.Mode = DMA_NORMAL;
 #else
         DmaChannelHandle.Init.PeriphInc = DMA_PINC_DISABLE;
         DmaChannelHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
         DmaChannelHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        DmaChannelHandle.Init.Mode = DMA_NORMAL;
         DmaChannelHandle.Init.Priority = DMA_PRIORITY_MEDIUM;
 #endif
 #if defined(DMA_STREAM_BASED)
@@ -465,9 +461,9 @@ namespace hal
     uint8_t DmaStm::Stream::DataSize() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_MSIZE)
         return 1 << ((streamRegister->CR & DMA_SxCR_MSIZE) >> POSITION_VAL(DMA_SxCR_MSIZE));
-#elif defined(STM32WBA)
+#elif defined(DMA_CTR1_DDW_LOG2)
         return 1 << ((streamRegister->CTR1 & DMA_CTR1_DDW_LOG2) >> POSITION_VAL(DMA_CTR1_DDW_LOG2));
 #else
         return 1 << ((streamRegister->CCR & DMA_CCR_MSIZE) >> POSITION_VAL(DMA_CCR_MSIZE));
@@ -484,14 +480,14 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_PSIZE)
         streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_PSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_PSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_PSIZE_1 : 0);
-#elif defined(STM32WBA)
+#elif defined(DMA_CTR2_DREQ)
         dataSizeInBytes &= 0x03;
-        uint32_t mask{0};
+        uint32_t mask{ 0 };
         if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
             mask = (dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos;
-        else  if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
+        else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
             mask = (dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos;
 
         streamRegister->CTR1 = (streamRegister->CTR1 & ~mask) | (streamRegister->CTR1 | mask);
@@ -503,15 +499,15 @@ namespace hal
     void DmaStm::Stream::SetMemoryDataSize(uint8_t dataSizeInBytes)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_MSIZE)
         streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_MSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_MSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_MSIZE_1 : 0);
-#elif defined(STM32WBA)
+#elif defined(DMA_CTR2_DREQ)
         dataSizeInBytes &= 0x03;
-        uint32_t mask{0};
+        uint32_t mask{ 0 };
         if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
-            mask = ((dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos);
+            mask = (dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos;
         else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
-            mask = ((dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos);
+            mask = (dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos;
 
         streamRegister->CTR1 = (streamRegister->CTR1 & ~mask) | (streamRegister->CTR1 | mask);
 #else
@@ -533,7 +529,7 @@ namespace hal
     void DmaStm::Stream::Disable()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_EN)
         streamRegister->CR &= ~DMA_SxCR_EN;
 #else
         streamRegister->CCR &= ~DMA_CCR_EN;
@@ -543,7 +539,7 @@ namespace hal
     void DmaStm::Stream::DisableHalfTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_HTIE)
         streamRegister->CR &= ~DMA_IT_HT;
 #else
         streamRegister->CCR &= ~DMA_IT_HT;
@@ -553,7 +549,7 @@ namespace hal
     void DmaStm::Stream::DisableMemoryIncrement()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_MINC)
         streamRegister->CR &= ~DMA_MINC_ENABLE;
 #elif defined(STM32WBA)
         streamRegister->CTR1 &= (!(streamRegister->CTR2 & DMA_CTR2_SWREQ) && (streamRegister->CTR2 & DMA_CTR2_DREQ)) ? ~DMA_CTR1_SINC : ~DMA_CTR1_DINC;
@@ -565,7 +561,7 @@ namespace hal
     void DmaStm::Stream::DisableTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_TCIE)
         streamRegister->CR &= ~DMA_IT_TC;
 #else
         streamRegister->CCR &= ~DMA_IT_TC;
@@ -575,9 +571,9 @@ namespace hal
     void DmaStm::Stream::DisableCircularMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_CIRC)
         streamRegister->CR &= ~DMA_SxCR_CIRC;
-#elif defined(STM32WBA)
+#elif defined(DMA_TCEM_EACH_LL_ITEM_TRANSFER)
         streamRegister->CLLR &= 0;
 #else
         streamRegister->CCR &= ~DMA_CCR_CIRC;
@@ -587,7 +583,7 @@ namespace hal
     void DmaStm::Stream::Enable()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_EN)
         streamRegister->CR |= DMA_SxCR_EN;
 #else
         streamRegister->CCR |= DMA_CCR_EN;
@@ -597,7 +593,7 @@ namespace hal
     void DmaStm::Stream::EnableHalfTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_HTIE)
         streamRegister->CR |= DMA_IT_HT;
 #else
         streamRegister->CCR |= DMA_IT_HT;
@@ -607,7 +603,7 @@ namespace hal
     void DmaStm::Stream::EnableMemoryIncrement()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_MINC)
         streamRegister->CR |= DMA_MINC_ENABLE;
 #elif defined(STM32WBA)
         streamRegister->CTR1 |= (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH)) ? DMA_CTR1_SINC : DMA_CTR1_DINC;
@@ -619,7 +615,7 @@ namespace hal
     void DmaStm::Stream::EnableTransferCompleteInterrupt()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_TCIE)
         streamRegister->CR |= DMA_IT_TC;
 #else
         streamRegister->CCR |= DMA_IT_TC;
@@ -629,11 +625,9 @@ namespace hal
     void DmaStm::Stream::EnableCircularMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_CIRC)
         streamRegister->CR |= DMA_SxCR_CIRC;
-#elif defined(STM32WBA)
-        EnableHalfTransferCompleteInterrupt();
-        EnableTransferCompleteInterrupt();
+#elif defined(DMA_LINKEDLIST)
 #else
         streamRegister->CCR |= DMA_CCR_CIRC;
 #endif
@@ -642,7 +636,7 @@ namespace hal
     bool DmaStm::Stream::Finished() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_EN)
         return (streamRegister->CR & DMA_SxCR_EN) == 0;
 #else
         return (streamRegister->CCR & DMA_CCR_EN) == 0;
@@ -653,7 +647,7 @@ namespace hal
     void DmaStm::Stream::SetMemoryAddress(const void* memoryAddress)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxM0AR_M0A)
         streamRegister->M0AR = reinterpret_cast<uint32_t>(memoryAddress);
 #elif defined(STM32WBA)
         if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
@@ -668,7 +662,7 @@ namespace hal
     void DmaStm::Stream::SetMemoryToPeripheralMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_DIR_0)
         streamRegister->CR |= DMA_MEMORY_TO_PERIPH;
 #elif defined(STM32WBA)
         streamRegister->CTR2 |= DMA_CTR2_DREQ;
@@ -681,7 +675,7 @@ namespace hal
     void DmaStm::Stream::SetPeripheralAddress(volatile void* peripheralAddress)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxPAR_PA)
         streamRegister->PAR = reinterpret_cast<uint32_t>(peripheralAddress);
 #elif defined(STM32WBA)
         if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
@@ -696,7 +690,7 @@ namespace hal
     void DmaStm::Stream::SetPeripheralToMemoryMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxCR_DIR_0)
         streamRegister->CR &= ~DMA_MEMORY_TO_PERIPH;
 #elif defined(STM32WBA)
         streamRegister->CTR2 &= ~(DMA_CTR2_DREQ | DMA_CTR2_SWREQ);
@@ -709,9 +703,9 @@ namespace hal
     void DmaStm::Stream::SetTransferSize(uint16_t size)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxNDT)
         streamRegister->NDTR = size / DataSize();
-#elif defined(STM32WBA)
+#elif defined(DMA_CBR1_BNDT)
         streamRegister->CBR1 = size / DataSize();
 #else
         streamRegister->CNDTR = size / DataSize();
@@ -741,9 +735,9 @@ namespace hal
     size_t DmaStm::Stream::BytesToTransfer() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(DMA_SxNDT)
         return streamRegister->NDTR * DataSize();
-#elif defined(STM32WBA)
+#elif defined(DMA_CBR1_BNDT)
         return streamRegister->CBR1 * DataSize();
 #else
         return streamRegister->CNDTR * DataSize();

@@ -55,7 +55,7 @@ emil_build_for(st.hal_driver_stm32wbaxx TARGET_MCU_FAMILY stm32wbaxx PREREQUISIT
 
 target_compile_definitions(st.hal_driver_stm32wbaxx PUBLIC
     STM32WBA=1
-    STM32WBA52xx=1
+    $<$<STREQUAL:${TARGET_MCU},stm32wba52>:STM32WBA52xx=1>
     DEVICE_HEADER="stm32wbaxx.h"
 )
 
