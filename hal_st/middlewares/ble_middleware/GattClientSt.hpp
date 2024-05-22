@@ -3,9 +3,8 @@
 
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
-#include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
-#include "infra/util/BoundedVector.hpp"
+#include "infra/stream/InputStream.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal

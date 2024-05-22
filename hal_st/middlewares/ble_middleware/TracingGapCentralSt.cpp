@@ -195,7 +195,7 @@ namespace hal
         tracer.Trace() << "\tL2CAP length        : " << connectionUpdateEvent.L2CAP_Length;
         tracer.Trace() << "\tInterval min        : " << connectionUpdateEvent.Interval_Min;
         tracer.Trace() << "\tInterval max        : " << connectionUpdateEvent.Interval_Max;
-        tracer.Trace() << "\tSlave latency       : " << connectionUpdateEvent.Slave_Latency;
+        //tracer.Trace() << "\tSlave latency       : " << connectionUpdateEvent.Slave_Latency;
 
         GapCentralSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
     }
