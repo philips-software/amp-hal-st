@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<ProjectWorkspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="project_mpw.xsd">
+
+  <SchemaVersion>1.0</SchemaVersion>
+
+  <Header>### uVision Project, (C) Keil Software</Header>
+
+  <WorkspaceName>WorkSpace</WorkspaceName>
+
+  <project>
+    <PathAndName>.\thread_ftd_keil_config\thread_ftd_keil_config.uvprojx</PathAndName>
+    <NodeIsActive>1</NodeIsActive>
+  </project>
+
+  <project>
+    <PathAndName>.\thread_mtd_keil_config\thread_mtd_keil_config.uvprojx</PathAndName>
+  </project>
+
+  <project>
+    <PathAndName>.\thread_rcp_keil_config\thread_rcp_keil_config.uvprojx</PathAndName>
+  </project>
+
+</ProjectWorkspace>
