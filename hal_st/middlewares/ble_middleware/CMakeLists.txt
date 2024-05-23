@@ -27,8 +27,6 @@ target_sources(hal_st.ble_middleware PRIVATE
     GattServerSt.cpp
     GattServerSt.hpp
     HciEventObserver.hpp
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:Shci.cpp>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:Shci.hpp>
     SystemTransportLayer.cpp
     SystemTransportLayer.hpp
     TracingGapCentralSt.cpp
