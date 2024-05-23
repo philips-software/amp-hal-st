@@ -22,6 +22,10 @@ namespace hal
             uint32_t baudrate{ 115200 };
             uint32_t parity{ USART_PARITY_NONE };
             InterruptPriority priority{ InterruptPriority::Normal };
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+            bool swapTxRx{ false };
+#endif
         };
     }
 
