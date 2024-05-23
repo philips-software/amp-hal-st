@@ -1,9 +1,12 @@
 #include "hal_st/middlewares/ble_middleware/SystemTransportLayer.hpp"
-#include "hci_tl.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include <atomic>
+#if defined(STM32WB)
+#include "hci_tl.h"
 #include "shci.h"
 #include "shci_tl.h"
-#include <atomic>
+#include "interface/patterns/ble_thread/tl/tl.h"
+#endif
 
 extern "C"
 {
@@ -17,6 +20,7 @@ extern "C"
         return SVCCTL_UserEvtFlowEnable;
     }
 
+#if defined(STM32WB)
     void hci_notify_asynch_evt(void* data)
     {
         static std::atomic_bool notificationScheduled{ false };
@@ -40,10 +44,17 @@ extern "C"
                     shci_user_evt_proc();
                 });
     }
+#elif defined(STM32WBA)
+    uint8_t BLECB_Indication(const uint8_t* data, uint16_t length, const uint8_t* ext_data, uint16_t ext_length)
+    {
+
+    }
+#endif
 }
 
 namespace
 {
+#if defined(STM32WB)
     const uint8_t bleEventQueueLength = 0x05;
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
     const uint16_t bleEventFrameSize = TL_EVT_HDR_SIZE + tlBleMaxEventPayloadSize;
@@ -85,6 +96,7 @@ namespace
         else
             pParam->status = HCI_TL_UserEventFlow_Disable;
     }
+#endif
 }
 
 namespace hal
@@ -93,11 +105,15 @@ namespace hal
         : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
         , protocolStackInitialized(protocolStackInitialized)
     {
+#if defined(STM32WB)
         TL_Init();
         ShciInit();
         HciInit();
         MemoryChannelInit();
         TL_Enable();
+#elif defined(STM32WBA)
+        protocolStackInitialized(bleBondsStorage);
+#endif
     }
 
     SystemTransportLayer::Version SystemTransportLayer::GetVersion() const
@@ -116,15 +132,24 @@ namespace hal
         };
     }
 
-    void SystemTransportLayer::HandleErrorNotifyEvent(TL_AsynchEvt_t* SysEvent)
+    void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)
+    {
+        infra::Subject<HciEventSink>::NotifyObservers([&event](auto& observer)
+            {
+                observer.HciEvent(event);
+            });
+    }
+
+#if defined(STM32WB)
+    void SystemTransportLayer::HandleErrorNotifyEvent(void* event)
     {}
 
-    void SystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
+    void SystemTransportLayer::HandleBleNvmRamUpdateEvent(void* event)
     {
         bondBlobPersistence.Update();
     }
 
-    void SystemTransportLayer::HandleUnknownEvent(TL_AsynchEvt_t* SysEvent)
+    void SystemTransportLayer::HandleUnknownEvent(void* event)
     {}
 
     void SystemTransportLayer::UserEventHandler(void* payload)
@@ -146,14 +171,6 @@ namespace hal
                 HandleUnknownEvent(event);
                 break;
         }
-    }
-
-    void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)
-    {
-        infra::Subject<HciEventSink>::NotifyObservers([&event](auto& observer)
-            {
-                observer.HciEvent(event);
-            });
     }
 
     void SystemTransportLayer::HandleWirelessFwEvent(void* payload)
@@ -213,4 +230,5 @@ namespace hal
         config.AsynchEvtPoolSize = poolSize;
         TL_MM_Init(&config);
     }
+#endif
 }
