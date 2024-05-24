@@ -1,0 +1,1 @@
+STM32Cube_FW_WBA_V1.3.1
