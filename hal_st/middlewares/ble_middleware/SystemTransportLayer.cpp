@@ -47,13 +47,14 @@ extern "C"
 #elif defined(STM32WBA)
     uint8_t BLECB_Indication(const uint8_t* data, uint16_t length, const uint8_t* ext_data, uint16_t ext_length)
     {
-
+        return BLE_STATUS_SUCCESS;
     }
 #endif
 }
 
 namespace
 {
+    const uint32_t bleBondsStorageLength = 507;
 #if defined(STM32WB)
     const uint8_t bleEventQueueLength = 0x05;
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
@@ -96,6 +97,8 @@ namespace
         else
             pParam->status = HCI_TL_UserEventFlow_Disable;
     }
+#elif defined(STM32WBA)
+    uint32_t bleBondsStorage[bleBondsStorageLength];
 #endif
 }
 
@@ -118,6 +121,7 @@ namespace hal
 
     SystemTransportLayer::Version SystemTransportLayer::GetVersion() const
     {
+#if defined(STM32WB)
         WirelessFwInfo_t wirelessInfo;
         SHCI_GetWirelessFwInfo(&wirelessInfo);
 
@@ -130,6 +134,17 @@ namespace hal
             wirelessInfo.FusVersionMinor,
             wirelessInfo.FusVersionSub,
         };
+#elif defined(STM32WBA)
+        return {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        };
+#endif
     }
 
     void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)

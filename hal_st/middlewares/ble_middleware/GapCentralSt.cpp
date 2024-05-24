@@ -143,8 +143,14 @@ namespace hal
 
         auto l2capEvent = *reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data);
 
+#if defined(STM32WB)
+        auto latency = l2capEvent.Slave_Latency;
+#elif defined(STM32WBA)
+        auto latency = l2capEvent.Latency;
+#endif
+
         aci_l2cap_connection_parameter_update_resp(
-            l2capEvent.Connection_Handle, l2capEvent.Interval_Min, l2capEvent.Interval_Max, l2capEvent.Slave_Latency,
+            l2capEvent.Connection_Handle, l2capEvent.Interval_Min, l2capEvent.Interval_Max, latency,
             l2capEvent.Timeout_Multiplier, minConnectionEventLength, maxConnectionEventLength, l2capEvent.Identifier, rejectParameters);
 
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()

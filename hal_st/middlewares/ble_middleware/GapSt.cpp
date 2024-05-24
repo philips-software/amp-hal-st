@@ -5,6 +5,10 @@
 #if defined(STM32WB)
 #include "shci.h"
 #include "stm32wbxx_ll_system.h"
+#elif defined(STM32WBA)
+#include "ble_common.h"
+#include "ble_bufsize.h"
+#include "blestack.h"
 #endif
 
 namespace hal
@@ -117,11 +121,11 @@ namespace hal
 #elif defined(STM32WBA)
         const uint8_t maxAttMtuSizeForInternalBuffer = 251;
         const std::size_t bufferSize = BLE_TOTAL_BUFFER_SIZE(maxNumberOfBleLinks, NumberOfBleMemoryBlocks(maxAttMtuSizeForInternalBuffer));
-        const std::size_t gattBufferSize = BLE_TOTAL_BUFFER_SIZE_GATT(numAttrRecord, numAttrServ, attrValueArrSize)
+        const std::size_t gattBufferSize = BLE_TOTAL_BUFFER_SIZE_GATT(numAttrRecord, numAttrServ, attrValueArrSize);
         std::array<uint32_t, DIVC(bufferSize, 4)> bleBuffer;
         std::array<uint32_t, DIVC(gattBufferSize, 4)> bleGattBuffer;
 
-        void BleStackInitialization(bleBondStorage, configuration)
+        void BleStackInitialization(GapSt::BleBondStorage bleBondStorage, const GapSt::Configuration& configuration)
         {
             const uint8_t bleStackOptions = 0;
 
