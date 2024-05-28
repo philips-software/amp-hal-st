@@ -3,7 +3,7 @@
 add_library(hal_st.stm32_wpan_stm32wbaxx STATIC)
 emil_build_for(hal_st.stm32_wpan_stm32wbaxx TARGET_MCU_FAMILY stm32wbaxx PREREQUISITE_BOOL HALST_STANDALONE)
 
-add_definitions(-DBLE)
+set_target_properties(hal_st.stm32_wpan_stm32wbaxx PROPERTIES COMPILE_DEFINITIONS "BLE")
 
 target_include_directories(hal_st.stm32_wpan_stm32wbaxx PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
@@ -21,11 +21,11 @@ target_include_directories(hal_st.stm32_wpan_stm32wbaxx PUBLIC
 
 target_link_libraries(hal_st.stm32_wpan_stm32wbaxx PUBLIC
     st.hal_driver
-    ${CMAKE_CURRENT_LIST_DIR}/ble/stack/lib/stm32wba_ble_stack_full.a
-    ${CMAKE_CURRENT_LIST_DIR}/link_layer/ll_cmd_lib/lib/LinkLayer_BLE_Full_lib.a
 )
 
 target_sources(hal_st.stm32_wpan_stm32wbaxx PRIVATE
+    app_specific/power_table.c
+
     ble/svc/Inc/common_blesvc.h
     ble/svc/Src/svc_ctl.c
 
