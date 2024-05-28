@@ -60,7 +60,6 @@ namespace
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
     const uint16_t bleEventFrameSize = TL_EVT_HDR_SIZE + tlBleMaxEventPayloadSize;
     const uint32_t poolSize = bleEventQueueLength * 4u * DIVC((sizeof(TL_PacketHeader_t) + bleEventFrameSize), 4u);
-    const uint32_t bleBondsStorageLength = 507;
 
     // Buffers to be used by the mailbox to report the events
     [[gnu::section("MB_MEM2")]] alignas(4) uint8_t evtPool[poolSize];

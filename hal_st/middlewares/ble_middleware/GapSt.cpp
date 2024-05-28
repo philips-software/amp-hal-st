@@ -6,9 +6,12 @@
 #include "shci.h"
 #include "stm32wbxx_ll_system.h"
 #elif defined(STM32WBA)
+extern "C"
+{
 #include "ble_common.h"
 #include "ble_bufsize.h"
 #include "blestack.h"
+}
 #endif
 
 namespace hal
