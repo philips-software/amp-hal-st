@@ -15,10 +15,10 @@ jobs:
     name: Host Build & Test (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.0.0
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           persist-credentials: false
-      - uses: hendrikmuhs/ccache-action@faf867a11c028c0b483fb2ae72b6fc8f7d842714 # v1.2.12
+      - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-ubuntu-latest
           variant: sccache
@@ -29,14 +29,14 @@ jobs:
           buildPreset: "host-Debug-WithPackage"
           #testPreset: "host"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
-      - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: hal_st
           path: build/host/hal_st-*-Linux.tar.gz
           if-no-files-found: error
       #- name: Upload test logs
       #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       #  with:
       #    name: test-logs
       #    path: build/host/Testing/Temporary/
@@ -47,10 +47,10 @@ jobs:
       matrix:
         os: [windows-latest, windows-2019, macos-latest]
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.0.0
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           persist-credentials: false
-      - uses: hendrikmuhs/ccache-action@faf867a11c028c0b483fb2ae72b6fc8f7d842714 # v1.2.12
+      - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-${{ matrix.os }}
           variant: sccache
@@ -62,7 +62,7 @@ jobs:
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
       #- name: Upload test logs
       #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       #  with:
       #    name: test-logs
       #    path: build/host/Testing/Temporary/
@@ -86,16 +86,16 @@ jobs:
             configuration: "RelWithDebInfo"
             target: "stm32f767"
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
         uses: carlosperate/arm-none-eabi-gcc-action@3bd7199be896455c00fffba8a216770a3003a538 # v1.8.1
         with:
           release: ${{ matrix.gcc }}
       - run: sudo apt-get update && sudo apt-get install ninja-build xsltproc
-      - uses: hendrikmuhs/ccache-action@faf867a11c028c0b483fb2ae72b6fc8f7d842714 # v1.2.12
+      - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
-      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: hal_st
       - run: tar -zxvf hal_st-*.tar.gz
