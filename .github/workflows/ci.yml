@@ -74,7 +74,7 @@ jobs:
       matrix:
         configuration: ["RelWithDebInfo"]
         gcc: [ "10.3-2021.10" ]
-        target: ["stm32wb55", "stm32g070", "stm32g431", "stm32f407", "stm32f429", "stm32f746", "stm32f767"]
+        target: ["stm32wb55", "stm32g070", "stm32g431", "stm32f407", "stm32f429", "stm32f746", "stm32f767", "stm32wba52"]
         include:
           - gcc: "7-2018-q2"
             configuration: "RelWithDebInfo"
@@ -88,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
-        uses: carlosperate/arm-none-eabi-gcc-action@3bd7199be896455c00fffba8a216770a3003a538 # v1.8.1
+        uses: carlosperate/arm-none-eabi-gcc-action@b864ac853a2d2f74ec2b8b3ec4deb9cb684b4627 # v1.8.2
         with:
           release: ${{ matrix.gcc }}
       - run: sudo apt-get update && sudo apt-get install ninja-build xsltproc

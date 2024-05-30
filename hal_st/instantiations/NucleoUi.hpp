@@ -47,6 +47,17 @@ namespace main_
         hal::GpioPinStm ledBlue{ hal::Port::B, 5 };
     };
 
+    // UM3103: MB1863 reference board with STM32WBA52CG
+    struct Nucleo64WBAUi
+    {
+        hal::GpioPinStm buttonOne{ hal::Port::C, 13, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm buttonTwo{ hal::Port::B, 6, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm buttonThree{ hal::Port::B, 7, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm ledRed{ hal::Port::B, 8 };
+        hal::GpioPinStm ledGreen{ hal::Port::B, 11 };
+        hal::GpioPinStm ledBlue{ hal::Port::B, 4 };
+    };
+
     // UM1974: MB1137 reference board with F207ZG, F303ZE, F412ZG, F413ZH, F429ZI, F439ZI, F446ZE, F722ZE, F746ZG, F756ZG, F767ZI, H743ZI
     // UM2179: MB1312 reference board with L496ZG, L496ZG-P, L4A6ZG, L4P5ZG, LR5ZI, L4R5ZI-P
     struct Nucleo144Ui
