@@ -1,10 +1,12 @@
 #include <algorithm>
+#include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include "stm32wbaxx_ll_rcc.h"
 extern "C"
 {
 #include "linklayer_plat.h"
 #include "ll_sys.h"
+#include "scm.h"
 }
 
 namespace
@@ -23,7 +25,7 @@ namespace
     volatile uint32_t localBasePriValue = 0;
 
     /* Radio SW low ISR global variable */
-    volatile bool isRadioRunningInHighPriority = 0;
+    volatile bool isRadioRunningInHighPriority = false;
 
     /* 2.4GHz RADIO ISR callbacks */
     void (*radioCallback)() = nullptr;
@@ -36,13 +38,53 @@ extern "C"
     {}
 
     void ll_sys_schedule_bg_process()
-    {}
+    {
+        infra::EventDispatcher::Instance().Schedule([]()
+            {
+                ll_sys_bg_process();
+            });
+    }
 
     void ll_sys_schedule_bg_process_isr()
-    {}
+    {
+        infra::EventDispatcher::Instance().Schedule([]()
+            {
+                ll_sys_bg_process();
+            });
+    }
 
     void ll_sys_config_params()
-    {}
+    {
+        uint16_t freq_value = 0;
+        uint32_t linklayer_slp_clk_src = LL_RCC_RADIOSLEEPSOURCE_NONE;
+
+        ll_intf_config_ll_ctx_params(1, 1); // Do not modify - must be 1
+
+        linklayer_slp_clk_src = LL_RCC_RADIO_GetSleepTimerClockSource();
+
+        switch(linklayer_slp_clk_src)
+        {
+            case LL_RCC_RADIOSLEEPSOURCE_LSE:
+                linklayer_slp_clk_src = RTC_SLPTMR;
+                break;
+
+            case LL_RCC_RADIOSLEEPSOURCE_LSI:
+                linklayer_slp_clk_src = RCO_SLPTMR;
+                break;
+
+            case LL_RCC_RADIOSLEEPSOURCE_HSE_DIV1000:
+                linklayer_slp_clk_src = CRYSTAL_OSCILLATOR_SLPTMR;
+                break;
+
+            default:
+                /* No Link Layer sleep clock source selected */
+                assert_param(0);
+                break;
+        }
+
+        ll_intf_le_select_slp_clk_src((uint8_t)linklayer_slp_clk_src, &freq_value);
+        ll_intf_select_tx_power_table(0);
+    }
 
     void ll_sys_bg_temperature_measurement_init()
     {}
@@ -204,12 +246,14 @@ extern "C"
     {
         __HAL_RCC_RADIO_CLK_SLEEP_ENABLE();
         NVIC_SetPriority(RADIO_IRQn, highIsrPriorityWhenRadioIsActive);
+        scm_notifyradiostate(SCM_RADIO_ACTIVE);
     }
 
     void LINKLAYER_PLAT_StopRadioEvt()
     {
         __HAL_RCC_RADIO_CLK_SLEEP_DISABLE();
         NVIC_SetPriority(RADIO_IRQn, highIsrPriorityWhenRadioIsInactive);
+        scm_notifyradiostate(SCM_RADIO_NOT_ACTIVE);
     }
 
     void LINKLAYER_PLAT_RCOStartClbr()
@@ -229,6 +273,20 @@ extern "C"
 
     void LINKLAYER_PLAT_SCHLDR_TIMING_UPDATE_NOT(Evnt_timing_t * p_evnt_timing)
     {}
+
+    void RCC_IRQHandler(void)
+    {
+        if(__HAL_RCC_GET_IT(RCC_IT_HSERDY))
+        {
+            __HAL_RCC_CLEAR_IT(RCC_IT_HSERDY);
+            scm_hserdy_isr();
+        }
+        else if(__HAL_RCC_GET_IT(RCC_IT_PLL1RDY))
+        {
+            __HAL_RCC_CLEAR_IT(RCC_IT_PLL1RDY);
+            scm_pllrdy_isr();
+        }
+    }
 
     void RADIO_IRQHandler()
     {
@@ -251,11 +309,8 @@ extern "C"
         if(lowIsrCallback)
             lowIsrCallback();
 
-        if(isRadioRunningInHighPriority != 0)
-        {
+        if(std::exchange(isRadioRunningInHighPriority, false))
             HAL_NVIC_SetPriority(HASH_IRQn, highIsrPriorityWhenRadioIsInactive, 0);
-            isRadioRunningInHighPriority = 0;
-        }
 
         NVIC_EnableIRQ(HASH_IRQn);
     }
