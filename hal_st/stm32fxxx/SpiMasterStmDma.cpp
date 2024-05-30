@@ -9,6 +9,16 @@ namespace hal
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
+#if defined(STM32WBA)
+        , tx(transmitStream, &peripheralSpi[spiInstance]->TXDR, 1, [this]()
+              {
+                  SendDone();
+              })
+        , rx(receiveStream, &peripheralSpi[spiInstance]->RXDR, 1, [this]()
+              {
+                  ReceiveDone();
+              })
+#else
         , tx(transmitStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
               {
                   SendDone();
@@ -17,6 +27,7 @@ namespace hal
               {
                   ReceiveDone();
               })
+#endif
     {
         EnableClockSpi(spiInstance);
 
@@ -134,6 +145,9 @@ namespace hal
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         assert(dataSizeInBits >= 4 && dataSizeInBits <= 16);
         peripheralSpi[spiInstance]->CR2 = (peripheralSpi[spiInstance]->CR2 & ~SPI_CR2_DS) | ((dataSizeInBits - 1) << POSITION_VAL(SPI_CR2_DS)) | (dataSizeInBits <= 8 ? SPI_CR2_FRXTH : 0);
+#elif defined(STM32WBA)
+        assert(dataSizeInBits == 8 || dataSizeInBits == 16);
+        peripheralSpi[spiInstance]->CR1 = peripheralSpi[spiInstance]->CR1 & ~SPI_CR1_SPE | (dataSizeInBits == 16 ? SPI_CR1_SPE : 0);
 #else
         assert(dataSizeInBits == 8 || dataSizeInBits == 16);
         peripheralSpi[spiInstance]->CR1 = peripheralSpi[spiInstance]->CR1 & ~SPI_CR1_DFF | (dataSizeInBits == 16 ? SPI_CR1_DFF : 0);
@@ -149,7 +163,12 @@ namespace hal
 #if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
         return ((peripheralSpi[spiInstance]->CR2 & SPI_CR2_DS) >> POSITION_VAL(SPI_CR2_DS)) + 1;
 #else
+#if !defined(STM32WBA)
         if ((peripheralSpi[spiInstance]->CR1 & SPI_CR1_DFF) != 0)
+#else
+        if ((peripheralSpi[spiInstance]->CR1 & SPI_CR1_SPE) != 0)
+
+#endif
             return 16;
         else
             return 8;
@@ -187,13 +206,23 @@ namespace hal
 
     void SpiMasterStmDma::EnableDma()
     {
+#if !defined(STM32WBA)
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_RXDMAEN;
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_TXDMAEN;
+#else
+        peripheralSpi[spiInstance]->CR2 |= SPI_CFG1_RXDMAEN;
+        peripheralSpi[spiInstance]->CR2 |= SPI_CFG1_TXDMAEN;
+#endif
     }
 
     void SpiMasterStmDma::DisableDma()
     {
+#if !defined(STM32WBA)
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_TXDMAEN;
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_RXDMAEN;
+#else
+        peripheralSpi[spiInstance]->CR2 &= ~SPI_CFG1_TXDMAEN;
+        peripheralSpi[spiInstance]->CR2 &= ~SPI_CFG1_RXDMAEN;
+#endif
     }
 }
