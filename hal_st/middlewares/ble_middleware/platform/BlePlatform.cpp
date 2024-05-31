@@ -81,14 +81,14 @@ extern "C"
         really_assert(hal::BlePlatform::InstanceSet());
     }
 
-    uint8_t BLEPLAT_TimerStart(uint16_t id, uint32_t timeout)
+    uint8_t BLEPLAT_TimerStart(uint8_t id, uint32_t timeout)
     {
         really_assert(hal::BlePlatform::InstanceSet());
 
         return 0;
     }
 
-    void BLEPLAT_TimerStop(uint16_t id)
+    void BLEPLAT_TimerStop(uint8_t id)
     {
         really_assert(hal::BlePlatform::InstanceSet());
     }

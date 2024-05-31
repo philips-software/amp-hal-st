@@ -55,35 +55,7 @@ extern "C"
 
     void ll_sys_config_params()
     {
-        uint16_t freq_value = 0;
-        uint32_t linklayer_slp_clk_src = LL_RCC_RADIOSLEEPSOURCE_NONE;
-
         ll_intf_config_ll_ctx_params(1, 1); // Do not modify - must be 1
-
-        linklayer_slp_clk_src = LL_RCC_RADIO_GetSleepTimerClockSource();
-
-        switch(linklayer_slp_clk_src)
-        {
-            case LL_RCC_RADIOSLEEPSOURCE_LSE:
-                linklayer_slp_clk_src = RTC_SLPTMR;
-                break;
-
-            case LL_RCC_RADIOSLEEPSOURCE_LSI:
-                linklayer_slp_clk_src = RCO_SLPTMR;
-                break;
-
-            case LL_RCC_RADIOSLEEPSOURCE_HSE_DIV1000:
-                linklayer_slp_clk_src = CRYSTAL_OSCILLATOR_SLPTMR;
-                break;
-
-            default:
-                /* No Link Layer sleep clock source selected */
-                assert_param(0);
-                break;
-        }
-
-        ll_intf_le_select_slp_clk_src((uint8_t)linklayer_slp_clk_src, &freq_value);
-        ll_intf_select_tx_power_table(0);
     }
 
     void ll_sys_bg_temperature_measurement_init()
@@ -94,8 +66,7 @@ extern "C"
 
     void LINKLAYER_PLAT_ClockInit()
     {
-        really_assert(LL_RCC_RADIO_GetSleepTimerClockSource() != LL_RCC_RADIOSLEEPSOURCE_NONE);
-
+        __HAL_RCC_RADIOSLPTIM_CONFIG(RCC_RADIOSTCLKSOURCE_LSE);
         __HAL_RCC_RADIO_CLK_ENABLE();
     }
 
@@ -269,9 +240,6 @@ extern "C"
     {}
 
     void LINKLAYER_PLAT_DisableOSContextSwitch()
-    {}
-
-    void LINKLAYER_PLAT_SCHLDR_TIMING_UPDATE_NOT(Evnt_timing_t * p_evnt_timing)
     {}
 
     void RCC_IRQHandler(void)
