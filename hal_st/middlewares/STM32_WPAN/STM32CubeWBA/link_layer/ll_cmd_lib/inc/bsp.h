@@ -1,40 +1,11 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW05Patchv6_2/firmware/public_inc/bsp.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/bsp.h#1 $*/
 
 /**
  ********************************************************************************
  * @file    bsp.h
  * @brief   board support package interface wrapper file.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef LL_BSP_H_
@@ -102,12 +73,6 @@ typedef struct _ble_ll_bus {
 	void (*write)(uint8_t *buffer);
 } ble_ll_bus;
 
-/* Structure holding the Event timing */
-typedef struct Evnt_timing_s{
-	uint32_t drift_time; /* The total drift time between the software timer value and the start execution of the function evnt_schdlr_timer_callback */
-	uint32_t exec_time;  /* The time to get the event ready for air transmission */
-	uint32_t schdling_time; /* The total time to server the completed event and start new cycle of it, the time from longest time of the state machine done isr to till the debug dio DBG_IO_PROFILE_END_DRIFT_TIME is raised */
-}Evnt_timing_t;
 /**
  * @brief enum holding all debugging gpio
  *
@@ -134,7 +99,6 @@ typedef enum Debug_GPIO_e{
 	DBG_IO_SCHDLR_HNDL_MISSED_EVNT                              ,
 	DBG_IO_SCHDLR_UNRGSTR_EVNT                                  ,
 	DBG_IO_SCHDLR_EXEC_EVNT_TRACE                               ,
-	DBG_IO_SCHDLR_EXEC_EVNT_PROFILE								,
 	DBG_IO_SCHDLR_EXEC_EVNT_ERROR                               ,
 	DBG_IO_SCHDLR_EXEC_EVNT_WINDOW_WIDENING                     ,
 	DBG_IO_LLHWC_CMN_CLR_ISR                                    ,
@@ -278,56 +242,7 @@ typedef enum Debug_GPIO_e{
 	DBG_IO_RAL_SM_DONE_EVNT_CBK                                 ,
 	DBG_IO_ED_TMR_HNDL                                          ,
 	DBG_IO_OS_TMR_EVNT_CBK                                      ,
-	DBG_IO_PROFILE_MARKER_PHY_WAKEUP_TIME                       ,
-	DBG_IO_PROFILE_END_DRIFT_TIME                               ,
-	DBG_IO_PROC_RADIO_RCV										,
 
-	DBG_IO_EVNT_TIME_UPDT										,
-												
-	DBG_IO_MAC_RECEIVE_DONE										,
-	DBG_IO_MAC_TX_DONE											,
-	DBG_IO_RADIO_APPLY_CSMA										,
-	DBG_IO_RADIO_TRANSMIT										,
-	DBG_IO_PROC_RADIO_TX										,
-	DBG_IO_RAL_TX_DONE											,
-	DBG_IO_RAL_TX_DONE_INCREMENT_BACKOFF_COUNT					,
-	DBG_IO_RAL_TX_DONE_RST_BACKOFF_COUNT						,
-	DBG_IO_RAL_CONTINUE_RX										,
-	DBG_IO_RAL_PERFORM_CCA										,
-	DBG_IO_RAL_ENABLE_TRANSMITTER								,
-	DBG_IO_LLHWC_GET_CH_IDX_ALGO_2 ,
-	DBG_IO_ADV_EXT_MNGR_PAWR_ADV_SE_CBK                         ,
-	DBG_IO_ADV_EXT_MNGR_PAWR_ADV_SE_ERR_CBK                     ,
-	DBG_IO_ADV_EXT_MNGR_PAWR_SCN_ERR_CBK                        ,
-
-	DBG_IO_LLHWC_SET_ADV_PAWR_SE_PARAM							,
-	DBG_IO_LLHWC_ADV_PAWR_SE_DONE								,
-	DBG_IO_LLHWC_SET_PAWR_RSP_PARAM								,
-	DBG_IO_LLHWC_ADV_PAWR_RSP_DONE								,
-	DBG_IO_LLHWC_ADV_PAWR_RSP_DONE_RCV_PCKT						,
-	DBG_IO_LLHWC_ADV_PAWR_RSP_DONE_FREE_PCKT					,
-	DBG_IO_LLHWC_PAWR_PING_PONG_HNDL							,
-	DBG_IO_LLHWC_PAWR_PING_PONG_RCV_PCKT						,
-	DBG_IO_LLHWC_PAWR_ADV_STOP_RSPS								,
-	DBG_IO_LLHWC_PAWR_SYNC_SET_PARAM							,
-	DBG_IO_LLHWC_PAWR_SYNC_DONE									,
-	DBG_IO_LLHWC_PAWR_SYNC_SEND_RSP								,
-
-	DBG_IO_PAWR_ADV_SE_MISS_RSP									,
-	DBG_IO_PAWR_ADV_FORCE_RP									,
-	DBG_IO_PAWR_ADV_PUSH_STRT_TIM_FORW							,
-	DBG_IO_PAWR_ADV_RSP_NEAR									,
-	DBG_IO_EVNT_STRT_TIM_PUSHED									,
-	DBG_IO_PAWR_ADV_RSP_SWITCH_SE								,
-	DBG_IO_PAWR_ADV_QUEUE_WIN_UPDT								,
-	DBG_IO_PAWR_SYNC_REFUSE_INST_RSP							,
-	DBG_IO_PAWR_SYNC_ABOUT_TIMEOUT								,
-	DBG_IO_PAWR_SYNC_INST_RSP_TOO_LATE							,
-	DBG_IO_PAWR_SYNC_EXEC_SKIPPED								,
-	DBG_IO_NULL_PKT_STATUS										,
-	DBG_IO_PAWR_MULTIPLE_EVNTS_MISSED							,
-	DBG_IO_PAWR_CHM_UPDT_END									,
-	DBG_IO_LLHWC_CMN_INIT                                       ,
 	Debug_GPIO_num
 
 }Debug_GPIO_t;
@@ -460,7 +375,7 @@ void bsp_delay_us(uint32_t delay);
  * @retval  None
  *
  */
-int bsp_intr_enable (uint32_t intrNum, void (*intr_cb)(void));
+int bsp_intr_enable (uint32_t intrNum, void (*intr_cb)());
 /**
  * @brief   interrupt set pri  Function
  *
@@ -471,7 +386,7 @@ int bsp_intr_enable (uint32_t intrNum, void (*intr_cb)(void));
  * @retval  None
  *
  */
-int bsp_intr_set_pri(uint32_t intrNum, void (*intr_cb)(void), int32_t intpri);
+int bsp_intr_set_pri(uint32_t intrNum, void (*intr_cb)(), int32_t intpri);
 
 
 
@@ -525,18 +440,6 @@ void bsp_control_aclk(uint8_t enable);
  * @retval None.
  */
 void bsp_evnt_not(EvntNotiState enable);
-
-/**
- * @brief	Notification that LL FW will start or end RCO Calibration .
- *
- *@note this is an optional wrapper that used to inform the upper layer of the state of RCO calibration.
- *@note the upper layer may ignore this wrapper
- * @param	enable: EVNT_START , RCO calibration will be started
- * 				  : Evnt_END     RCO calibration has  completed
-  *
- * @retval None.
- */
-void bsp_rco_clbr_not(EvntNotiState enable);
 
 /**
  * @brief used to assert/trigger the low priority interrupt from the SW.
@@ -613,14 +516,6 @@ void bsp_debug_gpio_toggle(Debug_GPIO_t gpio);
  */
 void bsp_set_phy_clbr_state(PhyClbrState state);
 /**
- * @brief a function to notify the upper layer to switch the clock.
- *
- * @param evnt_timing[in]: Evnt_timing_t pointer to structure contains drift time , execution time and scheduling time
- *
- * @retval None.
- */
-void bsp_evnt_schldr_timing_update_not(Evnt_timing_t * p_evnt_timing);
-/**
  * @}
  */
 
@@ -633,6 +528,7 @@ int logUart(void* devHandle, char* logStr);
 
 void bsp_assert_log(uint8_t condition, uint8_t severity, const char *ptr_func_name,  const int line);
 void bsp_assert(uint8_t condition, uint8_t severity);
+
 
 
 

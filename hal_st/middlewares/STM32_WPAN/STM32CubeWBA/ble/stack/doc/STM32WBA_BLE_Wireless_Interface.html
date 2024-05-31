@@ -636,7 +636,7 @@ padding-right: 0px;
 }
 
 td.gsib_a {padding:0px;padding-top:4px;padding-left:3px;}
-</style></head><body><font face="arial"><h1>STM32WBA BLE Wireless Interface</h1><p>This document describes the STM32WBA BLE Application Commands Interface (ACI) and Host Commands Interface (HCI).</p><p><a href="https://www.st.com/en/microcontrollers-microprocessors/stm32wb-series.html">STM32WBx Series website</a></p><h2>Contents</h2><p><a href="#HCI/ACI commands_anchor">HCI/ACI commands</a></p><p><a href="#HCI/ACI events_anchor">HCI/ACI events</a></p><p><a href="#Annex_anchor">Annex</a></p><p><a href="#Revision history_anchor">Revision history</a></p><h1><a name="HCI/ACI commands_anchor">HCI/ACI commands</a></h1><p><a href="#HCI commands_anchor">HCI commands</a></p><p><a href="#HCI TESTING commands_anchor">HCI TESTING commands</a></p><p><a href="#ACI HAL commands_anchor">ACI HAL commands</a></p><p><a href="#ACI GAP commands_anchor">ACI GAP commands</a></p><p><a href="#ACI GATT/ATT commands_anchor">ACI GATT/ATT commands</a></p><p><a href="#ACI L2CAP commands_anchor">ACI L2CAP commands</a></p><p>Note: in the command tables, a "Y" in the "BF", "LO" or "LB" column, means that the corresponding command applies to the "Basic Features", "Link Layer Only" or "Link Layer Only Basic" variant of the BLE stack, respectively.</p><h2><a name="HCI commands_anchor">HCI commands</a></h2><h2></h2><table width="800" border="1" class="reference">
+</style></head><body><font face="arial"><h1>STM32WBA BLE Wireless Interface</h1><p>This document describes the STM32WBA BLE Application Commands Interface (ACI) and Host Commands Interface (HCI).</p><p><a href="https://www.st.com/en/microcontrollers-microprocessors/stm32wb-series.html">STM32WBx Series website</a></p><h2>Revision history</h2><p>June 2022 - Rev 1.0 - First release.</p><p>July 2022 - Rev 1.1 - Fixed Event_Mask default value.</p><p>August 2022 - Rev 1.2 - Fixed HCI_READ_LOCAL_SUPPORTED_CODECS_V2; Removed "SCA Updates" feature; Fixed some spelling issues.</p><p>October 2022 - Rev 1.3 - Added Enhanced ATT feature; Added new commands: ACI_HAL_CONTINUOUS_TX_START, ACI_GATT_SEND_MULT_NOTIFICATION and ACI_GATT_READ_MULTIPLE_VAR_CHAR_VALUE; Added new events: ACI_GATT_EATT_BEARER_EVENT and ACI_GATT_MULT_NOTIFICATION_EVENT; Changed ACI_GATT_ADD_CHAR and ACI_GATT_TX_POOL_AVAILABLE_EVENT descriptions; Added note for GAP peripheral commands that only support legacy advertising; Fixed formula of RF_Channel; Added possible values for HCI_HOST_BUFFER_SIZE and HCI_WRITE_CONNECTION_ACCEPT_TIMEOUT; Created annex for TX Power Level; Replaced ACI_HAL_GET_LINK_STATUS by ACI_HAL_GET_LINK_STATUS_V2.</p><p>January 2023 - Rev 1.4 - Completed the description of Connection_Handle for some primitives; Completed the description of ACI_GAP_ADDR_NOT_RESOLVED_EVENT.</p><p>January 2023 - Rev 1.5 - Added new ATT error codes; Added ACI_HAL_SYNC_EVENT in ACI_HAL_SET_EVENT_MASK; Completed possible values of ACI_HAL_SET_RADIO_ACTIVITY_MASK and ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT.</p><p>March 2023 - Rev 1.6 - Updated HCI status error codes; Added HCI_LE_REQUEST_PEER_SCA and HCI_LE_REQUEST_PEER_SCA_COMPLETE_EVENT; Fixed possible values for HCI_LE_READ_ANTENNA_INFORMATION; Added ACI_GATT_NOTIFICATION_COMPLETE_EVENT; Added GAP service additional record number in ACI_HAL_WRITE_CONFIG_DATA; Completed description of ACI_GATT_ADD_CHAR and ACI_GATT_ADD_CHAR_DESC; Modified ACI_HAL_SYNC_EVENT.</p><p>March 2023 - Rev 1.7 - Added HCI_LE_GENERATE_DHKEY_V2 in LB variant; Completed some missing descriptions and possible values; Fixed description of HCI_ENCRYPTION_KEY_REFRESH_COMPLETE_EVENT, ACI_GATT_SET_EVENT_MASK, ACI_GAP_SET_EVENT_MASK and ACI_HAL_SET_EVENT_MASK; Added SC key type in ACI_HAL_WRITE_CONFIG_DATA.</p><p>May 2023 - Rev 1.8 - Changed description of ACI_GAP_SET_OOB_DATA, ACI_GAP_GET_OOB_DATA and ACI_GAP_SET_DIRECT_CONNECTABLE; Updated description of scanning and initiator filter policy; Renamed ACI_GAP_CONFIGURE_WHITELIST, ACI_HAL_SET_SLAVE_LATENCY, ACI_GAP_SLAVE_SECURITY_REQ and ACI_GAP_SLAVE_SECURITY_INITIATED_EVENT, as well as some parameter names; Replaced ACI_HAL_GET_PM_DEBUG_INFO by ACI_HAL_GET_PM_DEBUG_INFO_V2.</p><p>May 2023 - Rev 1.9 - Changed description of ACI_HAL_SET_TX_POWER_LEVEL; Fixed some spelling issues.</p><h2>Contents</h2><p><a href="#HCI/ACI commands_anchor">HCI/ACI commands</a></p><p><a href="#HCI/ACI events_anchor">HCI/ACI events</a></p><p><a href="#Annex_anchor">Annex</a></p><h1><a name="HCI/ACI commands_anchor">HCI/ACI commands</a></h1><p><a href="#HCI commands_anchor">HCI commands</a></p><p><a href="#HCI TESTING commands_anchor">HCI TESTING commands</a></p><p><a href="#ACI HAL commands_anchor">ACI HAL commands</a></p><p><a href="#ACI GAP commands_anchor">ACI GAP commands</a></p><p><a href="#ACI GATT/ATT commands_anchor">ACI GATT/ATT commands</a></p><p><a href="#ACI L2CAP commands_anchor">ACI L2CAP commands</a></p><p>Note: in the command tables, a "Y" in the "BF", "LO" or "LB" column, means that the corresponding command applies to the "Basic Features", "Link Layer Only" or "Link Layer Only Basic" variant of the BLE stack, respectively.</p><h2><a name="HCI commands_anchor">HCI commands</a></h2><h2></h2><table width="800" border="1" class="reference">
 <tr><th>Command</th><th>Opcode</th><th>BF</th><th>LO</th><th>LB</th></tr>
 <tr><td><a href="#HCI_DISCONNECT_anchor">HCI_DISCONNECT</a></td><td><p>0x0406</p>
 </td><td><p>Y</p>
@@ -681,12 +681,6 @@ td.gsib_a {padding:0px;padding-top:4px;padding-left:3px;}
 </td><td></td><td><p>Y</p>
 </td><td><p>Y</p>
 </td></tr>
-<tr><td><a href="#HCI_READ_AFH_CHANNEL_ASSESSMENT_MODE_anchor">HCI_READ_AFH_CHANNEL_ASSESSMENT_MODE</a></td><td><p>0x0C48</p>
-</td><td></td><td><p>Y</p>
-</td><td></td></tr>
-<tr><td><a href="#HCI_WRITE_AFH_CHANNEL_ASSESSMENT_MODE_anchor">HCI_WRITE_AFH_CHANNEL_ASSESSMENT_MODE</a></td><td><p>0x0C49</p>
-</td><td></td><td><p>Y</p>
-</td><td></td></tr>
 <tr><td><a href="#HCI_SET_EVENT_MASK_PAGE_2_anchor">HCI_SET_EVENT_MASK_PAGE_2</a></td><td><p>0x0C63</p>
 </td><td></td><td><p>Y</p>
 </td><td></td></tr>
@@ -1128,15 +1122,6 @@ td.gsib_a {padding:0px;padding-top:4px;padding-left:3px;}
 <tr><td><a href="#HCI_LE_SET_TRANSMIT_POWER_REPORTING_ENABLE_anchor">HCI_LE_SET_TRANSMIT_POWER_REPORTING_ENABLE</a></td><td><p>0x207A</p>
 </td><td></td><td><p>Y</p>
 </td><td></td></tr>
-<tr><td><a href="#HCI_LE_SET_DATA_RELATED_ADDRESS_CHANGES_anchor">HCI_LE_SET_DATA_RELATED_ADDRESS_CHANGES</a></td><td><p>0x207C</p>
-</td><td></td><td><p>Y</p>
-</td><td></td></tr>
-<tr><td><a href="#HCI_LE_SET_DEFAULT_SUBRATE_anchor">HCI_LE_SET_DEFAULT_SUBRATE</a></td><td><p>0x207D</p>
-</td><td></td><td><p>Y</p>
-</td><td></td></tr>
-<tr><td><a href="#HCI_LE_SUBRATE_REQUEST_anchor">HCI_LE_SUBRATE_REQUEST</a></td><td><p>0x207E</p>
-</td><td></td><td><p>Y</p>
-</td><td></td></tr>
 </table><h2><a name="HCI_DISCONNECT_anchor">HCI_DISCONNECT</a></h2><h3>Description</h3><p>The <a href="#HCI_DISCONNECT_anchor">HCI_DISCONNECT</a> is used to terminate an existing connection. The Connection_Handle command parameter indicates which connection is to be disconnected. The Reason command parameter indicates the reason for ending the connection. The remote Controller will receive the Reason command parameter in the <a href="#HCI_DISCONNECTION_COMPLETE_EVENT_anchor">HCI_DISCONNECTION_COMPLETE_EVENT</a> event. All synchronous connections on a physical link should be disconnected before the ACL connection on the same physical connection is disconnected.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.1.6].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
@@ -1283,29 +1268,7 @@ Units: dBm.</p>
 </td><td><p>The number of HCI Data Packets         that have been completed for the associated Connection_Handle since the previous time the event was returned.</p>
 </td><td><p>0x0000-0xFFFF</p>
 </td></tr>
-</table><h3>Output parameters</h3><p>None</p><h3>Events generated</h3><p>Normally, no event is generated after the Host_Number_Of_Completed_Packets command has completed. However, if the Host_Number_Of_Completed_Packets command contains one or more invalid parameters, the Controller shall return a Command Complete event with a failure status indicating the Invalid HCI Command Parameters error code. The Host may send the Host_Number_Of_Completed_Packets command at any time when there is at least one connection, or if the Controller is in local loopback mode. The normal flow control for commands is not used for this command.</p><h2><a name="HCI_READ_AFH_CHANNEL_ASSESSMENT_MODE_anchor">HCI_READ_AFH_CHANNEL_ASSESSMENT_MODE</a></h2><h3>Description</h3><p>This command reads the value for the AFH_Channel_Assessment_Mode parameter. The AFH_Channel_Assessment_Mode parameter controls whether the Controller's channel assessment scheme is enabled or disabled.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.3.53].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-<tr><td><p>AFH_Channel_Assessment_Mode</p>
-</td><td><p>1</p>
-</td><td><p>Controller channel assessment enable/disable.</p>
-</td><td><li>0x00: Controller channel assessment disabled</li><li>0x01: Controller channel assessment enabled</li></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_WRITE_AFH_CHANNEL_ASSESSMENT_MODE_anchor">HCI_WRITE_AFH_CHANNEL_ASSESSMENT_MODE</a></h2><h3>Description</h3><p>This command writes the value for the AFH_Channel_Assessment_Mode parameter. The AFH_Channel_Assessment_Mode parameter controls whether the Controller's channel assessment scheme is enabled or disabled.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.3.54].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>AFH_Channel_Assessment_Mode</p>
-</td><td><p>1</p>
-</td><td><p>Controller channel assessment enable/disable.</p>
-</td><td><li>0x00: Controller channel assessment disabled</li><li>0x01: Controller channel assessment enabled</li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_SET_EVENT_MASK_PAGE_2_anchor">HCI_SET_EVENT_MASK_PAGE_2</a></h2><h3>Description</h3><p>The HCI_Set_Event_Mask_Page_2 command is used to control which events are generated by the HCI for the Host. The Event_Mask_Page_2 is a logical extension to the Event_Mask parameter of the HCI_Set_Event_Mask command.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.3.69].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Output parameters</h3><p>None</p><h3>Events generated</h3><p>Normally, no event is generated after the Host_Number_Of_Completed_Packets command has completed. However, if the Host_Number_Of_Completed_Packets command contains one or more invalid parameters, the Controller shall return a Command Complete event with a failure status indicating the Invalid HCI Command Parameters error code. The Host may send the Host_Number_Of_Completed_Packets command at any time when there is at least one connection, or if the Controller is in local loopback mode. The normal flow control for commands is not used for this command.</p><h2><a name="HCI_SET_EVENT_MASK_PAGE_2_anchor">HCI_SET_EVENT_MASK_PAGE_2</a></h2><h3>Description</h3><p>The HCI_Set_Event_Mask_Page_2 command is used to control which events are generated by the HCI for the Host. The Event_Mask_Page_2 is a logical extension to the Event_Mask parameter of the HCI_Set_Event_Mask command.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.3.69].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Event_Mask_Page_2</p>
 </td><td><p>8</p>
@@ -1396,7 +1359,7 @@ Time = N * 1.25 ms</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_READ_LOCAL_VERSION_INFORMATION_anchor">HCI_READ_LOCAL_VERSION_INFORMATION</a></h2><h3>Description</h3><p>This command reads the values for the version information for the local Controller.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.4.1].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_READ_LOCAL_VERSION_INFORMATION_anchor">HCI_READ_LOCAL_VERSION_INFORMATION</a></h2><h3>Description</h3><p>This command reads the values for the version information for the local Controller. The HCI Version information defines the version information of the HCI layer. The LMP/PAL Version information defines the version of the LMP or PAL. The Manufacturer_Name information indicates the manufacturer of the local device. The HCI Revision and LMP/PAL Subversion are implementation dependent.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.4.1].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
@@ -1404,23 +1367,26 @@ Time = N * 1.25 ms</p>
 </td><td></td></tr>
 <tr><td><p>HCI_Version</p>
 </td><td><p>1</p>
-</td><td><p>Version of the HCI Specification supported by the Controller. See Bluetooth Assigned Numbers.</p>
+</td><td><p>See Bluetooth Assigned Numbers (<a class="reference external" href="https://www.bluetooth.org/en-us/specification/assigned-numbers">https://www.bluetooth.org/en-us/specification/assigned-numbers</a>)</p>
 </td><td></tr>
-<tr><td><p>HCI_Subversion</p>
+<tr><td><p>HCI_Revision</p>
 </td><td><p>2</p>
-</td><td><p>Revision of the HCI implementation in the Controller. This value is vendor-specific.</p>
+</td><td><p>Revision of the Current HCI in the BR/EDR Controller.</p>
 </td><td></tr>
-<tr><td><p>LMP_Version</p>
+<tr><td><p>LMP_PAL_Version</p>
 </td><td><p>1</p>
-</td><td><p>Version of the Current LMP supported by the Controller. See Bluetooth Assigned Numbers.</p>
+</td><td><p>Version of the Current LMP or PAL in the Controller.
+See Bluetooth Assigned Numbers (<a class="reference external" href="https://www.bluetooth.org/en-us/specification/assigned-numbers">https://www.bluetooth.org/en-us/specification/assigned-numbers</a>)</p>
 </td><td></tr>
-<tr><td><p>Company_Identifier</p>
+<tr><td><p>Manufacturer_Name</p>
 </td><td><p>2</p>
-</td><td><p>Company identifier for the manufacturer of the Controller. See Bluetooth Assigned Numbers.</p>
+</td><td><p>Manufacturer Name of the BR/EDR Controller.
+See Bluetooth Assigned Numbers (<a class="reference external" href="https://www.bluetooth.org/en-us/specification/assigned-numbers">https://www.bluetooth.org/en-us/specification/assigned-numbers</a>)</p>
 </td><td></tr>
-<tr><td><p>LMP_Subversion</p>
+<tr><td><p>LMP_PAL_Subversion</p>
 </td><td><p>2</p>
-</td><td><p>Subversion of the Current LMP in the Controller. This value is vendor-specific.</p>
+</td><td><p>Subversion of the Current LMP or PAL in the Controller. This value is
+implementation dependent.</p>
 </td><td></tr>
 </table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_READ_LOCAL_SUPPORTED_COMMANDS_anchor">HCI_READ_LOCAL_SUPPORTED_COMMANDS</a></h2><h3>Description</h3><p>This command reads the list of HCI commands supported for the local Controller. This command shall return the Supported_Commands configuration parameter. It is implied that if a command is listed as supported, the feature underlying that command is also supported.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.4.2].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
@@ -1568,8 +1534,8 @@ Units: dBm.</p>
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>LE_Event_Mask</p>
 </td><td><p>8</p>
-</td><td><p>LE event mask. Default: 0x000000C7FFF7F85F. Note that the BLE stack ignores the bits which represent events it does not support (according to its variant).</p>
-</td><td><p>Bitmask of:</p><li>0x0000000000000000: No LE events specified</li><li>0x0000000000000001: LE Connection Complete event</li><li>0x0000000000000002: LE Advertising Report event</li><li>0x0000000000000004: LE Connection Update Complete event</li><li>0x0000000000000008: LE Read Remote Features Complete event</li><li>0x0000000000000010: LE Long Term Key Request event</li><li>0x0000000000000020: LE Remote Connection Parameter Request event</li><li>0x0000000000000040: LE Data Length Change event</li><li>0x0000000000000080: LE Read Local P-256 Public Key Complete event</li><li>0x0000000000000100: LE Generate DHKey Complete event</li><li>0x0000000000000200: LE Enhanced Connection Complete event</li><li>0x0000000000000400: LE Directed Advertising Report event</li><li>0x0000000000000800: LE PHY Update Complete event</li><li>0x0000000000001000: LE Extended Advertising Report event</li><li>0x0000000000002000: LE Periodic Advertising Sync Established event</li><li>0x0000000000004000: LE Periodic Advertising Report event</li><li>0x0000000000008000: LE Periodic Advertising Sync Lost event</li><li>0x0000000000010000: LE Scan Timeout event</li><li>0x0000000000020000: LE Advertising Set Terminated event</li><li>0x0000000000040000: LE Scan Request Received event</li><li>0x0000000000080000: LE Channel Selection Algorithm event</li><li>0x0000000000100000: LE Connectionless IQ Report event</li><li>0x0000000000200000: LE Connection IQ Report event</li><li>0x0000000000400000: LE CTE Request Failed event</li><li>0x0000000000800000: LE Periodic Advertising Sync Transfer Received event</li><li>0x0000000001000000: LE CIS Established event</li><li>0x0000000002000000: LE CIS Request event</li><li>0x0000000004000000: LE Create BIG Complete event</li><li>0x0000000008000000: LE Terminate BIG Complete event</li><li>0x0000000010000000: LE BIG Sync Established event</li><li>0x0000000020000000: LE BIG Sync Lost event</li><li>0x0000000040000000: LE Request Peer SCA Complete event</li><li>0x0000000080000000: LE Path Loss Threshold event</li><li>0x0000000100000000: LE Transmit Power Reporting event</li><li>0x0000000200000000: LE BIGInfo Advertising Report event</li><li>0x0000000400000000: LE Subrate Change event</li><li>0x0000000800000000: LE Periodic Advertising Sync Established event [v2]</li><li>0x0000001000000000: LE Periodic Advertising Report event [v2]</li><li>0x0000002000000000: LE Periodic Advertising Sync Transfer Received event [v2]</li><li>0x0000004000000000: LE Periodic Advertising Subevent Data Request event</li><li>0x0000008000000000: LE Periodic Advertising Response Report event</li><li>0x0000010000000000: LE Enhanced Connection Complete event [v2]</li></td></tr>
+</td><td><p>LE event mask. Default: 0x000000000003185F.</p>
+</td><td><p>Bitmask of:</p><li>0x0000000000000000: No LE events specified</li><li>0x0000000000000001: LE Connection Complete Event</li><li>0x0000000000000002: LE Advertising Report Event</li><li>0x0000000000000004: LE Connection Update Complete Event</li><li>0x0000000000000008: LE Read Remote Used Features Complete Event</li><li>0x0000000000000010: LE Long Term Key Request Event</li><li>0x0000000000000020: LE Remote Connection Parameter Request Event</li><li>0x0000000000000040: LE Data Length Change Event</li><li>0x0000000000000080: LE Read Local P-256 Public Key Complete Event</li><li>0x0000000000000100: LE Generate DHKey Complete Event</li><li>0x0000000000000200: LE Enhanced Connection Complete Event</li><li>0x0000000000000400: LE Direct Advertising Report Event</li><li>0x0000000000000800: LE PHY Update Complete Event</li><li>0x0000000000001000: LE Extended Advertising Report Event</li><li>0x0000000000002000: LE Periodic Advertising Sync Established Event</li><li>0x0000000000004000: LE Periodic Advertising Report Event</li><li>0x0000000000008000: LE Periodic Advertising Sync Lost Event</li><li>0x0000000000010000: LE Extended Scan Timeout Event</li><li>0x0000000000020000: LE Extended Advertising Set Terminated Event</li><li>0x0000000000040000: LE Scan Request Received Event</li><li>0x0000000000080000: LE Channel Selection Algorithm Event</li></td></tr>
 </table><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
@@ -1828,13 +1794,13 @@ Time = N * 0.625 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_CREATE_CONNECTION_CANCEL_anchor">HCI_LE_CREATE_CONNECTION_CANCEL</a></h2><h3>Description</h3><p>The LE_Create_Connection_Cancel command is used to cancel the LE_Create_Connection command. This command shall only be issued after the LE_Create_Connection command has been issued, a Command Status event has been received for the LE Create Connection command and before the LE Connection Complete event.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.13].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_CREATE_CONNECTION_CANCEL_anchor">HCI_LE_CREATE_CONNECTION_CANCEL</a></h2><h3>Description</h3><p>The LE_Create_Connection_Cancel command is used to cancel the LE_Create_Connection command. This command shall only be issued after the LE_Create_Connection command has been issued, a Command Status event has been received for the LE Create Connection command and before the LE Connection Complete event.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.13].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_READ_FILTER_ACCEPT_LIST_SIZE_anchor">HCI_LE_READ_FILTER_ACCEPT_LIST_SIZE</a></h2><h3>Description</h3><p>This command is used to read the total number of Filter Accept List entries that can be stored in the Controller.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.14].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_READ_FILTER_ACCEPT_LIST_SIZE_anchor">HCI_LE_READ_FILTER_ACCEPT_LIST_SIZE</a></h2><h3>Description</h3><p>This command is used to read the total number of Filter Accept List entries that can be stored in the Controller.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.14].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
@@ -2429,8 +2395,8 @@ Default: N= 0x0384 (900 secs or 15 minutes)</p>
 </td><td><li>0x00 ... 0x03</li></td></tr>
 <tr><td><p>PHY_options</p>
 </td><td><p>2</p>
-</td><td><p>Bit field used to specify options for PHYs (not used on STM32WB)</p>
-</td><td><li>0x0000: the Host has no preferred coding when transmitting on the LE Coded PHY</li><li>0x0001: the Host prefers that S=2 coding be used when transmitting on the LE Coded PHY</li><li>0x0002: the Host prefers that S=8 coding be used when transmitting on the LE Coded PHY</li></td></tr>
+</td><td><p>Not supported</p>
+</td><td></tr>
 </table><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
@@ -2496,7 +2462,7 @@ Time = N * 0.625 ms.</p>
 <tr><td><p>Adv_TX_Power</p>
 </td><td><p>1</p>
 </td><td><p>Advertising TX power. Units: dBm.</p>
-</td><td><li>127: Host has no preference</li><li>-127 ... 20</li></td></tr>
+</td><td><li>-127 ... 20</li></td></tr>
 <tr><td><p>Primary_Adv_PHY</p>
 </td><td><p>1</p>
 </td><td><p>Primary advertising PHY.</p>
@@ -2612,7 +2578,7 @@ Time = N * 10 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_SET_TERMINATED_EVENT_anchor">HCI_LE_ADVERTISING_SET_TERMINATED_EVENT</a></li><li><a href="#HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_READ_MAXIMUM_ADVERTISING_DATA_LENGTH_anchor">HCI_LE_READ_MAXIMUM_ADVERTISING_DATA_LENGTH</a></h2><h3>Description</h3><p>This command is used to read the maximum length of data supported by the Controller for use as advertisement data or scan response data in an extended advertising event.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.57].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_SET_TERMINATED_EVENT_anchor">HCI_LE_ADVERTISING_SET_TERMINATED_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_READ_MAXIMUM_ADVERTISING_DATA_LENGTH_anchor">HCI_LE_READ_MAXIMUM_ADVERTISING_DATA_LENGTH</a></h2><h3>Description</h3><p>This command is used to read the maximum length of data supported by the Controller for use as advertisement data or scan response data in an extended advertising event.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.57].</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
@@ -4145,87 +4111,7 @@ Units: dB.</p>
 </td><td><p>2</p>
 </td><td><p>Connection handle for which the event applies.</p>
 </td><td><li>0x0000 ... 0x0EFF</li></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_TRANSMIT_POWER_REPORTING_EVENT_anchor">HCI_LE_TRANSMIT_POWER_REPORTING_EVENT</a></li><h2><a name="HCI_LE_SET_DATA_RELATED_ADDRESS_CHANGES_anchor">HCI_LE_SET_DATA_RELATED_ADDRESS_CHANGES</a></h2><h3>Description</h3><p>This command specifies circumstances when the Controller shall refresh any Resolvable Private Address used by the advertising set identified by the Advertising_Handle parameter, whether or not the address timeout period has been reached. This command may be used while advertising is enabled.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.122].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Advertising_Handle</p>
-</td><td><p>1</p>
-</td><td><p>Used to identify an advertising set.</p>
-</td><td><li>0x00 ... 0xEF</li></td></tr>
-<tr><td><p>Change_Reasons</p>
-</td><td><p>1</p>
-</td><td><p>Reason(s) for refreshing addresses.</p>
-</td><td><p>Bitmask of:</p><li>0x01: Change the address whenever the advertising data changes</li><li>0x02: Change the address whenever the scan response data changes</li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_SET_DEFAULT_SUBRATE_anchor">HCI_LE_SET_DEFAULT_SUBRATE</a></h2><h3>Description</h3><p>This command is used by the Host to set the initial values for the acceptable parameters for subrating requests, as defined by the HCI_LE Subrate_Request command, for all future ACL connections where the Controller is the Central. This command does not affect any existing connection.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.123].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Subrate_Min</p>
-</td><td><p>2</p>
-</td><td><p>Minimum subrate factor.</p>
-</td><td><li>0x0001 ... 0x01F4</li></td></tr>
-<tr><td><p>Subrate_Max</p>
-</td><td><p>2</p>
-</td><td><p>Maximum subrate factor.</p>
-</td><td><li>0x0001 ... 0x01F4</li></td></tr>
-<tr><td><p>Max_Latency</p>
-</td><td><p>2</p>
-</td><td><p>Maximum Peripheral latency allowed in requests by a Peripheral, in units of subrated connection intervals.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Continuation_Number</p>
-</td><td><p>2</p>
-</td><td><p>Minimum number of underlying connection events to remain active after a packet containing a Link Layer PDU with a non-zero Length field is sent or received in requests by a Peripheral.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Supervision_Timeout</p>
-</td><td><p>2</p>
-</td><td><p>Supervision timeout for the LE Link.
-It shall be a multiple of 10 ms and larger than (1 + connPeripheralLatency) * connInterval * 2.
-Time = N * 10 ms.</p>
-</td><td><li>0x000A (100 ms)  ... 0x0C80 (32000 ms) </li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="HCI_LE_SUBRATE_REQUEST_anchor">HCI_LE_SUBRATE_REQUEST</a></h2><h3>Description</h3><p>This command is used by a Central or a Peripheral to request a change to the subrating factor and/or other parameters applied to an existing connection using the Connection Subrate Update procedure.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.124].</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Connection_Handle</p>
-</td><td><p>2</p>
-</td><td><p>Connection handle for which the command applies.</p>
-</td><td><li>0x0000 ... 0x0EFF</li></td></tr>
-<tr><td><p>Subrate_Min</p>
-</td><td><p>2</p>
-</td><td><p>Minimum subrate factor.</p>
-</td><td><li>0x0001 ... 0x01F4</li></td></tr>
-<tr><td><p>Subrate_Max</p>
-</td><td><p>2</p>
-</td><td><p>Maximum subrate factor.</p>
-</td><td><li>0x0001 ... 0x01F4</li></td></tr>
-<tr><td><p>Max_Latency</p>
-</td><td><p>2</p>
-</td><td><p>Maximum Peripheral latency allowed in requests by a Peripheral, in units of subrated connection intervals.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Continuation_Number</p>
-</td><td><p>2</p>
-</td><td><p>Minimum number of underlying connection events to remain active after a packet containing a Link Layer PDU with a non-zero Length field is sent or received in requests by a Peripheral.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Supervision_Timeout</p>
-</td><td><p>2</p>
-</td><td><p>Supervision timeout for the LE Link.
-It shall be a multiple of 10 ms and larger than (1 + connPeripheralLatency) * connInterval * 2.
-Time = N * 10 ms.</p>
-</td><td><li>0x000A (100 ms)  ... 0x0C80 (32000 ms) </li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_SUBRATE_CHANGE_EVENT_anchor">HCI_LE_SUBRATE_CHANGE_EVENT</a></li><h2><a name="HCI TESTING commands_anchor">HCI TESTING commands</a></h2><h2></h2><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_TRANSMIT_POWER_REPORTING_EVENT_anchor">HCI_LE_TRANSMIT_POWER_REPORTING_EVENT</a></li><h2><a name="HCI TESTING commands_anchor">HCI TESTING commands</a></h2><h2></h2><table width="800" border="1" class="reference">
 <tr><th>Command</th><th>Opcode</th><th>BF</th><th>LO</th><th>LB</th></tr>
 <tr><td><a href="#HCI_LE_RECEIVER_TEST_anchor">HCI_LE_RECEIVER_TEST</a></td><td><p>0x201D</p>
 </td><td><p>Y</p>
@@ -4327,7 +4213,7 @@ Frequency Range : 2402 MHz to 2480 MHz</p>
 <tr><td><p>PHY</p>
 </td><td><p>1</p>
 </td><td><p>PHY to use for test packet</p>
-</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding (not supported on STM32WB)</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding (not supported on STM32WB)</li></td></tr>
+</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding</li></td></tr>
 <tr><td><p>Modulation_Index</p>
 </td><td><p>1</p>
 </td><td><p>Modulation index capability of the transmitter</p>
@@ -4356,7 +4242,7 @@ Frequency Range : 2402 MHz to 2480 MHz</p>
 <tr><td><p>PHY</p>
 </td><td><p>1</p>
 </td><td><p>PHY to use for test packet</p>
-</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding (not supported on STM32WB)</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding (not supported on STM32WB)</li></td></tr>
+</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding</li></td></tr>
 </table><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
@@ -4373,7 +4259,7 @@ Frequency Range : 2402 MHz to 2480 MHz</p>
 <tr><td><p>PHY</p>
 </td><td><p>1</p>
 </td><td><p>PHY to use for test packet</p>
-</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding (not supported on STM32WB)</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding (not supported on STM32WB)</li></td></tr>
+</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding</li></td></tr>
 <tr><td><p>Modulation_Index</p>
 </td><td><p>1</p>
 </td><td><p>Modulation index capability of the transmitter</p>
@@ -4422,7 +4308,7 @@ Frequency Range : 2402 MHz to 2480 MHz</p>
 <tr><td><p>PHY</p>
 </td><td><p>1</p>
 </td><td><p>PHY to use for test packet</p>
-</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding (not supported on STM32WB)</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding (not supported on STM32WB)</li></td></tr>
+</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding</li></td></tr>
 <tr><td><p>CTE_Length</p>
 </td><td><p>1</p>
 </td><td><p>Constant Tone Extension length in 8 us units.</p>
@@ -4553,7 +4439,7 @@ Frequency Range : 2402 MHz to 2480 MHz</p>
 <tr><td><p>PHY</p>
 </td><td><p>1</p>
 </td><td><p>PHY to use for test packet</p>
-</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding (not supported on STM32WB)</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding (not supported on STM32WB)</li></td></tr>
+</td><td><li>0x01: Transmitter set to use the LE 1M PHY</li><li>0x02: Transmitter set to use the LE 2M PHY</li><li>0x03: Transmitter set to use the LE Coded PHY with S=8 data coding</li><li>0x04: Transmitter set to use the LE Coded PHY with S=2 data coding</li></td></tr>
 <tr><td><p>CTE_Length</p>
 </td><td><p>1</p>
 </td><td><p>Constant Tone Extension length in 8 us units.</p>
@@ -4623,6 +4509,11 @@ Units: dBm.</p>
 </td><td><p>Y</p>
 </td><td><p>Y</p>
 </td></tr>
+<tr><td><a href="#ACI_HAL_GET_ANCHOR_PERIOD_anchor">ACI_HAL_GET_ANCHOR_PERIOD</a></td><td><p>0xFC19</p>
+</td><td><p>Y</p>
+</td><td><p>Y</p>
+</td><td><p>Y</p>
+</td></tr>
 <tr><td><a href="#ACI_HAL_SET_EVENT_MASK_anchor">ACI_HAL_SET_EVENT_MASK</a></td><td><p>0xFC1A</p>
 </td><td></td><td></td><td></td></tr>
 <tr><td><a href="#ACI_HAL_GET_LINK_STATUS_V2_anchor">ACI_HAL_GET_LINK_STATUS_V2</a></td><td><p>0xFC1B</p>
@@ -4657,19 +4548,19 @@ Units: dBm.</p>
 </td><td><p>2</p>
 </td><td><p>Build number of the firmware.</p>
 </td><td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_HAL_WRITE_CONFIG_DATA_anchor">ACI_HAL_WRITE_CONFIG_DATA</a></h2><h3>Description</h3><p>This command writes a value to a configure data structure. It is useful to setup directly some parameters for the BLE stack.<br>Note: the <a href="#HCI_RESET_anchor">HCI_RESET</a> command resets the configure data structure.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_HAL_WRITE_CONFIG_DATA_anchor">ACI_HAL_WRITE_CONFIG_DATA</a></h2><h3>Description</h3><p>This command writes a value to a configure data structure. It is useful to setup directly some parameters for the BLE stack.<br>Note: the static random address set by this command is taken into account by the GAP only when it receives the <a href="#ACI_GAP_INIT_anchor">ACI_GAP_INIT</a> command.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Offset</p>
 </td><td><p>1</p>
 </td><td><p>Offset of the element in the configuration data structure which has to be written.</p>
 </td><td><li>0x00: CONFIG_DATA_PUBADDR_OFFSET;
-Bluetooth public address; 6 bytes</li><li>0x08: CONFIG_DATA_ER_OFFSET (Host only);
-Encryption root key used to derive LTK (legacy) and CSRK; 16 bytes</li><li>0x18: CONFIG_DATA_IR_OFFSET (Host only);
-Identity root key used to derive DHK (legacy) and IRK; 16 bytes</li><li>0x2E: CONFIG_DATA_RANDOM_ADDRESS_OFFSET (Host only);
-Static Random Address; 6 bytes</li><li>0x34: CONFIG_DATA_GAP_ADD_REC_NBR_OFFSET (Host only);
-GAP service additional record number</li><li>0x35: CONFIG_DATA_SC_KEY_TYPE_OFFSET (Host only);
-Secure Connections key type (0: "normal", 1: "debug"); 1 byte</li><li>0xB0: CONFIG_DATA_SMP_MODE_OFFSET (Host only);
-SMP mode (0: "normal", 1: "bypass", 2: "no blacklist", 4: "no peer debug key"); 1 byte</li><li>0xC0: CONFIG_DATA_LL_SCAN_CHAN_MAP_OFFSET (only for STM32WB);
+Bluetooth public address; 6 bytes</li><li>0x08: CONFIG_DATA_ER_OFFSET;
+Encryption root key used to derive LTK (legacy) and CSRK; 16 bytes</li><li>0x18: CONFIG_DATA_IR_OFFSET;
+Identity root key used to derive DHK (legacy) and IRK; 16 bytes</li><li>0x2E: CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
+Static Random Address; 6 bytes</li><li>0x34: CONFIG_DATA_GAP_ADD_REC_NBR_OFFSET;
+GAP service additional record number</li><li>0x35: CONFIG_DATA_SC_KEY_TYPE_OFFSET;
+Secure Connections key type (0: "normal", 1: "debug"); 1 byte</li><li>0xB0: CONFIG_DATA_SMP_MODE_OFFSET;
+SMP mode (0: "normal", 1: "bypass", 2: "no blacklist"); 1 byte</li><li>0xC0: CONFIG_DATA_LL_SCAN_CHAN_MAP_OFFSET (only for STM32WB);
 LL scan channel map (same format as Primary_Adv_Channel_Map); 1 byte</li><li>0xC1: CONFIG_DATA_LL_BG_SCAN_MODE_OFFSET (only for STM32WB);
 LL background scan mode (0: "BG scan disabled", 1: "BG scan enabled"); 1 byte</li></td></tr>
 <tr><td><p>Length</p>
@@ -4772,7 +4663,23 @@ Device will continuously emit 0s, that means that the tone will be at the channe
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT_anchor">ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT</a></li><h2><a name="ACI_HAL_SET_EVENT_MASK_anchor">ACI_HAL_SET_EVENT_MASK</a></h2><h3>Description</h3><p>This command is used to enable/disable the generation of HAL events. If the bit in the Event_Mask is set to a one, then the event associated with that bit will be enabled.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT_anchor">ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT</a></li><h2><a name="ACI_HAL_GET_ANCHOR_PERIOD_anchor">ACI_HAL_GET_ANCHOR_PERIOD</a></h2><h3>Description</h3><p>This command returns information about the Anchor Period to help application in selecting slot timings when operating in multi-link scenarios.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
+<tr><td><p>Status</p>
+</td><td><p>1</p>
+</td><td><p>Status error code.</p>
+</td><td></td></tr>
+<tr><td><p>Anchor_Period</p>
+</td><td><p>4</p>
+</td><td><p>Current anchor period.
+T = N * 0.625 ms.</p>
+</td><td></tr>
+<tr><td><p>Max_Free_Slot</p>
+</td><td><p>4</p>
+</td><td><p>Maximum available time that can be allocated for a new slot.
+T = N * 0.625 ms.</p>
+</td><td></tr>
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_HAL_SET_EVENT_MASK_anchor">ACI_HAL_SET_EVENT_MASK</a></h2><h3>Description</h3><p>This command is used to enable/disable the generation of HAL events. If the bit in the Event_Mask is set to a one, then the event associated with that bit will be enabled.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Event_Mask</p>
 </td><td><p>4</p>
@@ -4784,18 +4691,18 @@ Device will continuously emit 0s, that means that the tone will be at the channe
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_HAL_GET_LINK_STATUS_V2_anchor">ACI_HAL_GET_LINK_STATUS_V2</a></h2><h3>Description</h3><p>This command returns the status of the 22 Bluetooth Low Energy links managed by the device.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_HAL_GET_LINK_STATUS_V2_anchor">ACI_HAL_GET_LINK_STATUS_V2</a></h2><h3>Description</h3><p>This command returns the status of the 10 Bluetooth Low Energy links managed by the device</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
 <tr><td><p>Link_Status</p>
-</td><td><p>22</p>
-</td><td><p>Array of link status (22 links). Each link status is 1 byte.</p>
+</td><td><p>10</p>
+</td><td><p>Array of link status (8 links). Each link status is 1 byte.</p>
 </td><td><li>0x00: Idle</li><li>0x01: Advertising</li><li>0x02: Peripheral connection</li><li>0x03: Scanning</li><li>0x05: Central connection</li><li>0x06: TX test mode</li><li>0x07: RX test mode</li><li>0x09: Periodic advertising</li><li>0x0A: Periodic sync</li><li>0x0B: Iso broadcast</li><li>0x0C: Iso sync</li><li>0x0D: Iso peripheral connection</li><li>0x0E: Iso central connection</li></td></tr>
 <tr><td><p>Link_Connection_Handle</p>
-</td><td><p>44</p>
+</td><td><p>20</p>
 </td><td><p>Array of connection handles (2 bytes). Valid only if the corresponding link status is &quot;connected&quot;</p>
 </td><td></tr>
 </table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_HAL_GET_PM_DEBUG_INFO_V2_anchor">ACI_HAL_GET_PM_DEBUG_INFO_V2</a></h2><h3>Description</h3><p>This command is used to retrieve TX, RX and total buffer count allocated for ACL packets.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
@@ -5021,16 +4928,6 @@ Units: dBm.</p>
 <tr><td><a href="#ACI_GAP_ADV_CLEAR_SETS_anchor">ACI_GAP_ADV_CLEAR_SETS</a></td><td><p>0xFCC5</p>
 </td><td></td><td></td><td></td></tr>
 <tr><td><a href="#ACI_GAP_ADV_SET_RANDOM_ADDRESS_anchor">ACI_GAP_ADV_SET_RANDOM_ADDRESS</a></td><td><p>0xFCC6</p>
-</td><td></td><td></td><td></td></tr>
-<tr><td><a href="#ACI_GAP_ADV_SET_PERIODIC_PARAMETERS_anchor">ACI_GAP_ADV_SET_PERIODIC_PARAMETERS</a></td><td><p>0xFCC7</p>
-</td><td></td><td></td><td></td></tr>
-<tr><td><a href="#ACI_GAP_ADV_SET_PERIODIC_DATA_anchor">ACI_GAP_ADV_SET_PERIODIC_DATA</a></td><td><p>0xFCC8</p>
-</td><td></td><td></td><td></td></tr>
-<tr><td><a href="#ACI_GAP_ADV_SET_PERIODIC_ENABLE_anchor">ACI_GAP_ADV_SET_PERIODIC_ENABLE</a></td><td><p>0xFCC9</p>
-</td><td></td><td></td><td></td></tr>
-<tr><td><a href="#ACI_GAP_EXT_START_SCAN_anchor">ACI_GAP_EXT_START_SCAN</a></td><td><p>0xFCD0</p>
-</td><td></td><td></td><td></td></tr>
-<tr><td><a href="#ACI_GAP_EXT_CREATE_CONNECTION_anchor">ACI_GAP_EXT_CREATE_CONNECTION</a></td><td><p>0xFCD1</p>
 </td><td></td><td></td><td></td></tr>
 </table><h2><a name="ACI_GAP_SET_NON_DISCOVERABLE_anchor">ACI_GAP_SET_NON_DISCOVERABLE</a></h2><h3>Description</h3><p>Puts the device in non-discoverable mode. This command disables the LL advertising.<br>Note: this command only supports legacy advertising.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
@@ -5472,13 +5369,13 @@ Time = N * 0.625 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_DISCONNECTION_COMPLETE_EVENT_anchor">HCI_DISCONNECTION_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_CLEAR_SECURITY_DB_anchor">ACI_GAP_CLEAR_SECURITY_DB</a></h2><h3>Description</h3><p>Clears the bonding table. All the devices in the bonding table are removed.<br>See also <a href="#ACI_GAP_REMOVE_BONDED_DEVICE_anchor">ACI_GAP_REMOVE_BONDED_DEVICE</a> to remove only one device.<br>Note: as a fallback mode, in case the bonding table is full, the BLE stack automatically clears the bonding table just before putting into it information about a new bonded device.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_DISCONNECTION_COMPLETE_EVENT_anchor">HCI_DISCONNECTION_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_CLEAR_SECURITY_DB_anchor">ACI_GAP_CLEAR_SECURITY_DB</a></h2><h3>Description</h3><p>Clears the security database. All the devices in the security database are removed.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ALLOW_REBOND_anchor">ACI_GAP_ALLOW_REBOND</a></h2><h3>Description</h3><p>Allows the security manager to complete the pairing procedure and re-bond with the Central. This command should be given by the application when it receives the <a href="#ACI_GAP_BOND_LOST_EVENT_anchor">ACI_GAP_BOND_LOST_EVENT</a> if it wants the re-bonding to happen successfully. If this command is not given on receiving the event, the bonding procedure will timeout.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ALLOW_REBOND_anchor">ACI_GAP_ALLOW_REBOND</a></h2><h3>Description</h3><p>Allows the security manager to complete the pairing procedure and re-bond with the Central. This command should be given by the application when it receives the ACI_GAP_BOND_LOST_EVENT if it wants the re-bonding to happen successfully. If this command is not given on receiving the event, the bonding procedure will timeout.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -5490,7 +5387,7 @@ Time = N * 0.625 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_LIMITED_DISCOVERY_PROC_anchor">ACI_GAP_START_LIMITED_DISCOVERY_PROC</a></h2><h3>Description</h3><p>Starts the limited discovery procedure. The controller is commanded to start active scanning.<br>When this procedure is started, only the devices in limited discoverable mode are returned to the upper layers.<br>The procedure is terminated when either the upper layers issue a command to terminate the procedure by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x01 or a timeout happens (the timeout value is fixed at 10.24 s.). When the procedure is terminated due to any of the above  reasons, <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is returned with the procedure code set to 0x01.<br>The device found when the procedure is ongoing is returned to the upper layers through the event <a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a> (or via <a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a> when the extended advertising feature is supported).</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_LIMITED_DISCOVERY_PROC_anchor">ACI_GAP_START_LIMITED_DISCOVERY_PROC</a></h2><h3>Description</h3><p>Starts the limited discovery procedure. The controller is commanded to start active scanning.<br>When this procedure is started, only the devices in limited discoverable mode are returned to the upper layers.<br>The procedure is terminated when either the upper layers issue a command to terminate the procedure by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x01 or a timeout happens (the timeout value is fixed at 10.24 s.). When the procedure is terminated due to any of the above  reasons, <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is returned with the procedure code set to 0x01.<br>The device found when the procedure is ongoing is returned to the upper layers through the event <a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a>.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>LE_Scan_Interval</p>
 </td><td><p>2</p>
@@ -5542,7 +5439,7 @@ Time = N * 0.625 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_AUTO_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_AUTO_CONNECTION_ESTABLISH_PROC</a></h2><h3>Description</h3><p>Starts the auto connection establishment procedure. The devices specified are added to the Filter Accept List of the controller and a LE_Create_Connection call will be made to the controller by GAP with the initiator filter policy set to "Filter Accept List is used to determine which advertiser to connect to". When a command is issued to terminate the procedure by upper layer, a LE_Create_Connection_Cancel call will be made to the controller by GAP.<br>The procedure is terminated when either a connection is successfully established with one of the specified devices in the Filter Accept List or the procedure is explicitly terminated by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x08. A <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is returned with the procedure code set to 0x08.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer generates a RPA.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_AUTO_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_AUTO_CONNECTION_ESTABLISH_PROC</a></h2><h3>Description</h3><p>Starts the auto connection establishment procedure. The devices specified are added to the Filter Accept List of the controller and a LE_Create_Connection call will be made to the controller by GAP with the initiator filter policy set to "Filter Accept List is used to determine which advertiser to connect to". When a command is issued to terminate the procedure by upper layer, a LE_Create_Connection_Cancel call will be made to the controller by GAP.<br>The procedure is terminated when either a connection is successfully established with one of the specified devices in the Filter Accept List or the procedure is explicitly terminated by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x08. A <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is returned with the procedure code set to 0x08.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer generates a RPA, if it is not then the RPA generated by the Host is used.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>LE_Scan_Interval</p>
 </td><td><p>2</p>
@@ -5606,7 +5503,7 @@ Time = N * 0.625 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_GENERAL_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_GENERAL_CONNECTION_ESTABLISH_PROC</a></h2><h3>Description</h3><p>Starts a general connection establishment procedure. The host enables scanning in the controller with the scanner filter policy set to "accept all advertising packets" and from the scanning results, all the devices are sent to the upper layer by the event <a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a> (or by the event <a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a> when the extended advertising feature is supported). The upper layer then has to select one of the devices to which it wants to connect by issuing the command <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>. If privacy is enabled, then either a private resolvable address or a non-resolvable address, based on the address type specified in the command is set as the scanner address but the gap create connection always uses a private resolvable address if the general connection establishment procedure is active.<br>Before the call to <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>, the procedure can be terminated by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x10.<br>After the call to <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>, the procedure is terminated when a connection is established, or the upper layer terminates the procedure by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x40. On completion of the procedure a <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is generated with the procedure code set to 0x40.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer generates a RPA.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_GENERAL_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_GENERAL_CONNECTION_ESTABLISH_PROC</a></h2><h3>Description</h3><p>Starts a general connection establishment procedure. The host enables scanning in the controller with the scanner filter policy set to "accept all advertising packets" and from the scanning results, all the devices are sent to the upper layer using the event LE_Advertising_Report. The upper layer then has to select one of the devices to which it wants to connect by issuing the command <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>. If privacy is enabled, then either a private resolvable address or a non-resolvable address, based on the address type specified in the command is set as the scanner address but the gap create connection always uses a private resolvable address if the general connection establishment procedure is active.<br>The procedure is terminated when a connection is established or the upper layer terminates the procedure by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x10. On completion of the procedure a <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is generated with the procedure code set to 0x10.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer will generate a RPA, if it is not then the RPA/NRPA generated by the Host will be used.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>LE_Scan_Type</p>
 </td><td><p>1</p>
@@ -5644,7 +5541,7 @@ With extended scanning filter policies, a directed advertising PDU accepted by t
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_SELECTIVE_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_SELECTIVE_CONNECTION_ESTABLISH_PROC</a></h2><h3>Description</h3><p>Starts a selective connection establishment procedure. The GAP adds the specified device addresses into Filter Accept List and enables scanning in the controller with a scanning filter policy that should be set to "filtered". All the devices found are sent to the upper layer by the event <a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a> (or by the event <a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a> when the extended advertising feature is supported). The upper layer then has to select one of the devices to which it wants to connect by issuing the command <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>.<br>Before the call to <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>, the procedure can be terminated by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x20.<br>After the call to <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>, the procedure is terminated when a connection is established, or the upper layer terminates the procedure by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x40. On completion of the procedure a <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is generated with the procedure code set to 0x40.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer generates a RPA.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_START_SELECTIVE_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_SELECTIVE_CONNECTION_ESTABLISH_PROC</a></h2><h3>Description</h3><p>Starts a selective connection establishment procedure. The GAP adds the specified device addresses into Filter Accept List and enables scanning in the controller with a scanning filter policy that should be set to "filtered". All the devices found are sent to the upper layer by the event <a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a> (or by the event <a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a> when the extended advertising feature is supported). The upper layer then has to select one of the devices to which it wants to connect by issuing the command <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a>.<br>On completion of the procedure a <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is generated with the procedure code set to 0x20. The procedure is terminated when a connection is established or the upper layer terminates the procedure by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the procedure code set to 0x20.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer will generate a RPA, if it is not then the RPA/NRPA generated by the Host will be used.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>LE_Scan_Type</p>
 </td><td><p>1</p>
@@ -5694,7 +5591,7 @@ With extended scanning filter policies, a directed advertising PDU accepted by t
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a></h2><h3>Description</h3><p>Starts the direct connection establishment procedure. A LE_Create_Connection call will be made to the controller by GAP with the initiator filter policy set to "Filter Accept List is not used to determine which advertiser to connect to". The procedure can be terminated explicitly by the upper layer by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a>. When a command is issued to terminate the procedure by upper layer, a <a href="#HCI_LE_CREATE_CONNECTION_CANCEL_anchor">HCI_LE_CREATE_CONNECTION_CANCEL</a> call will be made to the controller by GAP.<br>On termination of the procedure, a <a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a> (or <a href="#HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT</a> if privacy or extended advertising is used) is returned. The procedure can be explicitly terminated by the upper layer by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the Procedure_Code set to 0x40.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer generates a RPA.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a></h2><h3>Description</h3><p>Starts the direct connection establishment procedure. A LE_Create_Connection call will be made to the controller by GAP with the initiator filter policy set to "Filter Accept List is not used to determine which advertiser to connect to". The procedure can be terminated explicitly by the upper layer by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a>. When a command is issued to terminate the procedure by upper layer, a <a href="#HCI_LE_CREATE_CONNECTION_CANCEL_anchor">HCI_LE_CREATE_CONNECTION_CANCEL</a> call will be made to the controller by GAP.<br>On termination of the procedure, a <a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a> event is returned. The procedure can be explicitly terminated by the upper layer by issuing the command <a href="#ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a> with the Procedure_Code set to 0x40.<br>If privacy is enabled and the peer device (advertiser) is in the resolving list then the link layer will generate a RPA, if it is not then the RPA generated by the Host will be used.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>LE_Scan_Interval</p>
 </td><td><p>2</p>
@@ -5754,7 +5651,7 @@ Time = N * 0.625 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><li><a href="#HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a></h2><h3>Description</h3><p>Terminates the specified GAP procedure. An <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is returned with the procedure code set to the corresponding procedure.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_TERMINATE_GAP_PROC_anchor">ACI_GAP_TERMINATE_GAP_PROC</a></h2><h3>Description</h3><p>Terminates the specified GAP procedure. An <a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a> event is returned with the procedure code set to the corresponding procedure.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Procedure_Code</p>
 </td><td><p>1</p>
@@ -5816,7 +5713,10 @@ Time = N * 0.625 ms.</p>
 </td><td><li>0x0000 ... 0x0EFF</li></td></tr>
 <tr><td><p>Force_Rebond</p>
 </td><td><p>1</p>
-</td><td><p>If 1, Pairing request will be sent even if the device was previously bonded, otherwise pairing request is not sent.</p>
+</td><td><dl class="docutils">
+<dt>If 1, Pairing request will be sent even if the device was previously bonded,</dt>
+<dd>otherwise pairing request is not sent.</dd>
+</dl>
 </td><td><li>0x00: NO</li><li>0x01: YES</li></td></tr>
 </table><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
@@ -5924,7 +5824,7 @@ With extended scanning filter policies, a directed advertising PDU accepted by t
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><h2><a name="ACI_GAP_GET_BONDED_DEVICES_anchor">ACI_GAP_GET_BONDED_DEVICES</a></h2><h3>Description</h3><p>This command gets the list of the devices which are present in the bonding table. It returns the number of addresses and the corresponding address types and values.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_ADVERTISING_REPORT_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><h2><a name="ACI_GAP_GET_BONDED_DEVICES_anchor">ACI_GAP_GET_BONDED_DEVICES</a></h2><h3>Description</h3><p>This command gets the list of the devices which are bonded. It returns the number of addresses and the corresponding address types and values.</p><h3>Input parameters</h3><p>None</p><h3>Output parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
 </td><td><p>1</p>
@@ -5942,7 +5842,7 @@ With extended scanning filter policies, a directed advertising PDU accepted by t
 </td><td><p>6</p>
 </td><td><p>Public Device Address or Random Device Address.</p>
 </td><td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_IS_DEVICE_BONDED_anchor">ACI_GAP_IS_DEVICE_BONDED</a></h2><h3>Description</h3><p>The command finds whether the device, whose address is specified in the command, is present in the bonding table. If the device is found, the command returns "Success".</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_IS_DEVICE_BONDED_anchor">ACI_GAP_IS_DEVICE_BONDED</a></h2><h3>Description</h3><p>The command finds whether the device, whose address is specified in the command, is bonded. If the device is using a resolvable private address and it has been bonded, then the command will return BLE_STATUS_SUCCESS.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Peer_Address_Type</p>
 </td><td><p>1</p>
@@ -6078,7 +5978,7 @@ With extended scanning filter policies, a directed advertising PDU accepted by t
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_REMOVE_BONDED_DEVICE_anchor">ACI_GAP_REMOVE_BONDED_DEVICE</a></h2><h3>Description</h3><p>This command removes a specified device from bonding table; i.e. it removes from bonding table all security and GATT information related to the specified device.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_REMOVE_BONDED_DEVICE_anchor">ACI_GAP_REMOVE_BONDED_DEVICE</a></h2><h3>Description</h3><p>This command is used to remove a specified device from bonding table</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Peer_Identity_Address_Type</p>
 </td><td><p>1</p>
@@ -6118,12 +6018,12 @@ With extended scanning filter policies, a directed advertising PDU accepted by t
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ADV_SET_CONFIGURATION_anchor">ACI_GAP_ADV_SET_CONFIGURATION</a></h2><h3>Description</h3><p>This command is used to set the extended advertising configuration for one advertising set.<br>This command, in association with <a href="#ACI_GAP_ADV_SET_SCAN_RESP_DATA_anchor">ACI_GAP_ADV_SET_SCAN_RESP_DATA</a>, <a href="#ACI_GAP_ADV_SET_ADV_DATA_anchor">ACI_GAP_ADV_SET_ADV_DATA</a> and <a href="#ACI_GAP_ADV_SET_ENABLE_anchor">ACI_GAP_ADV_SET_ENABLE</a>, enables to start extended advertising. These commands must be used in replacement of <a href="#ACI_GAP_SET_DISCOVERABLE_anchor">ACI_GAP_SET_DISCOVERABLE</a>, <a href="#ACI_GAP_SET_LIMITED_DISCOVERABLE_anchor">ACI_GAP_SET_LIMITED_DISCOVERABLE</a>, <a href="#ACI_GAP_SET_DIRECT_CONNECTABLE_anchor">ACI_GAP_SET_DIRECT_CONNECTABLE</a>, <a href="#ACI_GAP_SET_NON_CONNECTABLE_anchor">ACI_GAP_SET_NON_CONNECTABLE</a>, <a href="#ACI_GAP_SET_UNDIRECTED_CONNECTABLE_anchor">ACI_GAP_SET_UNDIRECTED_CONNECTABLE</a> and <a href="#ACI_GAP_SET_BROADCAST_MODE_anchor">ACI_GAP_SET_BROADCAST_MODE</a> that only support legacy advertising.<br>If bit 0 of Adv_Mode is set, the Own_Address_Type parameter is ignored and the own address shall be set with the <a href="#ACI_GAP_ADV_SET_RANDOM_ADDRESS_anchor">ACI_GAP_ADV_SET_RANDOM_ADDRESS</a> command. This mode is only valid for non-connectable advertising.<br>If bit 1 of Adv_Mode is set, the primary advertisement PHY is set to LE Coded (not supported on STM32WB); otherwise, the default primary advertisement PHY is LE 1M.<br>To configure a periodic advertising set, the command <a href="#ACI_GAP_ADV_SET_PERIODIC_PARAMETERS_anchor">ACI_GAP_ADV_SET_PERIODIC_PARAMETERS</a> (in association with <a href="#ACI_GAP_ADV_SET_PERIODIC_DATA_anchor">ACI_GAP_ADV_SET_PERIODIC_DATA</a> and <a href="#ACI_GAP_ADV_SET_PERIODIC_ENABLE_anchor">ACI_GAP_ADV_SET_PERIODIC_ENABLE</a>) shall be used instead of this one (feature not supported on STM32WB).</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ADV_SET_CONFIGURATION_anchor">ACI_GAP_ADV_SET_CONFIGURATION</a></h2><h3>Description</h3><p>This command is used to set the extended advertising configuration for one advertising set.<br>This command, in association with <a href="#ACI_GAP_ADV_SET_SCAN_RESP_DATA_anchor">ACI_GAP_ADV_SET_SCAN_RESP_DATA</a>, <a href="#ACI_GAP_ADV_SET_ADV_DATA_anchor">ACI_GAP_ADV_SET_ADV_DATA</a> and <a href="#ACI_GAP_ADV_SET_ENABLE_anchor">ACI_GAP_ADV_SET_ENABLE</a>, enables to start extended advertising. These commands must be used in replacement of <a href="#ACI_GAP_SET_DISCOVERABLE_anchor">ACI_GAP_SET_DISCOVERABLE</a>, <a href="#ACI_GAP_SET_LIMITED_DISCOVERABLE_anchor">ACI_GAP_SET_LIMITED_DISCOVERABLE</a>, <a href="#ACI_GAP_SET_DIRECT_CONNECTABLE_anchor">ACI_GAP_SET_DIRECT_CONNECTABLE</a>, <a href="#ACI_GAP_SET_NON_CONNECTABLE_anchor">ACI_GAP_SET_NON_CONNECTABLE</a>, <a href="#ACI_GAP_SET_UNDIRECTED_CONNECTABLE_anchor">ACI_GAP_SET_UNDIRECTED_CONNECTABLE</a> and <a href="#ACI_GAP_SET_BROADCAST_MODE_anchor">ACI_GAP_SET_BROADCAST_MODE</a> that only support legacy advertising.<br>If bit 0 of Adv_Mode is set, the Own_Address_Type parameter is ignored and the own address shall be set with the <a href="#ACI_GAP_ADV_SET_RANDOM_ADDRESS_anchor">ACI_GAP_ADV_SET_RANDOM_ADDRESS</a> command. This mode is only valid for non-connectable advertising.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Adv_Mode</p>
 </td><td><p>1</p>
 </td><td><p>Bitmap of extended advertising modes</p>
-</td><td><p>Bitmask of:</p><li>0x01: Use specific random address</li><li>0x02: Use LE Coded as primary advertising PHY (not supported on STM32WB)</li></td></tr>
+</td><td><p>Bitmask of:</p><li>0x01: Use specific random address</li></td></tr>
 <tr><td><p>Advertising_Handle</p>
 </td><td><p>1</p>
 </td><td><p>Used to identify an advertising set.</p>
@@ -6165,7 +6065,7 @@ Time = N * 0.625 ms.</p>
 <tr><td><p>Adv_TX_Power</p>
 </td><td><p>1</p>
 </td><td><p>Advertising TX power. Units: dBm.</p>
-</td><td><li>127: Host has no preference</li><li>-127 ... 20</li></td></tr>
+</td><td><li>-127 ... 20</li></td></tr>
 <tr><td><p>Secondary_Adv_Max_Skip</p>
 </td><td><p>1</p>
 </td><td><p>Secondary advertising maximum skip.</p>
@@ -6307,240 +6207,7 @@ Time = N * 10 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ADV_SET_PERIODIC_PARAMETERS_anchor">ACI_GAP_ADV_SET_PERIODIC_PARAMETERS</a></h2><h3>Description</h3><p>This command is used to set the parameters for periodic advertising.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Advertising_Handle</p>
-</td><td><p>1</p>
-</td><td><p>Used to identify an advertising set.</p>
-</td><td><li>0x00 ... 0xEF</li></td></tr>
-<tr><td><p>Periodic_Adv_Interval_Min</p>
-</td><td><p>2</p>
-</td><td><p>Minimum advertising interval.
-Time = N * 1.25 ms.</p>
-</td><td><li>0x0006 (7.50 ms)  ... 0xFFFF (81918.75 ms) </li></td></tr>
-<tr><td><p>Periodic_Adv_Interval_Max</p>
-</td><td><p>2</p>
-</td><td><p>Maximum advertising interval.
-Time = N * 1.25 ms.</p>
-</td><td><li>0x0006 (7.50 ms)  ... 0xFFFF (81918.75 ms) </li></td></tr>
-<tr><td><p>Periodic_Adv_Properties</p>
-</td><td><p>2</p>
-</td><td><p>Specifies the fields included in the advertising packet.</p>
-</td><td><p>Bitmask of:</p><li>0x0040: Include TxPower in the advertising PDU</li></td></tr>
-<tr><td><p>Num_Subevents</p>
-</td><td><p>1</p>
-</td><td><p>Number of subevents.</p>
-</td><td><li>0x00 ... 0x80</li></td></tr>
-<tr><td><p>Subevent_Interval</p>
-</td><td><p>1</p>
-</td><td><p>Interval between subevents.
-Time = N * 1.25 ms.</p>
-</td><td><li>0x06 (7.50 ms)  ... 0xFF (318.75 ms) </li></td></tr>
-<tr><td><p>Response_Slot_Delay</p>
-</td><td><p>1</p>
-</td><td><p>Time between the advertising packet in a subevent and the first response slot.
-Time = N * 1.25 ms.</p>
-</td><td><li>0x00 (0.00 ms) : No response slots</li><li>0x01 (1.25 ms)  ... 0xFE (317.50 ms) </li></td></tr>
-<tr><td><p>Response_Slot_Spacing</p>
-</td><td><p>1</p>
-</td><td><p>Time between response slots.
-Time = N * 0.125 ms.</p>
-</td><td><li>0x00 (0.000 ms) : No response slots</li><li>0x02 (0.250 ms)  ... 0xFF (31.875 ms) </li></td></tr>
-<tr><td><p>Num_Response_Slots</p>
-</td><td><p>1</p>
-</td><td><p>Number of subevent response slots.</p>
-</td><td><li>0x00: No response slots</li><li>0x01 ... 0xFF</li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ADV_SET_PERIODIC_DATA_anchor">ACI_GAP_ADV_SET_PERIODIC_DATA</a></h2><h3>Description</h3><p>This command is used to set the data used in periodic advertising PDUs.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Advertising_Handle</p>
-</td><td><p>1</p>
-</td><td><p>Used to identify an advertising set.</p>
-</td><td><li>0x00 ... 0xEF</li></td></tr>
-<tr><td><p>Operation</p>
-</td><td><p>1</p>
-</td><td><p>Advertising operation.</p>
-</td><td><li>0x00: Intermediate fragment of fragmented extended advertising data</li><li>0x01: First fragment of fragmented extended advertising data</li><li>0x02: Last fragment of fragmented extended advertising data</li><li>0x03: Complete extended advertising data</li><li>0x04: Unchanged data (just update the Advertising DID)</li></td></tr>
-<tr><td><p>Advertising_Data_Length</p>
-</td><td><p>1</p>
-</td><td><p>Length of Advertising_Data in octets</p>
-</td><td></tr>
-<tr><td><p>Advertising_Data</p>
-</td><td><p>Advertising_Data_Length</p>
-</td><td><p>Data formatted as defined in Bluetooth spec. v.5.4 [Vol 3, Part C, 11].</p>
-</td><td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_ADV_SET_PERIODIC_ENABLE_anchor">ACI_GAP_ADV_SET_PERIODIC_ENABLE</a></h2><h3>Description</h3><p>This command is used to enable or disable the periodic advertising for the advertising set specified by the Advertising_Handle parameter.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Enable</p>
-</td><td><p>1</p>
-</td><td><p>Enable/disable advertising.</p>
-</td><td><li>0x00: Advertising is disabled</li><li>0x01: Advertising is enabled</li></td></tr>
-<tr><td><p>Advertising_Handle</p>
-</td><td><p>1</p>
-</td><td><p>Used to identify an advertising set.</p>
-</td><td><li>0x00 ... 0xEF</li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_EXT_START_SCAN_anchor">ACI_GAP_EXT_START_SCAN</a></h2><h3>Description</h3><p>This command is used to start a scanning procedure when the extended advertising feature is supported.<br>The Scanning_PHYs and subsequent parameters are used to specify the scanning parameters as defined for <a href="#HCI_LE_SET_EXTENDED_SCAN_PARAMETERS_anchor">HCI_LE_SET_EXTENDED_SCAN_PARAMETERS</a>: for more details, refer to Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.64].<br>Note: this more generic command can be used instead of <a href="#ACI_GAP_START_LIMITED_DISCOVERY_PROC_anchor">ACI_GAP_START_LIMITED_DISCOVERY_PROC</a>, <a href="#ACI_GAP_START_GENERAL_DISCOVERY_PROC_anchor">ACI_GAP_START_GENERAL_DISCOVERY_PROC</a>, <a href="#ACI_GAP_START_GENERAL_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_GENERAL_CONNECTION_ESTABLISH_PROC</a>, <a href="#ACI_GAP_START_SELECTIVE_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_SELECTIVE_CONNECTION_ESTABLISH_PROC</a> or <a href="#ACI_GAP_START_OBSERVATION_PROC_anchor">ACI_GAP_START_OBSERVATION_PROC</a>.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Scan_Mode</p>
-</td><td><p>1</p>
-</td><td><p>Not used. Shall be set to 0.</p>
-</td><td></tr>
-<tr><td><p>Procedure</p>
-</td><td><p>1</p>
-</td><td><p>Scan procedure.</p>
-</td><td><li>0x01: GAP_LIMITED_DISCOVERY_PROC</li><li>0x02: GAP_GENERAL_DISCOVERY_PROC</li><li>0x10: GAP_GENERAL_CONNECTION_ESTABLISHMENT_PROC</li><li>0x20: GAP_SELECTIVE_CONNECTION_ESTABLISHMENT_PROC</li><li>0x80: GAP_OBSERVATION_PROC</li></td></tr>
-<tr><td><p>Own_Address_Type</p>
-</td><td><p>1</p>
-</td><td><p>Own address type: if Privacy is disabled, the address can be public or static random; otherwise, it can be a resolvable private address or a non-resolvable private address.</p>
-</td><td><li>0x00: Public address</li><li>0x01: Static random address</li><li>0x02: Resolvable private address</li><li>0x03: Non-resolvable private address</li></td></tr>
-<tr><td><p>Filter_Duplicates</p>
-</td><td><p>1</p>
-</td><td><p>Enable/disable duplicate filtering.</p>
-</td><td><li>0x00: Duplicate filtering disabled</li><li>0x01: Duplicate filtering enabled</li></td></tr>
-<tr><td><p>Duration</p>
-</td><td><p>2</p>
-</td><td><p>Scan duration.
-Time = N * 10 ms.</p>
-</td><td><li>0x0000 (0 ms) : Scan continuously until explicitly disable</li><li>0x0001 (10 ms)  ... 0xFFFF (655350 ms) : Scan duration</li></td></tr>
-<tr><td><p>Period</p>
-</td><td><p>2</p>
-</td><td><p>Scan period.
-Time = N * 1.28 s.</p>
-</td><td><li>0x0000 (0 ms) : Scan continuously</li><li>0x0001 (1280 ms)  ... 0xFFFF (83884800 ms) : Time interval from when the Controller started its last Scan_Duration until it begins the subsequent Scan_Duration</li></td></tr>
-<tr><td><p>Scanning_Filter_Policy</p>
-</td><td><p>1</p>
-</td><td><p>The scanning filter policy determines how the scanner's Link Layer processes advertising and scan response PDUs.
-There is a choice of two primary filter policies: unfiltered and filtered.
-Unfiltered: the Link Layer processes all advertising and scan response PDUs (i.e., the Filter Accept List is not used).
-Filtered: the Link Layer processes advertising and scan response PDUs only from devices in the Filter Accept List.
-With extended scanning filter policies, a directed advertising PDU accepted by the primary filter policy shall nevertheless be ignored unless either the TargetA field is identical to the scanner's device address, or TargetA field is a resolvable private address.</p>
-</td><td><li>0x00: Basic unfiltered scanning filter policy</li><li>0x01: Basic filtered scanning filter policy</li><li>0x02: Extended unfiltered scanning filter policy</li><li>0x03: Extended filtered scanning filter policy</li></td></tr>
-<tr><td><p>Scanning_PHYs</p>
-</td><td><p>1</p>
-</td><td><p>Scan PHYs.</p>
-</td><td><p>Bitmask of:</p><li>0x01: Scan advertisements on the LE 1M PHY</li><li>0x04: Scan advertisements on the LE Coded PHY (not supported on STM32WB)</li></td></tr>
-<tr><td><p>Scan_Type[i]</p>
-</td><td><p>1</p>
-</td><td><p>Passive or active scanning. With passive scanning, no scan request PDUs are sent.</p>
-</td><td><li>0x00: Passive scanning</li><li>0x01: Active scanning</li></td></tr>
-<tr><td><p>Scan_Interval[i]</p>
-</td><td><p>2</p>
-</td><td><p>Time interval from when the Controller started its last scan until it begins the subsequent scan on the primary advertising physical channel.
-Time = N * 0.625 ms.</p>
-</td><td><li>0x0004 (2.500 ms)  ... 0x5DC0 (15000.000 ms) : STM32WB</li><li>0x0004 (2.500 ms)  ... 0xFFFF (40959.375 ms) : STM32WBA</li></td></tr>
-<tr><td><p>Scan_Window[i]</p>
-</td><td><p>2</p>
-</td><td><p>Duration of the scan on the primary advertising physical channel.
-Time = N * 0.625 ms.</p>
-</td><td><li>0x0004 (2.500 ms)  ... 0x5DC0 (15000.000 ms) : STM32WB</li><li>0x0004 (2.500 ms)  ... 0xFFFF (40959.375 ms) : STM32WBA</li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_EXTENDED_ADVERTISING_REPORT_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GAP_EXT_CREATE_CONNECTION_anchor">ACI_GAP_EXT_CREATE_CONNECTION</a></h2><h3>Description</h3><p>This command is used to create a connection with the local device in the Central role to an advertiser when the extended advertising feature is supported.<br>The Advertising_Handle and Subevent parameters shall be used for a connection to a periodic advertiser. Otherwise, they shall be set to 0xFF. These parameters are ignored on STM32WB.<br>The Initiating_PHYs and subsequent parameters are used to specify the initiating parameters as defined for <a href="#HCI_LE_EXTENDED_CREATE_CONNECTION_anchor">HCI_LE_EXTENDED_CREATE_CONNECTION</a>: for more details, refer to Bluetooth spec. v.5.4 [Vol 4, Part E, 7.8.66].<br>Note: this more generic command can be used instead of <a href="#ACI_GAP_CREATE_CONNECTION_anchor">ACI_GAP_CREATE_CONNECTION</a> or <a href="#ACI_GAP_START_AUTO_CONNECTION_ESTABLISH_PROC_anchor">ACI_GAP_START_AUTO_CONNECTION_ESTABLISH_PROC</a>.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Initiating_Mode</p>
-</td><td><p>1</p>
-</td><td><p>Not used. Shall be set to 0.</p>
-</td><td></tr>
-<tr><td><p>Procedure</p>
-</td><td><p>1</p>
-</td><td><p>Connection procedure.</p>
-</td><td><li>0x08: GAP_AUTO_CONNECTION_ESTABLISHMENT_PROC</li><li>0x40: GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC</li></td></tr>
-<tr><td><p>Own_Address_Type</p>
-</td><td><p>1</p>
-</td><td><p>Own address type: if Privacy is disabled, the address can be public or static random; otherwise, it can be a resolvable private address.</p>
-</td><td><li>0x00: Public address</li><li>0x01: Static random address</li><li>0x02: Resolvable private address</li></td></tr>
-<tr><td><p>Peer_Address_Type</p>
-</td><td><p>1</p>
-</td><td><p>The address type of the peer device.</p>
-</td><td><li>0x00: Public Device Address</li><li>0x01: Random Device Address</li></td></tr>
-<tr><td><p>Peer_Address</p>
-</td><td><p>6</p>
-</td><td><p>Public Device Address or Random Device Address of the device to be connected.</p>
-</td><td></tr>
-<tr><td><p>Advertising_Handle</p>
-</td><td><p>1</p>
-</td><td><p>Used to identify the subevent where a connection request shall be initiated from a periodic advertising train.</p>
-</td><td><li>0xFF: Parameter not used</li><li>0x00 ... 0xEF</li></td></tr>
-<tr><td><p>Subevent</p>
-</td><td><p>1</p>
-</td><td><p>Subevent where the connection request is to be sent.</p>
-</td><td><li>0xFF: Parameter not used</li><li>0x00 ... 0x7F</li></td></tr>
-<tr><td><p>Initiator_Filter_Policy</p>
-</td><td><p>1</p>
-</td><td><p>Initiator filter policy.</p>
-</td><td><li>0x00: Filter Accept List is not used to determine which advertiser to connect to</li><li>0x01: Filter Accept List is used to determine which advertiser to connect to (Peer_Address_Type and Peer_Address are ignored)</li></td></tr>
-<tr><td><p>Initiating_PHYs</p>
-</td><td><p>1</p>
-</td><td><p>Initiating PHYs.</p>
-</td><td><p>Bitmask of:</p><li>0x01: Scan connectable advertisements on the LE 1M PHY- Connection parameters for the LE 1M PHY</li><li>0x02: Connection parameters for the LE 2M PHY</li><li>0x04: Scan connectable advertisements on the LE Coded PHY (not supported on STM32WB)</li></td></tr>
-<tr><td><p>Scan_Interval[i]</p>
-</td><td><p>2</p>
-</td><td><p>Time interval from when the Controller started its last scan until it begins the subsequent scan on the primary advertising physical channel.
-Time = N * 0.625 ms.</p>
-</td><td><li>0x0004 (2.500 ms)  ... 0x5DC0 (15000.000 ms) : STM32WB</li><li>0x0004 (2.500 ms)  ... 0xFFFF (40959.375 ms) : STM32WBA</li></td></tr>
-<tr><td><p>Scan_Window[i]</p>
-</td><td><p>2</p>
-</td><td><p>Duration of the scan on the primary advertising physical channel.
-Time = N * 0.625 ms.</p>
-</td><td><li>0x0004 (2.500 ms)  ... 0x5DC0 (15000.000 ms) : STM32WB</li><li>0x0004 (2.500 ms)  ... 0xFFFF (40959.375 ms) : STM32WBA</li></td></tr>
-<tr><td><p>Conn_Interval_Min[i]</p>
-</td><td><p>2</p>
-</td><td><p>Minimum value for the connection event interval.
-Time = N * 1.25 ms.</p>
-</td><td><li>0x0006 (7.50 ms)  ... 0x0C80 (4000.00 ms) </li></td></tr>
-<tr><td><p>Conn_Interval_Max[i]</p>
-</td><td><p>2</p>
-</td><td><p>Maximum value for the connection event interval.
-Time = N * 1.25 ms.</p>
-</td><td><li>0x0006 (7.50 ms)  ... 0x0C80 (4000.00 ms) </li></td></tr>
-<tr><td><p>Conn_Latency[i]</p>
-</td><td><p>2</p>
-</td><td><p>Maximum Peripheral latency for the connection in number of connection events.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Supervision_Timeout[i]</p>
-</td><td><p>2</p>
-</td><td><p>Supervision timeout for the LE Link.
-It shall be a multiple of 10 ms and larger than (1 + connPeripheralLatency) * connInterval * 2.
-Time = N * 10 ms.</p>
-</td><td><li>0x000A (100 ms)  ... 0x0C80 (32000 ms) </li></td></tr>
-<tr><td><p>Min_CE_Length[i]</p>
-</td><td><p>2</p>
-</td><td><p>Information parameter about the minimum length of connection needed for this LE connection.
-Time = N * 0.625 ms.</p>
-</td><td><li>0x0000 (0.000 ms)  ... 0xFFFF (40959.375 ms) </li></td></tr>
-<tr><td><p>Max_CE_Length[i]</p>
-</td><td><p>2</p>
-</td><td><p>Information parameter about the maximum length of connection needed for this LE connection.
-Time = N * 0.625 ms.</p>
-</td><td><li>0x0000 (0.000 ms)  ... 0xFFFF (40959.375 ms) </li></td></tr>
-</table><h3>Output parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT</a></li><li><a href="#ACI_GAP_PROC_COMPLETE_EVENT_anchor">ACI_GAP_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI GATT/ATT commands_anchor">ACI GATT/ATT commands</a></h2><h2></h2><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI GATT/ATT commands_anchor">ACI GATT/ATT commands</a></h2><h2></h2><table width="800" border="1" class="reference">
 <tr><th>Command</th><th>Opcode</th><th>BF</th><th>LO</th><th>LB</th></tr>
 <tr><td><a href="#ACI_GATT_INIT_anchor">ACI_GATT_INIT</a></td><td><p>0xFD01</p>
 </td><td><p>Y</p>
@@ -6862,7 +6529,7 @@ a variable length.</p>
 </td><td><p>2</p>
 </td><td><p>Handle of the characteristic descriptor</p>
 </td><td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a></h2><h3>Description</h3><p>Updates a characteristic value in a service. If notifications (or indications) are enabled on that characteristic, a notification (or indication) is sent to any client that has registered for notifications (or indications) via the Client Characteristic Configuration.<br>Notes:<br>- The command is disallowed if it would cause the generation of an indication on a bearer which is still awaiting confirmation of a previous indication.<br>- The command does not execute and returns BLE_STATUS_BUSY if notifications from a previous call are not completed. The application can enable and wait for the event <a href="#ACI_GATT_NOTIFICATION_COMPLETE_EVENT_anchor">ACI_GATT_NOTIFICATION_COMPLETE_EVENT</a> to avoid this case.<br>- The command does not execute and returns BLE_STATUS_INSUFFICIENT_RESOURCES if there is no more room in the TX pool to allocate notification (or indication) packets. This happens if notifications (or indications) are enabled and the application calls this command at an higher rate than what is allowed by the link. Throughput on BLE link depends on connection interval and connection length parameters (decided by the Central, see <a href="#ACI_L2CAP_CONNECTION_PARAMETER_UPDATE_REQ_anchor">ACI_L2CAP_CONNECTION_PARAMETER_UPDATE_REQ</a> for more information on how to suggest new connection parameters from a Peripheral). The application can wait for the event <a href="#ACI_GATT_TX_POOL_AVAILABLE_EVENT_anchor">ACI_GATT_TX_POOL_AVAILABLE_EVENT</a> before retrying a call to this command. It can also retry the call until it does not return BLE_STATUS_INSUFFICIENT_RESOURCES anymore.<br>- When calling this command, the characteristic value is updated only if the command returns BLE_STATUS_SUCCESS or BLE_STATUS_SEC_PERMISSION_ERROR. The security permission error means that at least one client has not been notified due to security requirements not met.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a></h2><h3>Description</h3><p>Updates a characteristic value in a service. If notifications (or indications) are enabled on that characteristic, a notification (or indication) is sent to the client after sending this command. The command is queued into the STM32WB command queue. <br>If the buffer is full, because previous commands could not be still processed, the function will return BLE_STATUS_INSUFFICIENT_RESOURCES. This will happen if notifications (or indications) are enabled and the application calls <a href="#ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a> at an higher rate than what is allowed by the link. <br>Throughput on BLE link depends on connection interval and connection length parameters (decided by the Central, see <a href="#ACI_L2CAP_CONNECTION_PARAMETER_UPDATE_REQ_anchor">ACI_L2CAP_CONNECTION_PARAMETER_UPDATE_REQ</a> for more information on how to suggest new connection parameters from a Peripheral). If the application does not want to lose notifications because STM32WB buffer becomes full, it must retry again till the function returns BLE_STATUS_SUCCESS or any other error code.<br>Note that the characteristic is updated only if the command returns BLE_STATUS_SUCCESS.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Service_Handle</p>
 </td><td><p>2</p>
@@ -6880,8 +6547,7 @@ If the Val_Offset is set to a value greater than 0, then the length of the attri
 </td><td></tr>
 <tr><td><p>Char_Value_Length</p>
 </td><td><p>1</p>
-</td><td><p>Length of the Char_Value parameter in octets.
-On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 6) i.e. 249 for BLE_CMD_MAX_PARAM_LEN default value.</p>
+</td><td><p>Length of the characteristic value in octets</p>
 </td><td></tr>
 <tr><td><p>Char_Value</p>
 </td><td><p>Char_Value_Length</p>
@@ -7041,7 +6707,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 6) i.e. 249 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_BY_TYPE_RESP_EVENT_anchor">ACI_ATT_READ_BY_TYPE_RESP_EVENT</a></li><li><a href="#ACI_GATT_ERROR_RESP_EVENT_anchor">ACI_GATT_ERROR_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_ATT_READ_BY_GROUP_TYPE_REQ_anchor">ACI_ATT_READ_BY_GROUP_TYPE_REQ</a></h2><h3>Description</h3><p>Sends a Read By Group Type Request.<br>The Read By Group Type Request is used to obtain the values of grouping attributes where the attribute type is known but the handle is not known. Grouping attributes are defined at GATT layer. The grouping attribute types are: "Primary Service", "Secondary Service" and "Characteristic". <br>The responses of the procedure are given through the <a href="#ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT_anchor">ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT</a> event.<br>The end of the procedure is indicated by a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a>.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_BY_TYPE_RESP_EVENT_anchor">ACI_ATT_READ_BY_TYPE_RESP_EVENT</a></li><li><a href="#ACI_GATT_ERROR_RESP_EVENT_anchor">ACI_GATT_ERROR_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_ATT_READ_BY_GROUP_TYPE_REQ_anchor">ACI_ATT_READ_BY_GROUP_TYPE_REQ</a></h2><h3>Description</h3><p>Sends a Read By Group Type Request. <br>The Read By Group Type Request is used to obtain the values of grouping attributes where the attribute type is known but the handle is not known. Grouping attributes are defined at GATT layer. The grouping attribute types are: "Primary Service", "Secondary Service" and "Characteristic". <br>The responses of the procedure are given through the <a href="#ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT_anchor">ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT</a> event. <br>The end of the procedure is indicated by a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a>.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7069,7 +6735,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 6) i.e. 249 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT_anchor">ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT</a></li><li><a href="#ACI_GATT_ERROR_RESP_EVENT_anchor">ACI_GATT_ERROR_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_ATT_PREPARE_WRITE_REQ_anchor">ACI_ATT_PREPARE_WRITE_REQ</a></h2><h3>Description</h3><p>Sends a Prepare Write Request.<br>The Prepare Write Request is used to request the server to prepare to write the value of an attribute.<br>The responses of the procedure are given through the <a href="#ACI_ATT_PREPARE_WRITE_RESP_EVENT_anchor">ACI_ATT_PREPARE_WRITE_RESP_EVENT</a> event.<br>The end of the procedure is indicated by a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a>. </p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT_anchor">ACI_ATT_READ_BY_GROUP_TYPE_RESP_EVENT</a></li><li><a href="#ACI_GATT_ERROR_RESP_EVENT_anchor">ACI_GATT_ERROR_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_ATT_PREPARE_WRITE_REQ_anchor">ACI_ATT_PREPARE_WRITE_REQ</a></h2><h3>Description</h3><p>Sends a Prepare Write Request.<br>The Prepare Write Request is used to request the server to prepare to write the value of an attribute. <br>The responses of the procedure are given through the <a href="#ACI_ATT_PREPARE_WRITE_RESP_EVENT_anchor">ACI_ATT_PREPARE_WRITE_RESP_EVENT</a> event. <br>The end of the procedure is indicated by a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a>. </p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7097,7 +6763,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 6) i.e. 249 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_PREPARE_WRITE_RESP_EVENT_anchor">ACI_ATT_PREPARE_WRITE_RESP_EVENT</a></li><li><a href="#ACI_GATT_ERROR_RESP_EVENT_anchor">ACI_GATT_ERROR_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_ATT_EXECUTE_WRITE_REQ_anchor">ACI_ATT_EXECUTE_WRITE_REQ</a></h2><h3>Description</h3><p>Sends an Execute Write Request.<br>The Execute Write Request is used to request the server to write or cancel the write of all the prepared values currently held in the prepare queue from this client. <br>The result of the procedure is given through the <a href="#ACI_ATT_EXEC_WRITE_RESP_EVENT_anchor">ACI_ATT_EXEC_WRITE_RESP_EVENT</a> event. <br>The end of the procedure is indicated by a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a> event.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_PREPARE_WRITE_RESP_EVENT_anchor">ACI_ATT_PREPARE_WRITE_RESP_EVENT</a></li><li><a href="#ACI_GATT_ERROR_RESP_EVENT_anchor">ACI_GATT_ERROR_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_ATT_EXECUTE_WRITE_REQ_anchor">ACI_ATT_EXECUTE_WRITE_REQ</a></h2><h3>Description</h3><p>Sends an Execute Write Request.<br>The Execute Write Request is used to request the server to write or cancel the write of all the prepared values currently held in the prepare queue from this client. <br>The result of the procedure is given through the <a href="#ACI_ATT_EXEC_WRITE_RESP_EVENT_anchor">ACI_ATT_EXEC_WRITE_RESP_EVENT</a> event. <br>The end of the procedure is indicated by a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a> event. </p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7317,7 +6983,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 6) i.e. 249 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_MULTIPLE_RESP_EVENT_anchor">ACI_ATT_READ_MULTIPLE_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_WRITE_CHAR_VALUE_anchor">ACI_GATT_WRITE_CHAR_VALUE</a></h2><h3>Description</h3><p>Starts the procedure to write a characteristic value.<br>When the procedure is completed, a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a> event is generated.<br>The length of the value to be written must not exceed (ATT_MTU - 3). On STM32WB, it must also not exceed (BLE_CMD_MAX_PARAM_LEN - 5) i.e. 250 for BLE_CMD_MAX_PARAM_LEN default value.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_MULTIPLE_RESP_EVENT_anchor">ACI_ATT_READ_MULTIPLE_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_WRITE_CHAR_VALUE_anchor">ACI_GATT_WRITE_CHAR_VALUE</a></h2><h3>Description</h3><p>Starts the procedure to write a characteristic value.<br>When the procedure is completed, a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a> event is generated.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7357,8 +7023,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 6) i.e. 249 for 
 </td><td></tr>
 <tr><td><p>Attribute_Val_Length</p>
 </td><td><p>1</p>
-</td><td><p>Length of the value to be written.
-On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for BLE_CMD_MAX_PARAM_LEN default value.</p>
+</td><td><p>Length of the value to be written</p>
 </td><td></tr>
 <tr><td><p>Attribute_Val</p>
 </td><td><p>Attribute_Val_Length</p>
@@ -7386,8 +7051,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td></tr>
 <tr><td><p>Attribute_Val_Length</p>
 </td><td><p>1</p>
-</td><td><p>Length of the value to be written.
-On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for BLE_CMD_MAX_PARAM_LEN default value.</p>
+</td><td><p>Length of the value to be written</p>
 </td><td></tr>
 <tr><td><p>Attribute_Val</p>
 </td><td><p>Attribute_Val_Length</p>
@@ -7415,8 +7079,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td></tr>
 <tr><td><p>Attribute_Val_Length</p>
 </td><td><p>1</p>
-</td><td><p>Length of the value to be written.
-On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for BLE_CMD_MAX_PARAM_LEN default value.</p>
+</td><td><p>Length of the value to be written</p>
 </td><td></tr>
 <tr><td><p>Attribute_Val</p>
 </td><td><p>Attribute_Val_Length</p>
@@ -7448,7 +7111,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_BLOB_RESP_EVENT_anchor">ACI_ATT_READ_BLOB_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_WRITE_CHAR_DESC_anchor">ACI_GATT_WRITE_CHAR_DESC</a></h2><h3>Description</h3><p>Starts the procedure to write a characteristic descriptor.<br>When the procedure is completed, a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a> event is generated.<br>The length of the value to be written must not exceed (ATT_MTU - 3). On STM32WB, it must also not exceed (BLE_CMD_MAX_PARAM_LEN - 5) i.e. 250 for BLE_CMD_MAX_PARAM_LEN default value.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_BLOB_RESP_EVENT_anchor">ACI_ATT_READ_BLOB_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_WRITE_CHAR_DESC_anchor">ACI_GATT_WRITE_CHAR_DESC</a></h2><h3>Description</h3><p>Starts the procedure to write a characteristic descriptor.<br>When the procedure is completed, a <a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a> event is generated.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7488,7 +7151,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_RESP_EVENT_anchor">ACI_ATT_READ_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_WRITE_WITHOUT_RESP_anchor">ACI_GATT_WRITE_WITHOUT_RESP</a></h2><h3>Description</h3><p>Starts the procedure to write a characteristic value without waiting for any response from the server. No events are generated after this command is executed.<br>The length of the value to be written must not exceed (ATT_MTU - 3). On STM32WB, it must also not exceed (BLE_CMD_MAX_PARAM_LEN - 5) i.e. 250 for BLE_CMD_MAX_PARAM_LEN default value.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_STATUS_EVENT_anchor">HCI_COMMAND_STATUS_EVENT</a></li><li><a href="#ACI_ATT_READ_RESP_EVENT_anchor">ACI_ATT_READ_RESP_EVENT</a></li><li><a href="#ACI_GATT_PROC_COMPLETE_EVENT_anchor">ACI_GATT_PROC_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_WRITE_WITHOUT_RESP_anchor">ACI_GATT_WRITE_WITHOUT_RESP</a></h2><h3>Description</h3><p>Starts the procedure to write a characteristic value without waiting for any response from the server. No events are generated after this command is executed. The length of the value to be written must not exceed (ATT_MTU - 3); it must also not exceed (BLE_EVT_MAX_PARAM_LEN - 5) i.e. 250 for BLE_EVT_MAX_PARAM_LEN default value.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7512,7 +7175,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_SIGNED_WRITE_WITHOUT_RESP_anchor">ACI_GATT_SIGNED_WRITE_WITHOUT_RESP</a></h2><h3>Description</h3><p>Starts a signed write without response from the server.<br>The procedure is used to write a characteristic value with an authentication signature without waiting for any response from the server. It cannot be used when the link is encrypted.<br>The length of the value to be written must not exceed (ATT_MTU - 15). On STM32WB, it must also not exceed (BLE_CMD_MAX_PARAM_LEN - 5) i.e. 250 for BLE_CMD_MAX_PARAM_LEN default value.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_SIGNED_WRITE_WITHOUT_RESP_anchor">ACI_GATT_SIGNED_WRITE_WITHOUT_RESP</a></h2><h3>Description</h3><p>Starts a signed write without response from the server.<br>The procedure is used to write a characteristic value with an authentication signature without waiting for any response from the server. It cannot be used when the link is encrypted. The length of the value to be written must not exceed (ATT_MTU - 15); it must also not exceed (BLE_EVT_MAX_PARAM_LEN - 5) i.e. 250 for BLE_EVT_MAX_PARAM_LEN default value.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7592,7 +7255,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_SET_SECURITY_PERMISSION_anchor">ACI_GATT_SET_SECURITY_PERMISSION</a></h2><h3>Description</h3><p>This command sets the security permission for the attribute handle specified. It is allowed only for the Client Characteristic Configuration descriptor.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_SET_SECURITY_PERMISSION_anchor">ACI_GATT_SET_SECURITY_PERMISSION</a></h2><h3>Description</h3><p>This command sets the security permission for the attribute handle specified. Currently the setting of security permission is allowed only for client configuration descriptor.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Serv_Handle</p>
 </td><td><p>2</p>
@@ -7676,7 +7339,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td><p>Value_Length</p>
 </td><td><p>Attribute value</p>
 </td><td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_UPDATE_CHAR_VALUE_EXT_anchor">ACI_GATT_UPDATE_CHAR_VALUE_EXT</a></h2><h3>Description</h3><p>This command is a more flexible version of <a href="#ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a> to support update of long attribute up to 512 bytes and indicate selectively the generation of Indication/Notification.<br>The description notes for the <a href="#ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a> command also apply here.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_UPDATE_CHAR_VALUE_EXT_anchor">ACI_GATT_UPDATE_CHAR_VALUE_EXT</a></h2><h3>Description</h3><p>This command is a more flexible version of <a href="#ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a> to support update of long attribute up to 512 bytes and indicate selectively the generation of Indication/Notification.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Conn_Handle_To_Notify</p>
 </td><td><p>2</p>
@@ -7692,7 +7355,10 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 7) i.e. 248 for 
 </td><td></tr>
 <tr><td><p>Update_Type</p>
 </td><td><p>1</p>
-</td><td><p>Allow Notification or Indication generation, if enabled in the client characteristic configuration descriptor</p>
+</td><td><dl class="docutils">
+<dt>Allow Notification or Indication generation,</dt>
+<dd>if enabled in the client characteristic configuration descriptor</dd>
+</dl>
 </td><td><p>Bitmask of:</p><li>0x00: Do not notify</li><li>0x01: Notification</li><li>0x02: Indication</li></td></tr>
 <tr><td><p>Char_Length</p>
 </td><td><p>2</p>
@@ -7705,8 +7371,7 @@ In case of a variable size characteristic, this field specifies the new length o
 </td><td></tr>
 <tr><td><p>Value_Length</p>
 </td><td><p>1</p>
-</td><td><p>Length of the Value parameter in octets.
-On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 12) i.e. 243 for BLE_CMD_MAX_PARAM_LEN default value.</p>
+</td><td><p>Length of the Value parameter in octets</p>
 </td><td></tr>
 <tr><td><p>Value</p>
 </td><td><p>Value_Length</p>
@@ -7718,7 +7383,7 @@ On STM32WB, this value must not exceed (BLE_CMD_MAX_PARAM_LEN - 12) i.e. 243 for
 </td><td><p>1</p>
 </td><td><p>Status error code.</p>
 </td><td></td></tr>
-</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#ACI_GATT_NOTIFICATION_COMPLETE_EVENT_anchor">ACI_GATT_NOTIFICATION_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_DENY_READ_anchor">ACI_GATT_DENY_READ</a></h2><h3>Description</h3><p>This command is used to deny the GATT server to send a response to a read request from a client.<br>The application may send this command when it receives the <a href="#ACI_GATT_READ_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_PERMIT_REQ_EVENT</a> or  <a href="#ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT</a>.<br>This command indicates to the stack that the client is not allowed to read the requested characteristic due to e.g. application restrictions.<br>The Error code shall be either 0x08 (Insufficient Authorization) or a value in the range 0x80-0x9F (Application Error).<br>The application should issue the <a href="#ACI_GATT_DENY_READ_anchor">ACI_GATT_DENY_READ</a>  or <a href="#ACI_GATT_ALLOW_READ_anchor">ACI_GATT_ALLOW_READ</a> command within 30 seconds from the reception of the <a href="#ACI_GATT_READ_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_PERMIT_REQ_EVENT</a> or <a href="#ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT</a> events; otherwise the GATT procedure issues a timeout.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
+</table><h3>Events generated</h3><li><a href="#HCI_COMMAND_COMPLETE_EVENT_anchor">HCI_COMMAND_COMPLETE_EVENT</a></li><li><a href="#ACI_GATT_NOTIFICATION_COMPLETE_EVENT_anchor">ACI_GATT_NOTIFICATION_COMPLETE_EVENT</a></li><h2><a name="ACI_GATT_DENY_READ_anchor">ACI_GATT_DENY_READ</a></h2><h3>Description</h3><p>This command is used to deny the GATT server to send a response to a read request from a client.<br>The application may send this command when it receives the <a href="#ACI_GATT_READ_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_PERMIT_REQ_EVENT</a> or  <a href="#ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT</a>.<br>This command indicates to the stack that the client is not allowed to read the requested characteristic due to e.g. application restrictions.<br>The Error code shall be either 0x08 (Insufficient Authorization) or a value in the range 0x80-0x9F (Application Error).<br>The application should issue the <a href="#ACI_GATT_DENY_READ_anchor">ACI_GATT_DENY_READ</a>  or <a href="#ACI_GATT_ALLOW_READ_anchor">ACI_GATT_ALLOW_READ</a> command within 30 seconds from the reception of the <a href="#ACI_GATT_READ_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_PERMIT_REQ_EVENT</a> or  <a href="#ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT_anchor">ACI_GATT_READ_MULTI_PERMIT_REQ_EVENT</a> events; otherwise the GATT procedure issues a timeout.</p><h3>Input parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -7917,7 +7582,7 @@ Time = N * 0.625 ms.</p>
 <tr><td><p>MPS</p>
 </td><td><p>2</p>
 </td><td><p>Maximum payload size (in octets).</p>
-</td><td><li>23 ... 248</li></td></tr>
+</td><td><li>23 ... 65533</li></td></tr>
 <tr><td><p>Initial_Credits</p>
 </td><td><p>2</p>
 </td><td><p>Number of K-frames that can be received on the created channel(s) by the L2CAP layer entity sending this packet.</p>
@@ -7945,7 +7610,7 @@ Time = N * 0.625 ms.</p>
 <tr><td><p>MPS</p>
 </td><td><p>2</p>
 </td><td><p>Maximum payload size (in octets).</p>
-</td><td><li>23 ... 248</li></td></tr>
+</td><td><li>23 ... 65533</li></td></tr>
 <tr><td><p>Initial_Credits</p>
 </td><td><p>2</p>
 </td><td><p>Number of K-frames that can be received on the created channel(s) by the L2CAP layer entity sending this packet.</p>
@@ -7981,7 +7646,7 @@ Time = N * 0.625 ms.</p>
 <tr><td><p>MPS</p>
 </td><td><p>2</p>
 </td><td><p>Maximum payload size (in octets).</p>
-</td><td><li>23 ... 248</li></td></tr>
+</td><td><li>23 ... 65533</li></td></tr>
 <tr><td><p>Channel_Number</p>
 </td><td><p>1</p>
 </td><td><p>Number of created channels. It is the length of Channel_Index_List.</p>
@@ -8358,9 +8023,6 @@ Error code 4 is ISR delay error detected (only for STM32WB and only from cut 2.2
 </td><td></td><td><p>Y</p>
 </td><td></td></tr>
 <tr><td><a href="#HCI_LE_BIGINFO_ADVERTISING_REPORT_EVENT_anchor">HCI_LE_BIGINFO_ADVERTISING_REPORT_EVENT</a></td><td><p>0x22</p>
-</td><td></td><td><p>Y</p>
-</td><td></td></tr>
-<tr><td><a href="#HCI_LE_SUBRATE_CHANGE_EVENT_anchor">HCI_LE_SUBRATE_CHANGE_EVENT</a></td><td><p>0x23</p>
 </td><td></td><td><p>Y</p>
 </td><td></td></tr>
 </table><h2><a name="HCI_LE_CONNECTION_COMPLETE_EVENT_anchor">HCI_LE_CONNECTION_COMPLETE_EVENT</a></h2><h3>Description</h3><p>The LE Connection Complete event indicates to both of the Hosts forming the connection that a new connection has been created. Upon the creation of the connection a Connection_Handle shall be assigned by the Controller, and passed to the Host in this event. If the connection establishment fails this event shall be provided to the Host that had issued the LE_Create_Connection command.<br>This event indicates to the Host which issued a LE_Create_Connection command and received a Command Status event if the connection establishment failed or was successful.<br>The Central_Clock_Accuracy parameter is only valid for a Peripheral. On a Central, this parameter is set to 0x00.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.7.65.1].</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
@@ -8885,13 +8547,12 @@ Units: 0.1 dBm.</p>
 </td><td></tr>
 <tr><td><p>Sample_Count</p>
 </td><td><p>1</p>
-</td><td></td><td></tr>
-<tr><td><p>I_Sample[i]</p>
-</td><td><p>1</p>
-</td><td></td><td></tr>
-<tr><td><p>Q_Sample[i]</p>
-</td><td><p>1</p>
-</td><td></td><td></tr>
+</td><td><p>Total number of sample pairs</p>
+</td><td></tr>
+<tr><td><p>IQ_Sample</p>
+</td><td><p>Sample_Count</p>
+</td><td><p>I/Q sample pairs</p>
+</td><td></tr>
 </table><h2><a name="HCI_LE_CONNECTION_IQ_REPORT_EVENT_anchor">HCI_LE_CONNECTION_IQ_REPORT_EVENT</a></h2><h3>Description</h3><p>This event is used by the Controller to report the IQ samples from the Constant Tone Extension of a received packet.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.7.65.22].</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
@@ -8933,13 +8594,12 @@ Units: 0.1 dBm.</p>
 </td><td></tr>
 <tr><td><p>Sample_Count</p>
 </td><td><p>1</p>
-</td><td></td><td></tr>
-<tr><td><p>I_Sample[i]</p>
-</td><td><p>1</p>
-</td><td></td><td></tr>
-<tr><td><p>Q_Sample[i]</p>
-</td><td><p>1</p>
-</td><td></td><td></tr>
+</td><td><p>Total number of sample pairs</p>
+</td><td></tr>
+<tr><td><p>IQ_Sample</p>
+</td><td><p>Sample_Count</p>
+</td><td><p>I/Q sample pairs</p>
+</td><td></tr>
 </table><h2><a name="HCI_LE_CTE_REQUEST_FAILED_EVENT_anchor">HCI_LE_CTE_REQUEST_FAILED_EVENT</a></h2><h3>Description</h3><p>This event is used by the Controller to report an issue following a request to a peer device to reply with a packet containing an LL_CTE_RSP PDU and a Constant Tone Extension. It shall be generated if the packet containing the LL_CTE_RSP PDU sent in response did not contain a Constant Tone Extension or if the peer rejected the request. It shall not be generated if the packet containing the LL_CTE_RSP PDU had a CRC error or if the procedure response timeout timer expired.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.7.65.23].</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Status</p>
@@ -9125,8 +8785,8 @@ Time = N * 1.25 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Total number of BISes in the BIG.</p>
 </td><td><li>0x01 ... 0x1F</li></td></tr>
-<tr><td><p>Connection_Handle[i]</p>
-</td><td><p>2</p>
+<tr><td><p>Connection_Handle</p>
+</td><td><p>Num_BIS</p>
 </td><td></td><td></tr>
 </table><h2><a name="HCI_LE_TERMINATE_BIG_COMPLETE_EVENT_anchor">HCI_LE_TERMINATE_BIG_COMPLETE_EVENT</a></h2><h3>Description</h3><p>This event indicates that the transmission of all the BISes in the BIG are terminated.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.7.65.28].</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
@@ -9180,8 +8840,8 @@ Time = N * 1.25 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Total number of BISes in the BIG.</p>
 </td><td><li>0x01 ... 0x1F</li></td></tr>
-<tr><td><p>Connection_Handle[i]</p>
-</td><td><p>2</p>
+<tr><td><p>Connection_Handle</p>
+</td><td><p>Num_BIS</p>
 </td><td></td><td></tr>
 </table><h2><a name="HCI_LE_BIG_SYNC_LOST_EVENT_anchor">HCI_LE_BIG_SYNC_LOST_EVENT</a></h2><h3>Description</h3><p>This event indicates that the Controller has not received any PDUs on a BIG within the timeout period BIG_Sync_Timeout or the BIG has been terminated by the remote device.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.7.65.30].</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
@@ -9309,34 +8969,6 @@ Time = N * 1.25 ms.</p>
 </td><td><p>1</p>
 </td><td><p>Encryption mode of the BISes.</p>
 </td><td><li>0x00: Unencrypted</li><li>0x01: Encrypted</li></td></tr>
-</table><h2><a name="HCI_LE_SUBRATE_CHANGE_EVENT_anchor">HCI_LE_SUBRATE_CHANGE_EVENT</a></h2><h3>Description</h3><p>This event is used to indicate that a Connection Subrate Update procedure has completed and some parameters of the specified connection have changed.<br>See Bluetooth spec. v.5.4 [Vol 4, Part E, 7.7.65.35].</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
-<tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
-<tr><td><p>Status</p>
-</td><td><p>1</p>
-</td><td><p>Status error code.</p>
-</td><td></td></tr>
-<tr><td><p>Connection_Handle</p>
-</td><td><p>2</p>
-</td><td><p>Connection handle for which the command applies.</p>
-</td><td><li>0x0000 ... 0x0EFF</li></td></tr>
-<tr><td><p>Subrate_Factor</p>
-</td><td><p>2</p>
-</td><td><p>New subrate factor applied to the specified underlying connection interval Range.</p>
-</td><td><li>0x0001 ... 0x01F4</li></td></tr>
-<tr><td><p>Peripheral_Latency</p>
-</td><td><p>2</p>
-</td><td><p>New Peripheral latency for the connection in number of subrated connection events.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Continuation_Number</p>
-</td><td><p>2</p>
-</td><td><p>Minimum number of underlying connection events to remain active after a packet containing a Link Layer PDU with a non-zero Length field is sent or received in requests by a Peripheral.</p>
-</td><td><li>0x0000 ... 0x01F3</li></td></tr>
-<tr><td><p>Supervision_Timeout</p>
-</td><td><p>2</p>
-</td><td><p>Supervision timeout for the LE Link.
-It shall be a multiple of 10 ms and larger than (1 + connPeripheralLatency) * connInterval * 2.
-Time = N * 10 ms.</p>
-</td><td><li>0x000A (100 ms)  ... 0x0C80 (32000 ms) </li></td></tr>
 </table><h2><a name="ACI GAP events_anchor">ACI GAP events</a></h2><h2></h2><table width="800" border="1" class="reference">
 <tr><th>Event name</th><th>Vendor specific subevent code</th><th>BF</th><th>LO</th><th>LB</th></tr>
 <tr><td><a href="#ACI_GAP_LIMITED_DISCOVERABLE_EVENT_anchor">ACI_GAP_LIMITED_DISCOVERABLE_EVENT</a></td><td><p>0x0400</p>
@@ -9381,8 +9013,8 @@ Time = N * 10 ms.</p>
 </td><td><li>0x00: Success</li><li>0x01: SMP timeout</li><li>0x02: Pairing failed</li><li>0x03: Encryption failed</li></td></tr>
 <tr><td><p>Reason</p>
 </td><td><p>1</p>
-</td><td><p>Pairing failed reason code (valid in case of pairing failed status)</p>
-</td><td><li>0x01: Passkey Entry Failed</li><li>0x02: OOB Not Available</li><li>0x03: Authentication Requirements</li><li>0x04: Confirm Value Failed</li><li>0x05: Pairing Not Supported</li><li>0x06: Encryption Key Size</li><li>0x07: Command Not Supported</li><li>0x08: Unspecified Reason</li><li>0x09: Repeated Attempts</li><li>0x0A: Invalid Parameters</li><li>0x0B: DHKey Check Failed</li><li>0x0C: Numeric Comparison Failed</li><li>0x0F: Key Rejected</li></td></tr>
+</td><td><p>Pairing reason error code (valid in case of pairing failed status)</p>
+</td><td><li>0x02: OOB_NOT_AVAILABLE</li><li>0x03: AUTH_REQ_CANNOT_BE_MET</li><li>0x04: CONFIRM_VALUE_FAILED</li><li>0x05: PAIRING_NOT_SUPPORTED</li><li>0x06: INSUFF_ENCRYPTION_KEY_SIZE</li><li>0x07: CMD_NOT_SUPPORTED</li><li>0x08: UNSPECIFIED_REASON</li><li>0x09: VERY_EARLY_NEXT_ATTEMPT</li><li>0x0A: SM_INVALID_PARAMS</li><li>0x0B: SMP_SC_DHKEY_CHECK_FAILED</li><li>0x0C: SMP_SC_NUMCOMPARISON_FAILED</li></td></tr>
 </table><h2><a name="ACI_GAP_PASS_KEY_REQ_EVENT_anchor">ACI_GAP_PASS_KEY_REQ_EVENT</a></h2><h3>Description</h3><p>This event is generated by the Security manager to the application when a passkey is required for pairing. When this event is received, the application has to respond with the <a href="#ACI_GAP_PASS_KEY_RESP_anchor">ACI_GAP_PASS_KEY_RESP</a> command.</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
@@ -9835,7 +9467,7 @@ It will be the value of the Characteristic if a &quot;Read using Characteristic 
 <tr><td><p>Handle[i]</p>
 </td><td><p>2</p>
 </td><td></td><td></tr>
-</table><h2><a name="ACI_GATT_TX_POOL_AVAILABLE_EVENT_anchor">ACI_GATT_TX_POOL_AVAILABLE_EVENT</a></h2><h3>Description</h3><p>Each time one of the following GATT commands raises the error code BLE_STATUS_INSUFFICIENT_RESOURCES, the ACI_GATT_TX_POOL_AVAILABLE_EVENT event is generated as soon as there is at least one buffer (with a size of ATT_MTU) available in the TX pool:<br>- <a href="#ACI_GATT_UPDATE_CHAR_VALUE_anchor">ACI_GATT_UPDATE_CHAR_VALUE</a>,<br>- <a href="#ACI_GATT_UPDATE_CHAR_VALUE_EXT_anchor">ACI_GATT_UPDATE_CHAR_VALUE_EXT</a>,<br>- <a href="#ACI_GATT_SEND_MULT_NOTIFICATION_anchor">ACI_GATT_SEND_MULT_NOTIFICATION</a>,<br>- <a href="#ACI_GATT_WRITE_WITHOUT_RESP_anchor">ACI_GATT_WRITE_WITHOUT_RESP</a>,<br>- <a href="#ACI_GATT_SIGNED_WRITE_WITHOUT_RESP_anchor">ACI_GATT_SIGNED_WRITE_WITHOUT_RESP</a>.</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
+</table><h2><a name="ACI_GATT_TX_POOL_AVAILABLE_EVENT_anchor">ACI_GATT_TX_POOL_AVAILABLE_EVENT</a></h2><h3>Description</h3><p>Each time BLE stack raises the error code BLE_STATUS_INSUFFICIENT_RESOURCES (0x64), the <a href="#ACI_GATT_TX_POOL_AVAILABLE_EVENT_anchor">ACI_GATT_TX_POOL_AVAILABLE_EVENT</a> event is generated as soon as there are at least two buffers available for notifications or write commands.</p><h3>Event parameters</h3><table width="800" border="1" class="reference">
 <tr><th>Parameter</th><th>Size</th><th>Description</th><th>Possible values</th></tr>
 <tr><td><p>Connection_Handle</p>
 </td><td><p>2</p>
@@ -10097,7 +9729,7 @@ Time = N * 1.25 ms.</p>
 <tr><td><p>MPS</p>
 </td><td><p>2</p>
 </td><td><p>Maximum payload size (in octets).</p>
-</td><td><li>23 ... 248</li></td></tr>
+</td><td><li>23 ... 65533</li></td></tr>
 <tr><td><p>Initial_Credits</p>
 </td><td><p>2</p>
 </td><td><p>Number of K-frames that can be received on the created channel(s) by the L2CAP layer entity sending this packet.</p>
@@ -10119,7 +9751,7 @@ Time = N * 1.25 ms.</p>
 <tr><td><p>MPS</p>
 </td><td><p>2</p>
 </td><td><p>Maximum payload size (in octets).</p>
-</td><td><li>23 ... 248</li></td></tr>
+</td><td><li>23 ... 65533</li></td></tr>
 <tr><td><p>Initial_Credits</p>
 </td><td><p>2</p>
 </td><td><p>Number of K-frames that can be received on the created channel(s) by the L2CAP layer entity sending this packet.</p>
@@ -10149,7 +9781,7 @@ Time = N * 1.25 ms.</p>
 <tr><td><p>MPS</p>
 </td><td><p>2</p>
 </td><td><p>Maximum payload size (in octets).</p>
-</td><td><li>23 ... 248</li></td></tr>
+</td><td><li>23 ... 65533</li></td></tr>
 <tr><td><p>Channel_Number</p>
 </td><td><p>1</p>
 </td><td><p>Number of created channels. It is the length of Channel_Index_List.</p>
@@ -10198,7 +9830,7 @@ Time = N * 1.25 ms.</p>
 </td><td><p>Length</p>
 </td><td><p>Information data</p>
 </td><td></tr>
-</table><h2><a name="ACI_L2CAP_COC_TX_POOL_AVAILABLE_EVENT_anchor">ACI_L2CAP_COC_TX_POOL_AVAILABLE_EVENT</a></h2><h3>Description</h3><p>Each time <a href="#ACI_L2CAP_COC_TX_DATA_anchor">ACI_L2CAP_COC_TX_DATA</a> raises the error code BLE_STATUS_INSUFFICIENT_RESOURCES, the ACI_L2CAP_COC_TX_POOL_AVAILABLE_EVENT event is generated as soon as there is a free buffer available for sending K-frames.</p><h3>Event parameters</h3><p>None</p><h2><a name="ACI HAL events_anchor">ACI HAL events</a></h2><h2></h2><table width="800" border="1" class="reference">
+</table><h2><a name="ACI_L2CAP_COC_TX_POOL_AVAILABLE_EVENT_anchor">ACI_L2CAP_COC_TX_POOL_AVAILABLE_EVENT</a></h2><h3>Description</h3><p>Each time ACI_L2CAP_COC_TX_DATA raises the error code BLE_STATUS_INSUFFICIENT_RESOURCES (0x64), the ACI_L2CAP_COC_TX_POOL_AVAILABLE_EVENT event is generated as soon as there is a free buffer available for sending K-frames.</p><h3>Event parameters</h3><p>None</p><h2><a name="ACI HAL events_anchor">ACI HAL events</a></h2><h2></h2><table width="800" border="1" class="reference">
 <tr><th>Event name</th><th>Vendor specific subevent code</th><th>BF</th><th>LO</th><th>LB</th></tr>
 <tr><td><a href="#ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT_anchor">ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT</a></td><td><p>0x0004</p>
 </td><td><p>Y</p>
@@ -10259,7 +9891,7 @@ Units: dBm.</p>
 <tr><td><p>FW_Error_Type</p>
 </td><td><p>1</p>
 </td><td><p>FW Error type</p>
-</td><td><li>0x01: L2CAP recombination failure</li><li>0x02: GATT unexpected peer message</li><li>0x03: NVM level warning</li><li>0x04: COC RX data length too large</li><li>0x05: ECOC already assigned DCID</li></td></tr>
+</td><td><li>0x01: L2CAP recombination failure</li><li>0x02: GATT unexpected peer message</li><li>0x03: NVM level warning</li><li>0x04: COC RX data length too large</li></td></tr>
 <tr><td><p>Data_Length</p>
 </td><td><p>1</p>
 </td><td><p>Length of Data in octets</p>
@@ -10411,8 +10043,14 @@ Units: dBm.</p>
 <tr><td><p>0x5C</p>
 </td><td><p>Device not found in DB</p>
 </td></tr>
+<tr><td><p>0x5D</p>
+</td><td><p>Security DB full</p>
+</td></tr>
 <tr><td><p>0x5E</p>
 </td><td><p>Device not bonded</p>
+</td></tr>
+<tr><td><p>0x5F</p>
+</td><td><p>Insufficient encryption key size</p>
 </td></tr>
 <tr><td><p>0x60</p>
 </td><td><p>Invalid handle</p>
@@ -10422,6 +10060,9 @@ Units: dBm.</p>
 </td></tr>
 <tr><td><p>0x62</p>
 </td><td><p>Invalid operation</p>
+</td></tr>
+<tr><td><p>0x63</p>
+</td><td><p>Characteristic already exist</p>
 </td></tr>
 <tr><td><p>0x64</p>
 </td><td><p>Insufficient resources</p>
@@ -10575,4 +10216,4 @@ Units: dBm.</p>
 <tr><td><p>0x23</p>
 </td><td><p>+10 dBm</p>
 </td></tr>
-</table><p>Other values are reserved.</p><h2><a name="Revision history_anchor">Revision history</a></h2><p>June 2022 - Rev 1.0 - First release.</p><p>July 2022 - Rev 1.1 - Fixed Event_Mask default value.</p><p>August 2022 - Rev 1.2 - Fixed HCI_READ_LOCAL_SUPPORTED_CODECS_V2; Removed "SCA Updates" feature; Fixed some spelling issues.</p><p>October 2022 - Rev 1.3 - Added Enhanced ATT feature; Added new commands: ACI_HAL_CONTINUOUS_TX_START, ACI_GATT_SEND_MULT_NOTIFICATION and ACI_GATT_READ_MULTIPLE_VAR_CHAR_VALUE; Added new events: ACI_GATT_EATT_BEARER_EVENT and ACI_GATT_MULT_NOTIFICATION_EVENT; Changed ACI_GATT_ADD_CHAR and ACI_GATT_TX_POOL_AVAILABLE_EVENT descriptions; Added note for GAP peripheral commands that only support legacy advertising; Fixed formula of RF_Channel; Added possible values for HCI_HOST_BUFFER_SIZE and HCI_WRITE_CONNECTION_ACCEPT_TIMEOUT; Created annex for TX Power Level; Replaced ACI_HAL_GET_LINK_STATUS by ACI_HAL_GET_LINK_STATUS_V2.</p><p>January 2023 - Rev 1.4 - Completed the description of Connection_Handle for some primitives; Completed the description of ACI_GAP_ADDR_NOT_RESOLVED_EVENT.</p><p>January 2023 - Rev 1.5 - Added new ATT error codes; Added ACI_HAL_SYNC_EVENT in ACI_HAL_SET_EVENT_MASK; Completed possible values of ACI_HAL_SET_RADIO_ACTIVITY_MASK and ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT.</p><p>March 2023 - Rev 1.6 - Updated HCI status error codes; Added HCI_LE_REQUEST_PEER_SCA and HCI_LE_REQUEST_PEER_SCA_COMPLETE_EVENT; Fixed possible values for HCI_LE_READ_ANTENNA_INFORMATION; Added ACI_GATT_NOTIFICATION_COMPLETE_EVENT; Added GAP service additional record number in ACI_HAL_WRITE_CONFIG_DATA; Completed description of ACI_GATT_ADD_CHAR and ACI_GATT_ADD_CHAR_DESC; Modified ACI_HAL_SYNC_EVENT.</p><p>March 2023 - Rev 1.7 - Added HCI_LE_GENERATE_DHKEY_V2 in LB variant; Completed some missing descriptions and possible values; Fixed description of HCI_ENCRYPTION_KEY_REFRESH_COMPLETE_EVENT, ACI_GATT_SET_EVENT_MASK, ACI_GAP_SET_EVENT_MASK and ACI_HAL_SET_EVENT_MASK; Added SC key type in ACI_HAL_WRITE_CONFIG_DATA.</p><p>May 2023 - Rev 1.8 - Changed description of ACI_GAP_SET_OOB_DATA, ACI_GAP_GET_OOB_DATA and ACI_GAP_SET_DIRECT_CONNECTABLE; Updated description of scanning and initiator filter policy; Renamed ACI_GAP_CONFIGURE_WHITELIST, ACI_HAL_SET_SLAVE_LATENCY, ACI_GAP_SLAVE_SECURITY_REQ and ACI_GAP_SLAVE_SECURITY_INITIATED_EVENT, as well as some parameter names; Replaced ACI_HAL_GET_PM_DEBUG_INFO by ACI_HAL_GET_PM_DEBUG_INFO_V2.</p><p>May 2023 - Rev 1.9 - Changed description of ACI_HAL_SET_TX_POWER_LEVEL; Fixed some spelling issues.</p><p>June 2023 - Rev 1.10 - Fixed maximum value of MPS; Changed note for ACI_GATT_UPDATE_CHAR_VALUE; Changed description of PHY_options.</p><p>August 2023 - Rev 1.11 - Added HCI_LE_ENHANCED_CONNECTION_COMPLETE_EVENT as "Events generated"; Updated HCI_READ_LOCAL_VERSION_INFORMATION; Added some details about bonding table; Added new mode in ACI_GAP_ADV_SET_CONFIGURATION; Added ACI_GAP_EXT_START_SCAN and ACI_GAP_EXT_CREATE_CONNECTION; Added ACI_GAP_ADV_SET_PERIODIC_PARAMETERS, ACI_GAP_ADV_SET_PERIODIC_DATA and ACI_GAP_ADV_SET_PERIODIC_ENABLE; Added possible values for FW_Error_Type; Updated HCI_LE_SET_EVENT_MASK possible values.</p><p>September 2023 - Rev 1.12 - Fixed possible values of Advertising_TX_Power.</p><p>November 2023 - Rev 1.13 - Added Connection Subrating and Channel Classification features. Added HCI_LE_SET_DATA_RELATED_ADDRESS_CHANGES command; Updated description of ACI_GATT_UPDATE_CHAR_VALUE and ACI_GATT_TX_POOL_AVAILABLE_EVENT; Updated description and possible values of ACI_HAL_WRITE_CONFIG_DATA; Upgraded ACI_HAL_GET_LINK_STATUS_V2 command to support 22 links.</p><p>February 2024 - Rev 1.14 - Added "no peer debug key" bit for SMP mode in ACI_HAL_WRITE_CONFIG_DATA.</p></font></body></html>
+</table><p>Other values are reserved.</p></font></body></html>
