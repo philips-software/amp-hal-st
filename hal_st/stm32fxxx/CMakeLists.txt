@@ -15,8 +15,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:AdcDmaStm.cpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:AdcDmaStm.hpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>>:AdcDmaStm.cpp>
+    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>>:AdcDmaStm.hpp>
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
     BackupRamStm.cpp
@@ -123,7 +123,7 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55rg)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WB55x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55RGVx.xml")
-    elseif (TARGET_MCU_VARIANT STREQUAL stm32wba52cg)
+    elseif (TARGET_MCU STREQUAL stm32wba52)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WBA52x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WBA52CGUx.xml")
     else()
@@ -135,8 +135,16 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
 
-    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl $<IF:$<OR:$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>>,PeripheralTableWbxx.xml,PeripheralTableFxxx.xml>
+    if (TARGET_MCU_FAMILY STREQUAL stm32wbxx)
+        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableWbxx.xml
         --stringparam mcu-document ${mcu_xml})
+    elseif (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
+        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableWbaxx.xml
+        --stringparam mcu-document ${mcu_xml})
+    else()
+        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableFxxx.xml
+        --stringparam mcu-document ${mcu_xml})
+    endif()
 
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
