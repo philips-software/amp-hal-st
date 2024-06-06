@@ -61,7 +61,7 @@ namespace hal
         // clang-format off
         const std::array dmaISRDma1
         {
-#if defined(GPDMA1_Channel7_NS)
+#if defined(GPDMA1)
             &GPDMA1_Channel0_NS->CSR,
             &GPDMA1_Channel1_NS->CSR,
             &GPDMA1_Channel2_NS->CSR,
@@ -112,7 +112,7 @@ namespace hal
 
         const std::array dmaIFCRDma1
         {
-#if defined(GPDMA1_Channel7_NS)
+#if defined(GPDMA1)
             &GPDMA1_Channel0_NS->CFCR,
             &GPDMA1_Channel1_NS->CFCR,
             &GPDMA1_Channel2_NS->CFCR,
@@ -162,7 +162,7 @@ namespace hal
 
         const std::array DmaChannelDma1
         {
-#if defined(GPDMA1_Channel7_NS)
+#if defined(GPDMA1)
             GPDMA1_Channel0_NS,
             GPDMA1_Channel1_NS,
             GPDMA1_Channel2_NS,
@@ -353,7 +353,7 @@ namespace hal
 
     DmaStm::DmaStm()
     {
-#if defined(__HAL_RCC_GPDMA1_CLK_ENABLE)
+#if defined(GPDMA1)
         __HAL_RCC_GPDMA1_CLK_ENABLE();
 #else
         __DMA1_CLK_ENABLE();
@@ -366,7 +366,7 @@ namespace hal
 
     DmaStm::~DmaStm()
     {
-#if defined(__HAL_RCC_GPDMA1_CLK_DISABLE)
+#if defined(GPDMA1)
         __HAL_RCC_GPDMA1_CLK_DISABLE();
 #else
         __DMA1_CLK_DISABLE();
@@ -391,7 +391,7 @@ namespace hal
     DmaStm::Stream::Stream(DmaStm& dma, DmaChannelId channelId)
         : dma(dma)
         , dmaIndex(channelId.dma)
-#ifdef DMA_CTR2_REQSEL
+#ifdef GPDMA1
         , dmaMux(channelId.mux)
 #endif
 
@@ -404,25 +404,33 @@ namespace hal
         dma.ReserveStream(dmaIndex, streamIndex);
 
         DMA_HandleTypeDef DmaChannelHandle = {};
-
         DmaChannelHandle.Instance = DmaChannel[dmaIndex][streamIndex];
 
+#ifdef GPDMA1
+        DmaChannelHandle.Instance->CCR |= (DMA_CCR_SUSP | DMA_CCR_RESET);
+        DmaChannelHandle.Instance->CTR1 = 0;
+        DmaChannelHandle.Instance->CTR2 = 0;
+        DmaChannelHandle.Instance->CBR1 = 0;
+        DmaChannelHandle.Instance->CSAR = 0;
+        DmaChannelHandle.Instance->CDAR = 0;
+
+        DmaChannelHandle.Instance->CCR = DMA_CCR_PRIO | DMA_LOW_PRIORITY_HIGH_WEIGHT | DMA_LSM_FULL_EXECUTION;
+        DmaChannelHandle.Instance->CLLR = ((uint32_t)&linkRegisters & DMA_CLLR_LA) | DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL;
+        DmaChannelHandle.Instance->CLBAR = ((uint32_t)&linkRegisters & DMA_CLBAR_LBA);
+
+        linkRegisters.CTR1 = 0;
+        linkRegisters.CTR2 = dmaMux << DMA_CTR2_REQSEL_Pos;
+        linkRegisters.CDAR = 0;
+        linkRegisters.CSAR = 0;
+        linkRegisters.CLLR = 0;
+#else
         DmaChannelHandle.Init.Direction = DMA_MEMORY_TO_PERIPH;
         DmaChannelHandle.Init.Mode = DMA_NORMAL;
 
-#if defined(GPDMA1)
-        DmaChannelHandle.Init.BlkHWRequest = DMA_BREQ_SINGLE_BURST;
-        DmaChannelHandle.Init.Priority = DMA_LOW_PRIORITY_MID_WEIGHT;
-        DmaChannelHandle.Init.SrcBurstLength = 1;
-        DmaChannelHandle.Init.DestBurstLength = 1;
-        DmaChannelHandle.Init.TransferAllocatedPort = DMA_SRC_ALLOCATED_PORT0 | DMA_DEST_ALLOCATED_PORT0;
-        DmaChannelHandle.Init.TransferEventMode = DMA_TCEM_BLOCK_TRANSFER;
-#else
         DmaChannelHandle.Init.PeriphInc = DMA_PINC_DISABLE;
         DmaChannelHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
         DmaChannelHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
         DmaChannelHandle.Init.Priority = DMA_PRIORITY_MEDIUM;
-#endif
 #if defined(DMA_STREAM_BASED)
         DmaChannelHandle.Init.Channel = dmaChannel[channelId.channel];
         DmaChannelHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
@@ -434,6 +442,7 @@ namespace hal
 #endif
 
         HAL_DMA_Init(&DmaChannelHandle);
+#endif
     }
 
     DmaStm::Stream::~Stream()
@@ -463,10 +472,10 @@ namespace hal
     uint8_t DmaStm::Stream::DataSize() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_MSIZE)
+#if defined(GPDMA1)
+        return 1 << ((linkRegisters.CTR1 & DMA_CTR1_DDW_LOG2) >> POSITION_VAL(DMA_CTR1_DDW_LOG2));
+#elif defined(DMA_SxCR_MSIZE)
         return 1 << ((streamRegister->CR & DMA_SxCR_MSIZE) >> POSITION_VAL(DMA_SxCR_MSIZE));
-#elif defined(DMA_CTR1_DDW_LOG2)
-        return 1 << ((streamRegister->CTR1 & DMA_CTR1_DDW_LOG2) >> POSITION_VAL(DMA_CTR1_DDW_LOG2));
 #else
         return 1 << ((streamRegister->CCR & DMA_CCR_MSIZE) >> POSITION_VAL(DMA_CCR_MSIZE));
 #endif
@@ -482,17 +491,17 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 
-#if defined(DMA_SxCR_PSIZE)
-        streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_PSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_PSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_PSIZE_1 : 0);
-#elif defined(DMA_CTR2_DREQ)
+#if defined(GPDMA1)
         dataSizeInBytes &= 0x03;
         uint32_t mask{ 0 };
-        if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
+        if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY) && (linkRegisters.CTR2 & DMA_MEMORY_TO_PERIPH))
             mask = (dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos;
-        else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
+        else if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY))
             mask = (dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos;
 
-        streamRegister->CTR1 = (streamRegister->CTR1 & ~mask) | (streamRegister->CTR1 | mask);
+        linkRegisters.CTR1 = (linkRegisters.CTR1 & ~mask) | (linkRegisters.CTR1 | mask);
+#elif defined(DMA_SxCR_PSIZE)
+        streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_PSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_PSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_PSIZE_1 : 0);
 #else
         streamRegister->CCR = (streamRegister->CCR & ~DMA_CCR_PSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_CCR_PSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_CCR_PSIZE_1 : 0);
 #endif
@@ -501,17 +510,17 @@ namespace hal
     void DmaStm::Stream::SetMemoryDataSize(uint8_t dataSizeInBytes)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_MSIZE)
-        streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_MSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_MSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_MSIZE_1 : 0);
-#elif defined(DMA_CTR2_DREQ)
+#if defined(GPDMA1)
         dataSizeInBytes &= 0x03;
         uint32_t mask{ 0 };
-        if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
+        if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY) && (linkRegisters.CTR2 & DMA_MEMORY_TO_PERIPH))
             mask = (dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos;
-        else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
+        else if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY))
             mask = (dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos;
 
-        streamRegister->CTR1 = (streamRegister->CTR1 & ~mask) | (streamRegister->CTR1 | mask);
+        linkRegisters.CTR1 = (linkRegisters.CTR1 & ~mask) | (linkRegisters.CTR1 | mask);
+#elif defined(DMA_SxCR_MSIZE)
+        streamRegister->CR = (streamRegister->CR & ~DMA_SxCR_MSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_SxCR_MSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_SxCR_MSIZE_1 : 0);
 #else
         streamRegister->CCR = (streamRegister->CCR & ~DMA_CCR_MSIZE) | ((dataSizeInBytes & 1) == 0 ? DMA_CCR_MSIZE_0 : 0) | (dataSizeInBytes > 2 ? DMA_CCR_MSIZE_1 : 0);
 #endif
@@ -529,10 +538,13 @@ namespace hal
     void DmaStm::Stream::Disable()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_EN)
-        streamRegister->CR &= ~DMA_SxCR_EN;
-#else
+#ifdef GPDMA1
+        streamRegister->CCR |= (DMA_CCR_SUSP | DMA_CCR_RESET);
         streamRegister->CCR &= ~DMA_CCR_EN;
+#elif defined(DMA_CCR_EN)
+        streamRegister->CCR &= ~DMA_CCR_EN;
+#else
+        streamRegister->CR &= ~DMA_SxCR_EN;
 #endif
     }
 
@@ -549,10 +561,10 @@ namespace hal
     void DmaStm::Stream::DisableMemoryIncrement()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_MINC)
+#if defined(GPDMA1)
+        linkRegisters.CTR1 &= (!(linkRegisters.CTR2 & DMA_CTR2_SWREQ) && (linkRegisters.CTR2 & DMA_CTR2_DREQ)) ? ~DMA_CTR1_SINC : ~DMA_CTR1_DINC;
+#elif defined(DMA_SxCR_MINC)
         streamRegister->CR &= ~DMA_MINC_ENABLE;
-#elif defined(STM32WBA)
-        streamRegister->CTR1 &= (!(streamRegister->CTR2 & DMA_CTR2_SWREQ) && (streamRegister->CTR2 & DMA_CTR2_DREQ)) ? ~DMA_CTR1_SINC : ~DMA_CTR1_DINC;
 #else
         streamRegister->CCR &= ~DMA_MINC_ENABLE;
 #endif
@@ -571,10 +583,10 @@ namespace hal
     void DmaStm::Stream::DisableCircularMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_CIRC)
+#if defined(GPDMA1)
+        linkRegisters.CLLR = 0;
+#elif defined(DMA_SxCR_CIRC)
         streamRegister->CR &= ~DMA_SxCR_CIRC;
-#elif defined(DMA_TCEM_EACH_LL_ITEM_TRANSFER)
-        streamRegister->CLLR &= 0;
 #else
         streamRegister->CCR &= ~DMA_CCR_CIRC;
 #endif
@@ -583,10 +595,16 @@ namespace hal
     void DmaStm::Stream::Enable()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_EN)
-        streamRegister->CR |= DMA_SxCR_EN;
-#else
+#if defined(GPDMA1)
+        streamRegister->CCR |= DMA_CCR_PRIO | DMA_LOW_PRIORITY_HIGH_WEIGHT | DMA_LSM_FULL_EXECUTION;
+        streamRegister->CLLR = ((uint32_t)&linkRegisters & DMA_CLLR_LA) | DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL;
+        streamRegister->CLBAR = ((uint32_t)&linkRegisters & DMA_CLBAR_LBA);
+
         streamRegister->CCR |= DMA_CCR_EN;
+#elif defined(DMA_CCR_EN)
+        streamRegister->CCR |= DMA_CCR_EN;
+#else
+        streamRegister->CR |= DMA_SxCR_EN;
 #endif
     }
 
@@ -603,10 +621,10 @@ namespace hal
     void DmaStm::Stream::EnableMemoryIncrement()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_MINC)
+#if defined(GPDMA1)
+        linkRegisters.CTR1 |= (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY) && (linkRegisters.CTR2 & DMA_MEMORY_TO_PERIPH)) ? DMA_CTR1_SINC : DMA_CTR1_DINC;
+#elif defined(DMA_SxCR_MINC)
         streamRegister->CR |= DMA_MINC_ENABLE;
-#elif defined(STM32WBA)
-        streamRegister->CTR1 |= (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH)) ? DMA_CTR1_SINC : DMA_CTR1_DINC;
 #else
         streamRegister->CCR |= DMA_MINC_ENABLE;
 #endif
@@ -625,9 +643,10 @@ namespace hal
     void DmaStm::Stream::EnableCircularMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_CIRC)
+#if defined(GPDMA1)
+        linkRegisters.CLLR = DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL | ((uint32_t)&linkRegisters & DMA_CLLR_LA);
+#elif defined(DMA_SxCR_CIRC)
         streamRegister->CR |= DMA_SxCR_CIRC;
-#elif defined(DMA_LINKEDLIST)
 #else
         streamRegister->CCR |= DMA_CCR_CIRC;
 #endif
@@ -647,13 +666,13 @@ namespace hal
     void DmaStm::Stream::SetMemoryAddress(const void* memoryAddress)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxM0AR_M0A)
+#if defined(GPDMA1)
+        if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY) && (linkRegisters.CTR2 & DMA_MEMORY_TO_PERIPH))
+            linkRegisters.CSAR = reinterpret_cast<uint32_t>(memoryAddress);
+        else if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY))
+            linkRegisters.CDAR = reinterpret_cast<uint32_t>(memoryAddress);
+#elif defined(DMA_SxM0AR_M0A)
         streamRegister->M0AR = reinterpret_cast<uint32_t>(memoryAddress);
-#elif defined(STM32WBA)
-        if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
-            streamRegister->CSAR = reinterpret_cast<uint32_t>(memoryAddress);
-        else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
-            streamRegister->CDAR = reinterpret_cast<uint32_t>(memoryAddress);
 #else
         streamRegister->CMAR = reinterpret_cast<uint32_t>(memoryAddress);
 #endif
@@ -662,11 +681,11 @@ namespace hal
     void DmaStm::Stream::SetMemoryToPeripheralMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_DIR_0)
+#if defined(GPDMA1)
+        linkRegisters.CTR2 |= DMA_CTR2_DREQ;
+        linkRegisters.CTR2 &= ~DMA_CTR2_SWREQ;
+#elif defined(DMA_SxCR_DIR_0)
         streamRegister->CR |= DMA_MEMORY_TO_PERIPH;
-#elif defined(STM32WBA)
-        streamRegister->CTR2 |= DMA_CTR2_DREQ;
-        streamRegister->CTR2 &= ~DMA_CTR2_SWREQ;
 #else
         streamRegister->CCR |= DMA_MEMORY_TO_PERIPH;
 #endif
@@ -675,13 +694,13 @@ namespace hal
     void DmaStm::Stream::SetPeripheralAddress(volatile void* peripheralAddress)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxPAR_PA)
+#if defined(GPDMA1)
+        if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY) && (linkRegisters.CTR2 & DMA_MEMORY_TO_PERIPH))
+            linkRegisters.CDAR = reinterpret_cast<uint32_t>(peripheralAddress);
+        else if (!(linkRegisters.CTR2 & DMA_MEMORY_TO_MEMORY))
+            linkRegisters.CSAR = reinterpret_cast<uint32_t>(peripheralAddress);
+#elif defined(DMA_SxPAR_PA)
         streamRegister->PAR = reinterpret_cast<uint32_t>(peripheralAddress);
-#elif defined(STM32WBA)
-        if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
-            streamRegister->CDAR = reinterpret_cast<uint32_t>(peripheralAddress);
-        else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
-            streamRegister->CSAR = reinterpret_cast<uint32_t>(peripheralAddress);
 #else
         streamRegister->CPAR = reinterpret_cast<uint32_t>(peripheralAddress);
 #endif
@@ -690,11 +709,11 @@ namespace hal
     void DmaStm::Stream::SetPeripheralToMemoryMode()
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxCR_DIR_0)
+#if defined(GPDMA1)
+        linkRegisters.CTR2 &= ~(DMA_CTR2_DREQ | DMA_CTR2_SWREQ);
+        linkRegisters.CTR2 |= (dmaMux & DMA_CTR2_REQSEL);
+#elif defined(DMA_SxCR_DIR_0)
         streamRegister->CR &= ~DMA_MEMORY_TO_PERIPH;
-#elif defined(STM32WBA)
-        streamRegister->CTR2 &= ~(DMA_CTR2_DREQ | DMA_CTR2_SWREQ);
-        streamRegister->CTR2 |= (dmaMux & DMA_CTR2_REQSEL);
 #else
         streamRegister->CCR &= ~DMA_MEMORY_TO_PERIPH;
 #endif
@@ -703,10 +722,10 @@ namespace hal
     void DmaStm::Stream::SetTransferSize(uint16_t size)
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxNDT)
+#if defined(GPDMA1)
+        linkRegisters.CBR1 = size / DataSize();
+#elif defined(DMA_SxNDT)
         streamRegister->NDTR = size / DataSize();
-#elif defined(DMA_CBR1_BNDT)
-        streamRegister->CBR1 = size / DataSize();
 #else
         streamRegister->CNDTR = size / DataSize();
 #endif
@@ -735,10 +754,10 @@ namespace hal
     size_t DmaStm::Stream::BytesToTransfer() const
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
-#if defined(DMA_SxNDT)
-        return streamRegister->NDTR * DataSize();
-#elif defined(DMA_CBR1_BNDT)
+#if defined(GPDMA1)
         return streamRegister->CBR1 * DataSize();
+#elif defined(DMA_SxNDT)
+        return streamRegister->NDTR * DataSize();
 #else
         return streamRegister->CNDTR * DataSize();
 #endif
@@ -875,6 +894,23 @@ namespace hal
         stream.SetPeripheralDataSize(peripheralTransferSize);
     }
 
+#ifdef GPDMA1
+    void DmaStm::PeripheralTransceiveStream::SetMemoryToPeripheralMode()
+    {
+        stream.SetMemoryToPeripheralMode();
+    }
+
+    void DmaStm::PeripheralTransceiveStream::SetPeripheralToMemoryMode()
+    {
+        stream.SetPeripheralToMemoryMode();
+    }
+
+    void DmaStm::PeripheralTransceiveStream::SetPeripheralAddress(volatile void* peripheralAddress)
+    {
+        stream.SetPeripheralAddress(peripheralAddress);
+    }
+#endif
+
     void DmaStm::PeripheralTransceiveStream::SetPeripheralTransferSize(uint8_t peripheralTransferSize)
     {
         stream.SetPeripheralDataSize(peripheralTransferSize);
@@ -908,6 +944,23 @@ namespace hal
         : peripheralStream{ stream, peripheralAddress, peripheralTransferSize }
     {
     }
+
+#ifdef GPDMA1
+    void TransceiverDmaChannelBase::SetMemoryToPeripheralMode()
+    {
+        peripheralStream.SetMemoryToPeripheralMode();
+    }
+
+    void TransceiverDmaChannelBase::SetPeripheralToMemoryMode()
+    {
+        peripheralStream.SetPeripheralToMemoryMode();
+    }
+
+    void TransceiverDmaChannelBase::SetPeripheralAddress(volatile void* peripheralAddress)
+    {
+        peripheralStream.SetPeripheralAddress(peripheralAddress);
+    }
+#endif
 
     bool TransceiverDmaChannelBase::StopTransfer()
     {
@@ -946,19 +999,39 @@ namespace hal
 
     TransmitDmaChannel::TransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType)
         : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete, irqHandlerType }
-    {}
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(peripheralAddress);  
+#endif
+    }
 
     TransmitDmaChannel::TransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType)
         : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete, irqHandlerType }
-    {}
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(peripheralAddress);  
+#endif
+    }
 
     ReceiveDmaChannel::ReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType)
         : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete, irqHandlerType }
-    {}
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(peripheralAddress);  
+#endif
+    }
 
     ReceiveDmaChannel::ReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType)
         : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete, irqHandlerType }
-    {}
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(peripheralAddress);  
+#endif
+    }
 
     CircularTransceiverDmaChannel::CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
         : TransceiverDmaChannelBase{ stream, peripheralAddress, peripheralTransferSize }

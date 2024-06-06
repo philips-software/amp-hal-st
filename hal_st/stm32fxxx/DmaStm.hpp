@@ -114,6 +114,19 @@ namespace hal
             uint8_t dmaMux;
 #endif
             uint8_t streamIndex = 0xff;
+   
+#ifdef GPDMA1
+            struct LinkedList
+            {
+                uint32_t CTR1;
+                uint32_t CTR2;
+                uint32_t CBR1;
+                uint32_t CSAR;
+                uint32_t CDAR;
+                uint32_t CLLR;
+            };
+            LinkedList linkRegisters;
+#endif
         };
 
         class TransceiveStream
@@ -212,6 +225,11 @@ namespace hal
         public:
             PeripheralTransceiveStream(TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
+#ifdef GPDMA1
+            void SetMemoryToPeripheralMode();
+            void SetPeripheralToMemoryMode();
+            void SetPeripheralAddress(volatile void* peripheralAddress);
+#endif
             void SetPeripheralTransferSize(uint8_t peripheralTransferSize);
             bool StopTransfer();
 
@@ -234,7 +252,6 @@ namespace hal
         {
         public:
             using PeripheralTransceiveStream::PeripheralTransceiveStream;
-
             using PeripheralTransceiveStream::SetPeripheralTransferSize;
             using PeripheralTransceiveStream::StopTransfer;
 
@@ -247,7 +264,6 @@ namespace hal
         {
         public:
             using PeripheralTransceiveStream::PeripheralTransceiveStream;
-
             using PeripheralTransceiveStream::SetPeripheralTransferSize;
             using PeripheralTransceiveStream::StopTransfer;
 
@@ -274,6 +290,11 @@ namespace hal
     public:
         TransceiverDmaChannelBase(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
+#ifdef GPDMA1
+        void SetMemoryToPeripheralMode();
+        void SetPeripheralToMemoryMode();
+        void SetPeripheralAddress(volatile void* peripheralAddress);
+#endif
         bool StopTransfer();
         void SetPeripheralTransferSize(uint8_t peripheralTransferSize);
 
@@ -309,16 +330,15 @@ namespace hal
         TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
         TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
+#ifdef GPDMA1
+        using TransceiverDmaChannel::SetMemoryToPeripheralMode;
+        using TransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using TransceiverDmaChannel::SetPeripheralTransferSize;
         using TransceiverDmaChannel::StopTransfer;
 
         using TransceiverDmaChannel::StartTransmit;
         using TransceiverDmaChannel::StartTransmitDummy;
-
-        using TransceiverDmaChannel::StartReceive;
-        using TransceiverDmaChannel::StartReceiveDummy;
-
-        using TransceiverDmaChannel::ReceivedSize;
     };
 
     class ReceiveDmaChannel
@@ -328,11 +348,12 @@ namespace hal
         ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
         ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
+#ifdef GPDMA1
+        using TransceiverDmaChannel::SetPeripheralToMemoryMode;
+        using TransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using TransceiverDmaChannel::SetPeripheralTransferSize;
         using TransceiverDmaChannel::StopTransfer;
-
-        using TransceiverDmaChannel::StartTransmit;
-        using TransceiverDmaChannel::StartTransmitDummy;
 
         using TransceiverDmaChannel::StartReceive;
         using TransceiverDmaChannel::StartReceiveDummy;
