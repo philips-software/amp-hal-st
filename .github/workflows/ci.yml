@@ -18,7 +18,13 @@ jobs:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           persist-credentials: false
+<<<<<<< HEAD
       - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
+=======
+          submodules: true
+          token: ${{ secrets.AMP_ACCESS_TOKEN }}
+      - uses: hendrikmuhs/ccache-action@faf867a11c028c0b483fb2ae72b6fc8f7d842714 # v1.2.12
+>>>>>>> origin/feature/cucumber
         with:
           key: ${{ github.job }}-ubuntu-latest
           variant: sccache
@@ -45,11 +51,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, windows-2019, macos-latest]
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
         with:
           persist-credentials: false
+          submodules: true
+          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-${{ matrix.os }}
@@ -73,12 +81,9 @@ jobs:
     strategy:
       matrix:
         configuration: ["RelWithDebInfo"]
-        gcc: [ "10.3-2021.10" ]
+        gcc: ["10.3-2021.10"]
         target: ["stm32wb55", "stm32g070", "stm32g431", "stm32f407", "stm32f429", "stm32f746", "stm32f767", "stm32wba52"]
         include:
-          - gcc: "7-2018-q2"
-            configuration: "RelWithDebInfo"
-            target: "stm32f767"
           - gcc: "8-2019-q3"
             configuration: "RelWithDebInfo"
             target: "stm32f767"
@@ -87,6 +92,10 @@ jobs:
             target: "stm32f767"
     steps:
       - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        with:
+          persist-credentials: false
+          submodules: true
+          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
         uses: carlosperate/arm-none-eabi-gcc-action@b864ac853a2d2f74ec2b8b3ec4deb9cb684b4627 # v1.8.2
         with:

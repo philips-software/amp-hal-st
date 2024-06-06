@@ -36,7 +36,7 @@ endif()
 
 project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
@@ -54,10 +54,16 @@ if (HALST_BUILD_TESTS)
     emil_enable_testing()
 endif()
 
+if (EMIL_HOST_BUILD)
+    add_subdirectory(amp-cucumber-cpp-runner)
+endif()
+
 add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
-add_subdirectory(integration_test)
+if (HALST_STANDALONE)
+    add_subdirectory(integration_test)
+endif()
 add_subdirectory(services)
 add_subdirectory(examples)
 
