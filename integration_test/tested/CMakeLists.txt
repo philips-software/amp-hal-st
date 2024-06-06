@@ -13,5 +13,7 @@ target_link_libraries(integration_test.tested PRIVATE
     hal_st.instantiations
 )
 
+emil_generate_artifacts(TARGET integration_test.tested BIN)
+
 halst_target_default_linker_scripts(integration_test.tested)
 halst_target_default_init(integration_test.tested)
