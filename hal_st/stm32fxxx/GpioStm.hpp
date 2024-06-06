@@ -271,8 +271,22 @@ namespace hal
         DispatchedInterruptHandler interruptDispatcher2;
         DispatchedInterruptHandler interruptDispatcher3;
         DispatchedInterruptHandler interruptDispatcher4;
+#if defined(STM32WBA)
+        DispatchedInterruptHandler interruptDispatcher5;
+        DispatchedInterruptHandler interruptDispatcher6;
+        DispatchedInterruptHandler interruptDispatcher7;
+        DispatchedInterruptHandler interruptDispatcher8;
+        DispatchedInterruptHandler interruptDispatcher9;
+        DispatchedInterruptHandler interruptDispatcher10;
+        DispatchedInterruptHandler interruptDispatcher11;
+        DispatchedInterruptHandler interruptDispatcher12;
+        DispatchedInterruptHandler interruptDispatcher13;
+        DispatchedInterruptHandler interruptDispatcher14;
+        DispatchedInterruptHandler interruptDispatcher15;
+#else
         DispatchedInterruptHandler interruptDispatcher9_5;
         DispatchedInterruptHandler interruptDispatcher15_10;
+#endif
 #endif
     };
 }

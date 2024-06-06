@@ -10,7 +10,7 @@ namespace hal
 
         volatile void* TransmitRegister(uint8_t uartIndex)
         {
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(USART_TDR_TDR)
             return &peripheralUart[uartIndex]->TDR;
 #else
             return &peripheralUart[uartIndex]->DR;
@@ -19,7 +19,7 @@ namespace hal
 
         volatile void* ReceiveRegister(uint8_t uartIndex)
         {
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4)
+#if defined(USART_RDR_RDR)
             return &peripheralUart[uartIndex]->RDR;
 #else
             return &peripheralUart[uartIndex]->DR;
@@ -73,6 +73,18 @@ namespace hal
 
         uartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
+
+#if defined(UART_ADVFEATURE_NO_INIT)
+        uartHandle.AdvancedInit = {};
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+        if (config.swapTxRx)
+        {
+            uartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_SWAP_INIT;
+            uartHandle.AdvancedInit.Swap = UART_ADVFEATURE_SWAP_ENABLE;
+        }
+#endif
+#endif
 
         HAL_UART_Init(&uartHandle);
 

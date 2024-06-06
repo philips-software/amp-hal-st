@@ -3,7 +3,11 @@
 // #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 #include "services/util/DebugLed.hpp"
 
-unsigned int hse_value = 8000000;
+#if defined(STM32WBA)
+unsigned int hse_value = 32'000'000;
+#else
+unsigned int hse_value = 8'000'000;
+#endif
 
 int main()
 {
