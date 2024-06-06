@@ -8,6 +8,8 @@
 #include <atomic>
 #include <cstdint>
 
+#include DEVICE_HEADER
+
 namespace hal
 {
     namespace detail
@@ -16,6 +18,10 @@ namespace hal
         {
             uint32_t baudrate{ 115200 };
             hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+            bool swapTxRx{ false };
+#endif
         };
     }
 

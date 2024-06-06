@@ -1,0 +1,852 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Mcu ClockTree="STM32WBA" DBVersion="V3.0" Family="STM32WBA" HasPowerPad="false" IOType="" Line="STM32WBAx2" Package="UFQFPN48" RefName="STM32WBA52CGUx" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
+    <Core>ARM Cortex-M33</Core>
+    <ContextProject Attributes="MONO" Comment="without TrustZone activated ?" Contexts="CortexM33" Name="TrustZoneDisabled"/>
+    <ContextProject Attributes="DUAL,TZ" Comment="with TrustZone activated ?" Contexts="CortexM33S,CortexM33NS" Name="TrustZoneEnabled"/>
+    <Context Comment="Enable the Cortex-M33 secure context for the peripheral(s) that you want to use from the secure world, whether a basic secure monitor or a trusted execution environment" Core="ARM Cortex-M33" GenType="CUBE" GroupName="Runtime contexts" GroupShortName="RT" LongName="Cortex-M33 secure" Name="CortexM33S" Secure="true" SemaphoreSuffix="_SECURE" ShortName="M33S"/>
+    <Context Comment="Enable the Cortex-M33 non-secure context for the peripheral(s) that you plan to use from the non secure world" Core="ARM Cortex-M33" GenType="CUBE" GroupName="Runtime contexts" GroupShortName="RT" LongName="Cortex-M33 non secure" Name="CortexM33NS" Secure="false" SemaphoreSuffix="_NON_SECURE" ShortName="M33NS"/>
+    <Context Comment="Enable the Cortex-M33 context for the peripheral(s) that you plan to use" Core="ARM Cortex-M33" GenType="CUBE" GroupName="Runtime contexts" GroupShortName="RT" LongName="Cortex-M33" Name="CortexM33" Secure="false" SemaphoreSuffix="_NON_SECURE" ShortName="M33"/>
+    <Frequency>100</Frequency>
+    <TrustZone>Available</TrustZone>
+    <Ram>128</Ram>
+    <IONb>37</IONb>
+    <Die>DIE492</Die>
+    <Flash>1024</Flash>
+    <Voltage Max="3.6" Min="1.71"/>
+    <Temperature Max="85" Min="-40"/>
+    <IP ClockEnableMode="__HAL_RCC_ADC4_CLK_ENABLE" ConfigFile="ADC-STM32WBAxx" InstanceName="ADC4" Name="ADC" Version="aditf4_v4_WBA_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="ADV_TRACE-STM32WBAxx" InstanceName="ADV_TRACE" Name="ADV_TRACE" Version="v1.0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="AES-STM32WBAxx" InstanceName="AES" Name="AES" Version="aes3_v2_0_WBA_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="CORTEX_M33_NS-STM32WBAxx" InstanceName="CORTEX_M33_NS" Name="CORTEX_M33_NS" Version="cortex_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" InitializerForced="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="CORTEX_M33_S-STM32WBAxx" InstanceName="CORTEX_M33_S" Name="CORTEX_M33_S" Version="cortex_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" InitializerForced="true"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="CRC" Name="CRC" Version="integtest1_v2_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="DEBUG" Name="DEBUG" Version="STM32L55_sys_v1_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="FileX-STM32WBAxx" InstanceName="FILEX" Name="FileX" Version="v1.0.0_WBA_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" InitializerForced="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="GPDMA-STM32WBAxx" InstanceName="GPDMA1" Name="GPDMA" Version="STM32WBA_dma3_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="__HAL_RCC_GTZC1_CLK_ENABLE" ConfigFile="GTZC-STM32WBAxx" InstanceName="GTZC" Name="GTZC" Version="tzsc1_v2_2_rc1_TinyBluefish1M">
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="none" ConfigFile="GTZC-STM32WBAxx" InstanceName="GTZC_NS" Name="GTZC" Version="tzsc1_v2_2_rc1_TinyBluefish1M">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="__HAL_RCC_GTZC1_CLK_ENABLE" ConfigFile="GTZC-STM32WBAxx" InstanceName="GTZC_S" Name="GTZC" Version="tzsc1_v2_2_rc1_TinyBluefish1M">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="HASH-STM32WBAxx" InstanceName="HASH" Name="HASH" Version="hash1_v4_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="__HAL_RCC_HSEM_CLK_ENABLE" InstanceName="HSEM" Name="HSEM" Version="hsem1_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="I2C1" Name="I2C" Version="i2c2_v1_1U5_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="I2C3" Name="I2C" Version="i2c2_v1_1U5_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="ICACHE-STM32WBAxx" InstanceName="ICACHE" Name="ICACHE" Version="Icache_v1_0_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="none" InstanceName="IRTIM" Name="IRTIM" Version="L5_irtim_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="none" ConfigFile="IWDG-STM32WBAxx" InstanceName="IWDG" Name="IWDG" Version="iwdg1_v3_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="LINKEDLIST-STM32WBAxx" InstanceName="LINKEDLIST" Name="LINKEDLIST" Version="STM32WBA_linkedlist_v1_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="LPTIM-STM32WBAxx" InstanceName="LPTIM1" Name="LPTIM" Version="WBA_lptimer1_v2_2_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="LPTIM-STM32WBAxx" InstanceName="LPTIM2" Name="LPTIM" Version="WBA_lptimer1_v2_2_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="LPUART1" Name="LPUART" Version="sci3_v1_3_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="MISC-STM32WBAxx" InstanceName="MISC" Name="MISC" Version="v1.0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="PKA-STM32WBAxx" InstanceName="PKA" Name="PKA" Version="pka32_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="__HAL_RCC_PWR_CLK_ENABLE" InstanceName="PWR" Name="PWR" Version="STM32WBA_pwr_v1_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="__HAL_RCC_RAMCFG_CLK_ENABLE" ConfigFile="RAMCFG-STM32WBAxx" InstanceName="RAMCFG" Name="RAMCFG" Version="STM32WBA_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="RCC" Name="RCC" Version="STM32WBA_rcc_v1_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="RF-STM32WBAxx" InstanceName="RF" Name="RF" Version="ble154combo_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" InitializerForced="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="RNG-STM32WBAxx" InstanceName="RNG" Name="RNG" Version="rng1_v4_1">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ClockEnableMode="__HAL_RCC_RTCAPB_CLK_ENABLE" InstanceName="RTC" Name="RTC" Version="rtc2_v2_U5_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="AES-STM32WBAxx" InstanceName="SAES" Name="SAES" Version="aes3_v2_0_WBA_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="SEQUENCER-STM32WBAxx" InstanceName="SEQUENCER" Name="SEQUENCER" Version="v1.0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="SPI-STM32WBAxx" InstanceName="SPI1" Name="SPI" Version="spi2s3_v2_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="SPI-STM32WBAxx" InstanceName="SPI3" Name="SPI" Version="spi2s3_v2_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="STM32_WPAN-STM32WBAxx" InstanceName="STM32_WPAN" Name="STM32_WPAN" Version="v2.0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" InitializerForced="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="SYS" Name="SYS" Version="STM32U5x_sys_v1_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="SYS_S" Name="SYS_S" Version="STM32U5x_sys_s_v1_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="TAMP" Name="TAMP" Version="STM32L5_rtc2_v2_8_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="ThreadX-STM32WBAxx" InstanceName="THREADX" Name="ThreadX" Version="v1.0.0_WBA_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" InitializerForced="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TIM-STM32WBAxx" InstanceName="TIM1" Name="TIM1_8WBA5" Version="gptimer2_v4_x_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TIM-STM32WBAxx" InstanceName="TIM2" Name="TIM1_8WBA5" Version="gptimer2_v4_x_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TIM-STM32WBAxx" InstanceName="TIM3" Name="TIM1_8WBA5" Version="gptimer2_v4_x_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TIM-STM32WBAxx" InstanceName="TIM16" Name="TIM1_8WBA5" Version="gptimer2_v4_x_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TIM-STM32WBAxx" InstanceName="TIM17" Name="TIM1_8WBA5" Version="gptimer2_v4_x_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TIMER-STM32WBAxx" InstanceName="TIMER" Name="TIMER" Version="v1.0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TINY_LPM-STM32WBAxx" InstanceName="TINY_LPM" Name="TINY_LPM" Version="v1.0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TOUCHSENSING-STM32WBAxx" InstanceName="TOUCHSENSING" Name="TOUCHSENSING" Version="v2_2_6_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="TSC-STM32WBAxx" InstanceName="TSC" Name="TSC" Version="tsc1_v1_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="USART1" Name="USART" Version="sci3_v2_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP InstanceName="USART2" Name="USART" Version="sci3_v2_0_Cube">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="WWDG-STM32WBAxx" InstanceName="WWDG" Name="WWDG" Version="wwdg1_v2_0">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S"/>
+        </ContextSplit>
+        <ContextSplit Name="split2">
+            <ContextIP ContextName="CortexM33NS"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="GPIO-STM32WBAxx" InstanceName="GPIO" Name="GPIO" Version="STM32WBAx_gpio_v1_0"/>
+    <IP ConfigFile="NVIC-STM32WBAxx" InstanceName="NVIC1" Name="NVIC1" Version="STM32WBA55">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33S" ForcedSelection="true" InitializerForced="true"/>
+        </ContextSplit>
+    </IP>
+    <IP ConfigFile="NVIC-STM32WBAxx" InstanceName="NVIC2" Name="NVIC2" Version="STM32WBA55">
+        <ContextSplit Name="split1">
+            <ContextIP ContextName="CortexM33NS" ForcedSelection="true" InitializerForced="true"/>
+        </ContextSplit>
+        <ContextSplit Name="split3">
+            <ContextIP ContextName="CortexM33"/>
+        </ContextSplit>
+    </IP>
+    <Pin Name="PB12" Position="1" Type="I/O">
+        <Signal Name="SPI1_RDY"/>
+        <Signal Name="TIM2_CH1"/>
+        <Signal Name="TIM2_ETR"/>
+        <Signal Name="TIM3_ETR"/>
+        <Signal Name="TSC_SYNC"/>
+        <Signal Name="USART1_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB11" Position="2" Type="I/O">
+        <Signal Name="LPTIM1_CH1"/>
+        <Signal Name="LPTIM1_ETR"/>
+        <Signal Name="LPUART1_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA8" Position="3" Type="I/O">
+        <Signal Name="ADC4_IN1"/>
+        <Signal Name="LPTIM1_CH2"/>
+        <Signal Name="RCC_MCO"/>
+        <Signal Name="SPI3_RDY"/>
+        <Signal Name="TIM2_CH2"/>
+        <Signal Name="TSC_G1_IO1"/>
+        <Signal Name="USART1_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA7" Position="4" Type="I/O">
+        <Signal Name="ADC4_IN2"/>
+        <Signal Name="I2C3_SDA"/>
+        <Signal Name="PWR_WKUP8"/>
+        <Signal Name="TAMP_IN1"/>
+        <Signal Name="TAMP_OUT2"/>
+        <Signal Name="TIM2_CH3"/>
+        <Signal Name="TSC_G1_IO2"/>
+        <Signal Name="USART1_CTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA6" Position="5" Type="I/O">
+        <Signal Name="ADC4_IN3"/>
+        <Signal Name="I2C3_SCL"/>
+        <Signal Name="PWR_CSTOP"/>
+        <Signal Name="PWR_WKUP7"/>
+        <Signal Name="SPI3_RDY"/>
+        <Signal Name="TIM2_CH4"/>
+        <Signal Name="TSC_G1_IO3"/>
+        <Signal Name="USART1_DE"/>
+        <Signal Name="USART1_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VDDA" Position="6" Type="Power"/>
+    <Pin Name="PA5" Position="7" Type="I/O">
+        <Signal Name="ADC4_IN4"/>
+        <Signal Name="LPTIM2_ETR"/>
+        <Signal Name="PWR_CSLEEP"/>
+        <Signal Name="PWR_WKUP6"/>
+        <Signal Name="SPI3_NSS"/>
+        <Signal Name="TIM2_CH1"/>
+        <Signal Name="TIM2_ETR"/>
+        <Signal Name="TSC_G1_IO4"/>
+        <Signal Name="USART1_CK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA3" Position="8" Type="I/O">
+        <Signal Name="ADC4_IN6"/>
+        <Signal Name="PWR_WKUP5"/>
+        <Signal Name="TIM16_CH1N"/>
+        <Signal Name="TSC_G4_IO2"/>
+        <Signal Name="USART1_DE"/>
+        <Signal Name="USART1_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB10" Position="9" Type="I/O">
+        <Signal Name="TIM16_BKIN"/>
+        <Signal Name="TSC_G4_IO3"/>
+        <Signal Name="USART1_CK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA2" Position="10" Type="I/O">
+        <Signal Name="ADC4_IN7"/>
+        <Signal Name="LPUART1_TX"/>
+        <Signal Name="PWR_WKUP4"/>
+        <Signal Name="RCC_LSCO"/>
+        <Signal Name="TIM16_CH1"/>
+        <Signal Name="TIM1_BKIN"/>
+        <Signal Name="TIM3_CH1"/>
+        <Signal Name="TSC_G4_IO4"/>
+        <Signal Name="USART1_DE"/>
+        <Signal Name="USART1_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VDD" Position="11" Type="Power"/>
+    <Pin Name="PA1" Position="12" Type="I/O">
+        <Signal Name="ADC4_IN8"/>
+        <Signal Name="LPTIM2_CH2"/>
+        <Signal Name="LPUART1_RX"/>
+        <Signal Name="PWR_WKUP3"/>
+        <Signal Name="SPI1_RDY"/>
+        <Signal Name="TIM17_CH1"/>
+        <Signal Name="TIM1_CH1N"/>
+        <Signal Name="TIM3_CH2"/>
+        <Signal Name="TSC_G2_IO1"/>
+        <Signal Name="USART1_CK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA0" Position="13" Type="I/O">
+        <Signal Name="ADC4_IN9"/>
+        <Signal Name="LPTIM1_IN1"/>
+        <Signal Name="LPUART1_CTS"/>
+        <Signal Name="PWR_WKUP1"/>
+        <Signal Name="SPI3_SCK"/>
+        <Signal Name="TIM1_CH2N"/>
+        <Signal Name="TIM3_CH3"/>
+        <Signal Name="TIM3_ETR"/>
+        <Signal Name="TSC_G2_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB9" Position="14" Type="I/O">
+        <Signal Name="ADC4_IN10"/>
+        <Signal Name="IR_OUT"/>
+        <Signal Name="LPTIM2_IN1"/>
+        <Signal Name="LPUART1_DE"/>
+        <Signal Name="LPUART1_RTS"/>
+        <Signal Name="PWR_WKUP8"/>
+        <Signal Name="SPI3_MISO"/>
+        <Signal Name="TIM16_CH1"/>
+        <Signal Name="TIM1_CH3N"/>
+        <Signal Name="TIM3_CH4"/>
+        <Signal Name="TSC_G2_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB8" Position="15" Type="I/O">
+        <Signal Name="LPTIM1_ETR"/>
+        <Signal Name="PWR_PVD_IN"/>
+        <Signal Name="SPI3_MOSI"/>
+        <Signal Name="TIM16_CH1N"/>
+        <Signal Name="TIM1_CH1"/>
+        <Signal Name="TIM3_ETR"/>
+        <Signal Name="TSC_G2_IO4"/>
+        <Signal Name="USART2_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC15-OSC32_OUT" Position="16" Type="I/O">
+        <Signal Name="ADC4_EXTI15"/>
+        <Signal Name="RCC_OSC32_OUT"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC14-OSC32_IN" Position="17" Type="I/O">
+        <Signal Name="RCC_OSC32_IN"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PC13" Position="18" Type="I/O">
+        <Signal Name="PWR_WKUP2"/>
+        <Signal Name="RTC_OUT1"/>
+        <Signal Name="RTC_TS"/>
+        <Signal Name="TAMP_IN4"/>
+        <Signal Name="TAMP_OUT5"/>
+        <Signal Name="TIM1_BKIN2"/>
+        <Signal Name="TSC_G5_IO1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+        <Condition Diagnostic="" Expression="!(RTC_OUT2 &amp; (WakeUp_Outputed | AlarmA_Outputed | AlarmB_Outputed))"/>
+    </Pin>
+    <Pin Name="PB7" Position="19" Type="I/O">
+        <Signal Name="PWR_WKUP5"/>
+        <Signal Name="TAMP_IN5"/>
+        <Signal Name="TAMP_OUT4"/>
+        <Signal Name="TIM1_CH4N"/>
+        <Signal Name="TSC_G5_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB6" Position="20" Type="I/O">
+        <Signal Name="PWR_WKUP3"/>
+        <Signal Name="TIM2_CH1"/>
+        <Signal Name="TIM2_ETR"/>
+        <Signal Name="TSC_G5_IO3"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB5" Position="21" Type="I/O">
+        <Signal Name="LPUART1_TX"/>
+        <Signal Name="TIM3_CH1"/>
+        <Signal Name="TSC_G5_IO4"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VDD" Position="22" Type="Power"/>
+    <Pin Name="PB4 (NJTRST)" Position="23" Type="I/O">
+        <Signal Name="DEBUG_JTRST"/>
+        <Signal Name="LPTIM2_IN2"/>
+        <Signal Name="SPI1_SCK"/>
+        <Signal Name="TIM17_CH1"/>
+        <Signal Name="TIM1_CH3"/>
+        <Signal Name="TSC_G3_IO1"/>
+        <Signal Name="USART2_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB3 (JTDO/TRACESWO)" Position="24" Type="I/O">
+        <Signal Name="DEBUG_JTDO-SWO"/>
+        <Signal Name="I2C1_SDA"/>
+        <Signal Name="LPTIM1_IN2"/>
+        <Signal Name="SPI1_MISO"/>
+        <Signal Name="TIM17_CH1N"/>
+        <Signal Name="TIM1_CH4"/>
+        <Signal Name="TSC_G3_IO2"/>
+        <Signal Name="USART2_CK"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA15 (JTDI)" Position="25" Type="I/O">
+        <Signal Name="ADC4_EXTI15"/>
+        <Signal Name="DEBUG_JTDI"/>
+        <Signal Name="I2C1_SCL"/>
+        <Signal Name="LPTIM1_CH2"/>
+        <Signal Name="SPI1_MOSI"/>
+        <Signal Name="TIM17_BKIN"/>
+        <Signal Name="TIM1_ETR"/>
+        <Signal Name="TSC_G3_IO3"/>
+        <Signal Name="USART2_DE"/>
+        <Signal Name="USART2_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA14 (JTCK/SWCLK)" Position="26" Type="I/O">
+        <Signal Name="DEBUG_JTCK-SWCLK"/>
+        <Signal Name="TAMP_IN3"/>
+        <Signal Name="TAMP_OUT6"/>
+        <Signal Name="USART2_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA13 (JTMS/SWDIO)" Position="27" Type="I/O">
+        <Signal Name="DEBUG_JTMS-SWDIO"/>
+        <Signal Name="IR_OUT"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA12" Position="28" Type="I/O">
+        <Signal Name="PWR_WKUP6"/>
+        <Signal Name="RF_ANTSW0"/>
+        <Signal Name="SPI1_NSS"/>
+        <Signal Name="TIM1_CH2"/>
+        <Signal Name="TSC_G3_IO4"/>
+        <Signal Name="USART2_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA11" Position="29" Type="I/O">
+        <Signal Name="LPTIM2_CH1"/>
+        <Signal Name="RF_ANTSW1"/>
+        <Signal Name="TIM1_CH1"/>
+        <Signal Name="USART2_RX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB2" Position="30" Type="I/O">
+        <Signal Name="I2C1_SCL"/>
+        <Signal Name="I2C3_SCL"/>
+        <Signal Name="PWR_WKUP1"/>
+        <Signal Name="RF_ANTSW2"/>
+        <Signal Name="RTC_OUT2"/>
+        <Signal Name="TIM1_CH1N"/>
+        <Signal Name="USART2_CTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+        <Condition Diagnostic="" Expression="!(RTC_OUT1 &amp; CALIBRATION)"/>
+    </Pin>
+    <Pin Name="PB1" Position="31" Type="I/O">
+        <Signal Name="I2C1_SDA"/>
+        <Signal Name="I2C3_SDA"/>
+        <Signal Name="PWR_WKUP4"/>
+        <Signal Name="TIM1_CH2N"/>
+        <Signal Name="USART2_DE"/>
+        <Signal Name="USART2_RTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB0" Position="32" Type="I/O">
+        <Signal Name="LPTIM2_IN2"/>
+        <Signal Name="TIM1_CH3N"/>
+        <Signal Name="USART2_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB15" Position="33" Type="I/O">
+        <Signal Name="ADC4_EXTI15"/>
+        <Signal Name="I2C1_SMBA"/>
+        <Signal Name="I2C3_SMBA"/>
+        <Signal Name="LPUART1_CTS"/>
+        <Signal Name="TIM16_BKIN"/>
+        <Signal Name="TIM1_BKIN2"/>
+        <Signal Name="USART2_CTS"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PH3-BOOT0" Position="34" Type="I/O">
+        <Signal Name="TAMP_IN2"/>
+        <Signal Name="TAMP_OUT1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VDD" Position="35" Type="Power"/>
+    <Pin Name="NRST" Position="36" Type="Reset"/>
+    <Pin Name="RF" Position="37" Type="MonoIO"/>
+    <Pin Name="VDDHPA" Position="38" Type="Power"/>
+    <Pin Name="VDDRF" Position="39" Type="Power"/>
+    <Pin Name="OSC_OUT" Position="40" Type="I/O">
+        <Signal Name="RCC_OSC_OUT"/>
+    </Pin>
+    <Pin Name="OSC_IN" Position="41" Type="I/O">
+        <Signal Name="RCC_OSC_IN"/>
+    </Pin>
+    <Pin Name="VDDRFPA" Position="42" Type="Power"/>
+    <Pin Name="VDD" Position="43" Type="Power"/>
+    <Pin Name="VCAP" Position="44" Type="Power"/>
+    <Pin Name="PA10" Position="45" Type="I/O">
+        <Signal Name="LPUART1_RX"/>
+        <Signal Name="TIM3_CH1"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PA9" Position="46" Type="I/O">
+        <Signal Name="LPUART1_DE"/>
+        <Signal Name="LPUART1_RTS"/>
+        <Signal Name="TIM3_CH2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB14" Position="47" Type="I/O">
+        <Signal Name="PWR_WKUP7"/>
+        <Signal Name="RTC_REFIN"/>
+        <Signal Name="TIM3_CH3"/>
+        <Signal Name="TSC_G6_IO1"/>
+        <Signal Name="USART1_TX"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="PB13" Position="48" Type="I/O">
+        <Signal Name="TIM3_CH4"/>
+        <Signal Name="TSC_G6_IO2"/>
+        <Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
+    </Pin>
+    <Pin Name="VSS (exposed pad)" Position="49" Type="Power"/>
+</Mcu>

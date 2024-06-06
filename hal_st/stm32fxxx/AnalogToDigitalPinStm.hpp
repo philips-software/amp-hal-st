@@ -9,6 +9,22 @@
 
 namespace hal
 {
+    namespace detail
+    {
+        struct AdcStmChannelConfig
+        {
+#if defined(STM32F0) || defined(STM32F3)
+            uint32_t samplingTime{ ADC_SAMPLETIME_7CYCLES_5 };
+#elif defined(STM32WB) || defined(STM32G4)
+            uint32_t samplingTime{ ADC_SAMPLETIME_2CYCLES_5 };
+#elif defined(STM32G0) || defined(STM32WBA)
+            uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES_5 };
+#else
+            uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES };
+#endif
+        };
+    }
+
     class AdcStm;
 
     class AnalogToDigitalPinImplStm
@@ -28,12 +44,15 @@ namespace hal
         : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc);
+        using Config = detail::AdcStmChannelConfig;
+
+        AnalogToDigitalInternalTemperatureStm(AdcStm& adc, const Config& config = Config());
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
         AdcStm& adc;
+        Config config;
     };
 
     class AdcTriggeredByTimerWithDma;
