@@ -22,7 +22,7 @@ namespace application
         flash::FlashResultProxy flashResult;
         hal::Flash& flash;
 
-        std::array<uint8_t, std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value> buffer;
+        std::array<uint8_t, flash::WriteRequest::contentsSize> buffer;
     };
 
     class FlashProxy

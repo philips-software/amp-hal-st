@@ -59,7 +59,7 @@ namespace application
             proxy.RequestSend([this, address]()
                 {
                     ++transferBuffers;
-                    auto size = std::min(writingBuffer.size(), std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value);
+                    auto size = std::min<std::size_t>(writingBuffer.size(), flash::WriteRequest::contentsSize);
                     proxy.Write(address, infra::Head(writingBuffer, size));
                     WriteBuffer(infra::DiscardHead(writingBuffer, size), address + size, this->onDone.Clone());
                 });
@@ -114,7 +114,7 @@ namespace application
             proxy.RequestSend([this, address]()
                 {
                     ++transferBuffers;
-                    auto size = std::min<uint32_t>(readingBuffer.size() - this->start, std::tuple_size<std::remove_reference_t<decltype(std::declval<flash::WriteRequest>().contents.Storage())>>::value);
+                    auto size = std::min<uint32_t>(readingBuffer.size() - this->start, flash::WriteRequest::contentsSize);
                     proxy.Read(address + this->start, size);
                     ReadPartialBuffer(address, this->start + size);
                 });
