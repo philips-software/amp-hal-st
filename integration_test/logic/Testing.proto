@@ -26,6 +26,7 @@ service Tester
 
     rpc Reset(Nothing) returns (Nothing) { option (method_id) = 1; }
     rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
+    rpc Ping(Nothing) returns (Nothing) { option (method_id) = 3; }
 }
 
 service Tested

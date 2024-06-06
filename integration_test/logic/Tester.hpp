@@ -18,6 +18,7 @@ namespace application
         // Implementation of Tester
         void Reset() override;
         void EnablePeripheral(testing::Peripheral type) override;
+        void Ping() override;
 
         // Implementation of Peripherals
         services::Echo& GetEcho() const override;
@@ -27,6 +28,7 @@ namespace application
         infra::TimerSingleShot resetTimer;
 
         infra::SharedPtr<void> currentPeripheral;
+        testing::TesterProxy proxy;
     };
 }
 
