@@ -7,6 +7,8 @@ endif()
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
 option(HALST_BUILD_TESTS "Enable building the tests" Off)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
+option(HALST_BUILD_TESTS "Enable building the tests" Off)
+
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
 set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
@@ -26,7 +28,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        1ac66fc6aca64fb750b7133766c53d4d67b01be1 # unreleased
+        GIT_TAG        1ac66fc6aca64fb750b7133766c53d4d67b01be1 # sesame
     )
 
     FetchContent_MakeAvailable(emil)
