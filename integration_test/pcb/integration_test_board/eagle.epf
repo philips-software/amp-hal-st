@@ -1,0 +1,25 @@
+[Eagle]
+Version="06 03 00"
+Platform="Windows"
+Serial="62191E841E-LSR-WLM-1EL"
+Globals="Globals"
+Desktop="Desktop"
+
+[Globals]
+AutoSaveProject=1
+UsedLibrary="C:/Users/richa/Documents/eagle/lbr/Richard/diode.lbr"
+UsedLibrary="C:/Users/richa/Documents/eagle/lbr/Richard/header.lbr"
+UsedLibrary="C:/Users/richa/Documents/eagle/lbr/Richard/ic.lbr"
+UsedLibrary="C:/Users/richa/Documents/eagle/lbr/Richard/passive.lbr"
+UsedLibrary="C:/Users/richa/Documents/eagle/lbr/Richard/supply.lbr"
+UsedLibrary="C:/Users/richa/Documents/eagle/lbr/Richard/transistor.lbr"
+
+[Win_1]
+Type="Control Panel"
+Loc="616 301 1215 700"
+State=1
+Number=0
+
+[Desktop]
+Screen="1920 1080"
+Window="Win_1"

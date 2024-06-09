@@ -5,6 +5,7 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "infra/timer/Timer.hpp"
 #include "integration_test/logic/Peripheral.hpp"
+#include "services/util/EchoOnSesame.hpp"
 
 namespace application
 {
@@ -13,20 +14,21 @@ namespace application
         , public Peripherals
     {
     public:
-        Tester(services::Echo& echo, hal::GpioPin& resetTesterPin);
+        Tester(services::Echo& echo, hal::GpioPin& resetTesterPin, services::EchoOnSesame& echoToTested);
 
         // Implementation of Tester
         void Reset() override;
         void EnablePeripheral(testing::Peripheral type) override;
+        void Ping() override;
 
         // Implementation of Peripherals
         services::Echo& GetEcho() const override;
 
     private:
+        services::EchoOnSesame& echoToTested;
         hal::OutputPin resetTester;
         infra::TimerSingleShot resetTimer;
-
-        infra::SharedPtr<void> currentPeripheral;
+        testing::TesterProxy proxy;
     };
 }
 
