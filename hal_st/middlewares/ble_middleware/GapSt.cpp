@@ -122,11 +122,11 @@ namespace hal
         }
 
 #elif defined(STM32WBA)
-        const uint8_t maxAttMtuSizeForInternalBuffer = 251;
-        const std::size_t bufferSize = BLE_TOTAL_BUFFER_SIZE(maxNumberOfBleLinks, NumberOfBleMemoryBlocks(maxAttMtuSizeForInternalBuffer));
+        const std::size_t mblockCount = (BLE_MBLOCKS_CALC(BLE_DEFAULT_PREP_WRITE_LIST_SIZE, 251, maxNumberOfBleLinks) + 0x15);
+        const std::size_t bufferSize = BLE_TOTAL_BUFFER_SIZE(maxNumberOfBleLinks, mblockCount);
         const std::size_t gattBufferSize = BLE_TOTAL_BUFFER_SIZE_GATT(numAttrRecord, numAttrServ, attrValueArrSize);
-        std::array<uint32_t, DIVC(bufferSize, 4)> bleBuffer;
-        std::array<uint32_t, DIVC(gattBufferSize, 4)> bleGattBuffer;
+        static std::array<uint32_t, DIVC(bufferSize, 4)> bleBuffer;
+        static std::array<uint32_t, DIVC(gattBufferSize, 4)> bleGattBuffer;
 
         void BleStackInitialization(GapSt::BleBondStorage bleBondStorage, const GapSt::Configuration& configuration)
         {
@@ -142,7 +142,7 @@ namespace hal
                 attrValueArrSize,
                 maxNumberOfBleLinks,
                 PrepareWriteListSize(configuration.maxAttMtuSize),
-                NumberOfBleMemoryBlocks(configuration.maxAttMtuSize),
+                mblockCount,
                 configuration.maxAttMtuSize,
                 248,
                 64,

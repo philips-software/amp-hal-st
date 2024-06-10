@@ -45,9 +45,20 @@ extern "C"
                 });
     }
 #elif defined(STM32WBA)
+    tBleStatus ProcessHciEventPacket(const uint8_t* data)
+    {
+        SVCCTL_UserEvtRx(const_cast<uint8_t *>(data));
+        return BLE_STATUS_SUCCESS;
+    }
+
     uint8_t BLECB_Indication(const uint8_t* data, uint16_t length, const uint8_t* ext_data, uint16_t ext_length)
     {
-        return BLE_STATUS_SUCCESS;
+        if (data[0] == HCI_EVENT_PKT_TYPE)
+            return ProcessHciEventPacket(data);
+        else if (data[0] == HCI_ACLDATA_PKT_TYPE)
+            return BLE_STATUS_SUCCESS;
+
+        return BLE_STATUS_FAILED;
     }
 #endif
 }
@@ -114,7 +125,10 @@ namespace hal
         MemoryChannelInit();
         TL_Enable();
 #elif defined(STM32WBA)
-        protocolStackInitialized(bleBondsStorage);
+        infra::EventDispatcher::Instance().Schedule([this]()
+            {
+                this->protocolStackInitialized(bleBondsStorage);
+            });
 #endif
     }
 

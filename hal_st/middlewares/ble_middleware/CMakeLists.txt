@@ -1,8 +1,8 @@
 add_library(hal_st.ble_middleware STATIC)
 emil_build_for(hal_st.ble_middleware TARGET_MCU_FAMILY stm32wbxx stm32wbaxx PREREQUISITE_BOOL HALST_STANDALONE)
 
-set(BLE_STACK_LIBRARY_FILE  ${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/ble/stack/lib/stm32wba_ble_stack_full.a)
-set(LINK_LAYER_LIBRARY_FILE ${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/link_layer/ll_cmd_lib/lib/LinkLayer_BLE_Full_lib.a)
+set(BLE_STACK_LIBRARY_FILE  ${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/ble/stack/lib/stm32wba_ble_stack_basic.a)
+set(LINK_LAYER_LIBRARY_FILE ${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/link_layer/ll_cmd_lib/lib/LinkLayer_BLE_Basic_lib.a)
 
 target_include_directories(hal_st.ble_middleware PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../..>"
