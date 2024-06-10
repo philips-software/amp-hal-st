@@ -20,7 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "scm.h"
-#include "string.h"
+#include <string.h>
 
 /* Private typedef -----------------------------------------------------------*/
 #define PLL_INPUTRANGE0_FREQMAX         8000000u  /* 8 MHz is maximum frequency for VCO input range 0 */
@@ -73,6 +73,8 @@ static scm_clockconfig_t scm_getmaxfreq(void)
 
 static void scm_systemclockconfig(void)
 {
+  //SYSTEM_DEBUG_SIGNAL_SET(SCM_SYSTEM_CLOCK_CONFIG);
+
   switch (scm_system_clock_config.targeted_clock_freq)
   {
     case HSE_16MHZ:
@@ -147,6 +149,8 @@ static void scm_systemclockconfig(void)
     default:
       break;
   }
+
+  //SYSTEM_DEBUG_SIGNAL_RESET(SCM_SYSTEM_CLOCK_CONFIG);
 }
 
 static void SwitchHse16toHse32(void)
@@ -370,6 +374,8 @@ void scm_init()
   */
 void scm_setup(void)
 {
+  //SYSTEM_DEBUG_SIGNAL_SET(SCM_SETUP);
+
   /* System clock is now on HSI 16Mhz, as it exits from stop mode */
 
   /* Start HSE */
@@ -423,6 +429,7 @@ void scm_setup(void)
       __HAL_RCC_ENABLE_IT(RCC_IT_HSERDY);
     }
   }
+  //SYSTEM_DEBUG_SIGNAL_RESET(SCM_SETUP);
 }
 
 /**
@@ -648,6 +655,8 @@ void scm_setwaitstates(const scm_ws_lp_t ws_lp_config)
   */
 void scm_hserdy_isr(void)
 {
+  //SYSTEM_DEBUG_SIGNAL_SET(SCM_HSERDY_ISR);
+
   if(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
   {
     /* Wait until VOS has changed */
@@ -700,6 +709,8 @@ void scm_hserdy_isr(void)
     /* Ensure time base clock coherency */
     SystemCoreClockUpdate();
   }
+
+  //SYSTEM_DEBUG_SIGNAL_RESET(SCM_HSERDY_ISR);
 }
 
 /**
@@ -751,12 +762,12 @@ void scm_notifyradiostate(const scm_radio_state_t radio_state)
   if(radio_state != SCM_RADIO_NOT_ACTIVE)
   {
     RadioState = SCM_RADIO_ACTIVE; /* shall be set before calling scm_setsystemclock() */
-    scm_setsystemclock(SCM_USER_LL_FW, HSE_32MHZ); /* shall be set before calling scm_setsystemclock() */
+    //scm_setsystemclock(SCM_USER_LL_FW, HSE_32MHZ); /* shall be set before calling scm_setsystemclock() */
   }
   else
   {
     RadioState = SCM_RADIO_NOT_ACTIVE;
-    scm_setsystemclock(SCM_USER_LL_FW, HSE_16MHZ);
+    //scm_setsystemclock(SCM_USER_LL_FW, HSE_16MHZ);
   }
 }
 

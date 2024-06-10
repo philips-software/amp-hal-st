@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2020-2021 STMicroelectronics.
+  * Copyright (c) 2022 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -19,8 +19,8 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __BLE_DBG_CONF_H
-#define __BLE_DBG_CONF_H
+#ifndef BLE_DBG_CONF_H
+#define BLE_DBG_CONF_H
 
 /**
  * Enable or Disable traces from BLE
@@ -37,4 +37,4 @@
 #define BLE_DBG_APP_MSG             PRINT_NO_MESG
 #endif
 
-#endif /*__BLE_DBG_CONF_H */
+#endif /*BLE_DBG_CONF_H */

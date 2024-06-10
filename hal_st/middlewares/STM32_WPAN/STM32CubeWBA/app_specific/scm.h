@@ -27,19 +27,6 @@
 #include "stm32wbaxx_ll_pwr.h"
 #include "stm32wbaxx_ll_rcc.h"
 
-#define RCC_INTR_PRIO                       (1)           /* HSERDY and PLL1RDY */
-
-/**
-  * @brief macro used to enter the critical section
-  */
-#define UTILS_ENTER_LIMITED_CRITICAL_SECTION(x) uint32_t basepri_value= __get_BASEPRI();\
-  __set_BASEPRI_MAX(x)
-
-/**
-  * @brief macro used to exit the critical section
-  */
-#define UTILS_EXIT_LIMITED_CRITICAL_SECTION()  __set_BASEPRI(basepri_value)
-
 /* Exported types ------------------------------------------------------------*/
 typedef enum {
   NO_CLOCK_CONFIG = 0,
@@ -92,9 +79,33 @@ typedef struct{
 } scm_system_clock_t;
 
 /* Exported constants --------------------------------------------------------*/
+#define RCC_INTR_PRIO                       (1)           /* HSERDY and PLL1RDY */
+
 /* Exported variables --------------------------------------------------------*/
 
 /* Exported macro ------------------------------------------------------------*/
+/**
+  * @brief macro used to enter the critical section
+  */
+#define UTILS_ENTER_CRITICAL_SECTION() uint32_t primask_bit= __get_PRIMASK();\
+  __disable_irq()
+
+/**
+  * @brief macro used to exit the critical section
+  */
+#define UTILS_EXIT_CRITICAL_SECTION()  __set_PRIMASK(primask_bit)
+
+/**
+  * @brief macro used to enter the critical section
+  */
+#define UTILS_ENTER_LIMITED_CRITICAL_SECTION(x) uint32_t basepri_value= __get_BASEPRI();\
+  __set_BASEPRI_MAX(x)
+
+/**
+  * @brief macro used to exit the critical section
+  */
+#define UTILS_EXIT_LIMITED_CRITICAL_SECTION()  __set_BASEPRI(basepri_value)
+
 /* Exported functions ------------------------------------------------------- */
 
 /**
