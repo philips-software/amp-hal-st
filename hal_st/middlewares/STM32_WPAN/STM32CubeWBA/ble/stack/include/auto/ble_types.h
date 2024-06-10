@@ -19,9 +19,9 @@
 #ifndef BLE_TYPES_H__
 #define BLE_TYPES_H__
 
+
 #include <stdint.h>
 #include "ble_const.h"
-
 #include "cmsis_compiler.h"
 
 /* Type used for function return value */

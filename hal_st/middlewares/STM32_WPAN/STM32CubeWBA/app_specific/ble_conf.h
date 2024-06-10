@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2020-2021 STMicroelectronics.
+  * Copyright (c) 2022 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -24,22 +24,19 @@
 
 /******************************************************************************
  *
- * BLE SERVICES CONFIGURATION
- * blesvc
+ * Service Controller configuration
  *
  ******************************************************************************/
 
 /**
- * There is one handler per service enabled
+ * There is one handler per BLE service
  * Note: There is no handler for the Device Information Service
- *
- * This shall take into account all registered handlers
- * (from either the provided services or the custom services)
  */
-#define BLE_CFG_SVC_MAX_NBR_CB                                                 7
+#define BLE_CFG_SVC_MAX_NBR_CB                    (0)
+#define BLE_CFG_CLT_MAX_NBR_CB                    (1)
 
-#define BLE_CFG_CLT_MAX_NBR_CB                                                 0
+/* USER CODE BEGIN ble_conf_1 */
 
-#define BLE_CFG_MAX_NBR_CB                                                     0
+/* USER CODE END ble_conf_1 */
 
 #endif /*BLE_CONF_H */
