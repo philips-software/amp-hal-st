@@ -13,6 +13,8 @@ target_link_libraries(hal_st.synchronous_stm32fxxx PUBLIC
 )
 
 target_sources(hal_st.synchronous_stm32fxxx PRIVATE
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:SynchronousAesStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:SynchronousAesStm.hpp>
     SynchronousGpioStm.cpp
     SynchronousGpioStm.hpp
     SynchronousFlashInternalStm.cpp
