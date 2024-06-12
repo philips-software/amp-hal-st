@@ -414,12 +414,9 @@ namespace hal
         DmaChannelHandle.Instance->CSAR = 0;
         DmaChannelHandle.Instance->CDAR = 0;
 
-        DmaChannelHandle.Instance->CCR = DMA_CCR_PRIO | DMA_LOW_PRIORITY_HIGH_WEIGHT | DMA_LSM_FULL_EXECUTION;
-        DmaChannelHandle.Instance->CLLR = ((uint32_t)&linkRegisters & DMA_CLLR_LA) | DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL;
-        DmaChannelHandle.Instance->CLBAR = ((uint32_t)&linkRegisters & DMA_CLBAR_LBA);
-
         linkRegisters.CTR1 = 0;
         linkRegisters.CTR2 = dmaMux << DMA_CTR2_REQSEL_Pos;
+        linkRegisters.CBR1 = 0;
         linkRegisters.CDAR = 0;
         linkRegisters.CSAR = 0;
         linkRegisters.CLLR = 0;
@@ -540,8 +537,8 @@ namespace hal
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #ifdef GPDMA1
         streamRegister->CCR |= (DMA_CCR_SUSP | DMA_CCR_RESET);
-        streamRegister->CCR &= ~DMA_CCR_EN;
-#elif defined(DMA_CCR_EN)
+#endif
+#if defined(DMA_CCR_EN)
         streamRegister->CCR &= ~DMA_CCR_EN;
 #else
         streamRegister->CR &= ~DMA_SxCR_EN;
@@ -597,11 +594,10 @@ namespace hal
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
         streamRegister->CCR |= DMA_CCR_PRIO | DMA_LOW_PRIORITY_HIGH_WEIGHT | DMA_LSM_FULL_EXECUTION;
-        streamRegister->CLLR = ((uint32_t)&linkRegisters & DMA_CLLR_LA) | DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL;
-        streamRegister->CLBAR = ((uint32_t)&linkRegisters & DMA_CLBAR_LBA);
-
-        streamRegister->CCR |= DMA_CCR_EN;
-#elif defined(DMA_CCR_EN)
+        streamRegister->CLLR = (reinterpret_cast<uint32_t>(&linkRegisters) & DMA_CLLR_LA) | DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL;
+        streamRegister->CLBAR = (reinterpret_cast<uint32_t>(&linkRegisters) & DMA_CLBAR_LBA);
+#endif
+#if defined(DMA_CCR_EN)
         streamRegister->CCR |= DMA_CCR_EN;
 #else
         streamRegister->CR |= DMA_SxCR_EN;
@@ -644,7 +640,7 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
-        linkRegisters.CLLR = DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL | ((uint32_t)&linkRegisters & DMA_CLLR_LA);
+        linkRegisters.CLLR = DMA_CLLR_UT1 | DMA_CLLR_UT2 | DMA_CLLR_UB1 | DMA_CLLR_USA | DMA_CLLR_UDA | DMA_CLLR_ULL | (reinterpret_cast<uint32_t>(&linkRegisters) & DMA_CLLR_LA);
 #elif defined(DMA_SxCR_CIRC)
         streamRegister->CR |= DMA_SxCR_CIRC;
 #else
@@ -887,11 +883,13 @@ namespace hal
         }
     }
 
-    DmaStm::PeripheralTransceiveStream::PeripheralTransceiveStream(TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize)
+    DmaStm::PeripheralTransceiveStream::PeripheralTransceiveStream(TransceiveStream& stream, [[maybe_unused]]volatile void* peripheralAddress, [[maybe_unused]]uint8_t peripheralTransferSize)
         : stream{ stream }
     {
+#ifndef GPDMA1
         stream.SetPeripheralAddress(peripheralAddress);
         stream.SetPeripheralDataSize(peripheralTransferSize);
+#endif
     }
 
 #ifdef GPDMA1
@@ -1001,7 +999,7 @@ namespace hal
         : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete, irqHandlerType }
     {
 #ifdef GPDMA1
-        SetPeripheralToMemoryMode();
+        SetMemoryToPeripheralMode();
         SetPeripheralAddress(peripheralAddress);  
 #endif
     }
@@ -1010,7 +1008,7 @@ namespace hal
         : TransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferFullComplete, irqHandlerType }
     {
 #ifdef GPDMA1
-        SetPeripheralToMemoryMode();
+        SetMemoryToPeripheralMode();
         SetPeripheralAddress(peripheralAddress);  
 #endif
     }
@@ -1045,11 +1043,21 @@ namespace hal
 
     CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
         : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete }
-    {}
+    {
+#ifdef GPDMA1
+        SetMemoryToPeripheralMode();
+        SetPeripheralAddress(peripheralAddress);  
+#endif
+}
 
     CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
         : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete }
-    {}
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(peripheralAddress);  
+#endif
+    }
 }
 
 #endif

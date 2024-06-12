@@ -379,6 +379,10 @@ namespace hal
     public:
         CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
+#ifdef GPDMA1
+        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
+        using CircularTransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
 
@@ -392,6 +396,10 @@ namespace hal
     public:
         CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
+#ifdef GPDMA1
+        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
+        using CircularTransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
 
