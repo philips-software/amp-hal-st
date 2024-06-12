@@ -7,7 +7,7 @@
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/InterfaceConnector.hpp"
 
-#ifdef HAS_PERIPHERAL_USB
+#if defined(USB_OTG_FS)
 
 namespace hal
 {
