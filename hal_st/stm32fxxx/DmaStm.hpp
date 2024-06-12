@@ -363,11 +363,6 @@ namespace hal
 
         using CircularTransceiverDmaChannel::StartTransmit;
         using CircularTransceiverDmaChannel::StartTransmitDummy;
-
-        using CircularTransceiverDmaChannel::StartReceive;
-        using CircularTransceiverDmaChannel::StartReceiveDummy;
-
-        using CircularTransceiverDmaChannel::ReceivedSize;
     };
 
     class CircularReceiveDmaChannel
@@ -378,9 +373,6 @@ namespace hal
 
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
-
-        using CircularTransceiverDmaChannel::StartTransmit;
-        using CircularTransceiverDmaChannel::StartTransmitDummy;
 
         using CircularTransceiverDmaChannel::StartReceive;
         using CircularTransceiverDmaChannel::StartReceiveDummy;
