@@ -1,12 +1,14 @@
 #ifndef HAL_DMA_STM_HPP
 #define HAL_DMA_STM_HPP
 
-#include DEVICE_HEADER
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include "infra/util/Variant.hpp"
 #include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -164,14 +166,25 @@ namespace hal
         class StreamInterruptHandler
         {
         public:
-            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete);
+            struct Immediate
+            {};
+
+            struct Dispatched
+            {};
+
+            static inline constexpr Immediate immediate{};
+            static inline constexpr Dispatched dispatched{};
+
+            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete, Dispatched = {});
+            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete, Immediate);
 
         private:
             void OnInterrupt();
 
             Stream& stream;
 
-            DispatchedInterruptHandler dispatchedInterruptHandler;
+            infra::Variant<DispatchedInterruptHandler, ImmediateInterruptHandler> interruptHandler;
+            InterruptHandler* interruptHandlerHandle;
 
             infra::Function<void()> transferFullComplete;
         };
@@ -282,7 +295,8 @@ namespace hal
         : public TransceiverDmaChannelBase
     {
     public:
-        TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
+        TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
+        TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
     private:
         DmaStm::StreamInterruptHandler streamInterruptHandler;
@@ -292,7 +306,8 @@ namespace hal
         : private TransceiverDmaChannel
     {
     public:
-        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
+        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
+        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
         using TransceiverDmaChannel::SetPeripheralTransferSize;
         using TransceiverDmaChannel::StopTransfer;
@@ -310,7 +325,8 @@ namespace hal
         : private TransceiverDmaChannel
     {
     public:
-        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
+        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
+        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
         using TransceiverDmaChannel::SetPeripheralTransferSize;
         using TransceiverDmaChannel::StopTransfer;
