@@ -1,4 +1,5 @@
 #include "hal_st/stm32fxxx/UniqueDeviceId.hpp"
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -30,6 +31,14 @@ namespace hal
     infra::ConstByteRange UniqueDeviceId()
     {
         const uint8_t* base = reinterpret_cast<const uint8_t*>(0x1FFF7590);
+        return infra::ConstByteRange(base, base + 12);
+    }
+#endif
+
+#if defined(STM32WBA52xx)
+    infra::ConstByteRange UniqueDeviceId()
+    {
+        const uint8_t* base = reinterpret_cast<const uint8_t*>(UID_BASE);
         return infra::ConstByteRange(base, base + 12);
     }
 #endif
