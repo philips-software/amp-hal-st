@@ -66,6 +66,24 @@
         "monitor reset"
       ],
       "overrideRestartCommands": ["monitor reset"]
+    },
+    {
+      "name": "stm32wba52cg",
+      "cwd": "${workspaceFolder}",
+      "executable": "${command:cmake.launchTargetPath}",
+      "request": "launch",
+      "type": "cortex-debug",
+      "device": "STM32WBA52CG",
+      "servertype": "external",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both",
+      "gdbTarget": "host.docker.internal:61234",
+      "overrideLaunchCommands": [
+        "monitor reset",
+        "-target-download",
+        "monitor reset"
+      ],
+      "overrideRestartCommands": ["monitor reset"]
     }
   ]
 }
