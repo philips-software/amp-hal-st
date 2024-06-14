@@ -12,17 +12,16 @@ namespace hal
     class SynchronousAesEcbStm
     {
     public:
-        enum class OperationMode : uint8_t
+        enum class DataSwapping : uint8_t
         {
-            encrypt,
-            decrypt,
+            disabled,
+            halfWord,
+            byte,
         };
 
         struct Config
         {
-            bool enableReverse = false;
-            bool enableSwap = false;
-            OperationMode operationMode = OperationMode::encrypt;
+            DataSwapping dataSwapping = DataSwapping::disabled;
         };
 
         explicit SynchronousAesEcbStm(const Config& config);
@@ -30,15 +29,21 @@ namespace hal
 
         void SetKey(const std::array<uint8_t, 16>& key) const;
         void Encrypt(infra::ConstByteRange input, infra::ByteRange output) const;
+        void Decrypt(infra::ConstByteRange input, infra::ByteRange output) const;
 
     private:
-        const std::size_t index = 0;
+        const std::size_t aesIndex = 0;
         Config config;
+        mutable std::array<uint8_t, 16> localKey;
 
     private:
-        void SetDirectMode(const std::array<uint8_t, 16>& key) const;
-        void SetReverseMode(const std::array<uint8_t, 16>& key) const;
-        void ConfigureEncryption() const;
+        void Enable() const;
+        void Disable() const;
+        void SetKey() const;
+        void ConfigureDataSwapping() const;
+        void ConfigureDecrypt() const;
+        void Prepare() const;
+        void Start(infra::ConstByteRange input, infra::ByteRange output) const;
     };
 }
 
