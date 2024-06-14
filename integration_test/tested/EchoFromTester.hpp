@@ -14,7 +14,8 @@ namespace main_
         hal::GpioPinStm echoUartRx{ hal::Port::D, 2 };
         hal::UartStm echoUart{ 5, echoUartTx, echoUartRx };
         services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
-        main_::EchoOnSerialCommunication<256> echo{ echoUart, serializerFactory };
+        hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedEchoUart{ echoUart };
+        main_::EchoOnSesame<256> echo{ bufferedEchoUart, serializerFactory };
     };
 }
 
