@@ -45,7 +45,11 @@ namespace hal
         while (!(peripheralAes[aesIndex]->SR & AES_SR_CCF))
         {}
 
-        peripheralAes[aesIndex]->ICR |= AES_ICR_CCF;
+#if defined(AES_ICR_CCF)
+            peripheralAes[aesIndex]->ICR |= AES_ICR_CCF;
+#elif defined(AES_CR_CCFC)
+            peripheralAes[aesIndex]->CR |= AES_CR_CCFC;
+#endif
         peripheralAes[aesIndex]->CR = AES_CR_MODE_1;
     }
 
@@ -72,8 +76,10 @@ namespace hal
     {
         ConfigureDataSwapping();
 
+#if defined(AES_SR_KEYVALID)
         while (!(peripheralAes[aesIndex]->SR & AES_SR_KEYVALID))
         {}
+#endif
     }
 
     void SynchronousAesEcbStm::Start(infra::ConstByteRange input, infra::ByteRange output) const
@@ -93,7 +99,11 @@ namespace hal
 
             while (!(peripheralAes[aesIndex]->SR & AES_SR_CCF))
             {}
+#if defined(AES_ICR_CCF)
             peripheralAes[aesIndex]->ICR |= AES_ICR_CCF;
+#elif defined(AES_CR_CCFC)
+            peripheralAes[aesIndex]->CR |= AES_CR_CCFC;
+#endif
 
             for (auto copyBuffIndex = 0; copyBuffIndex < sizeof(uint32_t); ++copyBuffIndex)
                 outputRaw[index + copyBuffIndex] = peripheralAes[aesIndex]->DOUTR;
@@ -107,7 +117,9 @@ namespace hal
         EnableClockAes(aesIndex);
 
         peripheralAes[aesIndex]->CR &=~ AES_CR_EN;
+#if defined(AES_CR_IPRST)
         peripheralAes[aesIndex]->CR |= AES_CR_IPRST;
+#endif
         peripheralAes[aesIndex]->CR = 0;
     }
 
