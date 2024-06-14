@@ -1,7 +1,7 @@
 #include "hal_st/stm32fxxx/UsbLinkLayerStm.hpp"
 #include <cstdlib>
 
-#ifdef HAS_PERIPHERAL_USB
+#if defined(USB_OTG_FS)
 
 extern "C" void OTG_FS_IRQHandler(void)
 {
