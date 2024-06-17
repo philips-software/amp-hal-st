@@ -161,7 +161,7 @@ namespace hal
 #elif defined(STM32F4) || defined(STM32F1)
         while (uartArray[uartIndex]->SR & USART_SR_RXNE)
 #else
-        while (uartArray[uartIndex]->ISR & USART_ISR_RXNE)
+        while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE)
 #endif
         {
             uint8_t receivedByte =
