@@ -156,12 +156,10 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32G0)
+#if defined(USART_ISR_RXNE_RXFNE)
         while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
-#elif defined(STM32F4) || defined(STM32F1)
-        while (!buffer.full() && uartArray[uartIndex]->SR & USART_SR_RXNE)
 #else
-        while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE)
+        while (!buffer.full() && uartArray[uartIndex]->SR & USART_SR_RXNE)
 #endif
         {
             uint8_t receivedByte =
