@@ -158,6 +158,8 @@ namespace hal
 
 #if defined(USART_ISR_RXNE_RXFNE)
         while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
+#elif defined(USART_ISR_RXNE)
+        while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE)
 #else
         while (!buffer.full() && uartArray[uartIndex]->SR & USART_SR_RXNE)
 #endif
