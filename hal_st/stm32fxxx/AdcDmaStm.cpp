@@ -11,33 +11,32 @@ namespace hal
                 TransferDone();
             })
         , analogPin(pin)
-#if defined(STM32G0)
-        , timer(3, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
-#else
+#ifdef TIM2
         , timer(2, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
+#else
+        , timer(3, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #endif
     {
-        ADC_ChannelConfTypeDef channelConfig;
+        ADC_ChannelConfTypeDef channelConfig{};
         channelConfig.Channel = adc.Channel(analogPin);
-#if !defined(STM32WB)
-        channelConfig.Rank = 1;
-#else
+#ifdef ADC_REGULAR_RANK_1
         channelConfig.Rank = ADC_REGULAR_RANK_1;
-#endif
-#if defined(STM32F0) || defined(STM32F3)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_7CYCLES_5;
-#elif defined(STM32WB)
-        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
-        channelConfig.SamplingTime = ADC_SAMPLETIME_92CYCLES_5;
-        channelConfig.Offset = 0;
-        channelConfig.OffsetNumber = ADC_OFFSET_NONE;
-#elif defined(STM32G0)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
-#elif defined(STM32G4)
-        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
-        channelConfig.Offset = 0;
 #else
-        channelConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+        channelConfig.Rank = 1;
+#endif
+
+#ifdef ADC_SMPR_SMP1
+        channelConfig.SamplingTime = ADC_SAMPLINGTIME_COMMON_1;
+#else
+        channelConfig.SamplingTime = hal::detail::AdcStmChannelConfig().samplingTime;
+#endif
+#ifdef ADC_OFFSET_NONE
+        channelConfig.OffsetNumber = ADC_OFFSET_NONE;
+#endif
+#ifdef ADC_SINGLE_ENDED
+        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
+#endif
+#ifdef ADC_OFFSET_1
         channelConfig.Offset = 0;
 #endif
         ReconfigureTrigger();
@@ -45,7 +44,9 @@ namespace hal
         auto result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
         assert(result == HAL_OK);
 
+#ifdef ADC_SINGLE_ENDED
         result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_SINGLE_ENDED);
+#endif
         assert(result == HAL_OK);
     }
 
@@ -63,14 +64,14 @@ namespace hal
     {
         HAL_ADC_Stop(&adc.Handle());
 
-#if defined(STM32F4) || defined(STM32F7)
+#if defined(ADC_EXTERNALTRIGCONV_T2_TRGO)
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIGCONV_T2_TRGO);
-#elif defined(STM32G0)
+#elif defined(ADC_EXTERNALTRIG_T3_TRGO)
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIG_T3_TRGO);
 #else
         LL_ADC_REG_SetTriggerSource(adc.Handle().Instance, ADC_EXTERNALTRIG_T2_TRGO);
 #endif
-        LL_ADC_REG_SetTriggerEdge(adc.Handle().Instance, LL_ADC_REG_TRIG_EXT_RISING);
+        LL_ADC_REG_SetTriggerEdge(adc.Handle().Instance, ADC_EXTERNALTRIGCONVEDGE_RISING);
     }
 
     void AdcTriggeredByTimerWithDma::Configure()
