@@ -348,11 +348,11 @@ namespace hal
     {
         if (isUuid16)
         {
-            stream >> type.Emplace<services::AttAttribute::Uuid16>();
+            stream >> type.emplace<services::AttAttribute::Uuid16>();
         }
         else
         {
-            stream >> type.Emplace<services::AttAttribute::Uuid128>();
+            stream >> type.emplace<services::AttAttribute::Uuid128>();
         }
     }
 

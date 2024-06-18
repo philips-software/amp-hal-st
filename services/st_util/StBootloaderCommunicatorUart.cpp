@@ -260,7 +260,7 @@ namespace services
     template<class T, class... Args>
     void StBootloaderCommunicatorUart::AddCommandAction(Args&&... args)
     {
-        commandActions.emplace_back(infra::InPlaceType<T>(), *this, std::forward<Args>(args)...);
+        commandActions.emplace_back(std::in_place_type_t<T>(), *this, std::forward<Args>(args)...);
     }
 
     void StBootloaderCommunicatorUart::ExecuteCommand(const infra::Function<void(), sizeof(StBootloaderCommunicatorUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
@@ -369,10 +369,10 @@ namespace services
 
     bool StBootloaderCommunicatorUart::ReceiveBuffer::TotalNumberOfBytesAvailable(infra::DataInputStream& stream)
     {
-        if (nBytesTotal == infra::none)
+        if (nBytesTotal == std::nullopt)
             TryRetreiveNumberOfBytes(stream);
 
-        return nBytesTotal != infra::none;
+        return nBytesTotal != std::nullopt;
     }
 
     void StBootloaderCommunicatorUart::ReceiveBuffer::RetreiveData(infra::QueueForOneReaderOneIrqWriter<uint8_t>::StreamReader& reader, infra::DataInputStream& stream)
@@ -399,18 +399,18 @@ namespace services
 
     void StBootloaderCommunicatorUart::ReceivePredefinedBuffer::TryRetreiveNumberOfBytes([[maybe_unused]] infra::DataInputStream& stream)
     {
-        nBytesTotal.Emplace(size);
+        nBytesTotal.emplace(size);
     }
 
     void StBootloaderCommunicatorUart::ReceiveSmallBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
     {
-        nBytesTotal.Emplace(stream.Extract<uint8_t>() + 1);
+        nBytesTotal.emplace(stream.Extract<uint8_t>() + 1);
     }
 
     void StBootloaderCommunicatorUart::ReceiveBigBuffer::TryRetreiveNumberOfBytes(infra::DataInputStream& stream)
     {
         if (stream.Available() >= sizeof(uint16_t))
-            nBytesTotal.Emplace(stream.Extract<infra::BigEndian<uint16_t>>());
+            nBytesTotal.emplace(stream.Extract<infra::BigEndian<uint16_t>>());
     }
 
     StBootloaderCommunicatorUart::TransmitRaw::TransmitRaw(StBootloaderCommunicatorUart& handler, infra::ConstByteRange data)

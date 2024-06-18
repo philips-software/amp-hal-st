@@ -40,7 +40,7 @@ namespace hal
         struct Config
         {
             CounterMode counterMode;
-            infra::Optional<Trigger> trigger;
+            std::optional<Trigger> trigger;
         };
 
         TimerBaseStm(uint8_t aTimerIndex, Timing timing, const Config& config);

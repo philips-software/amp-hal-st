@@ -14,9 +14,10 @@ namespace hal
 
         LL_RCC_HSI48_Enable();
         while (!LL_RCC_HSI48_IsReady())
-        {}
+        {
+        }
 
-        hwRngCreator.Emplace();
+        hwRngCreator.emplace();
         hwRngCreator->GenerateRandomData(result);
         hwRngCreator.Destroy();
 

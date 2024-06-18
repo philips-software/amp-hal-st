@@ -118,7 +118,7 @@ namespace hal
         // Write Encryption root key used to derive LTK and CSRK
         aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, configuration.rootKeys.encryption.data());
 
-        bondStorageSynchronizer.Emplace(bleBondStorage.bondStorageSynchronizerCreator);
+        bondStorageSynchronizer.emplace(bleBondStorage.bondStorageSynchronizerCreator);
 
         aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
