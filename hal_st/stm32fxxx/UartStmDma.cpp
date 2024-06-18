@@ -7,12 +7,12 @@ namespace hal
 {
     namespace
     {
-        volatile void* PeripheralAddress(uint8_t uartIndex)
+        volatile void* PeripheralAddress(infra::MemoryRange<USART_TypeDef* const> table, uint8_t uartIndex)
         {
 #if defined(USART_TDR_TDR)
-            return &peripheralUart[uartIndex]->TDR;
+            return &table[uartIndex]->TDR;
 #else
-            return &peripheralUart[uartIndex]->DR;
+            return &table[uartIndex]->DR;
 #endif
         }
     }
@@ -31,16 +31,78 @@ namespace hal
         , uartRx(uartRx, PinConfigTypeStm::uartRx, oneBasedIndex)
         , uartRts(uartRts, PinConfigTypeStm::uartRts, oneBasedIndex)
         , uartCts(uartCts, PinConfigTypeStm::uartCts, oneBasedIndex)
-        , transmitDmaChannel{ transmitStream, PeripheralAddress(uartIndex), 1, [this]()
+        , uartArray(peripheralUart)
+        , uartIrqArray(peripheralUartIrq)
+        , transmitDmaChannel{ transmitStream, PeripheralAddress(uartArray, uartIndex), 1, [this]()
             {
                 TransferComplete();
             } }
     {
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
+        UartStmHalInit(config, hasFlowControl);
+    }
 
+#if defined(HAS_PERIPHERAL_LPUART)
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config)
+        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, dummyPinStm, dummyPinStm, lpUart, config, false)
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config)
+        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, lpUart, config, false)
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config, bool hasFlowControl)
+        : uartIndex(oneBasedIndex - 1)
+        , uartTx(uartTx, PinConfigTypeStm::lpuartTx, oneBasedIndex)
+        , uartRx(uartRx, PinConfigTypeStm::lpuartRx, oneBasedIndex)
+        , uartRts(uartRts, PinConfigTypeStm::lpuartRts, oneBasedIndex)
+        , uartCts(uartCts, PinConfigTypeStm::lpuartCts, oneBasedIndex)
+        , uartArray(peripheralLpuart)
+        , uartIrqArray(peripheralLpuartIrq)
+        , transmitDmaChannel{ transmitStream, PeripheralAddress(uartArray, uartIndex), 1, [this]()
+            {
+                TransferComplete();
+            } }
+    {
+        RegisterInterrupt(config);
+        EnableClockLpuart(uartIndex);
+        UartStmHalInit(config, hasFlowControl);
+    }
+#endif
+
+    UartStmDma::~UartStmDma()
+    {
+        uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+        DisableClockUart(uartIndex);
+    }
+
+    void UartStmDma::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
+    {
+        if (!data.empty())
+        {
+            transferDataComplete = actionOnCompletion;
+            transmitDmaChannel.StartTransmit(data);
+        }
+        else
+            infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
+    }
+
+    void UartStmDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
+    {
+        this->dataReceived = dataReceived;
+
+#if defined(STM32F4) || defined(STM32G4)
+        uartArray[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
+#else
+        uartArray[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
+#endif
+    }
+
+    void UartStmDma::UartStmHalInit(const Config& config, bool hasFlowControl)
+    {
         UART_HandleTypeDef uartHandle = {};
-        uartHandle.Instance = peripheralUart[uartIndex];
+        uartHandle.Instance = uartArray[uartIndex];
         uartHandle.Init.BaudRate = config.baudrate;
         uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
         uartHandle.Init.StopBits = USART_STOPBITS_1;
@@ -71,41 +133,13 @@ namespace hal
 
         HAL_UART_Init(&uartHandle);
 
-        peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT;
-    }
-
-    UartStmDma::~UartStmDma()
-    {
-        peripheralUart[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-        DisableClockUart(uartIndex);
-    }
-
-    void UartStmDma::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
-    {
-        if (!data.empty())
-        {
-            transferDataComplete = actionOnCompletion;
-            transmitDmaChannel.StartTransmit(data);
-        }
-        else
-            infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
-    }
-
-    void UartStmDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
-    {
-        this->dataReceived = dataReceived;
-
-#if defined(STM32F4) || defined(STM32G4)
-        peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
-#else
-        peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
-#endif
+        uartArray[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
+        uartArray[uartIndex]->CR3 |= USART_CR3_DMAT;
     }
 
     void UartStmDma::RegisterInterrupt(const Config& config)
     {
-        Register(peripheralUartIrq[uartIndex], config.priority);
+        Register(uartIrqArray[uartIndex], config.priority);
     }
 
     void UartStmDma::TransferComplete()
@@ -122,28 +156,28 @@ namespace hal
     {
         infra::BoundedVector<uint8_t>::WithMaxSize<8> buffer;
 
-#if defined(STM32G0)
-        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
-#elif defined(STM32F4) || defined(STM32F1)
-        while (peripheralUart[uartIndex]->SR & USART_SR_RXNE)
+#if defined(USART_ISR_RXNE_RXFNE)
+        while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE_RXFNE)
+#elif defined(USART_ISR_RXNE)
+        while (!buffer.full() && uartArray[uartIndex]->ISR & USART_ISR_RXNE)
 #else
-        while (peripheralUart[uartIndex]->ISR & USART_ISR_RXNE)
+        while (!buffer.full() && uartArray[uartIndex]->SR & USART_SR_RXNE)
 #endif
         {
             uint8_t receivedByte =
 #if defined(USART_RDR_RDR)
-                peripheralUart[uartIndex]->RDR;
+                uartArray[uartIndex]->RDR;
 #else
-                peripheralUart[uartIndex]->DR;
+                uartArray[uartIndex]->DR;
 #endif
             buffer.push_back(receivedByte);
         }
 
         // If buffer is empty then interrupt was raised by Overrun Error (ORE) and we miss data.
 #if defined(USART_ISR_ORE)
-        really_assert(!(buffer.empty() && peripheralUart[uartIndex]->ISR & USART_ISR_ORE));
+        really_assert(!(buffer.empty() && uartArray[uartIndex]->ISR & USART_ISR_ORE));
 #else
-        really_assert(!(buffer.empty() && peripheralUart[uartIndex]->SR & USART_SR_ORE));
+        really_assert(!(buffer.empty() && uartArray[uartIndex]->SR & USART_SR_ORE));
 #endif
 
         if (dataReceived != nullptr)
