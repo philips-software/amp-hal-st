@@ -20,9 +20,9 @@ namespace hal
         , uartRts(uartRtsPin, PinConfigTypeStm::uartRts, oneBasedIndex)
         , uartCts(uartCtsPin, PinConfigTypeStm::uartCts, oneBasedIndex)
         , uartHandle()
+        , uartArray(peripheralUart)
+        , uartIrqArray(peripheralUartIrq)
     {
-        uartArray = peripheralUart;
-        uartIrqArray = peripheralUartIrq;
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
@@ -44,9 +44,9 @@ namespace hal
         , uartRts(uartRtsPin, PinConfigTypeStm::lpuartRts, oneBasedIndex)
         , uartCts(uartCtsPin, PinConfigTypeStm::lpuartCts, oneBasedIndex)
         , uartHandle()
+        , uartArray(peripheralLpuart)
+        , uartIrqArray(peripheralLpuartIrq)
     {
-        uartArray = peripheralLpuart;
-        uartIrqArray = peripheralLpuartIrq;
         RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
