@@ -225,23 +225,23 @@ namespace hal
 
     void SpiMasterStmDma::EnableDma()
     {
-#ifdef SPI_CFG1_TXDMAEN
-        peripheralSpi[spiInstance]->CFG1 |= SPI_CFG1_RXDMAEN;
-        peripheralSpi[spiInstance]->CFG1 |= SPI_CFG1_TXDMAEN;
-#else
+#ifdef SPI_CR2_RXDMAEN
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_RXDMAEN;
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_TXDMAEN;
+#else
+        peripheralSpi[spiInstance]->CFG1 |= SPI_CFG1_RXDMAEN;
+        peripheralSpi[spiInstance]->CFG1 |= SPI_CFG1_TXDMAEN;
 #endif
     }
 
     void SpiMasterStmDma::DisableDma()
     {
-#ifdef SPI_CFG1_TXDMAEN
-        peripheralSpi[spiInstance]->CFG1 &= ~SPI_CFG1_TXDMAEN;
-        peripheralSpi[spiInstance]->CFG1 &= ~SPI_CFG1_RXDMAEN;
-#else
+#ifdef SPI_CR2_TXDMAEN
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_TXDMAEN;
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_RXDMAEN;
+#else
+        peripheralSpi[spiInstance]->CFG1 &= ~SPI_CFG1_TXDMAEN;
+        peripheralSpi[spiInstance]->CFG1 &= ~SPI_CFG1_RXDMAEN;
 #endif
     }
 }

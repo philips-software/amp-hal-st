@@ -73,12 +73,12 @@ namespace hal
         if (!receiving)
             dummyToReceive = sendData.size();
 
-#ifdef SPI_IER_RXPIE
-        peripheralSpi[spiInstance]->IER |= SPI_IT_TXP;
-        peripheralSpi[spiInstance]->IER |= SPI_IT_RXP;
+#ifdef SPI_CR2_TXEIE
+        peripheralSpi[spiInstance]->CR2 |= SPI_CR2_TXEIE;
+        peripheralSpi[spiInstance]->CR2 |= SPI_CR2_RXNEIE;
 #else
-        peripheralSpi[spiInstance]->CR2 |= SPI_IT_TXE;
-        peripheralSpi[spiInstance]->CR2 |= SPI_IT_RXNE;
+        peripheralSpi[spiInstance]->IER |= SPI_IER_TXPIE;
+        peripheralSpi[spiInstance]->IER |= SPI_IER_RXPIE;
 #endif
 
         while (sending || receiving || dummyToSend != 0 || dummyToReceive != 0)
@@ -88,27 +88,27 @@ namespace hal
     void SynchronousSpiMasterStm::HandleInterrupt()
     {
         uint32_t status = peripheralSpi[spiInstance]->SR;
-#ifdef SPI_FLAG_RXNE
-        if ((status & SPI_FLAG_RXNE) != 0)
+#ifdef SPI_SR_RXNE
+        if ((status & SPI_SR_RXNE) != 0)
 #else
-        if ((status & SPI_IT_RXP) != 0)
+        if ((status & SPI_SR_RXP) != 0)
 #endif
         {
             if (dummyToReceive != 0)
             {
-#ifdef SPI_RXDR_RXDR
-                (void)peripheralSpi[spiInstance]->RXDR;
-#else
+#ifdef SPI_DR_DR
                 (void)peripheralSpi[spiInstance]->DR;
+#else
+                (void)peripheralSpi[spiInstance]->RXDR;
 #endif
                 --dummyToReceive;
             }
             else if (receiving)
             {
-#ifdef SPI_RXDR_RXDR
-                receiveData.front() = peripheralSpi[spiInstance]->RXDR;
-#else
+#ifdef SPI_DR_DR
                 receiveData.front() = peripheralSpi[spiInstance]->DR;
+#else
+                receiveData.front() = peripheralSpi[spiInstance]->RXDR;
 #endif
                 receiveData.pop_front();
             }
@@ -116,35 +116,35 @@ namespace hal
             receiving &= !receiveData.empty();
 
             if (dummyToReceive == 0 && !receiving)
-#ifdef SPI_IER_RXPIE
-                peripheralSpi[spiInstance]->IER &= ~SPI_IT_RXP;
+#ifdef SPI_CR2_RXNEIE
+                peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_RXNEIE;
 #else
-                peripheralSpi[spiInstance]->CR2 &= ~SPI_IT_RXNE;
+                peripheralSpi[spiInstance]->IER &= ~SPI_IER_RXPIE;
 #endif
         }
 
-#ifdef SPI_SR_TXP
-        if ((status & SPI_FLAG_TXP) != 0)
+#ifdef SPI_SR_TXE
+        if ((status & SPI_SR_TXE) != 0)
 #else
-        if ((status & SPI_FLAG_TXE) != 0)
+        if ((status & SPI_SR_TXP) != 0)
 #endif
         {
             if (dummyToSend != 0)
             {
-#ifdef SPI_TXDR_TXDR
-                reinterpret_cast<volatile uint8_t&>(peripheralSpi[spiInstance]->TXDR) = 0;
-#else
+#ifdef SPI_DR_DR
                 reinterpret_cast<volatile uint8_t&>(peripheralSpi[spiInstance]->DR) = 0;
+#else
+                reinterpret_cast<volatile uint8_t&>(peripheralSpi[spiInstance]->TXDR) = 0;
 #endif
                 --dummyToSend;
             }
             else if (sending)
             {
-#ifdef SPI_TXDR_TXDR
+#ifdef SPI_DR_DR
+                reinterpret_cast<volatile uint8_t&>(peripheralSpi[spiInstance]->DR) = sendData.front();
+#else
                 reinterpret_cast<volatile uint8_t&>(peripheralSpi[spiInstance]->TXDR) = sendData.front();
                 peripheralSpi[spiInstance]->CR1 |= SPI_CR1_CSTART;
-#else
-                reinterpret_cast<volatile uint8_t&>(peripheralSpi[spiInstance]->DR) = sendData.front();
 #endif
                 sendData.pop_front();
             }
@@ -153,13 +153,13 @@ namespace hal
 
             // After the first transmit, disable interrupt on transmit buffer empty,
             // so that a receive is done before each transmit
-#ifdef SPI_IER_TXPIE
-            peripheralSpi[spiInstance]->IER &= ~SPI_IT_TXP;
+#ifdef SPI_CR2_TXEIE
+            peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_TXEIE;
 #else
-            peripheralSpi[spiInstance]->CR2 &= ~SPI_IT_TXE;
+            peripheralSpi[spiInstance]->IER &= ~SPI_IER_TXPIE;
 #endif
         }
 
-        really_assert(!(peripheralSpi[spiInstance]->SR & SPI_FLAG_OVR));
+        really_assert(!(peripheralSpi[spiInstance]->SR & SPI_SR_OVR));
     }
 }
