@@ -120,11 +120,16 @@ namespace hal
     {
         this->dataReceived = dataReceived;
 
-        receiveDmaChannel.StartReceive(rxBuffer);
+        if (dataReceived == nullptr)
+            receiveDmaChannel.StopTransfer();
+        else
+        {
+            receiveDmaChannel.StartReceive(rxBuffer);
 
-        peripheralUart[uartIndex]->CR2 |= USART_CR2_RTOEN;
-        peripheralUart[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RTOIE;
-        peripheralUart[uartIndex]->RTOR = defaultRxTimeout;
+            peripheralUart[uartIndex]->CR2 |= USART_CR2_RTOEN;
+            peripheralUart[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RTOIE;
+            peripheralUart[uartIndex]->RTOR = defaultRxTimeout;
+        }
     }
 
     void UartStmDuplexDma::HalfReceiveComplete()
@@ -147,7 +152,8 @@ namespace hal
         infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
         lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
 
-        dataReceived(receivedData);
+        if (dataReceived != nullptr)
+            dataReceived(receivedData);
     }
 
     void UartStmDuplexDma::RegisterInterrupt(const Config& config)
