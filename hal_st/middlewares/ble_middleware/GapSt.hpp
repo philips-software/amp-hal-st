@@ -8,7 +8,6 @@
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
-#include "shci.h"
 
 namespace hal
 {
@@ -33,8 +32,8 @@ namespace hal
 
         enum class RfWakeupClock : uint8_t
         {
-            highSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024,
-            lowSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE,
+            highSpeedExternal,
+            lowSpeedExternal,
         };
 
         struct Configuration

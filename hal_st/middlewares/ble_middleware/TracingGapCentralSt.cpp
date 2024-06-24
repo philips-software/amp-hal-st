@@ -189,13 +189,19 @@ namespace hal
     {
         auto connectionUpdateEvent = *reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data);
 
+#if defined(STM32WB)
+        auto latency = connectionUpdateEvent.Slave_Latency;
+#else
+        auto latency = connectionUpdateEvent.Latency;
+#endif
+
         tracer.Trace() << "TracingGapCentralSt::HandleL2capConnectionUpdateRequestEvent";
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << connectionUpdateEvent.Connection_Handle;
         tracer.Trace() << "\tIdentifier          : 0x" << infra::hex << connectionUpdateEvent.Identifier;
         tracer.Trace() << "\tL2CAP length        : " << connectionUpdateEvent.L2CAP_Length;
         tracer.Trace() << "\tInterval min        : " << connectionUpdateEvent.Interval_Min;
         tracer.Trace() << "\tInterval max        : " << connectionUpdateEvent.Interval_Max;
-        tracer.Trace() << "\tSlave latency       : " << connectionUpdateEvent.Slave_Latency;
+        tracer.Trace() << "\tSlave latency       : " << latency;
 
         GapCentralSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
     }
