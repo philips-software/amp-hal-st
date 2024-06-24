@@ -1,7 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include "infra/stream/ByteInputStream.hpp"
 
 namespace hal
 {
@@ -11,6 +10,15 @@ namespace hal
         0,
         50, // 500 ms
     };
+
+    // Connection Interval parameters
+    const uint16_t minConnectionEventLength = 0;
+    const uint16_t maxConnectionEventLength = 0x280; // 400 ms
+
+    // Discovery parameters
+    const uint8_t filterDuplicatesEnabled = 1;
+    const uint8_t acceptParameters = 1;
+    const uint8_t rejectParameters = 0;
 
     namespace
     {
@@ -22,6 +30,12 @@ namespace hal
         services::GapAdvertisingEventAddressType ToAdvertisingAddressType(uint8_t addressType)
         {
             return static_cast<services::GapAdvertisingEventAddressType>(addressType);
+        }
+
+        bool IsTxDataLengthConfigured(const hci_le_data_length_change_event_rp0& dataLengthChangeEvent)
+        {
+            return dataLengthChangeEvent.MaxTxOctets == services::GapConnectionParameters::connectionInitialMaxTxOctets &&
+                dataLengthChangeEvent.MaxTxTime == services::GapConnectionParameters::connectionInitialMaxTxTime;
         }
     }
 
@@ -142,11 +156,16 @@ namespace hal
     {
         GapSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
 
-        auto l2capEvent = *reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data);
+        auto identifier = reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data)->Identifier;
 
-        aci_l2cap_connection_parameter_update_resp(
-            l2capEvent.Connection_Handle, l2capEvent.Interval_Min, l2capEvent.Interval_Max, l2capEvent.Slave_Latency,
-            l2capEvent.Timeout_Multiplier, minConnectionEventLength, maxConnectionEventLength, l2capEvent.Identifier, rejectParameters);
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, identifier]()
+            {
+                auto status = aci_l2cap_connection_parameter_update_resp(
+                    connectionContext.connectionHandle, connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
+                    connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
+                    minConnectionEventLength, maxConnectionEventLength, identifier, rejectParameters);
+                assert(status == BLE_STATUS_SUCCESS);
+            });
 
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
             {
@@ -161,6 +180,17 @@ namespace hal
         auto dataLengthChangeEvent = *reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
 
         really_assert(dataLengthChangeEvent.Connection_Handle == connectionContext.connectionHandle);
+
+        if (!IsTxDataLengthConfigured(dataLengthChangeEvent))
+            onMtuExchangeDone = [this]()
+            {
+                SetDataLength();
+            };
+        else
+            onMtuExchangeDone = [this]()
+            {
+                SetPhy();
+            };
 
         if (onDataLengthChanged)
             onDataLengthChanged();
@@ -190,13 +220,8 @@ namespace hal
             });
     }
 
-    void GapCentralSt::MtuExchange()
+    void GapCentralSt::MtuExchange() const
     {
-        onMtuExchangeDone = [this]()
-        {
-            SetDataLength();
-        };
-
         auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
         assert(status == BLE_STATUS_SUCCESS);
     }

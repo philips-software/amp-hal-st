@@ -40,7 +40,7 @@ namespace hal
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetPhy() const;
         void SetDataLength();
-        void MtuExchange();
+        void MtuExchange() const;
         void Initialize(const GapService& gapService);
 
     private:
@@ -50,17 +50,8 @@ namespace hal
         const uint16_t leScanInterval = 0x320;
         const uint16_t leScanWindow = 0x320;
 
-        // Connection Interval parameters
-        const uint16_t minConnectionEventLength = 0;
-        const uint16_t maxConnectionEventLength = 0x280; // 400 ms
-
         // Terminate connection
         const uint8_t remoteUserTerminatedConnection = 0x13;
-
-        // Discovery parameters
-        const uint8_t filterDuplicatesEnabled = 1;
-        const uint8_t acceptParameters = 1;
-        const uint8_t rejectParameters = 0;
 
         // HCI status
         const uint8_t commandDisallowed = 0x0c;
