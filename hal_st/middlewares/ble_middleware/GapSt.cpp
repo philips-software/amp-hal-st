@@ -12,10 +12,10 @@ namespace hal
     namespace
     {
 #if defined(STM32WB)
-        constexpr uint32_t ToLowSpeedClock(hal::GapSt::RfWakeupClock rfWakeupClock)
+        constexpr uint8_t ToLowSpeedClock(hal::GapSt::RfWakeupClock rfWakeupClock)
         {
             if (rfWakeupClock == hal::GapSt::RfWakeupClock::highSpeedExternal)
-                return SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024
+                return SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024;
             else
                 return SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE;
         }
@@ -57,7 +57,7 @@ namespace hal
                     configuration.maxAttMtuSize,
                     0x1FA,                                               // Sleep clock accuracy in Slave mode
                     0x00,                                                // Sleep clock accuracy in Master mode
-                    ToLowSpeedClock(configuration.rfWakeupClock), // Source for the low speed clock for RF wake-up
+                    ToLowSpeedClock(configuration.rfWakeupClock),        // Source for the low speed clock for RF wake-up
                     0xFFFFFFFF,                                          // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
                     0x148,                                               // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
                     0x01,                                                // Viterbi Mode

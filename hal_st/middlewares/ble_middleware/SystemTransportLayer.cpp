@@ -1,9 +1,12 @@
 #include "hal_st/middlewares/ble_middleware/SystemTransportLayer.hpp"
-#include "hci_tl.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include <atomic>
+#if defined(STM32WB)
+#include "hci_tl.h"
+#include "interface/patterns/ble_thread/tl/tl.h"
 #include "shci.h"
 #include "shci_tl.h"
-#include <atomic>
+#endif
 
 extern "C"
 {
@@ -17,6 +20,7 @@ extern "C"
         return SVCCTL_UserEvtFlowEnable;
     }
 
+#if defined(STM32WB)
     void hci_notify_asynch_evt(void* data)
     {
         static std::atomic_bool notificationScheduled{ false };
@@ -40,15 +44,18 @@ extern "C"
                     shci_user_evt_proc();
                 });
     }
+#endif
 }
 
 namespace
 {
+    const uint32_t bleBondsStorageLength = 507;
+
+#if defined(STM32WB)
     const uint8_t bleEventQueueLength = 0x05;
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
     const uint16_t bleEventFrameSize = TL_EVT_HDR_SIZE + tlBleMaxEventPayloadSize;
     const uint32_t poolSize = bleEventQueueLength * 4u * DIVC((sizeof(TL_PacketHeader_t) + bleEventFrameSize), 4u);
-    const uint32_t bleBondsStorageLength = 507;
 
     // Buffers to be used by the mailbox to report the events
     [[gnu::section("MB_MEM2")]] alignas(4) uint8_t evtPool[poolSize];
@@ -85,6 +92,9 @@ namespace
         else
             pParam->status = HCI_TL_UserEventFlow_Disable;
     }
+#else
+    uint32_t bleBondsStorage[bleBondsStorageLength];
+#endif
 }
 
 namespace hal
@@ -93,15 +103,31 @@ namespace hal
         : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
         , protocolStackInitialized(protocolStackInitialized)
     {
+#if defined(STM32WB)
         TL_Init();
         ShciInit();
         HciInit();
         MemoryChannelInit();
         TL_Enable();
+#else
+        infra::EventDispatcher::Instance().Schedule([this]()
+            {
+                this->protocolStackInitialized(bleBondsStorage);
+            });
+#endif
+    }
+
+    void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)
+    {
+        infra::Subject<HciEventSink>::NotifyObservers([&event](auto& observer)
+            {
+                observer.HciEvent(event);
+            });
     }
 
     SystemTransportLayer::Version SystemTransportLayer::GetVersion() const
     {
+#if defined(STM32WB)
         WirelessFwInfo_t wirelessInfo;
         SHCI_GetWirelessFwInfo(&wirelessInfo);
 
@@ -114,17 +140,20 @@ namespace hal
             wirelessInfo.FusVersionMinor,
             wirelessInfo.FusVersionSub,
         };
+#endif
+        return { 0, 0, 0, 0, 0, 0, 0 };
     }
 
-    void SystemTransportLayer::HandleErrorNotifyEvent(TL_AsynchEvt_t* SysEvent)
+#if defined(STM32WB)
+    void SystemTransportLayer::HandleErrorNotifyEvent(void* SysEvent)
     {}
 
-    void SystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
+    void SystemTransportLayer::HandleBleNvmRamUpdateEvent(void* sysEvent)
     {
         bondBlobPersistence.Update();
     }
 
-    void SystemTransportLayer::HandleUnknownEvent(TL_AsynchEvt_t* SysEvent)
+    void SystemTransportLayer::HandleUnknownEvent(void* SysEvent)
     {}
 
     void SystemTransportLayer::UserEventHandler(void* payload)
@@ -146,14 +175,6 @@ namespace hal
                 HandleUnknownEvent(event);
                 break;
         }
-    }
-
-    void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)
-    {
-        infra::Subject<HciEventSink>::NotifyObservers([&event](auto& observer)
-            {
-                observer.HciEvent(event);
-            });
     }
 
     void SystemTransportLayer::HandleWirelessFwEvent(void* payload)
@@ -213,4 +234,5 @@ namespace hal
         config.AsynchEvtPoolSize = poolSize;
         TL_MM_Init(&config);
     }
+#endif
 }

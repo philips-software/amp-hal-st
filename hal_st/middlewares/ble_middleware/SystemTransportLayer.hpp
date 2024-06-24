@@ -5,7 +5,6 @@
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
-#include "interface/patterns/ble_thread/tl/tl.h"
 #include "services/ble/BondBlobPersistence.hpp"
 
 namespace hal
@@ -32,14 +31,16 @@ namespace hal
 
         Version GetVersion() const;
 
+        // Implementation of HciEventSource
+        void HciEventHandler(hci_event_pckt& event) override;
+
         virtual void UserEventHandler(void* payload);
-        virtual void HciEventHandler(hci_event_pckt& event);
 
     protected:
         virtual void HandleReadyEvent(void* payload);
-        virtual void HandleErrorNotifyEvent(TL_AsynchEvt_t* event);
-        virtual void HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent);
-        virtual void HandleUnknownEvent(TL_AsynchEvt_t* event);
+        virtual void HandleErrorNotifyEvent(void* event);
+        virtual void HandleBleNvmRamUpdateEvent(void* sysEvent);
+        virtual void HandleUnknownEvent(void* event);
 
         virtual void HandleWirelessFwEvent(void* payload);
         virtual void HandleFusFwEvent(void* payload);
