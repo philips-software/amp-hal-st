@@ -1,11 +1,12 @@
+#include <atomic>
 #include "hal_st/middlewares/ble_middleware/SystemTransportLayer.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include <atomic>
 #if defined(STM32WB)
 #include "hci_tl.h"
 #include "interface/patterns/ble_thread/tl/tl.h"
 #include "shci.h"
 #include "shci_tl.h"
+#include "stm32wbxx_ll_system.h"
 #endif
 
 extern "C"
@@ -20,7 +21,6 @@ extern "C"
         return SVCCTL_UserEvtFlowEnable;
     }
 
-#if defined(STM32WB)
     void hci_notify_asynch_evt(void* data)
     {
         static std::atomic_bool notificationScheduled{ false };
@@ -44,14 +44,11 @@ extern "C"
                     shci_user_evt_proc();
                 });
     }
-#endif
 }
 
 namespace
 {
     const uint32_t bleBondsStorageLength = 507;
-
-#if defined(STM32WB)
     const uint8_t bleEventQueueLength = 0x05;
     const uint8_t tlBleMaxEventPayloadSize = 0xFF;
     const uint16_t bleEventFrameSize = TL_EVT_HDR_SIZE + tlBleMaxEventPayloadSize;
@@ -92,29 +89,90 @@ namespace
         else
             pParam->status = HCI_TL_UserEventFlow_Disable;
     }
-#else
-    uint32_t bleBondsStorage[bleBondsStorageLength];
-#endif
+
+    uint8_t ToLowSpeedClock(hal::SystemTransportLayer::RfWakeupClock rfWakeupClock)
+    {
+        if (rfWakeupClock == hal::SystemTransportLayer::RfWakeupClock::highSpeedExternal)
+            return SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024;
+        else
+            return SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE;
+    }
+
+    void ShciCore2Init(const hal::SystemTransportLayer::Configuration& configuration)
+    {
+        const uint8_t maxNumberOfBleLinks = 0x01;
+        const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(configuration.maxAttMtuSize);
+        const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, configuration.maxAttMtuSize, maxNumberOfBleLinks);
+        const uint8_t bleStackOptions = (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 |
+                                        SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 | SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY | SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED);
+
+        SHCI_C2_CONFIG_Cmd_Param_t configParam = {
+            SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
+            SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
+            SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
+            0, // Spare
+            reinterpret_cast<uint32_t>(&bleBondsStorage),
+            0, // ThreadNvmRamAddress
+            static_cast<uint16_t>(LL_DBGMCU_GetRevisionID()),
+            static_cast<uint16_t>(LL_DBGMCU_GetDeviceID()),
+        };
+
+        if (SHCI_C2_Config(&configParam) != SHCI_Success)
+            std::abort();
+
+        SHCI_C2_Ble_Init_Cmd_Packet_t bleInitCmdPacket = {
+            { { 0, 0, 0 } }, // Header (unused)
+            {
+                0x00,  // BLE buffer address (unused)
+                0x00,  // BLE buffer size (unused)
+                0x44,  // Maximum number of GATT Attributes
+                0x08,  // Maximum number of Services that can be stored in the GATT database
+                0x540, // Size of the storage area for Attribute values
+                maxNumberOfBleLinks,
+                0x01, // Enable or disable the Extended Packet length feature
+                prepareWriteListSize,
+                numberOfBleMemoryBlocks,
+                configuration.maxAttMtuSize,
+                0x1FA,                                               // Sleep clock accuracy in Slave mode
+                0x00,                                                // Sleep clock accuracy in Master mode
+                ToLowSpeedClock(configuration.rfWakeupClock),        // Source for the low speed clock for RF wake-up
+                0xFFFFFFFF,                                          // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
+                0x148,                                               // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
+                0x01,                                                // Viterbi Mode
+                bleStackOptions,
+                0,   // HW version (unused)
+                32,  // Maximum number of connection-oriented channels in initiator mode
+                -40, // Minimum transmit power in dBm supported by the Controller
+                6,   // Maximum transmit power in dBm supported by the Controller
+                SHCI_C2_BLE_INIT_RX_MODEL_AGC_RSSI_LEGACY,
+                3,    // Maximum number of advertising sets.
+                1650, // Maximum advertising data length (in bytes)
+                0,    // RF TX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+                0,    // RF RX Path Compensation Value (16-bit signed integer). Units: 0.1 dB.
+                SHCI_C2_BLE_INIT_BLE_CORE_5_3 }
+        };
+
+        if (SHCI_C2_BLE_Init(&bleInitCmdPacket) != SHCI_Success)
+            std::abort();
+    }
 }
 
 namespace hal
 {
-    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized)
+    SystemTransportLayer::SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized)
         : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
-        , protocolStackInitialized(protocolStackInitialized)
+        , bondStorageSynchronizerCreator(bondStorageSynchronizerCreator)
+        , configuration(configuration)
+        , onInitialized(onInitialized)
     {
-#if defined(STM32WB)
+        really_assert(configuration.maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && configuration.maxAttMtuSize <= 251);
+        // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
+
         TL_Init();
         ShciInit();
         HciInit();
         MemoryChannelInit();
         TL_Enable();
-#else
-        infra::EventDispatcher::Instance().Schedule([this]()
-            {
-                this->protocolStackInitialized(bleBondsStorage);
-            });
-#endif
     }
 
     void SystemTransportLayer::HciEventHandler(hci_event_pckt& event)
@@ -127,7 +185,6 @@ namespace hal
 
     SystemTransportLayer::Version SystemTransportLayer::GetVersion() const
     {
-#if defined(STM32WB)
         WirelessFwInfo_t wirelessInfo;
         SHCI_GetWirelessFwInfo(&wirelessInfo);
 
@@ -140,11 +197,8 @@ namespace hal
             wirelessInfo.FusVersionMinor,
             wirelessInfo.FusVersionSub,
         };
-#endif
-        return { 0, 0, 0, 0, 0, 0, 0 };
     }
 
-#if defined(STM32WB)
     void SystemTransportLayer::HandleErrorNotifyEvent(void* SysEvent)
     {}
 
@@ -177,9 +231,13 @@ namespace hal
         }
     }
 
-    void SystemTransportLayer::HandleWirelessFwEvent(void* payload)
+    void SystemTransportLayer::HandleWirelessFwEvent(void*)
     {
-        protocolStackInitialized(bleBondsStorage);
+        ShciCore2Init(configuration);
+        bondStorageSynchronizerCreator.Emplace();
+
+        if (onInitialized)
+            onInitialized(*bondStorageSynchronizerCreator);
     }
 
     void SystemTransportLayer::HandleFusFwEvent(void* payload)
@@ -234,5 +292,4 @@ namespace hal
         config.AsynchEvtPoolSize = poolSize;
         TL_MM_Init(&config);
     }
-#endif
 }

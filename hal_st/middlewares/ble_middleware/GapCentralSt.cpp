@@ -39,8 +39,8 @@ namespace hal
         }
     }
 
-    GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration)
-        : GapSt(hciEventSource, bleBondStorage, configuration)
+    GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
+        : GapSt(hciEventSource, bondStorageSynchronizer, configuration)
     {
         Initialize(configuration.gapService);
 

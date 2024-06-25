@@ -10,9 +10,8 @@ namespace hal
         : public SystemTransportLayer
     {
     public:
-        TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer);
+        TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized, services::Tracer& tracer);
 
-#if defined(STM32WB)
     protected:
         void UserEventHandler(void* pPayload) override;
         void HandleReadyEvent(void* pPayload) override;
@@ -23,7 +22,6 @@ namespace hal
         void HandleWirelessFwEvent(void* pPayload) override;
         void HandleFusFwEvent(void* pPayload) override;
         void HandleUnknwownReadyEvent(void* pPayload) override;
-#endif
 
     private:
         services::Tracer& tracer;

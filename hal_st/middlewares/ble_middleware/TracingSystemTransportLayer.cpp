@@ -1,23 +1,14 @@
 #include "hal_st/middlewares/ble_middleware/TracingSystemTransportLayer.hpp"
-#if defined(STM32WB)
-#include "hci_tl.h"
 #include "shci.h"
 #include "shci_tl.h"
-extern "C"
-{
-#include "app_conf.h"
-#include "ble.h"
-}
-#endif
 
 namespace hal
 {
-    TracingSystemTransportLayer::TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer)
-        : SystemTransportLayer(flashStorage, protocolStackInitialized)
+    TracingSystemTransportLayer::TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized, services::Tracer& tracer)
+        : SystemTransportLayer(flashStorage, bondStorageSynchronizerCreator, configuration, onInitialized)
         , tracer(tracer)
     {}
 
-#if defined(STM32WB)
     void TracingSystemTransportLayer::UserEventHandler(void* pPayload)
     {
         SystemTransportLayer::UserEventHandler(pPayload);
@@ -43,8 +34,7 @@ namespace hal
 
     void TracingSystemTransportLayer::HandleBleNvmRamUpdateEvent(void* sysEvent)
     {
-        auto& sysEventPayload = reinterpret_cast<TL_AsynchEvt_t*>(sysEvent)->payload;
-        auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(sysEventPayload);
+        auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(reinterpret_cast<TL_AsynchEvt_t*>(sysEvent)->payload);
         tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : size: " << bleNvmRamUpdateEvent.Size << ", address: 0x" << infra::hex << bleNvmRamUpdateEvent.StartAddress;
         SystemTransportLayer::HandleBleNvmRamUpdateEvent(sysEvent);
     }
@@ -75,5 +65,4 @@ namespace hal
         tracer.Trace() << "SystemTransportLayer::HandleReadyEvent: Unsupported event found (" << pSysReadyEvent->sysevt_ready_rsp << ")";
         SystemTransportLayer::HandleUnknwownReadyEvent(pPayload);
     }
-#endif
 }
