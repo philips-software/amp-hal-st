@@ -63,17 +63,39 @@ namespace hal
 
     enum class Port : uint8_t
     {
+#if defined(GPIOA)
         A,
+#endif
+#if defined(GPIOB)
         B,
+#endif
+#if defined(GPIOC)
         C,
+#endif
+#if defined(GPIOD)
         D,
+#endif
+#if defined(GPIOE)
         E,
+#endif
+#if defined(GPIOF)
         F,
+#endif
+#if defined(GPIOG)
         G,
+#endif
+#if defined(GPIOH)
         H,
+#endif
+#if defined(GPIOI)
         I,
+#endif
+#if defined(GPIOJ)
         J,
-        K
+#endif
+#if defined(GPIOK)
+        K,
+#endif
     };
 
     enum class WeakPull : uint8_t
