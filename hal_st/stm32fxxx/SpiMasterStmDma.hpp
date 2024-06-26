@@ -13,6 +13,8 @@ namespace hal
         struct SpiMasterStmDmaConfig
         {
             bool msbFirst{ true };
+            bool polarityLow{true};
+            bool phase1st{true};
             uint32_t baudRatePrescaler{ SPI_BAUDRATEPRESCALER_16 };
         };
     }
@@ -24,6 +26,7 @@ namespace hal
         using Config = detail::SpiMasterStmDmaConfig;
 
         SpiMasterStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
+        ~SpiMasterStmDma();
 
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
         void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
