@@ -24,6 +24,7 @@ namespace hal
         };
 
         SpiMasterStm(uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, const Config& config = Config(), GpioPinStm& slaveSelect = dummyPinStm);
+        ~SpiMasterStm();
 
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, SpiAction nextAction, const infra::Function<void()>& onDone) override;
         void SetChipSelectConfigurator(ChipSelectConfigurator& configurator) override;
