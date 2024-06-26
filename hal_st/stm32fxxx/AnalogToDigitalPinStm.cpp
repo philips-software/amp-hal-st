@@ -118,7 +118,7 @@ namespace hal
         adc.Measure(onDone);
     }
 
-    AdcStm::AdcStm(uint8_t oneBasedIndex)
+    AdcStm::AdcStm(uint8_t oneBasedIndex, const Config& config)
         : index(oneBasedIndex - 1)
 #if defined(STM32WB) || defined(STM32G0)
         , interruptHandler(ADC1_IRQn, [this]()
@@ -136,11 +136,7 @@ namespace hal
         EnableClockAdc(index);
 
         handle.Instance = peripheralAdc[index];
-#ifdef ADC_CLOCK_ASYNC_DIV4
-        handle.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV4;
-#else
-        handle.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
-#endif
+        handle.Init.ClockPrescaler = config.clockPrescaler;
         handle.Init.Resolution = ADC_RESOLUTION_12B;
         handle.Init.ScanConvMode = DISABLE;
         handle.Init.ContinuousConvMode = DISABLE;
