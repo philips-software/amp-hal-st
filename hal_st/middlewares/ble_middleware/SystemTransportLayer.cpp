@@ -1,6 +1,7 @@
-#include <atomic>
 #include "hal_st/middlewares/ble_middleware/SystemTransportLayer.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include <atomic>
+
 #if defined(STM32WB)
 #include "hci_tl.h"
 #include "interface/patterns/ble_thread/tl/tl.h"
@@ -104,14 +105,14 @@ namespace
         const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(configuration.maxAttMtuSize);
         const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, configuration.maxAttMtuSize, maxNumberOfBleLinks);
         const uint8_t bleStackOptions = (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 |
-                                        SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 | SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY | SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED);
+                                         SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 | SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY | SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED);
 
         SHCI_C2_CONFIG_Cmd_Param_t configParam = {
             SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
             SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
             SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
             0, // Spare
-            reinterpret_cast<uint32_t>(&bleBondsStorage),
+            reinterpret_cast<uint32_t>(bleBondsStorage),
             0, // ThreadNvmRamAddress
             static_cast<uint16_t>(LL_DBGMCU_GetRevisionID()),
             static_cast<uint16_t>(LL_DBGMCU_GetDeviceID()),
@@ -133,12 +134,12 @@ namespace
                 prepareWriteListSize,
                 numberOfBleMemoryBlocks,
                 configuration.maxAttMtuSize,
-                0x1FA,                                               // Sleep clock accuracy in Slave mode
-                0x00,                                                // Sleep clock accuracy in Master mode
-                ToLowSpeedClock(configuration.rfWakeupClock),        // Source for the low speed clock for RF wake-up
-                0xFFFFFFFF,                                          // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
-                0x148,                                               // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
-                0x01,                                                // Viterbi Mode
+                0x1FA,                                        // Sleep clock accuracy in Slave mode
+                0x00,                                         // Sleep clock accuracy in Master mode
+                ToLowSpeedClock(configuration.rfWakeupClock), // Source for the low speed clock for RF wake-up
+                0xFFFFFFFF,                                   // Maximum duration of the connection event when the device is in Slave mode in units of 625/256 us (~2.44 us)
+                0x148,                                        // Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
+                0x01,                                         // Viterbi Mode
                 bleStackOptions,
                 0,   // HW version (unused)
                 32,  // Maximum number of connection-oriented channels in initiator mode

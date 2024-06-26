@@ -35,7 +35,7 @@ namespace hal
         bool IsTxDataLengthConfigured(const hci_le_data_length_change_event_rp0& dataLengthChangeEvent)
         {
             return dataLengthChangeEvent.MaxTxOctets == services::GapConnectionParameters::connectionInitialMaxTxOctets &&
-                dataLengthChangeEvent.MaxTxTime == services::GapConnectionParameters::connectionInitialMaxTxTime;
+                   dataLengthChangeEvent.MaxTxTime == services::GapConnectionParameters::connectionInitialMaxTxTime;
         }
     }
 

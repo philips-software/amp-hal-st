@@ -40,7 +40,6 @@ namespace hal
 
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : HciEventSink(hciEventSource)
-        , txPowerLevel(configuration.txPowerLevel)
         , bondStorageSynchronizer(bondStorageSynchronizer)
     {
         connectionContext.connectionHandle = GapSt::invalidConnection;
@@ -54,7 +53,7 @@ namespace hal
         // Write Encryption root key used to derive LTK and CSRK
         aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, configuration.rootKeys.encryption.data());
 
-        aci_hal_set_tx_power_level(1, txPowerLevel);
+        aci_hal_set_tx_power_level(1, configuration.txPowerLevel);
         aci_gatt_init();
 
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());

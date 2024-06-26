@@ -4,9 +4,9 @@
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
+#include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
-#include "services/ble/BondStorageSynchronizer.hpp"
 
 namespace hal
 {
@@ -111,7 +111,6 @@ namespace hal
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
-        uint8_t txPowerLevel;
         services::BondStorageSynchronizer& bondStorageSynchronizer;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
     };
