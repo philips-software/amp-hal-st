@@ -1,5 +1,4 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
-#include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 
@@ -38,10 +37,10 @@ namespace hal
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
     {
-        auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? PUBLIC_ADDR : RANDOM_ADDR;
+        auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
         aci_gap_create_connection(
-            leScanInterval, leScanWindow, peerAddress, macAddress.data(), RESOLVABLE_PRIVATE_ADDR,
+            leScanInterval, leScanWindow, peerAddress, macAddress.data(), GAP_RESOLVABLE_PRIVATE_ADDR,
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
             minConnectionEventLength, maxConnectionEventLength);
@@ -144,8 +143,14 @@ namespace hal
 
         auto l2capEvent = *reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data);
 
+#if defined(STM32WB)
+        auto latency = l2capEvent.Slave_Latency;
+#elif defined(STM32WBA)
+        auto latency = l2capEvent.Latency;
+#endif
+
         aci_l2cap_connection_parameter_update_resp(
-            l2capEvent.Connection_Handle, l2capEvent.Interval_Min, l2capEvent.Interval_Max, l2capEvent.Slave_Latency,
+            l2capEvent.Connection_Handle, l2capEvent.Interval_Min, l2capEvent.Interval_Max, latency,
             l2capEvent.Timeout_Multiplier, minConnectionEventLength, maxConnectionEventLength, l2capEvent.Identifier, rejectParameters);
 
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()

@@ -1,14 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GattClientSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include "infra/stream/InputStream.hpp"
-#include "infra/util/Endian.hpp"
-
-extern "C"
-{
-#include "auto/ble_gatt_aci.h"
-#include "ble/ble.h"
-#include "ble/core/ble_core.h"
-}
+#include "infra/stream/ByteInputStream.hpp"
 
 namespace hal
 {

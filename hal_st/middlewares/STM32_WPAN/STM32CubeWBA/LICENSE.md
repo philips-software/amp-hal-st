@@ -1,28 +1,3 @@
-## Overview
- 
-
-This Software Bill Of Material (SBOM) lists the software components of this
-software package, including the copyright owner and license terms for each
-component.
-
-__SOFTWARE BILL OF MATERIALS__
-
- Component            | Copyright                                                         | License
- ---------            | ----------------------------------------------------------------- | -------
- Bluetooth Low Energy | STMicroelectronics                                                | SLA
- Linklayer            | Synopsys, Inc.                                                    | SLA
- MAC                  | Synopsys, Inc.                                                    | SLA
- OpenThread           | The OpenThread Authors                                            | BSD-3-Clause
- Zigbee               | Exegin Technologies Limited, STMicroelectronics, Dr Brian Gladman | SLA
-
-
-__Notes:__ If the license is an open source license, then you can access the
-terms at [www.opensource.org](https://opensource.org/). Otherwise, the full
-license terms are below. If a component is not listed in the SBOM, then the SLA
-shall apply unless other terms are clearly stated in the package.
-
-
-
 SLA0044 Rev5/February 2018
 
 ## Software license agreement

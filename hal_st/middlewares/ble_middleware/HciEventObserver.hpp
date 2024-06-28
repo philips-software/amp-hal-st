@@ -1,7 +1,7 @@
 #ifndef HAL_ST_HCI_EVENT_OBSERVER_HPP
 #define HAL_ST_HCI_EVENT_OBSERVER_HPP
 
-#include "ble/core/ble_legacy.h"
+#include "ble/ble.h"
 #include "infra/util/Observer.hpp"
 
 namespace hal

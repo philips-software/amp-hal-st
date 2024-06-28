@@ -1,11 +1,12 @@
 /*****************************************************************************
  * @file    ble_vs_codes.h
+ * @author  MDG
  * @brief   STM32WBA BLE API (vendor specific event codes)
  *          Auto-generated file: do not edit!
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2024 STMicroelectronics.
+ * Copyright (c) 2018-2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file

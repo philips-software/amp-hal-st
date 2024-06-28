@@ -1,7 +1,6 @@
 #ifndef HAL_ST_GAP_CENTRAL_ST_HPP
 #define HAL_ST_GAP_CENTRAL_ST_HPP
 
-#include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 

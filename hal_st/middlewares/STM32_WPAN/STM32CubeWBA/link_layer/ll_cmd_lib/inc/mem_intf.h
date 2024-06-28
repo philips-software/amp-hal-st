@@ -1,43 +1,10 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/branches/P10164613/issue_2029/firmware/public_inc/mem_intf.h#2 $*/
-/*Version_INFO 
-V2  --> Original version is 1.30a-SOW05PatchV6_2
-V2  --> combined patch case 01641860
-*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/mem_intf.h#1 $*/
 /**
  ********************************************************************************
  * @file    mem_intf.h
  * @brief   This file contains all the functions prototypes for the mem_intf.c.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef MEM_INTF_H
@@ -95,19 +62,8 @@ int8_t ble_memcmp(
 	uint16_t n);
 
 /**
- * @brief  Moving  memory from position to another.
- * @param  ptr_dstntion	: pointer to the destination array where the content is to be moved.
- * @param  ptr_src	: pointer to the source of data to be moved.
- * @param  n 		: the number of bytes to be moved.
- * @retval pointer to destination.
- */
-
-void *ble_memmov(
-	void *ptr_dstntion,
-	const void *ptr_src,
-	uint16_t n);
-/**
  * @}
  */
 #endif /* MEM_INTF_H */
 
+/*****END OF FILE****/

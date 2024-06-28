@@ -5,7 +5,7 @@
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2024 STMicroelectronics.
+ * Copyright (c) 2018-2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -18,21 +18,6 @@
 #ifndef BLE_LEGACY_H__
 #define BLE_LEGACY_H__
 
-
-/* Various obsolete definitions
- */
-
-#define PERIPHERAL_PRIVACY_FLAG_UUID             0x2A02U
-#define RECONNECTION_ADDR_UUID                   0x2A03U
-
-#define OOB_AUTH_DATA_ABSENT                       0x00U
-#define OOB_AUTH_DATA_PRESENT                      0x01U
-
-#define BLE_STATUS_SEC_DB_FULL                     0x5DU
-#define BLE_STATUS_INSUFFICIENT_ENC_KEYSIZE        0x5FU
-#define BLE_STATUS_CHARAC_ALREADY_EXISTS           0x63U
-
-#define GAP_NAME_DISCOVERY_PROC                    0x04U
 
 /* Deprecated names for ACI/HCI commands and events
  */
@@ -84,18 +69,6 @@
 
 #define AD_TYPE_SLAVE_CONN_INTERVAL \
         AD_TYPE_PERIPHERAL_CONN_INTERVAL
-
-#define OOB_NOT_AVAILABLE                 REASON_OOB_NOT_AVAILABLE
-#define AUTH_REQ_CANNOT_BE_MET            REASON_AUTHENTICATION_REQ
-#define CONFIRM_VALUE_FAILED              REASON_CONFIRM_VALUE_FAILED
-#define PAIRING_NOT_SUPPORTED             REASON_PAIRING_NOT_SUPPORTED
-#define INSUFF_ENCRYPTION_KEY_SIZE        REASON_ENCRYPTION_KEY_SIZE
-#define CMD_NOT_SUPPORTED                 REASON_COMMAND_NOT_SUPPORTED
-#define UNSPECIFIED_REASON                REASON_UNSPECIFIED_REASON
-#define VERY_EARLY_NEXT_ATTEMPT           REASON_REPEATED_ATTEMPTS
-#define SM_INVALID_PARAMS                 REASON_INVALID_PARAMETERS
-#define SMP_SC_DHKEY_CHECK_FAILED         REASON_DHKEY_CHECK_FAILED
-#define SMP_SC_NUMCOMPARISON_FAILED       REASON_NUM_COMPARISON_FAILED
 
 
 #endif /* BLE_LEGACY_H__ */

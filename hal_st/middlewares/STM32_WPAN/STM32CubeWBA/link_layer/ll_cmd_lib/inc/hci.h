@@ -1,39 +1,10 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW05Patchv6_2/firmware/public_inc/hci.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/hci.h#1 $*/
 /**
  ********************************************************************************
  * @file    hci.h
  * @brief   This file contains all the functions prototypes for the hci.h.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
 
 /** @defgroup  hci_intf HCI Layer
  *  @ingroup BLE_STACK_API
@@ -173,7 +144,7 @@ uint8_t hci_rgstr_ble_external_custom_cbk(ble_ext_custm_cb_t ext_custm_cbk);
  *
  * @retval ble_stat_t  None
  */
-void hci_init_events_queues(void);
+void hci_init_events_queues();
 /**
  * @brief  Post data/event to appropriate queue. This function is called
  * 		   in case of sending data/events to host
@@ -231,5 +202,7 @@ void hci_ll_set_custom_event_mask(uint8_t cstm_evnt_mask);
 #endif /* SUPPORT_HCI_EVENT_ONLY */
 
 #endif /* INCLUDE_HCI_H */
+
+/*****END OF FILE****/
 
 

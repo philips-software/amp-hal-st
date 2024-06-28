@@ -6,7 +6,7 @@
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2024 STMicroelectronics.
+ * Copyright (c) 2018-2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -23,7 +23,7 @@
 #include <stdint.h>
 
 /* Definition of Setup_Iso_Data_Path_Params */
-typedef __PACKED_STRUCT  hci_le_setup_iso_data_path_params
+typedef struct hci_le_setup_iso_data_path_params
 {
   uint8_t Big_Handle;
   uint16_t Connection_Handle;
@@ -100,13 +100,11 @@ void BLE_IsochronousGroupEvent( uint16_t opcode,
                                 uint8_t cig_id,
                                 uint16_t iso_interval,
                                 uint8_t num_connection_handles,
-                                uint16_t* connection_handle,
-                                uint8_t* transport_latency_C_to_P,
-                                uint8_t* transport_latency_P_to_C );
+                                uint16_t* connection_handle );
 
 /* Audio codec functions exported by the BLE stack
  */
-uint8_t BLE_SendIsoDataToLinkLayer( uint16_t iso_connection_handle,
+void BLE_SendIsoDataToLinkLayer( uint16_t iso_connection_handle,
                                  uint8_t pb_flag,
                                  uint8_t ts_flag,
                                  uint32_t timestamp,
@@ -115,7 +113,6 @@ uint8_t BLE_SendIsoDataToLinkLayer( uint16_t iso_connection_handle,
                                  uint8_t* iso_data );
 
 
-void BLE_ResendIsoDataOutToCodec( uint16_t iso_connection_handle );
 
 void BLE_CalibrationCallback(uint32_t TimeStamp);
 

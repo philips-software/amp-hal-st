@@ -1,40 +1,11 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW05Patchv6_2/firmware/public_inc/evnt_schdlr_gnrc_if.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/evnt_schdlr_gnrc_if.h#1 $*/
 /**
  ********************************************************************************
  * @file    evnt_schdlr_gnrc_if.h
  * @brief   This file contains all the functions prototypes for the evnt_schdlr.c
  * that are used by other layers to interface with the scheduler.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
 
  /**
  *  @ingroup gnrc_schdlr_intf
@@ -106,7 +77,7 @@ typedef struct _extrnl_evnt_st_t{
 	 * when it is  called from event scheduler, the stack should stop all running operation that access phy,
 	 *  no need to call @ref evnt_schdlr_gnrc_evnt_cmpltafter calling this callback as it is called from scheduler itself.
 	 * */
-	uint32_t    				(*evnt_abortd_cbk)(void);
+	uint32_t    				(*evnt_abortd_cbk)();
 #if (RADIO_CSMA)
 	/** Event coexistence error Callback Function. it will be called when @ref EXTRNL_GNRC event execution returned error.
 	 *  when  @ref evnt_strtd_cbk of @ref EXTRNL_GNRC failed at execution for any reason, this callback will be  called from event scheduler,
@@ -206,3 +177,4 @@ uint8_t evnt_schdlr_confrm_grant(void * evnt_hndl);
  * @}
  */
 
+/*****END OF FILE****/
