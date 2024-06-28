@@ -1,6 +1,8 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
+#include "hal_st/stm32fxxx/DmaStm.hpp"
+#include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "infra/timer/Timer.hpp"
 #include "services/tracer/GlobalTracer.hpp"
 #include "services/tracer/StreamWriterOnSerialCommunication.hpp"
