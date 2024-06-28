@@ -1,9 +1,7 @@
 #ifndef HAL_ST_NUCLEO_UI_HPP
 #define HAL_ST_NUCLEO_UI_HPP
 
-#include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "hal_st/stm32fxxx/UartStmDma.hpp"
 
 namespace main_
 {
@@ -36,6 +34,7 @@ namespace main_
 #endif
     };
 
+#if defined(GPIOD)
     // UM2435: MB1355 reference board with STM32WB55RG
     struct Nucleo64WBUi
     {
@@ -46,6 +45,7 @@ namespace main_
         hal::GpioPinStm ledGreen{ hal::Port::B, 0 };
         hal::GpioPinStm ledBlue{ hal::Port::B, 5 };
     };
+#endif
 
     // UM3103: MB1863 reference board with STM32WBA52CG
     struct Nucleo64WBAUi
