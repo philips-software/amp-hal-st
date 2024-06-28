@@ -13,9 +13,9 @@ namespace hal
         struct SpiMasterStmDmaConfig
         {
             bool msbFirst{ true };
-            bool polarityLow{true};
-            bool phase1st{true};
             uint32_t baudRatePrescaler{ SPI_BAUDRATEPRESCALER_16 };
+            bool polarityLow{ true };
+            bool phase1st{ true };
         };
     }
 

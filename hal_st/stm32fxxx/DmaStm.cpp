@@ -62,14 +62,14 @@ namespace hal
         const std::array dmaISRDma1
         {
 #if defined(GPDMA1)
-            &GPDMA1_Channel0_NS->CSR,
-            &GPDMA1_Channel1_NS->CSR,
-            &GPDMA1_Channel2_NS->CSR,
-            &GPDMA1_Channel3_NS->CSR,
-            &GPDMA1_Channel4_NS->CSR,
-            &GPDMA1_Channel5_NS->CSR,
-            &GPDMA1_Channel6_NS->CSR,
-            &GPDMA1_Channel7_NS->CSR,
+            &GPDMA1_Channel0->CSR,
+            &GPDMA1_Channel1->CSR,
+            &GPDMA1_Channel2->CSR,
+            &GPDMA1_Channel3->CSR,
+            &GPDMA1_Channel4->CSR,
+            &GPDMA1_Channel5->CSR,
+            &GPDMA1_Channel6->CSR,
+            &GPDMA1_Channel7->CSR,
 #else
             &DMA1->ISR,
             &DMA1->ISR,
@@ -85,15 +85,26 @@ namespace hal
             &DMA1->ISR,
 #endif
         };
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array dmaISRDma2
         {
+#if defined(GPDMA1)
+            &GPDMA2_Channel0->CSR,
+            &GPDMA2_Channel1->CSR,
+            &GPDMA2_Channel2->CSR,
+            &GPDMA2_Channel3->CSR,
+            &GPDMA2_Channel4->CSR,
+            &GPDMA2_Channel5->CSR,
+            &GPDMA2_Channel6->CSR,
+            &GPDMA2_Channel7->CSR,
+#else
             &DMA2->ISR,
             &DMA2->ISR,
             &DMA2->ISR,
             &DMA2->ISR,
             &DMA2->ISR,
             &DMA2->ISR,
+#endif
 #if defined(DMA2_Channel7)
             &DMA2->ISR,
 #endif
@@ -104,7 +115,7 @@ namespace hal
 #endif
 
 
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array<decltype(dmaISRDma1), 2> dmaISR { dmaISRDma1, dmaISRDma2 };
 #else
         const std::array<decltype(dmaISRDma1), 1> dmaISR { dmaISRDma1 };
@@ -113,14 +124,14 @@ namespace hal
         const std::array dmaIFCRDma1
         {
 #if defined(GPDMA1)
-            &GPDMA1_Channel0_NS->CFCR,
-            &GPDMA1_Channel1_NS->CFCR,
-            &GPDMA1_Channel2_NS->CFCR,
-            &GPDMA1_Channel3_NS->CFCR,
-            &GPDMA1_Channel4_NS->CFCR,
-            &GPDMA1_Channel5_NS->CFCR,
-            &GPDMA1_Channel6_NS->CFCR,
-            &GPDMA1_Channel7_NS->CFCR,
+            &GPDMA1_Channel0->CFCR,
+            &GPDMA1_Channel1->CFCR,
+            &GPDMA1_Channel2->CFCR,
+            &GPDMA1_Channel3->CFCR,
+            &GPDMA1_Channel4->CFCR,
+            &GPDMA1_Channel5->CFCR,
+            &GPDMA1_Channel6->CFCR,
+            &GPDMA1_Channel7->CFCR,
 #else
             &DMA1->IFCR,
             &DMA1->IFCR,
@@ -136,15 +147,26 @@ namespace hal
             &DMA1->IFCR,
 #endif
         };
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array dmaIFCRDma2
         {
+#if defined(GPDMA2)
+            &GPDMA2_Channel0->CFCR,
+            &GPDMA2_Channel1->CFCR,
+            &GPDMA2_Channel2->CFCR,
+            &GPDMA2_Channel3->CFCR,
+            &GPDMA2_Channel4->CFCR,
+            &GPDMA2_Channel5->CFCR,
+            &GPDMA2_Channel6->CFCR,
+            &GPDMA2_Channel7->CFCR,
+#else
             &DMA2->IFCR,
             &DMA2->IFCR,
             &DMA2->IFCR,
             &DMA2->IFCR,
             &DMA2->IFCR,
             &DMA2->IFCR,
+#endif
 #if defined(DMA2_Channel7)
             &DMA2->IFCR,
 #endif
@@ -154,7 +176,7 @@ namespace hal
         };
 #endif
 
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array<decltype(dmaIFCRDma1), 2> dmaIFCR { dmaIFCRDma1, dmaIFCRDma2 };
 #else
         const std::array<decltype(dmaIFCRDma1), 1> dmaIFCR { dmaIFCRDma1 };
@@ -163,14 +185,14 @@ namespace hal
         const std::array DmaChannelDma1
         {
 #if defined(GPDMA1)
-            GPDMA1_Channel0_NS,
-            GPDMA1_Channel1_NS,
-            GPDMA1_Channel2_NS,
-            GPDMA1_Channel3_NS,
-            GPDMA1_Channel4_NS,
-            GPDMA1_Channel5_NS,
-            GPDMA1_Channel6_NS,
-            GPDMA1_Channel7_NS,
+            GPDMA1_Channel0,
+            GPDMA1_Channel1,
+            GPDMA1_Channel2,
+            GPDMA1_Channel3,
+            GPDMA1_Channel4,
+            GPDMA1_Channel5,
+            GPDMA1_Channel6,
+            GPDMA1_Channel7,
 #else
             DMA1_Channel1,
             DMA1_Channel2,
@@ -186,15 +208,26 @@ namespace hal
             DMA1_Channel8,
 #endif
         };
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array DmaChannelDma2
         {
+#if defined(GPDMA2)
+            GPDMA2_Channel0,
+            GPDMA2_Channel1,
+            GPDMA2_Channel2,
+            GPDMA2_Channel3,
+            GPDMA2_Channel4,
+            GPDMA2_Channel5,
+            GPDMA2_Channel6,
+            GPDMA2_Channel7,
+#else
             DMA2_Channel1,
             DMA2_Channel2,
             DMA2_Channel3,
             DMA2_Channel4,
             DMA2_Channel5,
             DMA2_Channel6,
+#endif
 #if defined(DMA2_Channel7)
             DMA2_Channel7,
 #endif
@@ -204,7 +237,7 @@ namespace hal
         };
 #endif
 
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array<decltype(DmaChannelDma1), 2> DmaChannel { DmaChannelDma1, DmaChannelDma2 };
 #else
         const std::array<decltype(DmaChannelDma1), 1> DmaChannel { DmaChannelDma1 };
@@ -236,15 +269,26 @@ namespace hal
             DMA1_Channel8_IRQn,
 #endif
         };
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array dmaIrqDma2
         {
+#if defined(GPDMA2)
+            GPDMA2_Channel0_IRQn,
+            GPDMA2_Channel1_IRQn,
+            GPDMA2_Channel2_IRQn,
+            GPDMA2_Channel3_IRQn,
+            GPDMA2_Channel4_IRQn,
+            GPDMA2_Channel5_IRQn,
+            GPDMA2_Channel6_IRQn,
+            GPDMA2_Channel7_IRQn,
+#else
             DMA2_Channel1_IRQn,
             DMA2_Channel2_IRQn,
             DMA2_Channel3_IRQn,
             DMA2_Channel4_IRQn,
             DMA2_Channel5_IRQn,
             DMA2_Channel6_IRQn,
+#endif
 #if defined(DMA2_Channel7)
             DMA2_Channel7_IRQn,
 #endif
@@ -254,7 +298,7 @@ namespace hal
         };
 #endif
 
-#if defined(DMA2_Channel1)
+#if defined(DMA2_Channel1) || defined(GPDMA2)
         const std::array<decltype(dmaIrqDma1), 2> dmaIrq { dmaIrqDma1, dmaIrqDma2 };
 #else
         const std::array<decltype(dmaIrqDma1), 1> dmaIrq { dmaIrqDma1 };
@@ -355,6 +399,9 @@ namespace hal
     {
 #if defined(GPDMA1)
         __HAL_RCC_GPDMA1_CLK_ENABLE();
+#if defined(GPDMA2)
+        __HAL_RCC_GPDMA2_CLK_ENABLE();
+#endif
 #else
         __DMA1_CLK_ENABLE();
         __DMA2_CLK_ENABLE();
@@ -368,6 +415,9 @@ namespace hal
     {
 #if defined(GPDMA1)
         __HAL_RCC_GPDMA1_CLK_DISABLE();
+#if defined(GPDMA2)
+        __HAL_RCC_GPDMA2_CLK_DISABLE();
+#endif
 #else
         __DMA1_CLK_DISABLE();
         __DMA2_CLK_DISABLE();
@@ -719,7 +769,7 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
-        linkRegisters.CBR1 = size / DataSize();
+        linkRegisters.CBR1 = size;
 #elif defined(DMA_SxNDT)
         streamRegister->NDTR = size / DataSize();
 #else
@@ -751,7 +801,7 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
-        return streamRegister->CBR1 * DataSize();
+        return streamRegister->CBR1;
 #elif defined(DMA_SxNDT)
         return streamRegister->NDTR * DataSize();
 #else
@@ -1000,7 +1050,8 @@ namespace hal
     {
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
-        SetPeripheralAddress(peripheralAddress);  
+        SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1009,7 +1060,8 @@ namespace hal
     {
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
-        SetPeripheralAddress(peripheralAddress);  
+        SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1018,7 +1070,8 @@ namespace hal
     {
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();
-        SetPeripheralAddress(peripheralAddress);  
+        SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1027,7 +1080,8 @@ namespace hal
     {
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();
-        SetPeripheralAddress(peripheralAddress);  
+        SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1046,7 +1100,8 @@ namespace hal
     {
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
-        SetPeripheralAddress(peripheralAddress);  
+        SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
 }
 
@@ -1055,7 +1110,8 @@ namespace hal
     {
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();
-        SetPeripheralAddress(peripheralAddress);  
+        SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 }
