@@ -7,10 +7,16 @@ namespace hal
 {
     namespace
     {
-        GPIO_TypeDef* const portToGPIOPort[] = {
+        const std::array portToGPIOPort = {
+#if defined(GPIOA)
             GPIOA,
+#endif
+#if defined(GPIOB)
             GPIOB,
+#endif
+#if defined(GPIOC)
             GPIOC,
+#endif
 #if defined(GPIOD)
             GPIOD,
 #endif
@@ -37,7 +43,7 @@ namespace hal
 #endif
         };
 
-        const uint16_t pinToGPIOPin[16] = {
+        const std::array pinToGPIOPin = {
             GPIO_PIN_0,
             GPIO_PIN_1,
             GPIO_PIN_2,
@@ -56,13 +62,13 @@ namespace hal
             GPIO_PIN_15,
         };
 
-        const uint32_t weakPullToPuPd[3] = {
+        const std::array weakPullToPuPd = {
             GPIO_NOPULL,
             GPIO_PULLUP,
             GPIO_PULLDOWN
         };
 
-        const uint32_t speedToSpeed[] = {
+        const std::array speedToSpeed = {
             GPIO_SPEED_FREQ_LOW,
             GPIO_SPEED_FREQ_MEDIUM,
             GPIO_SPEED_FREQ_HIGH,
@@ -71,7 +77,7 @@ namespace hal
 #endif
         };
 
-        const uint32_t driveToAFMode[2] = {
+        const std::array driveToAFMode = {
             GPIO_MODE_AF_PP,
             GPIO_MODE_AF_OD
         };
