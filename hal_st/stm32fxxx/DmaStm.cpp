@@ -769,7 +769,7 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
-        linkRegisters.CBR1 = size / DataSize();
+        linkRegisters.CBR1 = size;
 #elif defined(DMA_SxNDT)
         streamRegister->NDTR = size / DataSize();
 #else
@@ -801,7 +801,7 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
-        return streamRegister->CBR1 * DataSize();
+        return streamRegister->CBR1;
 #elif defined(DMA_SxNDT)
         return streamRegister->NDTR * DataSize();
 #else
