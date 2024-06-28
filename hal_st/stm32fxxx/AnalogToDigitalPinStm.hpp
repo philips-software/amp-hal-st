@@ -21,6 +21,15 @@ namespace hal
             uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES };
 #endif
         };
+
+        struct AdcStmConfig
+        {
+#ifdef STM32WBA
+            uint32_t clockPrescaler{ ADC_CLOCK_ASYNC_DIV4 };
+#else
+            uint32_t clockPrescaler{ ADC_CLOCKPRESCALER_PCLK_DIV4 };
+#endif
+        };
     }
 
     class AdcStm;
@@ -61,7 +70,9 @@ namespace hal
     class AdcStm
     {
     public:
-        explicit AdcStm(uint8_t adcIndex);
+        using Config = detail::AdcStmConfig;
+
+        explicit AdcStm(uint8_t adcIndex, const Config& config = Config());
         ~AdcStm();
 
     protected:
