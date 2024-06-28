@@ -1051,6 +1051,7 @@ namespace hal
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
         SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1060,6 +1061,7 @@ namespace hal
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
         SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1069,6 +1071,7 @@ namespace hal
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();
         SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1078,6 +1081,7 @@ namespace hal
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();
         SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 
@@ -1097,6 +1101,7 @@ namespace hal
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
         SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
 }
 
@@ -1106,6 +1111,7 @@ namespace hal
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();
         SetPeripheralAddress(peripheralAddress);
+        SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
 }
