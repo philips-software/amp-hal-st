@@ -24,8 +24,6 @@ target_link_libraries(hal_st.stm32_wpan_stm32wbaxx PUBLIC
 )
 
 target_sources(hal_st.stm32_wpan_stm32wbaxx PRIVATE
-    app_specific/power_table.c
-
     ble/svc/Inc/common_blesvc.h
     ble/svc/Src/svc_ctl.c
 
