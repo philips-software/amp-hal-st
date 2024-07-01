@@ -5,7 +5,7 @@
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2024 STMicroelectronics.
+ * Copyright (c) 2018-2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -194,7 +194,7 @@ extern tBleStatus BleStack_Init( const BleStack_init_t* init_params_p );
  * function.
  * 
  * No BLE stack function must be called while the BleStack_Process is running.
- * For example, if a BLE stack function may be called inside an
+ * For example, if a BLE stack function may be called inside an 
  * interrupt routine, that interrupt must be disabled during the execution of
  * BleStack_Process().
  *

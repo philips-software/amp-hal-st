@@ -1,39 +1,10 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW05Patchv6_2/firmware/public_inc/ll_error.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/ll_error.h#1 $*/
 /**
  ********************************************************************************
  * @file    error.h
  * @brief   This file contains error defines across BLE FW LL.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 
@@ -91,7 +62,7 @@
 #define		RESERVED_FOR_FUTURE_1                                                           0x2B
 #define		QOS_UNACCEPTABLE_PARAMETER                                                  	0x2C
 #define		QOS_REJECTED                                                                	0x2D
-#define		CHANNEL_ASSESSMENT_NOT_SUPPORTED                                            	0x2E
+#define		CHANNEL_ASSESSMENT_NOT_SUPPORTED                                        	0x2E
 #define		INSUFFICIENT_SECURITY                                                       	0x2F
 #define		PARAMETER_OUT_OF_MANDATORY_RANGE                                            	0x30
 #define		RESERVED_FOR_FUTURE_2                                                           0x31
@@ -116,8 +87,6 @@
 #define		LIMIT_REACHED																	0x43
 #define     OPERATION_CANCELLED_BY_HOST														0x44
 #define		PACKET_TOO_LONG																	0x45
-#define 	TOO_LATE																		0x46
-
 
 
 #if ((MAX_NUM_CNCRT_STAT_MCHNS > 1) && !((SUPPORT_MASTER_CONNECTION) || (SUPPORT_SLAVE_CONNECTION)||(SUPPORT_LE_EXTENDED_ADVERTISING)))
@@ -148,16 +117,8 @@
 #error LE Power Control feature shall be enabled only when the master role or slave role is enabled
 #endif /* #error */
 
-#if ((SUPPORT_AOA_AOD) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION && !SUPPORT_LE_PERIODIC_ADVERTISING))
-#error CTE feature shall be enabled only when the master role or slave role or periodic advertising is enabled
-#endif /* #error */
-
 #if ((SUPPORT_BRD_ISOCHRONOUS || SUPPORT_SYNC_ISOCHRONOUS) && (!SUPPORT_LE_PERIODIC_ADVERTISING))
 #error Broadcast Isochronous feature shall be enabled only when periodic advertisng is enabled
-#endif /* #error */
-
-#if ((SUPPORT_CONNECTED_ISOCHRONOUS) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION))
-#error Connection Isochronous feature shall be enabled when at least one the master role or slave role is enabled
 #endif /* #error */
 
 #if (SUPPORT_PERIODIC_ADV_ADI && (!SUPPORT_LE_PERIODIC_ADVERTISING))
@@ -168,13 +129,6 @@
 #error Channel Classification feature shall be enabled only when the master role or slave role is enabled 
 #endif /* #error */
 
-#if (SUPPORT_LE_ENHANCED_CONN_UPDATE) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION)
-#error "LE Enhanced Connection Update(subrating) enabled only if master or slave enabled"
-#endif /* #error */
-
-
-
-
 
 /* Exported macros ------------------------------------------------------------*/
 
@@ -184,4 +138,4 @@
 
 #endif /* ERROR_H_ */
 
-/******************* (C) (C) COPYRIGHT 2023 SYNOPSYS, INC. *****END OF FILE****/
+/*****END OF FILE****/

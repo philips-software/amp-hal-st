@@ -1,39 +1,11 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW05Patchv6_2/firmware/public_inc/event_manager.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/event_manager.h#1 $*/
 /**
  ********************************************************************************
  * @file    event_manager.h
  * @brief   This file contains all the functions prototypes for the event_manager.c.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef INCLUDE_EVENT_MANAGER_H_
 #define INCLUDE_EVENT_MANAGER_H_
@@ -80,8 +52,8 @@ typedef enum {
 	BIS_TERM_EVENT,
 #if(SUPPORT_SYNC_ISOCHRONOUS)
 	BIS_SYNC_TIMEOUT_EVENT,
-#endif /* SUPPORT_SYNC_ISOCHRONOUS */
-#endif /* SUPPORT_BRD_ISOCHRONOUS || SUPPORT_SYNC_ISOCHRONOUS */
+#endif /* SUPPORT_EXPLCT_OBSERVER_ROLE */
+#endif /* SUPPORT_BROADCAST_ISOCHRONOUS */
 #endif /*SUPPORT_BLE*/
 #if ((SUPPORT_BLE)||(SUPPORT_MAC_HCI_UART)||(SUPPORT_ANT_HCI_UART) || (SUPPORT_AUG_MAC_HCI_UART))
 	HCI_HANDLER, /* handler for the HCI events; handling events from Host to HCI*/
@@ -91,10 +63,8 @@ typedef enum {
 	ADV_TIMEOUT_EVENT, 	/*handler for advertising extended timeout feature */
 	SCN_DURATION_EVENT,	/*handler for extended scanning duration */
 	SCN_PERIOD_EVENT, 	/*handler for extended scanning period */
-#if SUPPORT_LE_PERIODIC_ADVERTISING
-	PRDC_SCAN_TIMEOUT_EVENT, /*handler for periodic scan sync timeout */
+	PRDC_SCAN_TIMEOUT_EVENT, /*handler for periodoc scan sync timeout */
 	PRDC_SCAN_CANCEL_EVENT,
-#endif /* SUPPORT_LE_PERIODIC_ADVERTISING */
 #endif /* SUPPORT_LE_EXTENDED_ADVERTISING */
 #endif /*SUPPORT_BLE*/
 #if SUPPORT_COEXISTENCE
@@ -352,3 +322,4 @@ uint8_t emngr_process_conditional_event( uint8_t id, uint8_t only_one_event,
 
 #endif /* INCLUDE_EVENT_MANAGER_H_ */
 
+/*****END OF FILE****/
