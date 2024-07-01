@@ -276,6 +276,8 @@ namespace hal
     public:
         DmaStm();
         ~DmaStm();
+        DmaStm(const DmaStm& other) = delete;
+        DmaStm& operator=(const DmaStm& other) = delete;
 
     private:
         void ReserveStream(uint8_t dmaIndex, uint8_t streamIndex);
