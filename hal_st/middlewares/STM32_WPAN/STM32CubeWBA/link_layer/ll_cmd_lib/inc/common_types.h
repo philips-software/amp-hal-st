@@ -1,43 +1,10 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/branches/P10164613/issue_2029/firmware/public_inc/common_types.h#2 $*/
-/*Version_INFO 
-V2  --> Original version is 1.30a-SOW05PatchV6_2
-V2  --> combined patch case 01641860
-*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/common_types.h#1 $*/
 /**
  ********************************************************************************
  * @file    common_types.h
  * @brief   This file contains common includes for BLE FW LL.
  ******************************************************************************
- * @copy
- * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
- * associated documentation ( hereinafter the "Software") is an unsupported
- * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
- * writing between Synopsys and you. The Software IS NOT an item of Licensed
- * Software or a Licensed Product under any End User Software License Agreement
- * or Agreement for Licensed Products with Synopsys or any supplement thereto.
- * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
- * the SOFTWARE may be the trademarks of their respective owners.
- *
- * Synopsys MIT License:
- * Copyright (c) 2020-Present Synopsys, Inc
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * the Software), to deal in the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
- * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * */
+ */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 
@@ -107,7 +74,9 @@ V2  --> combined patch case 01641860
 #if((!SUPPORT_BLE)&&(SUPPORT_MAC)&&(SUPPORT_ANT))
 #error "BLE controller must be enabled to support MAC and ANT Coexistence"
 #endif
-
+#if (SUPPORT_LE_ENHANCED_CONN_UPDATE) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION)
+#error "LE Enhanced Connection Update(subrating) enabled only if master or slave enabled"
+#endif /* (SUPPORT_LE_ENHANCED_CONN_UPDATE) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION) */
 #define SUPPORT_COEXISTENCE							((SUPPORT_BLE&&SUPPORT_MAC) || (SUPPORT_BLE&&SUPPORT_ANT))
 #define SUPPORT_ANT_COEXISTENCE						(SUPPORT_BLE&&SUPPORT_ANT)
 /****************** User configuration **********************************/
@@ -144,7 +113,6 @@ V2  --> combined patch case 01641860
 #define MEMSET(ptr_memory, value, memory_size)				ble_memset(ptr_memory, value, memory_size)
 #define MEMCPY(ptr_destination, ptr_source, memory_size)	ble_memcpy(ptr_destination, ptr_source, memory_size)
 #define MEMCMP(ptr_destination, ptr_source, memory_size)	ble_memcmp(ptr_destination, ptr_source, memory_size)
-#define MEMMOV(ptr_destination, ptr_source, memory_size)	ble_memmov(ptr_destination, ptr_source, memory_size)
 
 
 
@@ -200,13 +168,29 @@ typedef enum {
 #endif /* ((SUPPORT_CONNECTED_ISOCHRONOUS && SUPPORT_MASTER_CONNECTION) || SUPPORT_BRD_ISOCHRONOUS) */
 } tx_rx_phy_e;
 
+
+#ifdef PHY_40nm_2_50_a
+/**
+ * @brief Enumeration to represent different rates for continuous modulation mode
+ */
+typedef enum phy_cnt_mod_rate_e {
+	PHY_CNT_MOD_1M_RATE,		/* Continuous modulation mode with 1M PHY*/
+	PHY_CNT_MOD_2M_RATE,		/* Continuous modulation mode with 2M PHY*/
+	PHY_CNT_MOD_CODED_RATE,		/* Continuous modulation mode with Coded PHY*/
+	PHY_CNT_MOD_256K_RATE,		/* Continuous modulation mode with Zigbee PHY*/
+#if SUPPORT_A_MAC
+	PHY_CNT_MOD_125K_RATE,		/* Continuous modulation mode with zigbee 125K PHY*/
+#endif /*SUPPORT_A_MAC*/
+	PHY_CNT_MOD_UNSUPPORTED
+} phy_cnt_mod_rate_t;
+#endif /*PHY_40nm_2_50_a*/
+
 /**
  * @brief time stamp structure.
  */
 typedef struct time_st {
 	uint32_t time_stamp_base;
-	uint16_t time_stamp_fine;
-	uint8_t  overflow_flag;
+	uint32_t time_stamp_fine;
 } ble_time_t, *ble_time_p;
 typedef enum dpslp_state {
 	DEEP_SLEEP_ENABLE  = 0x01,
@@ -341,15 +325,6 @@ typedef struct _sdu_buf_hdr_st {
 } iso_sdu_buf_hdr_st, *iso_sdu_buf_hdr_p;
 #endif  /* (SUPPORT_BRD_ISOCHRONOUS || SUPPORT_SYNC_ISOCHRONOUSs ||  (SUPPORT_CONNECTED_ISOCHRONOUS && ( SUPPORT_MASTER_CONNECTION || SUPPORT_SLAVE_CONNECTION))) */
 
-/**
- * brief: PAWR host buffer struct
- */
-typedef struct _pawr_host_buffer {
-	uint8_t buffer[257];
-	uint8_t total_data_lenth;
-	uint8_t number_of_reports;
-}pawr_host_buffer;
-
 /*
  * @brief   Transport layer event
  */
@@ -416,7 +391,7 @@ typedef enum {
 #ifndef EXTERNAL_CUSTOM_CMDS
 #define EXTERNAL_CUSTOM_CMDS						0	/* Indicates that an external custom HCI commands module exists */
 #endif /* EXTERNAL_CUSTOM_CMDS */
-#define SUPPORT_ZIGBEE_PHY_CERTIFICATION   0  /* 0 disable , 1 enable .. used to enable support of hci command required to implement zigbee phy Test cases*/
+#define SUPPORT_ZIGBEE_PHY_CERTIFICATION   1  /* 0 disable , 1 enable .. used to enable support of hci command required to implement zigbee phy Test cases*/
 
 
 #if (!USE_HCI_TRANSPORT) && (SUPPORT_BLE)						  /* SUPPORT_HCI_EVENT_ONLY cannot be supported with default HCI_transport */
@@ -427,7 +402,5 @@ typedef enum {
 
 #endif/* (!USE_HCI_TRANSPORT) && (SUPPORT_BLE) */
 
-#define SUPPORT_HW_AUDIO_SYNC_SIGNAL       0
-
-
+#define SUPPORT_HW_AUDIO_SYNC_SIGNAL        0
 #endif /*COMMON_TYPES_H_*/
