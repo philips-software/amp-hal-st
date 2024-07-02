@@ -21,45 +21,45 @@ namespace main_
         {}
 
     public:
-        virtual void SendBuffer(infra::ConstByteRange data, bool last) override
+        void SendBuffer(infra::ConstByteRange data, bool last) override
         {
             hal::EthernetMacObserver::Subject().SendBuffer(data, last);
         }
 
-        virtual void RetryAllocation() override
+        void RetryAllocation() override
         {
             hal::EthernetMacObserver::Subject().RetryAllocation();
         }
 
-        virtual void AddMacAddressFilter(hal::MacAddress address) override
+        void AddMacAddressFilter(hal::MacAddress address) override
         {
             hal::EthernetMacObserver::Subject().AddMacAddressFilter(address);
         }
 
-        virtual void RemoveMacAddressFilter(hal::MacAddress address) override
+        void RemoveMacAddressFilter(hal::MacAddress address) override
         {
             hal::EthernetMacObserver::Subject().RemoveMacAddressFilter(address);
         }
 
     private:
-        virtual infra::ByteRange RequestReceiveBuffer() override
+        infra::ByteRange RequestReceiveBuffer() override
         {
             return GetObserver().RequestReceiveBuffer();
         }
 
-        virtual void ReceivedFrame(uint32_t usedBuffers, uint32_t frameSize) override
+        void ReceivedFrame(uint32_t usedBuffers, uint32_t frameSize) override
         {
             GetObserver().ReceivedFrame(usedBuffers, frameSize);
         }
 
-        virtual void ReceivedErrorFrame(uint32_t usedBuffers, uint32_t frameSize) override
+        void ReceivedErrorFrame(uint32_t usedBuffers, uint32_t frameSize) override
         {
             ethernetRmiiRefClkPeripheral = infra::none;
             ethernetRmiiRefClkPeripheral.Emplace(ethernetRmiiRefClk, hal::PinConfigTypeStm::ethernet, 0);
             GetObserver().ReceivedErrorFrame(usedBuffers, frameSize);
         }
 
-        virtual void SentFrame() override
+        void SentFrame() override
         {
             GetObserver().SentFrame();
         }
