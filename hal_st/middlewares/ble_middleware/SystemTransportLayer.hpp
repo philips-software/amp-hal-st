@@ -5,8 +5,9 @@
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
-#include "interface/patterns/ble_thread/tl/tl.h"
+#include "infra/util/ProxyCreator.hpp"
 #include "services/ble/BondBlobPersistence.hpp"
+#include "services/ble/BondStorageSynchronizer.hpp"
 
 namespace hal
 {
@@ -15,6 +16,18 @@ namespace hal
         , public HciEventSource
     {
     public:
+        enum class RfWakeupClock : uint8_t
+        {
+            highSpeedExternal,
+            lowSpeedExternal,
+        };
+
+        struct Configuration
+        {
+            uint16_t maxAttMtuSize;
+            RfWakeupClock rfWakeupClock;
+        };
+
         struct Version
         {
             uint8_t firmwareMajor;
@@ -28,18 +41,22 @@ namespace hal
         };
 
     public:
-        SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized);
+        using BondStorageSynchronizerCreator = infra::CreatorBase<services::BondStorageSynchronizer, void()>;
+
+        SystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized);
 
         Version GetVersion() const;
 
+        // Implementation of HciEventSource
+        void HciEventHandler(hci_event_pckt& event) override;
+
         virtual void UserEventHandler(void* payload);
-        virtual void HciEventHandler(hci_event_pckt& event);
 
     protected:
         virtual void HandleReadyEvent(void* payload);
-        virtual void HandleErrorNotifyEvent(TL_AsynchEvt_t* event);
-        virtual void HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent);
-        virtual void HandleUnknownEvent(TL_AsynchEvt_t* event);
+        virtual void HandleErrorNotifyEvent(void* event);
+        virtual void HandleBleNvmRamUpdateEvent(void* sysEvent);
+        virtual void HandleUnknownEvent(void* event);
 
         virtual void HandleWirelessFwEvent(void* payload);
         virtual void HandleFusFwEvent(void* payload);
@@ -52,7 +69,9 @@ namespace hal
 
     private:
         services::BondBlobPersistence bondBlobPersistence;
-        infra::Function<void(uint32_t*)> protocolStackInitialized;
+        infra::DelayedProxyCreator<services::BondStorageSynchronizer, void()> bondStorageSynchronizerCreator;
+        Configuration configuration;
+        infra::AutoResetFunction<void(services::BondStorageSynchronizer&)> onInitialized;
     };
 }
 

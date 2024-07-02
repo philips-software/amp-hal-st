@@ -7,7 +7,6 @@ extern "C"
 {
 #include "auto/ble_gatt_aci.h"
 #include "ble/ble.h"
-#include "ble/core/ble_core.h"
 }
 
 namespace hal

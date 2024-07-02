@@ -1,10 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GattServerSt.hpp"
 
-extern "C"
-{
-#include "ble/core/ble_core.h"
-}
-
 namespace
 {
     uint8_t UuidToType(const services::AttAttribute::Uuid& uuid)
