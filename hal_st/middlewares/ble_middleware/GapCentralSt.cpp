@@ -204,6 +204,8 @@ namespace hal
 
         really_assert(phyUpdateCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
 
+        onMtuExchangeDone = nullptr;
+
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
             {
                 observer.StateChanged(services::GapState::connected);
