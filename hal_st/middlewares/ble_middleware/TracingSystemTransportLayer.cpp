@@ -1,19 +1,11 @@
 #include "hal_st/middlewares/ble_middleware/TracingSystemTransportLayer.hpp"
-#include "ble/svc/Inc/svc_ctl.h"
-#include "hci_tl.h"
 #include "shci.h"
 #include "shci_tl.h"
 
-extern "C"
-{
-#include "app_conf.h"
-#include "ble.h"
-}
-
 namespace hal
 {
-    TracingSystemTransportLayer::TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, const infra::Function<void(uint32_t*)>& protocolStackInitialized, services::Tracer& tracer)
-        : SystemTransportLayer(flashStorage, protocolStackInitialized)
+    TracingSystemTransportLayer::TracingSystemTransportLayer(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized, services::Tracer& tracer)
+        : SystemTransportLayer(flashStorage, bondStorageSynchronizerCreator, configuration, onInitialized)
         , tracer(tracer)
     {}
 
@@ -34,22 +26,23 @@ namespace hal
         SystemTransportLayer::HandleReadyEvent(pPayload);
     }
 
-    void TracingSystemTransportLayer::HandleErrorNotifyEvent(TL_AsynchEvt_t* sysEvent)
+    void TracingSystemTransportLayer::HandleErrorNotifyEvent(void* sysEvent)
     {
         tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_ERROR_NOTIF";
         SystemTransportLayer::HandleErrorNotifyEvent(sysEvent);
     }
 
-    void TracingSystemTransportLayer::HandleBleNvmRamUpdateEvent(TL_AsynchEvt_t* sysEvent)
+    void TracingSystemTransportLayer::HandleBleNvmRamUpdateEvent(void* sysEvent)
     {
-        auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(sysEvent->payload);
+        auto& bleNvmRamUpdateEvent = *reinterpret_cast<SHCI_C2_BleNvmRamUpdate_Evt_t*>(reinterpret_cast<TL_AsynchEvt_t*>(sysEvent)->payload);
         tracer.Trace() << "SystemTransportLayer::UserEventHandler: SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE : size: " << bleNvmRamUpdateEvent.Size << ", address: 0x" << infra::hex << bleNvmRamUpdateEvent.StartAddress;
         SystemTransportLayer::HandleBleNvmRamUpdateEvent(sysEvent);
     }
 
-    void TracingSystemTransportLayer::HandleUnknownEvent(TL_AsynchEvt_t* sysEvent)
+    void TracingSystemTransportLayer::HandleUnknownEvent(void* sysEvent)
     {
-        tracer.Trace() << "SystemTransportLayer::UserEventHandler: Unsupported event found (" << sysEvent->subevtcode << ")";
+        auto subEventCode = reinterpret_cast<TL_AsynchEvt_t*>(sysEvent)->subevtcode;
+        tracer.Trace() << "SystemTransportLayer::UserEventHandler: Unsupported event found (" << subEventCode << ")";
         SystemTransportLayer::HandleUnknownEvent(sysEvent);
     }
 
