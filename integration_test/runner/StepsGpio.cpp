@@ -44,7 +44,7 @@ namespace
 
 STEP("gpio peripherals are enabled")
 {
-    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Emplace<GpioObserver>(context.Get<services::Echo>());
 
@@ -53,9 +53,9 @@ STEP("gpio peripherals are enabled")
                     context.Get<testing::TesterProxy>().EnablePeripheral(testing::Peripheral::gpio);
                     done();
                 });
-        });
+        }));
 
-    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Get<testing::TestedProxy>().RequestSend([&]()
                 {
@@ -66,12 +66,12 @@ STEP("gpio peripherals are enabled")
                             done();
                         });
                 });
-        });
+        }));
 
-    infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor(context, [&]()
         {
             return context.Get<application::TestedObserver>().ReceivedPong();
-        });
+        }));
 
     context.Emplace<testing::GpioTesterProxy>(context.Get<services::Echo>());
     context.Emplace<testing::GpioTestedProxy>(context.Get<services::Echo>());
@@ -81,46 +81,46 @@ STEP("the tester sets its output pin (high|low)", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Get<testing::GpioTesterProxy>().RequestSend([&]()
                 {
                     context.Get<testing::GpioTesterProxy>().SetGpio(context.Get<bool>("state"));
                     done();
                 });
-        });
+        }));
 }
 
 STEP("the tester sees a (high|low) value", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor(context, [&]()
         {
             return context.Get<GpioObserver>().testerGpio == context.Get<bool>("state");
-        });
+        }));
 }
 
 STEP("the tested sets its output pin (high|low)", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Get<testing::GpioTestedProxy>().RequestSend([&]()
                 {
                     context.Get<testing::GpioTestedProxy>().SetGpio(context.Get<bool>("state"));
                     done();
                 });
-        });
+        }));
 }
 
 STEP("the tested sees a (high|low) value", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor(context, [&]()
         {
             return context.Get<GpioObserver>().testedGpio == context.Get<bool>("state");
-        });
+        }));
 }
