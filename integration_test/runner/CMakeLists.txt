@@ -5,6 +5,7 @@ target_sources(integration_test.runner PRIVATE
     FixtureEcho.cpp
     FixtureEcho.hpp
     Hooks.cpp
+    Main.cpp
     StepsGpio.cpp
     StepsUart.cpp
     Waiting.cpp
@@ -13,7 +14,7 @@ target_sources(integration_test.runner PRIVATE
 
 target_link_libraries(integration_test.runner PRIVATE
     args
-    cucumber-cpp-runner
+    cucumber-cpp
     integration_test.logic
     hal.generic
     gtest

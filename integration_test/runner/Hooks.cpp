@@ -1,5 +1,4 @@
 #include "cucumber-cpp/Hooks.hpp"
-#include "args.hxx"
 #include "generated/echo/Testing.pb.hpp"
 #include "hal/generic/SynchronousRandomDataGeneratorGeneric.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
@@ -12,79 +11,61 @@
 
 HOOK_BEFORE_ALL()
 {
-    args::ArgumentParser parser("Integration test runner for amp-hal-st");
-    args::Group arguments(parser, "Arguments:");
-    args::Positional<std::string> target(arguments, "target", "COM port or hostname (ws://<host>/path or tcp://<host>) of the amp-hal-st integration test board", args::Options::Required);
-    args::Group flags(parser, "Optional flags:");
-    args::HelpFlag help(flags, "help", "Display this help menu.", { 'h', "help" });
+    auto target = context.Get<std::string>("target");
+    auto networkAdapter = std::make_shared<main_::NetworkAdapter>();
+    context.SetShared(std::shared_ptr<infra::EventDispatcherWithWeakPtrWorker>(networkAdapter, &networkAdapter->EventDispatcher()));
+    context.SetShared(std::shared_ptr<services::ConnectionFactoryWithNameResolver>(networkAdapter, &networkAdapter->ConnectionFactoryWithNameResolver()));
+    context.Emplace<hal::TimerServiceGeneric>();
 
-    try
+    if (target.substr(0, 3) == "COM" || target.substr(0, 4) == "/dev")
     {
-        const auto& args = context.Get<std::vector<std::string_view>>("args");
-        std::vector<std::string> stringArgs(args.begin(), args.end());
-        parser.ParseArgs(stringArgs);
-
-        auto networkAdapter = std::make_shared<main_::NetworkAdapter>();
-        context.SetShared(std::shared_ptr<infra::EventDispatcherWithWeakPtrWorker>(networkAdapter, &networkAdapter->EventDispatcher()));
-        context.SetShared(std::shared_ptr<services::ConnectionFactoryWithNameResolver>(networkAdapter, &networkAdapter->ConnectionFactoryWithNameResolver()));
-        context.Emplace<hal::TimerServiceGeneric>();
-
-        if (args::get(target).substr(0, 3) == "COM" || args::get(target).substr(0, 4) == "/dev")
-        {
-            auto echoFixture = std::make_shared<main_::FixtureEchoSerial>(args::get(target));
-            context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo));
-        }
-        else if (services::SchemeFromUrl(args::get(target)) == "ws")
-        {
-            if (!infra::WaitUntilDone(
-                    context, [&](const std::function<void()>& done)
-                    {
-                        static hal::SynchronousRandomDataGeneratorGeneric randomDataGenerator;
-
-                        auto echoFixture = std::make_shared<main_::EchoClientWebSocket>(
-                            context.Get<services::ConnectionFactoryWithNameResolver>(),
-                            args::get(target), randomDataGenerator);
-                        echoFixture->OnDone([&, echoFixture](services::Echo& echo)
-                            {
-                                context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echo));
-                                done();
-                            });
-                    },
-                    std::chrono::seconds(10)))
-                throw std::runtime_error("Couldn't open websocket connection");
-        }
-        else if (services::SchemeFromUrl(args::get(target)) == "tcp")
-        {
-            if (!infra::WaitUntilDone(
-                    context, [&](const std::function<void()>& done)
-                    {
-                        static hal::SynchronousRandomDataGeneratorGeneric randomDataGenerator;
-
-                        auto echoFixture = std::make_shared<main_::EchoClientTcp>(
-                            context.Get<services::ConnectionFactoryWithNameResolver>(),
-                            services::HostFromUrl(args::get(target)), services::PortFromUrl(args::get(target)).ValueOr(1234));
-                        echoFixture->OnDone([&, echoFixture](services::Echo& echo)
-                            {
-                                context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echo));
-                                done();
-                            });
-                    },
-                    std::chrono::seconds(10)))
-                throw std::runtime_error("Couldn't open websocket connection");
-        }
-        else
-            throw std::runtime_error("Don't know how to open " + args::get(target));
-
-        context.Emplace<testing::TesterProxy>(context.Get<services::Echo>());
-        context.Emplace<testing::TestedProxy>(context.Get<services::Echo>());
-        context.Emplace<application::TestedObserver>(context.Get<services::Echo>());
+        auto echoFixture = std::make_shared<main_::FixtureEchoSerial>(target);
+        context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo));
     }
-    catch (const args::Error& error)
+    else if (services::SchemeFromUrl(target) == "ws")
     {
-        std::ostringstream errorPlusHelp;
-        errorPlusHelp << error.what() << parser;
-        throw std::runtime_error(errorPlusHelp.str());
+        if (!infra::WaitUntilDone(
+                context, [&](const std::function<void()>& done)
+                {
+                    static hal::SynchronousRandomDataGeneratorGeneric randomDataGenerator;
+
+                    auto echoFixture = std::make_shared<main_::EchoClientWebSocket>(
+                        context.Get<services::ConnectionFactoryWithNameResolver>(),
+                        target, randomDataGenerator);
+                    echoFixture->OnDone([&, echoFixture](services::Echo& echo)
+                        {
+                            context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echo));
+                            done();
+                        });
+                },
+                std::chrono::seconds(10)))
+            throw std::runtime_error("Couldn't open websocket connection");
     }
+    else if (services::SchemeFromUrl(target) == "tcp")
+    {
+        if (!infra::WaitUntilDone(
+                context, [&](const std::function<void()>& done)
+                {
+                    static hal::SynchronousRandomDataGeneratorGeneric randomDataGenerator;
+
+                    auto echoFixture = std::make_shared<main_::EchoClientTcp>(
+                        context.Get<services::ConnectionFactoryWithNameResolver>(),
+                        services::HostFromUrl(target), services::PortFromUrl(target).ValueOr(1234));
+                    echoFixture->OnDone([&, echoFixture](services::Echo& echo)
+                        {
+                            context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echo));
+                            done();
+                        });
+                },
+                std::chrono::seconds(10)))
+            throw std::runtime_error("Couldn't open websocket connection");
+    }
+    else
+        throw std::runtime_error("Don't know how to open " + target);
+
+    context.Emplace<testing::TesterProxy>(context.Get<services::Echo>());
+    context.Emplace<testing::TestedProxy>(context.Get<services::Echo>());
+    context.Emplace<application::TestedObserver>(context.Get<services::Echo>());
 }
 
 HOOK_BEFORE_SCENARIO()
