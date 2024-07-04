@@ -1,4 +1,4 @@
-#include "integration_test/flash_tested/Flash.hpp"
+#include "integration_test/logic/Flash.hpp"
 #include <utility>
 
 namespace application
