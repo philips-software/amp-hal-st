@@ -1,11 +1,12 @@
 /*****************************************************************************
  * @file    ble_l2cap_aci.h
+ * @author  MDG
  * @brief   STM32WBA BLE API (l2cap_aci)
  *          Auto-generated file: do not edit!
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2024 STMicroelectronics.
+ * Copyright (c) 2018-2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -121,7 +122,7 @@ tBleStatus aci_l2cap_connection_parameter_update_resp( uint16_t Connection_Handl
  *        - 23 ... 65535
  * @param MPS Maximum payload size (in octets).
  *        Values:
- *        - 23 ... 248
+ *        - 23 ... 65533
  * @param Initial_Credits Number of K-frames that can be received on the
  *        created channel(s) by the L2CAP layer entity sending this packet.
  *        Values:
@@ -156,7 +157,7 @@ tBleStatus aci_l2cap_coc_connect( uint16_t Connection_Handle,
  *        - 23 ... 65535
  * @param MPS Maximum payload size (in octets).
  *        Values:
- *        - 23 ... 248
+ *        - 23 ... 65533
  * @param Initial_Credits Number of K-frames that can be received on the
  *        created channel(s) by the L2CAP layer entity sending this packet.
  *        Values:
@@ -195,7 +196,7 @@ tBleStatus aci_l2cap_coc_connect_confirm( uint16_t Connection_Handle,
  *        - 23 ... 65535
  * @param MPS Maximum payload size (in octets).
  *        Values:
- *        - 23 ... 248
+ *        - 23 ... 65533
  * @param Channel_Number Number of created channels. It is the length of
  *        Channel_Index_List.
  *        Values:

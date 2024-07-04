@@ -13,14 +13,21 @@ namespace hal
     {
         struct AdcStmChannelConfig
         {
-#if defined(STM32F0) || defined(STM32F3)
-            uint32_t samplingTime{ ADC_SAMPLETIME_7CYCLES_5 };
-#elif defined(STM32WB) || defined(STM32G4)
+#if defined(ADC_SAMPLETIME_2CYCLES_5)
             uint32_t samplingTime{ ADC_SAMPLETIME_2CYCLES_5 };
-#elif defined(STM32G0) || defined(STM32WBA)
+#elif defined(ADC_SAMPLETIME_3CYCLES_5)
             uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES_5 };
 #else
             uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES };
+#endif
+        };
+
+        struct AdcStmConfig
+        {
+#ifdef STM32WBA
+            uint32_t clockPrescaler{ ADC_CLOCK_ASYNC_DIV4 };
+#else
+            uint32_t clockPrescaler{ ADC_CLOCKPRESCALER_PCLK_DIV4 };
 #endif
         };
     }
@@ -31,13 +38,16 @@ namespace hal
         : public AnalogToDigitalPinImplBase<uint16_t>
     {
     public:
-        explicit AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc);
+        using Config = detail::AdcStmChannelConfig;
+
+        AnalogToDigitalPinImplStm(hal::GpioPinStm& pin, AdcStm& adc, const Config& config = Config());
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
     private:
         AnalogPinStm analogPin;
         AdcStm& adc;
+        Config config;
     };
 
     class AnalogToDigitalInternalTemperatureStm
@@ -46,7 +56,7 @@ namespace hal
     public:
         using Config = detail::AdcStmChannelConfig;
 
-        AnalogToDigitalInternalTemperatureStm(AdcStm& adc, const Config& config = Config());
+        explicit AnalogToDigitalInternalTemperatureStm(AdcStm& adc, const Config& config = Config());
 
         void Measure(std::size_t numberOfSamples, const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone) override;
 
@@ -60,7 +70,9 @@ namespace hal
     class AdcStm
     {
     public:
-        explicit AdcStm(uint8_t adcIndex);
+        using Config = detail::AdcStmConfig;
+
+        explicit AdcStm(uint8_t adcIndex, const Config& config = Config());
         ~AdcStm();
 
     protected:
