@@ -1,5 +1,5 @@
 add_executable(integration_test.tested)
-emil_build_for(integration_test.tested TARGET_MCU stm32f767 stm32wb55)
+emil_build_for(integration_test.tested TARGET_MCU stm32f767)
 
 target_sources(integration_test.tested PRIVATE
     EchoFromTester.hpp
