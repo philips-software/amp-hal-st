@@ -2,16 +2,21 @@
 
 namespace application
 {
-    Tester::Tester(services::Echo& echo, hal::GpioPin& resetTesterPin)
+    Tester::Tester(services::Echo& echo, hal::GpioPin& resetTesterPin, services::EchoOnSesame& echoToTested)
         : testing::Tester(echo)
+        , echoToTested(echoToTested)
         , resetTester(resetTesterPin, true)
+        , proxy(echo)
     {}
 
     void Tester::Reset()
     {
         resetTester.Set(false);
 
-        resetTimer.Start(std::chrono::milliseconds(3000), [this]()
+        Peripherals::Reset();
+        echoToTested.Reset();
+
+        resetTimer.Start(std::chrono::milliseconds(10), [this]()
             {
                 resetTester.Set(true);
                 MethodDone();
@@ -23,6 +28,15 @@ namespace application
         Peripherals::EnablePeripheral(type);
 
         MethodDone();
+    }
+
+    void Tester::Ping()
+    {
+        proxy.RequestSend([this]()
+            {
+                proxy.Ping();
+                MethodDone();
+            });
     }
 
     services::Echo& Tester::GetEcho() const

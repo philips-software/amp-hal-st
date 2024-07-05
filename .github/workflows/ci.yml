@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
+          submodules: true
+          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-ubuntu-latest
@@ -27,29 +29,31 @@ jobs:
         with:
           configurePreset: "host"
           buildPreset: "host-Debug-WithPackage"
-          #testPreset: "host"
+          testPreset: "host"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
       - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: hal_st
           path: build/host/hal_st-*-Linux.tar.gz
           if-no-files-found: error
-      #- name: Upload test logs
-      #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
-      #  with:
-      #    name: test-logs
-      #    path: build/host/Testing/Temporary/
+      - name: Upload test logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: test-logs
+          path: build/host/Testing/Temporary/
   host_build_test:
     name: Host Build & Test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, windows-2019, macos-latest]
+        os: [windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
+          submodules: true
+          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-${{ matrix.os }}
@@ -58,14 +62,14 @@ jobs:
         with:
           configurePreset: "host-single-Debug"
           buildPreset: "host-single-Debug"
-          #testPreset: "host-single-Debug"
+          testPreset: "host-single-Debug"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
-      #- name: Upload test logs
-      #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
-      #  with:
-      #    name: test-logs
-      #    path: build/host/Testing/Temporary/
+      - name: Upload test logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: test-logs
+          path: build/host/Testing/Temporary/
   embedded_build:
     name: Embedded Build
     runs-on: ubuntu-latest
@@ -73,12 +77,19 @@ jobs:
     strategy:
       matrix:
         configuration: ["RelWithDebInfo"]
-        gcc: [ "10.3-2021.10" ]
-        target: ["stm32wb55", "stm32g070", "stm32g431", "stm32f407", "stm32f429", "stm32f746", "stm32f767", "stm32wba52"]
+        gcc: ["10.3-2021.10"]
+        target:
+          [
+            "stm32wb55",
+            "stm32g070",
+            "stm32g431",
+            "stm32f407",
+            "stm32f429",
+            "stm32f746",
+            "stm32f767",
+            "stm32wba52"
+          ]
         include:
-          - gcc: "7-2018-q2"
-            configuration: "RelWithDebInfo"
-            target: "stm32f767"
           - gcc: "8-2019-q3"
             configuration: "RelWithDebInfo"
             target: "stm32f767"
@@ -87,6 +98,10 @@ jobs:
             target: "stm32f767"
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          persist-credentials: false
+          submodules: true
+          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
         uses: carlosperate/arm-none-eabi-gcc-action@b864ac853a2d2f74ec2b8b3ec4deb9cb684b4627 # v1.8.2
         with:

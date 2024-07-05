@@ -5,11 +5,20 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
+option(HALST_BUILD_TESTS "Enable building the tests" Off)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
+option(HALST_BUILD_TESTS "Enable building the tests" Off)
+
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
 set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
 set(HALST_XML_STM32 "" CACHE STRING "XML STM32 table")
+
+if (HALST_BUILD_TESTS)
+    # CTest cannot be included before the first project() statement, but amp-embedded-infa-lib
+    # needs to see that test utilities need to be built.
+    set(BUILD_TESTING On)
+endif()
 
 if (HALST_STANDALONE)
     set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})
@@ -19,7 +28,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        eeefdbabb671c1bed0142b06ffe25546d702c7d0 # unreleased
+        GIT_TAG        beda564a06ef7969767cc320ac20477f9b70ba97 # sesame
     )
 
     FetchContent_MakeAvailable(emil)
@@ -27,7 +36,7 @@ endif()
 
 project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
@@ -40,10 +49,21 @@ else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
+if (HALST_BUILD_TESTS)
+    include(CTest)
+    emil_enable_testing()
+endif()
+
+if (EMIL_HOST_BUILD)
+    add_subdirectory(amp-cucumber-cpp-runner)
+endif()
+
 add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
-add_subdirectory(integration_test)
+if (HALST_STANDALONE)
+    add_subdirectory(integration_test)
+endif()
 add_subdirectory(services)
 add_subdirectory(examples)
 

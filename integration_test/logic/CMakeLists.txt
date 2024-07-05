@@ -5,8 +5,11 @@ target_include_directories(integration_test.logic PUBLIC
 )
 
 protocol_buffer_echo_cpp(integration_test.logic Testing.proto)
+protocol_buffer_echo_cpp(integration_test.logic Flash.proto)
 
 target_sources(integration_test.logic PRIVATE
+    Flash.cpp
+    Flash.hpp
     Gpio.cpp
     Gpio.hpp
     Peripheral.cpp
@@ -15,9 +18,13 @@ target_sources(integration_test.logic PRIVATE
     Tested.hpp
     Tester.cpp
     Tester.hpp
+    Uart.cpp
+    Uart.hpp
 )
 
 target_link_libraries(integration_test.logic PUBLIC
     services.util
     protobuf.echo
 )
+
+add_subdirectory(test)

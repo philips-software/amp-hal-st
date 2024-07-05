@@ -27,4 +27,9 @@ namespace application
                 return false;
             });
     }
+
+    void Peripherals::Reset()
+    {
+        currentPeripheral = nullptr;
+    }
 }
