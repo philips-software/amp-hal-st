@@ -12,14 +12,14 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 
-template<class Result, std::size_t ExtraSize = INFRA_DEFAULT_FUNCTION_EXTRA_SIZE>
+template<class Result>
 class NotifyingVerifyingFunctionMock;
 
-template<class Result, std::size_t ExtraSize>
-class NotifyingVerifyingFunctionMock<Result(), ExtraSize>
+template<class Result, class... Args>
+class NotifyingVerifyingFunctionMock<Result(Args...)>
 {
 public:
-    NotifyingVerifyingFunctionMock(infra::Function<void()> onCalled)
+    explicit NotifyingVerifyingFunctionMock(infra::Function<Result(Args...)> onCalled)
         : onCalled(onCalled)
     {
         EXPECT_CALL(*this, callback());
@@ -27,17 +27,17 @@ public:
 
     MOCK_CONST_METHOD0_T(callback, Result());
 
-    operator infra::Function<Result(), ExtraSize>()
+    operator infra::Function<Result(Args...)>()
     {
-        return [this]()
+        return [this](Args&&... args)
         {
-            onCalled();
+            onCalled(args...);
             return callback();
         };
     }
 
 private:
-    infra::Function<void()> onCalled;
+    infra::Function<Result(Args...)> onCalled;
 };
 
 class FlashOnStBootloaderCommunicatorTest

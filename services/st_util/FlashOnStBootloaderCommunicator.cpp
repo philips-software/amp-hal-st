@@ -18,7 +18,7 @@ namespace services
         else
         {
             this->onDone = onDone;
-            auto head = infra::Head(buffer, 255);
+            const auto head = infra::Head(buffer, 255);
             writeTail = infra::DiscardHead(buffer, 255);
             tailAddress = address + head.size();
             communicator.WriteMemory(address, head, [this]()
@@ -35,7 +35,7 @@ namespace services
         else
         {
             this->onDone = onDone;
-            auto head = infra::Head(buffer, 255);
+            const auto head = infra::Head(buffer, 255);
             readTail = infra::DiscardHead(buffer, 255);
             tailAddress = address + head.size();
             communicator.ReadMemory(address, head, [this]()
