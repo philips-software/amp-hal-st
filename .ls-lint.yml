@@ -8,4 +8,7 @@ ignore:
   - .git
   - .github
   - .vscode
+  - hal_st/middlewares/STM32_WPAN
+  - hal_st/stm32fxxx/DefaultClock*
   - megalinter-reports
+  - st
