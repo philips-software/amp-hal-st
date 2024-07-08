@@ -1,5 +1,8 @@
 add_library(hal_st.ble_middleware STATIC)
-emil_build_for(hal_st.ble_middleware TARGET_MCU_FAMILY stm32wbxx PREREQUISITE_BOOL HALST_STANDALONE)
+emil_build_for(hal_st.ble_middleware
+    TARGET_MCU_FAMILY stm32wbxx
+    TARGET_MCU_FAMILY stm32wbaxx
+    PREREQUISITE_BOOL HALST_STANDALONE)
 
 target_include_directories(hal_st.ble_middleware PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../../..>"
@@ -11,6 +14,8 @@ target_link_libraries(hal_st.ble_middleware PUBLIC
     services.ble
     services.util
     services.tracer
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/ble/stack/lib/stm32wba_ble_stack_basic.a>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/link_layer/ll_cmd_lib/lib/LinkLayer_BLE_Basic_lib.a>
 )
 
 target_sources(hal_st.ble_middleware PRIVATE
@@ -27,8 +32,10 @@ target_sources(hal_st.ble_middleware PRIVATE
     GattServerSt.cpp
     GattServerSt.hpp
     HciEventObserver.hpp
-    SystemTransportLayer.cpp
-    SystemTransportLayer.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SystemTransportLayerWb.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SystemTransportLayerWb.hpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:SystemTransportLayerWba.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:SystemTransportLayerWba.hpp>
     TracingGapCentralSt.cpp
     TracingGapCentralSt.hpp
     TracingGapPeripheralSt.cpp
@@ -37,6 +44,6 @@ target_sources(hal_st.ble_middleware PRIVATE
     TracingGattClientSt.hpp
     TracingGattServerSt.cpp
     TracingGattServerSt.hpp
-    TracingSystemTransportLayer.cpp
-    TracingSystemTransportLayer.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:TracingSystemTransportLayerWb.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:TracingSystemTransportLayerWb.hpp>
 )
