@@ -10,7 +10,7 @@ namespace hal
         : public GapPeripheralSt
     {
     public:
-        TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration, services::Tracer& tracer);
+        TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer);
 
     protected:
         // Implementation of GapPeripheralSt

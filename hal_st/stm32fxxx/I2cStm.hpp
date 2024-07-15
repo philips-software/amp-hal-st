@@ -18,10 +18,10 @@ namespace hal
             constexpr Config()
             {}
 
-#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
+#if defined(I2C_TIMINGR_PRESC)
             uint32_t timing = 0x00304d4d;
 #endif
-#if defined(STM32F2) || defined(STM32F4)
+#if defined(I2C_CCR_CCR)
             uint32_t clockSpeed = 400000;
 #endif
         };
@@ -40,7 +40,7 @@ namespace hal
     private:
         void EventInterrupt();
         void ErrorInterrupt();
-#if defined(STM32F0) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
+#if defined(I2C_ISR_TXE)
         void ReadReceivedData();
 #endif
 
