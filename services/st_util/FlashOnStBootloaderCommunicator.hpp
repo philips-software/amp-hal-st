@@ -47,6 +47,30 @@ namespace services
         FlashOnStBootloaderCommunicatorBase flashOnStBootloaderCommunicator;
     };
 
+    template<class T, class... Args>
+    FlashOnStBootloaderCommunicator<T, Args...>::FlashOnStBootloaderCommunicator(Args... args, StBootloaderCommunicator& communicator)
+        : T(std::forward<Args>(args)...)
+        , flashOnStBootloaderCommunicator(*this, communicator)
+    {}
+
+    template<class T, class... Args>
+    void FlashOnStBootloaderCommunicator<T, Args...>::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
+    {
+        flashOnStBootloaderCommunicator.WriteBuffer(buffer, address + 0x8000000, onDone);
+    }
+
+    template<class T, class... Args>
+    void FlashOnStBootloaderCommunicator<T, Args...>::ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone)
+    {
+        flashOnStBootloaderCommunicator.ReadBuffer(buffer, address + 0x8000000, onDone);
+    }
+
+    template<class T, class... Args>
+    void FlashOnStBootloaderCommunicator<T, Args...>::EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone)
+    {
+        flashOnStBootloaderCommunicator.EraseSectors(beginIndex, endIndex, onDone);
+    }
+
     using FlashHomogeneousOnStBootloaderCommunicator = FlashOnStBootloaderCommunicator<hal::FlashHomogeneous, uint32_t, uint32_t>;
     using FlashHeterogeneousOnStBootloaderCommunicator = FlashOnStBootloaderCommunicator<hal::FlashHeterogeneous, infra::MemoryRange<uint32_t>>;
 }
