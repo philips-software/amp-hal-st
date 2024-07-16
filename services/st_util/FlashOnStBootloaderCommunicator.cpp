@@ -11,11 +11,11 @@ namespace services
         , flash(flash)
         , onWriteMemoryDone([this]()
               {
-                  WriteBuffer(writeTail, tailAddress, std::exchange(this->onDone, nullptr));
+                  WriteBuffer(this->writeTail, this->tailAddress, std::exchange(this->onDone, nullptr));
               })
         , onReadMemoryDone([this]()
               {
-                  ReadBuffer(readTail, tailAddress, std::exchange(this->onDone, nullptr));
+                  ReadBuffer(this->readTail, this->tailAddress, std::exchange(this->onDone, nullptr));
               })
         , onExtendedEraseDone([this]()
               {
@@ -44,8 +44,8 @@ namespace services
         else
         {
             this->onDone = onDone;
-            auto head = infra::Head(buffer, 255);
-            readTail = infra::DiscardHead(buffer, 255);
+            auto head = infra::Head(buffer, 256);
+            readTail = infra::DiscardHead(buffer, 256);
             tailAddress = address + head.size();
             communicator.ReadMemory(address, head, onReadMemoryDone);
         }

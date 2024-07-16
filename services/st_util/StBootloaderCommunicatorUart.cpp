@@ -281,7 +281,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::TryHandleDataReceived()
     {
-        if (!queue.Empty())
+        if (!queue.Empty() && !commandActions.empty())
             commandActions.front()->DataReceived();
     }
 

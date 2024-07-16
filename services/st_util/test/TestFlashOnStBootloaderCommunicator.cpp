@@ -164,3 +164,5 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
 
     flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
 }
+
+// data received but no commandActions in queue
