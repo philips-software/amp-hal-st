@@ -23,6 +23,9 @@ namespace services
         hal::Flash& flash;
 
         infra::Function<void()> onDone;
+        infra::Function<void()> onWriteMemoryDone;
+        infra::Function<void()> onReadMemoryDone;
+        infra::Function<void()> onExtendedEraseDone;
         infra::ConstByteRange writeTail;
         infra::ByteRange readTail;
         uint32_t tailAddress = 0;
@@ -56,13 +59,13 @@ namespace services
     template<class T, class... Args>
     void FlashOnStBootloaderCommunicator<T, Args...>::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
-        flashOnStBootloaderCommunicator.WriteBuffer(buffer, address + 0x8000000, onDone);
+        flashOnStBootloaderCommunicator.WriteBuffer(buffer, address + 0x08000000, onDone);
     }
 
     template<class T, class... Args>
     void FlashOnStBootloaderCommunicator<T, Args...>::ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
-        flashOnStBootloaderCommunicator.ReadBuffer(buffer, address + 0x8000000, onDone);
+        flashOnStBootloaderCommunicator.ReadBuffer(buffer, address + 0x08000000, onDone);
     }
 
     template<class T, class... Args>

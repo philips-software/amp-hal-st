@@ -19,6 +19,7 @@ namespace
     constexpr uint8_t extendedSpecial = 0x51;
 
     constexpr uint8_t ack = 0x79;
+    constexpr uint8_t nack = 0x1f;
 
     constexpr auto commandTimeout = std::chrono::seconds(1);
 }
@@ -105,7 +106,8 @@ namespace services
 
     void StBootloaderCommunicatorUart::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
-        really_assert(data.size() <= 255);
+        really_assert(data.size() <= 256);
+        really_assert(data.size() > 1);
 
         this->address = address;
 
@@ -136,7 +138,8 @@ namespace services
 
     void StBootloaderCommunicatorUart::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
-        really_assert(data.size() <= 255);
+        really_assert(data.size() <= 256);
+        really_assert(data.size() % 4 == 0);
 
         this->address = address;
 
@@ -167,6 +170,7 @@ namespace services
     void StBootloaderCommunicatorUart::Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
         really_assert(pages.size() <= 255);
+        really_assert(pages.size() > 0);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(erase);
         AddCommandAction<ReceiveAck>();
@@ -314,9 +318,9 @@ namespace services
             onError(reason);
     }
 
-    void StBootloaderCommunicatorUart::SendData(infra::ConstByteRange data, uint8_t checksum)
+    void StBootloaderCommunicatorUart::SendData(infra::ConstByteRange data, const uint8_t& checksum)
     {
-        serial.SendData(data, [this, checksum]()
+        serial.SendData(data, [this, &checksum]()
             {
                 SendData(infra::MakeConstByteRange(checksum));
             });
@@ -342,12 +346,21 @@ namespace services
 
     void StBootloaderCommunicatorUart::ReceiveAck::DataReceived()
     {
-        auto byte = handler.queue.Get();
+        while (!handler.queue.Empty())
+        {
+            auto byte = handler.queue.Get();
+            if (byte == ack)
+            {
+                handler.OnActionExecuted();
+                return;
+            }
 
-        if (byte == ack)
-            handler.OnActionExecuted();
-        else
-            handler.OnError("NACK received");
+            if (byte == nack)
+            {
+                handler.OnError("NACK received");
+                return;
+            }
+        }
     }
 
     StBootloaderCommunicatorUart::ReceiveBuffer::ReceiveBuffer(StBootloaderCommunicatorUart& handler, infra::ByteRange& data)
@@ -430,7 +443,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::TransmitWithTwosComplementChecksum::Start()
     {
-        uint8_t checksum = data ^ 0xff;
+        checksum = data ^ 0xff;
         handler.SendData(infra::MakeConstByteRange(data), checksum);
     }
 

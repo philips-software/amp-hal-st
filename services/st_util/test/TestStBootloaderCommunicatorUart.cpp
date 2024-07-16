@@ -356,10 +356,10 @@ TEST_F(StBootloaderCommunicatorUartTest, Erase_timeout)
 {
     Initialize();
     testing::StrictMock<infra::MockCallback<void()>> ondone;
-    std::array<uint8_t, 4> data;
+    std::array<uint8_t, 4> pages = { 0x01, 0x02, 0x03, 0x04 };
 
     ExpectSendData(0x43, 0xbc);
-    handler.Erase(infra::ByteRange{}, [&ondone]()
+    handler.Erase(infra::MakeByteRange(pages), [&ondone]()
         {
             ondone.callback();
         });

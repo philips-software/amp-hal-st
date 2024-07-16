@@ -9,6 +9,18 @@ namespace services
     FlashOnStBootloaderCommunicatorBase::FlashOnStBootloaderCommunicatorBase(hal::Flash& flash, StBootloaderCommunicator& communicator)
         : communicator(communicator)
         , flash(flash)
+        , onWriteMemoryDone([this]()
+              {
+                  WriteBuffer(writeTail, tailAddress, std::exchange(this->onDone, nullptr));
+              })
+        , onReadMemoryDone([this]()
+              {
+                  ReadBuffer(readTail, tailAddress, std::exchange(this->onDone, nullptr));
+              })
+        , onExtendedEraseDone([this]()
+              {
+                  EraseSectors(this->beginIndex + 1, this->endIndex, std::exchange(this->onDone, nullptr));
+              })
     {}
 
     void FlashOnStBootloaderCommunicatorBase::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
@@ -18,13 +30,10 @@ namespace services
         else
         {
             this->onDone = onDone;
-            const auto head = infra::Head(buffer, 255);
-            writeTail = infra::DiscardHead(buffer, 255);
+            const auto head = infra::Head(buffer, 256);
+            writeTail = infra::DiscardHead(buffer, 256);
             tailAddress = address + head.size();
-            communicator.WriteMemory(address, head, [this]()
-                {
-                    WriteBuffer(writeTail, tailAddress, std::exchange(this->onDone, nullptr));
-                });
+            communicator.WriteMemory(address, head, onWriteMemoryDone);
         }
     }
 
@@ -38,10 +47,7 @@ namespace services
             auto head = infra::Head(buffer, 255);
             readTail = infra::DiscardHead(buffer, 255);
             tailAddress = address + head.size();
-            communicator.ReadMemory(address, head, [this]()
-                {
-                    ReadBuffer(readTail, tailAddress, std::exchange(this->onDone, nullptr));
-                });
+            communicator.ReadMemory(address, head, onReadMemoryDone);
         }
     }
 
@@ -57,10 +63,7 @@ namespace services
             this->beginIndex = beginIndex;
             this->endIndex = endIndex;
             this->page[1] = static_cast<uint8_t>(beginIndex);
-            communicator.ExtendedErase(infra::MakeConstByteRange(page), [this]()
-                {
-                    EraseSectors(this->beginIndex + 1, this->endIndex, std::exchange(this->onDone, nullptr));
-                });
+            communicator.ExtendedErase(infra::MakeConstByteRange(page), onExtendedEraseDone);
         }
     }
 }

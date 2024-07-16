@@ -15,7 +15,7 @@
 namespace services
 {
     class StBootloaderCommunicatorUart
-        : protected StBootloaderCommunicator
+        : public StBootloaderCommunicator
     {
     public:
         StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
@@ -48,7 +48,7 @@ namespace services
         void OnActionExecuted();
         void SetCommandTimeout(infra::BoundedConstString reason);
         void OnError(infra::BoundedConstString reason);
-        void SendData(infra::ConstByteRange data, uint8_t checksum);
+        void SendData(infra::ConstByteRange data, const uint8_t& checksum);
         void SendData(infra::ConstByteRange data);
 
     private:
@@ -153,6 +153,7 @@ namespace services
 
         private:
             uint8_t data;
+            uint8_t checksum = 0;
         };
 
         class TransmitChecksummedBuffer
