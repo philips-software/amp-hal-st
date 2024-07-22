@@ -29,7 +29,7 @@ message EraseSectorsRequest
 
 service Flash
 {
-    option (service_id) = 6;
+    option (service_id) = 50;
 
     rpc Read(ReadRequest) returns (Nothing) { option (method_id) = 1; }
     rpc Write(WriteRequest) returns (Nothing) { option (method_id) = 2; }
@@ -38,7 +38,7 @@ service Flash
 
 service FlashResult
 {
-    option (service_id) = 7;
+    option (service_id) = 51;
 
     rpc ReadDone(ReadResponse) returns (Nothing) { option (method_id) = 1; }
     rpc WriteDone(Nothing) returns (Nothing) { option (method_id) = 2; }

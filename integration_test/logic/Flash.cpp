@@ -9,6 +9,7 @@ namespace application
         , flash(flash)
     {}
 
+
     void Flash::Read(uint32_t address, uint32_t size)
     {
         flash.ReadBuffer(infra::Head(infra::MakeRange(buffer), size), address, [this, size]()
@@ -45,10 +46,43 @@ namespace application
             });
     }
 
-    FlashProxy::FlashProxy(services::Echo& echo)
+    FlashProxy::FlashProxy(services::Echo& echo, infra::MemoryRange<const uint32_t> sectorSizes)
         : flash::FlashResult(echo)
+        , sectorSizes(sectorSizes)
         , proxy(echo)
     {}
+
+    uint32_t FlashProxy::NumberOfSectors() const
+    {
+        return sectorSizes.size();
+    }
+
+    uint32_t FlashProxy::SizeOfSector(uint32_t sectorIndex) const
+    {
+        return sectorSizes[sectorIndex];
+    }
+
+    uint32_t FlashProxy::SectorOfAddress(uint32_t address) const
+    {
+        uint32_t totalSize = 0;
+        for (uint32_t sector = 0; sector != sectorSizes.size(); ++sector)
+        {
+            totalSize += sectorSizes[sector];
+            if (address < totalSize)
+                return sector;
+        }
+
+        assert(address == totalSize);
+        return sectorSizes.size();
+    }
+
+    uint32_t FlashProxy::AddressOfSector(uint32_t sectorIndex) const
+    {
+        uint32_t address = 0;
+        for (uint32_t sector = 0; sector != sectorIndex; ++sector)
+            address += sectorSizes[sector];
+        return address;
+    }
 
     void FlashProxy::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
@@ -122,7 +156,7 @@ namespace application
     }
 
     FlashHomogeneousProxy::FlashHomogeneousProxy(services::Echo& echo, uint32_t numberOfSectors, uint32_t sizeOfEachSector)
-        : FlashProxy(echo)
+        : FlashProxy(echo, {})
         , numberOfSectors(numberOfSectors)
         , sizeOfEachSector(sizeOfEachSector)
     {}

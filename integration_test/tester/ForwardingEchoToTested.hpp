@@ -41,6 +41,16 @@ namespace main_
     {
         ForwardingEchoToTested(services::Echo& echo, hal::DmaStm& dma, services::Tracer& tracer);
 
+        operator const services::EchoOnSesame&() const
+        {
+            return echoToTested.echo.echo;
+        }
+
+        operator services::EchoOnSesame&()
+        {
+            return echoToTested.echo.echo;
+        }
+
         main_::EchoToTested echoToTested;
         services::ServiceForwarder forwardTested;
         services::ServiceForwarder forwardTestedObserver;

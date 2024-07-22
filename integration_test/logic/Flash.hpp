@@ -30,9 +30,13 @@ namespace application
         , private flash::FlashResult
     {
     public:
-        FlashProxy(services::Echo& echo);
+        FlashProxy(services::Echo& echo, infra::MemoryRange<const uint32_t> sectorSizes);
 
         // Implementation of hal::Flash
+        uint32_t NumberOfSectors() const override;
+        uint32_t SizeOfSector(uint32_t sectorIndex) const override;
+        uint32_t SectorOfAddress(uint32_t address) const override;
+        uint32_t AddressOfSector(uint32_t sectorIndex) const override;
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
@@ -46,6 +50,7 @@ namespace application
         void ReadPartialBuffer(uint32_t address, uint32_t start);
 
     private:
+        infra::MemoryRange<const uint32_t> sectorSizes;
         flash::FlashProxy proxy;
         infra::AutoResetFunction<void()> onDone;
         infra::ConstByteRange writingBuffer;

@@ -84,7 +84,7 @@ namespace services
 
     void StUartProgrammer::EraseAll(const infra::Function<void()>& onDone)
     {
-        timeout.Start(std::chrono::seconds(30), [this]()
+        timeout.Start(std::chrono::seconds(60), [this]()
             {
                 OnError("Timeout erasing chip");
             });
@@ -123,7 +123,7 @@ namespace services
 
         startClaimer.Claim([this]()
             {
-                timeout.Start(std::chrono::milliseconds(20), [this]()
+                timeout.Start(std::chrono::milliseconds(30), [this]()
                     {
                         timeout.Start(std::chrono::seconds(1), [this]()
                             {

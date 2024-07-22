@@ -26,18 +26,41 @@ message PeripheralType
     Peripheral peripheral = 1;
 }
 
+enum TestedMode
+{
+    reset = 0;
+    active = 1;
+    programming = 2;
+}
+
+message TestedModeMessage
+{
+    TestedMode mode = 1;
+}
+
+message StringMessage
+{
+    string message = 1 [(string_size) = 64];
+}
+
 service Tester
 {
     option (service_id) = 1;
 
-    rpc Reset(Nothing) returns (Nothing) { option (method_id) = 1; }
+    rpc SetTestedMode(TestedModeMessage) returns (Nothing) { option (method_id) = 1; }
     rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
-    rpc Ping(Nothing) returns (Nothing) { option (method_id) = 3; }
+}
+
+service TesterObserver
+{
+    option (service_id) = 2;
+
+    rpc TestedModeSet(StringMessage) returns (Nothing) { option (method_id) = 1; }
 }
 
 service Tested
 {
-    option (service_id) = 2;
+    option (service_id) = 3;
 
     rpc Ping(Nothing) returns (Nothing) { option (method_id) = 1; }
     rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
@@ -45,28 +68,28 @@ service Tested
 
 service TestedObserver
 {
-    option (service_id) = 3;
+    option (service_id) = 4;
 
     rpc Pong(Nothing) returns (Nothing) { option (method_id) = 1; }
 }
 
 service GpioTester
 {
-    option (service_id) = 4;
+    option (service_id) = 5;
 
     rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
 }
 
 service GpioTested
 {
-    option (service_id) = 5;
+    option (service_id) = 6;
 
     rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
 }
 
 service GpioObserver
 {
-    option (service_id) = 6;
+    option (service_id) = 7;
 
     rpc TesterGpioChanged(GpioState) returns (Nothing) { option (method_id) = 1; }
     rpc TestedGpioChanged(GpioState) returns (Nothing) { option (method_id) = 2; }
@@ -74,21 +97,21 @@ service GpioObserver
 
 service UartTester
 {
-    option (service_id) = 7;
+    option (service_id) = 8;
 
     rpc SendData(Data) returns (Nothing) { option (method_id) = 1; }
 }
 
 service UartTested
 {
-    option (service_id) = 8;
+    option (service_id) = 9;
 
     rpc SendData(Data) returns (Nothing) { option (method_id) = 1; }
 }
 
 service UartObserver
 {
-    option (service_id) = 9;
+    option (service_id) = 10;
 
     rpc TesterReceivedData(Data) returns (Nothing) { option (method_id) = 1; }
     rpc TestedReceivedData(Data) returns (Nothing) { option (method_id) = 2; }
