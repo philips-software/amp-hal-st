@@ -46,7 +46,7 @@ if (EMIL_HOST_BUILD)
     FetchContent_Declare(
         cucumber-cpp-runner
         GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-        GIT_TAG        5b99c5f3748e907c2f6e3640ba8536f7a2961a77 # unreleased
+        GIT_TAG        7a25c498de47eaa53692b583c75ea6a0c4ac807d # unreleased
     )
 
     FetchContent_MakeAvailable(cucumber-cpp-runner)
