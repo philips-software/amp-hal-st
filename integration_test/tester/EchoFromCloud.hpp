@@ -22,7 +22,7 @@ namespace main_
         hal::DmaStm::TransmitStream transmitStream;
         hal::DmaStm::ReceiveStream receiveStream;
         hal::UartStmDuplexDma::WithRxBuffer<256> hostUart{ transmitStream, receiveStream, 4, hostUartTxPin, hostUartRxPin };
-        services::MethodSerializerFactory ::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested, testing::UartObserverProxy, testing::UartTester, testing::UartTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy, testing::UartObserver, testing::UartTesterProxy, testing::UartTestedProxy> serializerFactory;
+        services::MethodSerializerFactory::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedHostUart{ hostUart };
         services::TracerColoured redTracer;
         main_::TracingEchoOnSesame<256> echo{ bufferedHostUart, serializerFactory, redTracer };
