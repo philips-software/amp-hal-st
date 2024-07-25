@@ -63,17 +63,39 @@ namespace hal
 
     enum class Port : uint8_t
     {
+#if defined(GPIOA)
         A,
+#endif
+#if defined(GPIOB)
         B,
+#endif
+#if defined(GPIOC)
         C,
+#endif
+#if defined(GPIOD)
         D,
+#endif
+#if defined(GPIOE)
         E,
+#endif
+#if defined(GPIOF)
         F,
+#endif
+#if defined(GPIOG)
         G,
+#endif
+#if defined(GPIOH)
         H,
+#endif
+#if defined(GPIOI)
         I,
+#endif
+#if defined(GPIOJ)
         J,
-        K
+#endif
+#if defined(GPIOK)
+        K,
+#endif
     };
 
     enum class WeakPull : uint8_t
@@ -271,8 +293,22 @@ namespace hal
         DispatchedInterruptHandler interruptDispatcher2;
         DispatchedInterruptHandler interruptDispatcher3;
         DispatchedInterruptHandler interruptDispatcher4;
+#if defined(STM32WBA)
+        DispatchedInterruptHandler interruptDispatcher5;
+        DispatchedInterruptHandler interruptDispatcher6;
+        DispatchedInterruptHandler interruptDispatcher7;
+        DispatchedInterruptHandler interruptDispatcher8;
+        DispatchedInterruptHandler interruptDispatcher9;
+        DispatchedInterruptHandler interruptDispatcher10;
+        DispatchedInterruptHandler interruptDispatcher11;
+        DispatchedInterruptHandler interruptDispatcher12;
+        DispatchedInterruptHandler interruptDispatcher13;
+        DispatchedInterruptHandler interruptDispatcher14;
+        DispatchedInterruptHandler interruptDispatcher15;
+#else
         DispatchedInterruptHandler interruptDispatcher9_5;
         DispatchedInterruptHandler interruptDispatcher15_10;
+#endif
 #endif
     };
 }

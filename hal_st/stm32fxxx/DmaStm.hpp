@@ -1,16 +1,18 @@
 #ifndef HAL_DMA_STM_HPP
 #define HAL_DMA_STM_HPP
 
-#include DEVICE_HEADER
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include "infra/util/Variant.hpp"
 #include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB)
+#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA)
 #define DMA_CHANNEL_BASED
 #else
 #define DMA_STREAM_BASED
@@ -108,7 +110,23 @@ namespace hal
 
             DmaStm& dma;
             uint8_t dmaIndex;
+#ifdef DMA_CTR2_REQSEL
+            uint8_t dmaMux;
+#endif
             uint8_t streamIndex = 0xff;
+   
+#ifdef GPDMA1
+            struct LinkedList
+            {
+                uint32_t CTR1;
+                uint32_t CTR2;
+                uint32_t CBR1;
+                uint32_t CSAR;
+                uint32_t CDAR;
+                uint32_t CLLR;
+            };
+            LinkedList linkRegisters;
+#endif
         };
 
         class TransceiveStream
@@ -131,7 +149,8 @@ namespace hal
             infra::ByteRange data;
         };
 
-        class TransmitStream : private TransceiveStream
+        class TransmitStream
+            : private TransceiveStream
         {
         public:
             using TransceiveStream::TransceiveStream;
@@ -143,7 +162,8 @@ namespace hal
             friend CircularTransmitDmaChannel;
         };
 
-        class ReceiveStream : private TransceiveStream
+        class ReceiveStream
+            : private TransceiveStream
         {
         public:
             using TransceiveStream::TransceiveStream;
@@ -159,14 +179,25 @@ namespace hal
         class StreamInterruptHandler
         {
         public:
-            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete);
+            struct Immediate
+            {};
+
+            struct Dispatched
+            {};
+
+            static inline constexpr Immediate immediate{};
+            static inline constexpr Dispatched dispatched{};
+
+            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete, Dispatched = {});
+            StreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferFullComplete, Immediate);
 
         private:
             void OnInterrupt();
 
             Stream& stream;
 
-            DispatchedInterruptHandler dispatchedInterruptHandler;
+            infra::Variant<DispatchedInterruptHandler, ImmediateInterruptHandler> interruptHandler;
+            InterruptHandler* interruptHandlerHandle;
 
             infra::Function<void()> transferFullComplete;
         };
@@ -194,6 +225,11 @@ namespace hal
         public:
             PeripheralTransceiveStream(TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
+#ifdef GPDMA1
+            void SetMemoryToPeripheralMode();
+            void SetPeripheralToMemoryMode();
+            void SetPeripheralAddress(volatile void* peripheralAddress);
+#endif
             void SetPeripheralTransferSize(uint8_t peripheralTransferSize);
             bool StopTransfer();
 
@@ -211,11 +247,11 @@ namespace hal
             TransceiveStream& stream;
         };
 
-        class PeripheralTransmitStream : private PeripheralTransceiveStream
+        class PeripheralTransmitStream
+            : private PeripheralTransceiveStream
         {
         public:
             using PeripheralTransceiveStream::PeripheralTransceiveStream;
-
             using PeripheralTransceiveStream::SetPeripheralTransferSize;
             using PeripheralTransceiveStream::StopTransfer;
 
@@ -223,11 +259,11 @@ namespace hal
             using PeripheralTransceiveStream::StartTransmitDummy;
         };
 
-        class PeripheralReceiveStream : private PeripheralTransceiveStream
+        class PeripheralReceiveStream
+            : private PeripheralTransceiveStream
         {
         public:
             using PeripheralTransceiveStream::PeripheralTransceiveStream;
-
             using PeripheralTransceiveStream::SetPeripheralTransferSize;
             using PeripheralTransceiveStream::StopTransfer;
 
@@ -240,6 +276,8 @@ namespace hal
     public:
         DmaStm();
         ~DmaStm();
+        DmaStm(const DmaStm& other) = delete;
+        DmaStm& operator=(const DmaStm& other) = delete;
 
     private:
         void ReserveStream(uint8_t dmaIndex, uint8_t streamIndex);
@@ -254,6 +292,11 @@ namespace hal
     public:
         TransceiverDmaChannelBase(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize);
 
+#ifdef GPDMA1
+        void SetMemoryToPeripheralMode();
+        void SetPeripheralToMemoryMode();
+        void SetPeripheralAddress(volatile void* peripheralAddress);
+#endif
         bool StopTransfer();
         void SetPeripheralTransferSize(uint8_t peripheralTransferSize);
 
@@ -271,25 +314,48 @@ namespace hal
         DmaStm::PeripheralTransceiveStream peripheralStream;
     };
 
-    class TransceiverDmaChannel : public TransceiverDmaChannelBase
+    class TransceiverDmaChannel
+        : public TransceiverDmaChannelBase
     {
     public:
-        TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
+        TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
+        TransceiverDmaChannel(DmaStm::TransceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
     private:
         DmaStm::StreamInterruptHandler streamInterruptHandler;
     };
 
-    class TransmitDmaChannel : private TransceiverDmaChannel
+    class TransmitDmaChannel
+        : private TransceiverDmaChannel
     {
     public:
-        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
+        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
+        TransmitDmaChannel(DmaStm::TransmitStream& transmitStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
+#ifdef GPDMA1
+        using TransceiverDmaChannel::SetMemoryToPeripheralMode;
+        using TransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using TransceiverDmaChannel::SetPeripheralTransferSize;
         using TransceiverDmaChannel::StopTransfer;
 
         using TransceiverDmaChannel::StartTransmit;
         using TransceiverDmaChannel::StartTransmitDummy;
+    };
+
+    class ReceiveDmaChannel
+        : private TransceiverDmaChannel
+    {
+    public:
+        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType = {});
+        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
+
+#ifdef GPDMA1
+        using TransceiverDmaChannel::SetPeripheralToMemoryMode;
+        using TransceiverDmaChannel::SetPeripheralAddress;
+#endif
+        using TransceiverDmaChannel::SetPeripheralTransferSize;
+        using TransceiverDmaChannel::StopTransfer;
 
         using TransceiverDmaChannel::StartReceive;
         using TransceiverDmaChannel::StartReceiveDummy;
@@ -297,24 +363,8 @@ namespace hal
         using TransceiverDmaChannel::ReceivedSize;
     };
 
-    class ReceiveDmaChannel : private TransceiverDmaChannel
-    {
-    public:
-        ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete);
-
-        using TransceiverDmaChannel::SetPeripheralTransferSize;
-        using TransceiverDmaChannel::StopTransfer;
-
-        using TransceiverDmaChannel::StartTransmit;
-        using TransceiverDmaChannel::StartTransmitDummy;
-
-        using TransceiverDmaChannel::StartReceive;
-        using TransceiverDmaChannel::StartReceiveDummy;
-
-        using TransceiverDmaChannel::ReceivedSize;
-    };
-
-    class CircularTransceiverDmaChannel : public TransceiverDmaChannelBase
+    class CircularTransceiverDmaChannel
+        : public TransceiverDmaChannelBase
     {
     public:
         CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
@@ -325,33 +375,35 @@ namespace hal
         DmaStm::CircularStreamInterruptHandler circularStreamInterruptHandler;
     };
 
-    class CircularTransmitDmaChannel : private CircularTransceiverDmaChannel
+    class CircularTransmitDmaChannel
+        : private CircularTransceiverDmaChannel
     {
     public:
         CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
+#ifdef GPDMA1
+        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
+        using CircularTransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
 
         using CircularTransceiverDmaChannel::StartTransmit;
         using CircularTransceiverDmaChannel::StartTransmitDummy;
-
-        using CircularTransceiverDmaChannel::StartReceive;
-        using CircularTransceiverDmaChannel::StartReceiveDummy;
-
-        using CircularTransceiverDmaChannel::ReceivedSize;
     };
 
-    class CircularReceiveDmaChannel : private CircularTransceiverDmaChannel
+    class CircularReceiveDmaChannel
+        : private CircularTransceiverDmaChannel
     {
     public:
         CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
+#ifdef GPDMA1
+        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
+        using CircularTransceiverDmaChannel::SetPeripheralAddress;
+#endif
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
-
-        using CircularTransceiverDmaChannel::StartTransmit;
-        using CircularTransceiverDmaChannel::StartTransmitDummy;
 
         using CircularTransceiverDmaChannel::StartReceive;
         using CircularTransceiverDmaChannel::StartReceiveDummy;

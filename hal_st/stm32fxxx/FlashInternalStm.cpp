@@ -12,7 +12,9 @@ namespace hal
     {
         HAL_FLASH_Unlock();
 
-#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
+#if defined(STM32WBA)
+        AlignedWriteBuffer(buffer, address);
+#elif defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         AlignedWriteBuffer<uint64_t, FLASH_TYPEPROGRAM_DOUBLEWORD>(buffer, address);
 #else
         uint32_t word;
@@ -28,7 +30,7 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3)
         AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD>(buffer, address);
-#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0)
+#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0) && !defined(STM32WBA)
         for (uint8_t byte : buffer)
         {
             auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
@@ -52,7 +54,7 @@ namespace hal
     {
         HAL_FLASH_Unlock();
 
-#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
+#if defined(STM32WB) || defined(STM32G4) || defined(STM32G0) || defined(STM32WBA)
         uint32_t pageError = 0;
 
         FLASH_EraseInitTypeDef eraseInitStruct;
@@ -102,6 +104,29 @@ namespace hal
             chunk = flashAlign.Next();
         }
     }
+
+#ifdef STM32WBA
+    const uint8_t alignment = sizeof(uint64_t) * 2;
+    void FlashInternalStmBase::AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address)
+    {
+        services::FlashAlign::WithAlignment<alignment> flashAlign;
+        flashAlign.Align(address, buffer);
+
+        services::FlashAlign::Chunk* chunk = flashAlign.First();
+        auto dataSize = chunk->data.size();
+        while (chunk != nullptr)
+        {
+            really_assert(chunk->data.size() % sizeof(alignment) == 0);
+            auto fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunk->alignedAddress);
+
+            uint32_t addr = reinterpret_cast<uint32_t>(chunk->data.begin());
+            auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_QUADWORD, fullAddress, addr);
+            really_assert(result == HAL_OK);
+            fullAddress += alignment;
+            chunk = flashAlign.Next();
+        }
+    }
+#endif
 
     FlashInternalStm::FlashInternalStm(infra::MemoryRange<uint32_t> sectorSizes, infra::ConstByteRange flashMemory)
         : FlashInternalStmBase(flashMemory)

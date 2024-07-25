@@ -1,9 +1,7 @@
 #ifndef HAL_ST_NUCLEO_UI_HPP
 #define HAL_ST_NUCLEO_UI_HPP
 
-#include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "hal_st/stm32fxxx/UartStmDma.hpp"
 
 namespace main_
 {
@@ -36,6 +34,7 @@ namespace main_
 #endif
     };
 
+#if defined(GPIOD)
     // UM2435: MB1355 reference board with STM32WB55RG
     struct Nucleo64WBUi
     {
@@ -45,6 +44,18 @@ namespace main_
         hal::GpioPinStm ledRed{ hal::Port::B, 1 };
         hal::GpioPinStm ledGreen{ hal::Port::B, 0 };
         hal::GpioPinStm ledBlue{ hal::Port::B, 5 };
+    };
+#endif
+
+    // UM3103: MB1863 reference board with STM32WBA52CG
+    struct Nucleo64WBAUi
+    {
+        hal::GpioPinStm buttonOne{ hal::Port::C, 13, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm buttonTwo{ hal::Port::B, 6, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm buttonThree{ hal::Port::B, 7, hal::Drive::Default, hal::Speed::Default, hal::WeakPull::Up };
+        hal::GpioPinStm ledRed{ hal::Port::B, 8 };
+        hal::GpioPinStm ledGreen{ hal::Port::B, 11 };
+        hal::GpioPinStm ledBlue{ hal::Port::B, 4 };
     };
 
     // UM1974: MB1137 reference board with F207ZG, F303ZE, F412ZG, F413ZH, F429ZI, F439ZI, F446ZE, F722ZE, F746ZG, F756ZG, F767ZI, H743ZI

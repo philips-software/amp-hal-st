@@ -4,11 +4,9 @@
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
-#include "infra/util/ProxyCreator.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
-#include "shci.h"
 
 namespace hal
 {
@@ -31,26 +29,12 @@ namespace hal
             std::array<uint8_t, 16> encryption;
         };
 
-        enum class RfWakeupClock : uint8_t
-        {
-            highSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_HSE_1024,
-            lowSpeedExternal = SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE,
-        };
-
         struct Configuration
         {
             const hal::MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
-            uint16_t maxAttMtuSize;
             uint8_t txPowerLevel;
-            RfWakeupClock rfWakeupClock;
-        };
-
-        struct BleBondStorage
-        {
-            infra::CreatorBase<services::BondStorageSynchronizer, void()>& bondStorageSynchronizerCreator;
-            uint32_t& bleBondsStorage;
         };
 
         // Implementation of AttMtuExchange
@@ -70,7 +54,7 @@ namespace hal
         void NumericComparisonConfirm(bool accept) override;
 
     protected:
-        GapSt(hal::HciEventSource& hciEventSource, BleBondStorage bleBondStorage, const Configuration& configuration);
+        GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
@@ -127,9 +111,8 @@ namespace hal
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
-        const uint8_t& txPowerLevel;
+        services::BondStorageSynchronizer& bondStorageSynchronizer;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
-        infra::Optional<infra::ProxyCreator<services::BondStorageSynchronizer, void()>> bondStorageSynchronizer;
     };
 }
 

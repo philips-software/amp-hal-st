@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<peripherals xmlns:xi="http://www.w3.org/2001/XInclude">
+  <peripheral name="Uart" type="USART_TypeDef*">
+    <item name="USART"/>
+    <interrupt/>
+  </peripheral>
+  <peripheral name="Lpuart" type="USART_TypeDef*">
+    <item name="LPUART"/>
+    <interrupt/>
+  </peripheral>
+  <peripheral name="Spi" type="SPI_TypeDef*"><item name="SPI"/><interrupt/></peripheral>
+  <peripheral name="I2c" type="I2C_TypeDef*"><item name="I2C"/>
+    <interrupt name="Ev" postfix="_EV"/>
+    <interrupt name="Er" postfix="_ER"/>
+  </peripheral>
+  <peripheral name="Sai" type="SAI_TypeDef*"><item name="SAI"/>
+    <interrupt/>
+  </peripheral>
+  <peripheral name="Adc" type="ADC_TypeDef*"><item name="ADC"/></peripheral>
+  <peripheral name="QuadSpi" type="QUADSPI_TypeDef*" base="QUADSPI_R_BASE">
+    <item name="QUADSPI"/>
+    <interrupt/>
+  </peripheral>
+  <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral>
+  <peripheral name="Rtc" type="RTC_TypeDef*"><item name="RTC"/></peripheral>
+  <peripheral name="Timer" type="TIM_TypeDef*" prefix="TIM">
+    <item name="TIM1_8WBA5"/>
+  </peripheral>
+</peripherals>

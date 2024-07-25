@@ -1,6 +1,7 @@
 #ifndef HAL_UART_STM_HPP
 #define HAL_UART_STM_HPP
 
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
@@ -8,7 +9,7 @@
 
 namespace hal
 {
-#if defined(STM32WB)
+#if defined(HAS_PERIPHERAL_LPUART)
     struct LpUart
     {};
 
@@ -22,6 +23,10 @@ namespace hal
             uint32_t baudrate{ 115200 };
             uint32_t parity{ USART_PARITY_NONE };
             InterruptPriority priority{ InterruptPriority::Normal };
+
+#if defined(UART_ADVFEATURE_SWAP_INIT)
+            bool swapTxRx{ false };
+#endif
         };
     }
 
@@ -34,13 +39,13 @@ namespace hal
 
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
-#if defined(STM32WB)
+#if defined(HAS_PERIPHERAL_LPUART)
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
 #endif
     private:
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
-#if defined(STM32WB)
+#if defined(HAS_PERIPHERAL_LPUART)
         UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config, bool hasFlowControl);
 #endif
 

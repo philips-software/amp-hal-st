@@ -1,0 +1,14 @@
+ls:
+  .dir: snake_case
+  .hpp: PascalCase
+  .cpp: PascalCase
+
+ignore:
+  - .devcontainer
+  - .git
+  - .github
+  - .vscode
+  - hal_st/middlewares/STM32_WPAN
+  - hal_st/stm32fxxx/DefaultClock*
+  - megalinter-reports
+  - st

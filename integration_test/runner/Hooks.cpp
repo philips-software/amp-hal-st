@@ -34,7 +34,7 @@ HOOK_BEFORE_ALL()
             auto echoFixture = std::make_shared<main_::FixtureEchoSerial>(args::get(target));
             context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echoFixture->echo));
         }
-        else if (services::SchemeFromUrl(args::get(target)) == "ws")
+        else if (services::SchemeFromUrl(infra::BoundedConstString(args::get(target))) == "ws")
         {
             if (!infra::WaitUntilDone(
                     context, [&](const std::function<void()>& done)
@@ -53,7 +53,7 @@ HOOK_BEFORE_ALL()
                     std::chrono::seconds(10)))
                 throw std::runtime_error("Couldn't open websocket connection");
         }
-        else if (services::SchemeFromUrl(args::get(target)) == "tcp")
+        else if (services::SchemeFromUrl(infra::BoundedConstString(args::get(target))) == "tcp")
         {
             if (!infra::WaitUntilDone(
                     context, [&](const std::function<void()>& done)
@@ -62,7 +62,7 @@ HOOK_BEFORE_ALL()
 
                         auto echoFixture = std::make_shared<main_::EchoClientTcp>(
                             context.Get<services::ConnectionFactoryWithNameResolver>(),
-                            services::HostFromUrl(args::get(target)), services::PortFromUrl(args::get(target)).ValueOr(1234));
+                            services::HostFromUrl(infra::BoundedConstString(args::get(target))), services::PortFromUrl(args::get(target)).ValueOr(1234));
                         echoFixture->OnDone([&, echoFixture](services::Echo& echo)
                             {
                                 context.SetShared(std::shared_ptr<services::Echo>(echoFixture, &echo));
