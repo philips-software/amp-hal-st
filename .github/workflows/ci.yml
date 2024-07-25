@@ -18,8 +18,6 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
-          submodules: true
-          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-ubuntu-latest
@@ -52,8 +50,6 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
-          submodules: true
-          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - uses: hendrikmuhs/ccache-action@c92f40bee50034e84c763e33b317c77adaa81c92 # v1.2.13
         with:
           key: ${{ github.job }}-${{ matrix.os }}
@@ -87,7 +83,7 @@ jobs:
             "stm32f407",
             "stm32f429",
             "stm32f746",
-            "stm32f767",
+            "stm32f767"
           ]
         include:
           - gcc: "8-2019-q3"
@@ -100,8 +96,6 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
-          submodules: true
-          token: ${{ secrets.AMP_ACCESS_TOKEN }}
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
         uses: carlosperate/arm-none-eabi-gcc-action@62a654ee770a4f3bd5aa8775d6d790aacb372b8f # v1.9.0
         with:
