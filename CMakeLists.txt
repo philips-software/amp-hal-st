@@ -23,16 +23,17 @@ endif()
 if (HALST_STANDALONE)
     set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})
 
-    include(FetchContent)
-
-    FetchContent_Declare(
-        emil
-        GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        beda564a06ef7969767cc320ac20477f9b70ba97 # sesame
-    )
-
-    FetchContent_MakeAvailable(emil)
+#    include(FetchContent)
+#
+#    FetchContent_Declare(
+#        emil
+#        GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
+#        GIT_TAG        d5b66d36efd54d447064fd4c0f2942b4676497a9 # sesame
+#    )
+#
+#    FetchContent_MakeAvailable(emil)
 endif()
+add_subdirectory(amp-embedded-infra-lib)
 
 project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
 
