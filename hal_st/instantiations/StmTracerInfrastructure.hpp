@@ -12,12 +12,12 @@ namespace main_
         : public hal::TimeKeeper
     {
     public:
-        virtual bool Timeout() override
+        bool Timeout() override
         {
             return false;
         }
 
-        virtual void Reset() override
+        void Reset() override
         {}
     };
 
