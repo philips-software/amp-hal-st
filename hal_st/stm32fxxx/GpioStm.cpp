@@ -381,7 +381,7 @@ namespace hal
               { ExtiInterrupt(EXTI3_IRQn, 3, 4); })
         , interruptDispatcher4(EXTI4_IRQn, [this]()
               { ExtiInterrupt(EXTI4_IRQn, 4, 5); })
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         , interruptDispatcher5(EXTI5_IRQn, [this]()
               { ExtiInterrupt(EXTI5_IRQn, 5, 6); })
         , interruptDispatcher6(EXTI6_IRQn, [this]()
@@ -412,7 +412,7 @@ namespace hal
 #endif
 #endif
     {
-#if !defined(STM32WB)
+#if !defined(STM32WB) && !defined(STM32H5)
         __SYSCFG_CLK_ENABLE();
 #endif
 
@@ -485,7 +485,7 @@ namespace hal
 
     void GpioStm::EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger)
     {
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         uint8_t pos = 3;
 #else
         uint8_t pos = 2;
@@ -547,7 +547,7 @@ namespace hal
             if (EXTI->PR1 & (1 << line))
             {
                 EXTI->PR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it
-#elif defined(STM32G0) || defined(STM32WBA)
+#elif defined(STM32G0) || defined(STM32WBA) || defined(STM32H5)
             if ((EXTI->RPR1 & (1 << line)) || (EXTI->FPR1 & (1 << line)))
             {
                 EXTI->RPR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it

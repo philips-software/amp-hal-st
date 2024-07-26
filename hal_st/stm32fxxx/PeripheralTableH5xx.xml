@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<peripherals xmlns:xi="http://www.w3.org/2001/XInclude">
+  <peripheral name="Uart" type="USART_TypeDef*">
+    <item name="UART"/>
+    <item name="USART"/>
+    <interrupt/>
+  </peripheral>
+  <peripheral name="Spi" type="SPI_TypeDef*">
+    <item name="SPI"/>
+    <interrupt/>
+  </peripheral>
+  <peripheral name="I2c" type="I2C_TypeDef*">
+    <item name="I2C"/>
+    <interrupt name="Ev" postfix="_EV"/>
+    <interrupt name="Er" postfix="_ER"/>
+  </peripheral>
+  <!-- <peripheral name="Can" type="CAN_TypeDef*"><item name="CAN"/>
+    <interrupt name="Tx" postfix="_TX"/>
+    <interrupt name="Rx0" postfix="_RX0"/>
+    <interrupt name="Rx1" postfix="_RX1"/>
+    <interrupt name="Sce" postfix="_SCE"/>
+  </peripheral> -->
+  <peripheral name="Timer" type="TIM_TypeDef*" prefix="TIM">
+    <item name="TIM1_8H5"/>
+    <item name="TIM6_7H5"/>
+  </peripheral>
+  <peripheral name="Adc" type="ADC_TypeDef*"><item name="ADC"/></peripheral>
+  <peripheral name="Dac" type="DAC_TypeDef*"><item name="DAC"/></peripheral>
+  <!-- <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral> -->
+  <!-- <peripheral name="Rtc" type="RTC_TypeDef*"><item name="RTC"/></peripheral> -->
+</peripherals>

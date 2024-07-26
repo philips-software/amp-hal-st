@@ -74,7 +74,7 @@ jobs:
       matrix:
         configuration: ["RelWithDebInfo"]
         gcc: [ "10.3-2021.10" ]
-        target: ["stm32wb55", "stm32g070", "stm32g431", "stm32f407", "stm32f429", "stm32f746", "stm32f767", "stm32wba52"]
+        target: ["stm32wb55", "stm32g070", "stm32g431", "stm32f407", "stm32f429", "stm32f746", "stm32f767", "stm32wba52", "stm32h563", "stm32h573"]
         include:
           - gcc: "7-2018-q2"
             configuration: "RelWithDebInfo"
