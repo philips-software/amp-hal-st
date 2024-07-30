@@ -32,6 +32,12 @@ namespace hal
         Configure();
     }
 
+    SpiSlaveStmDma::~SpiSlaveStmDma()
+    {
+        peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
+        DisableClockSpi(spiInstance);
+    }
+
     void SpiSlaveStmDma::SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
