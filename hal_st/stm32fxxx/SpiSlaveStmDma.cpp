@@ -122,7 +122,7 @@ namespace hal
 
     void SpiSlaveStmDma::Configure()
     {
-        SPI_HandleTypeDef spiHandle;
+        SPI_HandleTypeDef spiHandle{};
         spiHandle.Instance = peripheralSpi[spiInstance];
         spiHandle.Init.Mode = SPI_MODE_SLAVE;
         spiHandle.Init.Direction = SPI_DIRECTION_2LINES;
@@ -137,9 +137,19 @@ namespace hal
         spiHandle.Init.CRCPolynomial = 1;
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7)
         spiHandle.Init.CRCLength = SPI_CRC_LENGTH_8BIT;
+#endif
+#ifdef SPI_CFG1_FTHLV
+        spiHandle.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
+#endif
+#ifdef SPI_NSS_PULSE_DISABLE
         spiHandle.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
 #endif
-        HAL_SPI_Init(&spiHandle);
+#ifdef SPI_NSS_POLARITY_LOW
+        spiHandle.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
+#endif
+
+        auto result = HAL_SPI_Init(&spiHandle);
+        assert(result == HAL_OK);
 
 #if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7)
         peripheralSpi[spiInstance]->CR2 |= SPI_RXFIFO_THRESHOLD_QF;
