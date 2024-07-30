@@ -34,7 +34,7 @@ namespace hal
 
     SpiSlaveStmDma::~SpiSlaveStmDma()
     {
-        peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
+        DisableSpi();
         DisableClockSpi(spiInstance);
     }
 
@@ -68,6 +68,10 @@ namespace hal
         receiveDone = false;
         sendDone = false;
 
+#ifdef STM32H5
+        DisableSpi();
+#endif
+
         if (!sendData.empty() && !receiveData.empty())
         {
             assert(sendData.size() == receiveData.size());
@@ -86,6 +90,10 @@ namespace hal
         }
         else
             std::abort();
+
+#ifdef STM32H5
+        EnableSpi();
+#endif
     }
 
     void SpiSlaveStmDma::ReceiveDone()
@@ -106,6 +114,9 @@ namespace hal
 
     void SpiSlaveStmDma::TransferDone()
     {
+#ifdef STM32H5
+        DisableSpi();
+#endif
         onDone();
     }
 
@@ -134,8 +145,17 @@ namespace hal
         peripheralSpi[spiInstance]->CR2 |= SPI_RXFIFO_THRESHOLD_QF;
 #endif
 
-        __HAL_SPI_ENABLE(&spiHandle);
         EnableDma();
+    }
+
+    void SpiSlaveStmDma::EnableSpi()
+    {
+        peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
+    }
+
+    void SpiSlaveStmDma::DisableSpi()
+    {
+        peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
     }
 
     void SpiSlaveStmDma::EnableDma()

@@ -24,6 +24,8 @@ namespace hal
         void SendDone();
         void TransferDone();
         void Configure();
+        void EnableSpi();
+        void DisableSpi();
         void EnableDma();
         void DisableDma();
 
