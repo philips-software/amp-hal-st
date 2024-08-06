@@ -131,10 +131,10 @@ namespace hal
         else
             std::abort();
         
+        peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
 #ifdef SPI_CR1_CSTART
         peripheralSpi[spiInstance]->CR1 |= SPI_CR1_CSTART;
 #endif
-        peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
     }
 
     void SpiMasterStmDma::SetChipSelectConfigurator(ChipSelectConfigurator& configurator)
