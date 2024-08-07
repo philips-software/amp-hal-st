@@ -57,17 +57,23 @@
 
   <xsl:template match="peripheral">
     <peripheral>
-      <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
+      <xsl:attribute name="name">
+        <xsl:value-of select="@name"/>
+      </xsl:attribute>
       <xsl:apply-templates/>
     </peripheral>
   </xsl:template>
 
   <xsl:template match="pin">
     <pin>
-      <xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
+      <xsl:attribute name="name">
+        <xsl:value-of select="@name"/>
+      </xsl:attribute>
       <xsl:choose>
         <xsl:when test="@drive != ''">
-          <xsl:attribute name="drive"><xsl:value-of select="@drive"/></xsl:attribute>
+          <xsl:attribute name="drive">
+            <xsl:value-of select="@drive"/>
+          </xsl:attribute>
         </xsl:when>
         <xsl:otherwise>
           <xsl:attribute name="drive">Default</xsl:attribute>
@@ -76,7 +82,9 @@
 
       <xsl:choose>
         <xsl:when test="@speed != ''">
-          <xsl:attribute name="speed"><xsl:value-of select="@speed"/></xsl:attribute>
+          <xsl:attribute name="speed">
+            <xsl:value-of select="@speed"/>
+          </xsl:attribute>
         </xsl:when>
         <xsl:otherwise>
           <xsl:attribute name="speed">Default</xsl:attribute>
@@ -85,7 +93,9 @@
 
       <xsl:choose>
         <xsl:when test="@weak-pull != ''">
-          <xsl:attribute name="weak-pull"><xsl:value-of select="@weak-pull"/></xsl:attribute>
+          <xsl:attribute name="weak-pull">
+            <xsl:value-of select="@weak-pull"/>
+          </xsl:attribute>
         </xsl:when>
         <xsl:otherwise>
           <xsl:attribute name="weak-pull">Default</xsl:attribute>
@@ -100,13 +110,19 @@
     <xsl:choose>
       <xsl:when test="contains(@name, ':')">
         <xsl:apply-templates select="document($gpio-document-no-spaces)/*/mcu:GPIO_Pin/mcu:PinSignal">
-          <xsl:with-param name="prefix"><xsl:value-of select="substring-before(@name, ':')"/></xsl:with-param>
-          <xsl:with-param name="postfix"><xsl:value-of select="substring-after(@name, ':')"/></xsl:with-param>
+          <xsl:with-param name="prefix">
+            <xsl:value-of select="substring-before(@name, ':')"/>
+          </xsl:with-param>
+          <xsl:with-param name="postfix">
+            <xsl:value-of select="substring-after(@name, ':')"/>
+          </xsl:with-param>
         </xsl:apply-templates>
       </xsl:when>
       <xsl:otherwise>
         <xsl:apply-templates select="document($gpio-document-no-spaces)/*/mcu:GPIO_Pin/mcu:PinSignal">
-          <xsl:with-param name="prefix"><xsl:value-of select="@name"/></xsl:with-param>
+          <xsl:with-param name="prefix">
+            <xsl:value-of select="@name"/>
+          </xsl:with-param>
           <xsl:with-param name="postfix"/>
         </xsl:apply-templates>
       </xsl:otherwise>
@@ -118,7 +134,9 @@
     <xsl:param name="postfix"/>
 
     <xsl:if test="starts-with(@Name, $prefix) and ($postfix = substring(@Name, string-length(@Name) - string-length($postfix) + 1)) and (substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10))">
-      <xsl:variable name="pin_signal"><xsl:value-of select="@Name"/></xsl:variable>
+      <xsl:variable name="pin_signal">
+        <xsl:value-of select="@Name"/>
+      </xsl:variable>
       <xsl:variable name="mcu_has_pin">
         <!-- Lookup mcu file to check if this pin exists and supports this signal, as ip file is too generic for a mcu family -->
         <xsl:for-each select="document($mcu-document-no-spaces)/mcu:Mcu/mcu:Pin[contains(@Name, ../@Name)]">
@@ -130,17 +148,25 @@
 
       <xsl:if test="$mcu_has_pin != ''">
         <gpio_pin>
-          <xsl:attribute name="port"><xsl:value-of select="substring(../@PortName, 2)"/></xsl:attribute>
-          <xsl:attribute name="pin-index"><xsl:value-of select="substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10)"/></xsl:attribute>
+          <xsl:attribute name="port">
+            <xsl:value-of select="substring(../@PortName, 2)"/>
+          </xsl:attribute>
+          <xsl:attribute name="pin-index">
+            <xsl:value-of select="substring(../mcu:SpecificParameter[@Name='GPIO_Pin'], 10)"/>
+          </xsl:attribute>
           <xsl:choose>
             <xsl:when test="$postfix != '' and concat($prefix, $postfix) != @Name">
-              <xsl:attribute name="peripheral-index"><xsl:value-of select="substring(@Name, string-length($prefix) + 1, string-length(@Name) - string-length($prefix) - string-length($postfix))"/></xsl:attribute>
+              <xsl:attribute name="peripheral-index">
+                <xsl:value-of select="substring(@Name, string-length($prefix) + 1, string-length(@Name) - string-length($prefix) - string-length($postfix))"/>
+              </xsl:attribute>
             </xsl:when>
             <xsl:otherwise>
               <xsl:attribute name="peripheral-index">0</xsl:attribute>
             </xsl:otherwise>
           </xsl:choose>
-          <xsl:attribute name="alternate-function"><xsl:value-of select="mcu:SpecificParameter[@Name='GPIO_AF']"/></xsl:attribute>
+          <xsl:attribute name="alternate-function">
+            <xsl:value-of select="mcu:SpecificParameter[@Name='GPIO_AF']"/>
+          </xsl:attribute>
         </gpio_pin>
       </xsl:if>
     </xsl:if>
@@ -176,9 +202,21 @@
         <xsl:attribute name="pin-index">
           <xsl:value-of select="substring-before(concat(translate(substring(../@Name, 3), '-', '/'), '/'), '/')"/>
         </xsl:attribute>
-        <xsl:attribute name="channel">
-          <xsl:value-of select="substring(@Name, 8)"/>
-        </xsl:attribute>
+        <xsl:choose>
+          <xsl:when test="substring(@Name, 8, 1)='P' or substring(@Name, 8, 1)='N'">
+            <xsl:attribute name="channel">
+              <xsl:value-of select="substring(@Name, 9)"/>
+            </xsl:attribute>
+            <xsl:attribute name="channelType">
+              <xsl:value-of select="substring(@Name, 8, 1)"/>
+            </xsl:attribute>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:attribute name="channel">
+              <xsl:value-of select="substring(@Name, 8)"/>
+            </xsl:attribute>
+          </xsl:otherwise>
+        </xsl:choose>
       </analog_pin>
     </xsl:if>
     <xsl:if test="starts-with(@Name, 'DAC') and contains(@Name, '_OUT')">

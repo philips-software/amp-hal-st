@@ -27,6 +27,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32f407>:DefaultClockDiscoveryF407G.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockDiscoveryF746G.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f746>:DefaultClockDiscoveryF746G.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32h573>:DefaultClockDiscoveryH573I.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32h573>:DefaultClockDiscoveryH573I.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f429>:DefaultClockNucleoF429ZI.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f429>:DefaultClockNucleoF429ZI.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32f767>:DefaultClockNucleoF767ZI.cpp>
@@ -37,6 +39,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474RE.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474RE.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32h563>:DefaultClockNucleoH563ZI.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32h563>:DefaultClockNucleoH563ZI.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wba52>:DefaultClockNucleoWBA52CG.cpp>
@@ -49,8 +53,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     EthernetMacStm.hpp
     EthernetSmiStm.cpp
     EthernetSmiStm.hpp
-    FlashInternalStm.cpp
-    FlashInternalStm.hpp
+    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:FlashInternalStm.cpp>
+    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:FlashInternalStm.hpp>
     GpioStm.cpp
     GpioStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>
@@ -128,6 +132,12 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     elseif (TARGET_MCU STREQUAL stm32wba52)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WBA52x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WBA52CGUx.xml")
+    elseif (TARGET_MCU STREQUAL stm32h563)
+        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32H56x_gpio_v1_0_Modes.xml")
+        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32H563ZITx.xml")
+    elseif (TARGET_MCU STREQUAL stm32h573)
+        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32H56x_gpio_v1_0_Modes.xml")
+        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32H573IIKxQ.xml")
     else()
         message(FATAL_ERROR "Unknown TARGET_MCU \"${TARGET_MCU}\". Please configure HALST_XML_GPIO and HALST_XML_STM32.")
     endif()
@@ -138,16 +148,17 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
 
     if (TARGET_MCU_FAMILY STREQUAL stm32wbxx)
-        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableWbxx.xml
-        --stringparam mcu-document ${mcu_xml})
+        set(peripheral_xml "PeripheralTableWbxx.xml")
     elseif (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
-        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableWbaxx.xml
-        --stringparam mcu-document ${mcu_xml})
+        set(peripheral_xml "PeripheralTableWbaxx.xml")
+    elseif (TARGET_MCU_FAMILY STREQUAL stm32h5xx)
+        set(peripheral_xml "PeripheralTableH5xx.xml")
     else()
-        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableFxxx.xml
-        --stringparam mcu-document ${mcu_xml})
+        set(peripheral_xml "PeripheralTableFxxx.xml")
     endif()
 
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl ${peripheral_xml}
+        --stringparam mcu-document ${mcu_xml})
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.hpp GeneratePeripheralTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
 

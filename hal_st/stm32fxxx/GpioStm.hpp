@@ -61,6 +61,12 @@ namespace hal
         dac
     };
 
+    enum class AdcChannelType
+    {
+        P,
+        N
+    };
+
     enum class Port : uint8_t
     {
 #if defined(GPIOA)
@@ -249,6 +255,7 @@ namespace hal
             Port port;
             uint8_t pin;
             uint8_t channel;
+            AdcChannelType channelType{ AdcChannelType::P };
         };
 
         struct PinoutTable
@@ -265,7 +272,7 @@ namespace hal
 
     public:
         std::pair<const PinPosition&, const PinoutTable&> GetPeripheralPinConfig(Port port, uint8_t index, PinConfigTypeStm pinConfigType, uint8_t peripheral) const;
-        uint32_t AdcChannel(Port port, uint8_t index, uint8_t adc) const;
+        uint32_t AdcChannel(Port port, uint8_t index, uint8_t adc, AdcChannelType channelType = AdcChannelType::P) const;
         uint32_t DacChannel(Port port, uint8_t index, uint8_t dac) const;
 
         void EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger);
@@ -293,7 +300,7 @@ namespace hal
         DispatchedInterruptHandler interruptDispatcher2;
         DispatchedInterruptHandler interruptDispatcher3;
         DispatchedInterruptHandler interruptDispatcher4;
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         DispatchedInterruptHandler interruptDispatcher5;
         DispatchedInterruptHandler interruptDispatcher6;
         DispatchedInterruptHandler interruptDispatcher7;

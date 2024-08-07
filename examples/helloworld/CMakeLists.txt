@@ -27,6 +27,7 @@ emil_generate_artifacts(TARGET hal_st.helloworld_nucleo64 LST MAP BIN HEX)
 add_executable(hal_st.helloworld_nucleo144 Main.cpp)
 emil_build_for(hal_st.helloworld_nucleo144
     TARGET_MCU stm32f767
+    TARGET_MCU stm32h563
     PREREQUISITE_BOOL HALST_BUILD_EXAMPLES
 )
 

@@ -15,8 +15,8 @@ target_link_libraries(hal_st.synchronous_stm32fxxx PUBLIC
 target_sources(hal_st.synchronous_stm32fxxx PRIVATE
     SynchronousGpioStm.cpp
     SynchronousGpioStm.hpp
-    SynchronousFlashInternalStm.cpp
-    SynchronousFlashInternalStm.hpp
+    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:SynchronousFlashInternalStm.cpp>
+    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:SynchronousFlashInternalStm.hpp>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousHardwareSemaphoreStm.cpp>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousHardwareSemaphoreStm.hpp>
     SynchronousRandomDataGeneratorStm.cpp

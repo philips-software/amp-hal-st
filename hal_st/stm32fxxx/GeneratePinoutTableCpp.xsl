@@ -39,7 +39,7 @@ namespace hal
 
 </xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="pin" mode="list-pins">
     <xsl:if test="count(*) != 0">
       <xsl:text><![CDATA[    constexpr std::array<const GpioStm::PinPosition, ]]></xsl:text>
@@ -64,7 +64,7 @@ namespace hal
 </xsl:text>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="gpio_pin">
     <xsl:if test="position() mod 4 = 1">
       <xsl:text>       </xsl:text>
@@ -141,8 +141,22 @@ namespace hal
   </xsl:template>
 
   <xsl:template match="analog_pin">
-    <xsl:text>        { </xsl:text><xsl:value-of select="@instance"/><xsl:text>, Type::</xsl:text><xsl:value-of select="@type"/><xsl:text>, Port::</xsl:text><xsl:value-of select="@port"/><xsl:text>, </xsl:text><xsl:value-of select="@pin-index"/><xsl:text>, </xsl:text><xsl:value-of select="@channel"/><xsl:text> },
-</xsl:text>
+    <xsl:text>        { </xsl:text>
+    <xsl:value-of select="@instance"/>
+    <xsl:text>, Type::</xsl:text>
+    <xsl:value-of select="@type"/>
+    <xsl:text>, Port::</xsl:text>
+    <xsl:value-of select="@port"/>
+    <xsl:text>, </xsl:text>
+    <xsl:value-of select="@pin-index"/>
+    <xsl:text>, </xsl:text>
+    <xsl:value-of select="@channel"/>
+    <xsl:if test="@channelType">
+      <xsl:text>, AdcChannelType::</xsl:text>
+      <xsl:value-of select="@channelType"/>
+    </xsl:if>
+    <xsl:text> },
+    </xsl:text>
   </xsl:template>
 
   <xsl:template match="analog_default_table">

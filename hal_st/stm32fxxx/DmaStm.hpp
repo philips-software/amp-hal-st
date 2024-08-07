@@ -12,7 +12,7 @@
 
 namespace hal
 {
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA)
+#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA) || defined(STM32H5)
 #define DMA_CHANNEL_BASED
 #else
 #define DMA_STREAM_BASED
@@ -34,9 +34,9 @@ namespace hal
 #else
     struct DmaChannelId
     {
-        constexpr DmaChannelId(uint8_t oneBasedDma, uint8_t oneBasedChannel, uint8_t mux)
+        constexpr DmaChannelId(uint8_t oneBasedDma, uint8_t channelIndex, uint8_t mux)
             : dma{ static_cast<uint8_t>(oneBasedDma - 1) }
-            , channel{ static_cast<uint8_t>(oneBasedChannel - 1) }
+            , channel{ static_cast<uint8_t>(channelIndex) }
             , mux{ mux }
         {}
 
@@ -114,7 +114,7 @@ namespace hal
             uint8_t dmaMux;
 #endif
             uint8_t streamIndex = 0xff;
-   
+
 #ifdef GPDMA1
             struct LinkedList
             {
