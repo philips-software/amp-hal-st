@@ -4,6 +4,49 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [4.0.0](https://github.com/philips-software/amp-hal-st/compare/v3.0.0...v4.0.0) (2024-08-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* add BLE transport layer for stm32wbaxx ([#356](https://github.com/philips-software/amp-hal-st/issues/356))
+* refactor ble middleware ([#346](https://github.com/philips-software/amp-hal-st/issues/346))
+
+### Features
+
+* Add ADC and timer for mcu stm32wbaxx ([#328](https://github.com/philips-software/amp-hal-st/issues/328)) ([d413549](https://github.com/philips-software/amp-hal-st/commit/d413549c64e6d24e62a5b23ef02999324a939fdc))
+* Add ADC triggered by timer using DMA ([#238](https://github.com/philips-software/amp-hal-st/issues/238)) ([31adf4e](https://github.com/philips-software/amp-hal-st/commit/31adf4ea988ce87f796520c9e3145720244577bc))
+* Add BLE transport layer for stm32wbaxx ([#356](https://github.com/philips-software/amp-hal-st/issues/356)) ([f2803c8](https://github.com/philips-software/amp-hal-st/commit/f2803c809d12f2944fb4e0655f5fd41f8216e57e))
+* Add channel config to stm internal temperature sensor ([#291](https://github.com/philips-software/amp-hal-st/issues/291)) ([401024a](https://github.com/philips-software/amp-hal-st/commit/401024afe3d124036f87cc7e8f2e16d39af4b406))
+* Add clangd configuration file ([#351](https://github.com/philips-software/amp-hal-st/issues/351)) ([e86f662](https://github.com/philips-software/amp-hal-st/commit/e86f662237dd687d85467c9a286e1d35c4112f39))
+* Add DMA circular mode for mcu stm32wbaxx ([#327](https://github.com/philips-software/amp-hal-st/issues/327)) ([3d46e93](https://github.com/philips-software/amp-hal-st/commit/3d46e931bf27b93a40d6fcf91a6b7935317c3f5f))
+* Add hw semaphore sync for rng on stm32wb ([#286](https://github.com/philips-software/amp-hal-st/issues/286)) ([3e4a41d](https://github.com/philips-software/amp-hal-st/commit/3e4a41d3698df6541b0d45497205444c79507251))
+* Add Immediate and Dispatched interrupt handling to DmaStm's StreamInterruptHandler via tag dispatching ([#336](https://github.com/philips-software/amp-hal-st/issues/336)) ([736df80](https://github.com/philips-software/amp-hal-st/commit/736df8088f9f9a3916f6af2872b209612e106ff2))
+* Add internal flash for mcu stm32wba  ([#348](https://github.com/philips-software/amp-hal-st/issues/348)) ([8629391](https://github.com/philips-software/amp-hal-st/commit/8629391b6fe1159eea8a65a982ded02fcf95e00a))
+* Add new family STM32WBA to hal_st ([#314](https://github.com/philips-software/amp-hal-st/issues/314)) ([112eedb](https://github.com/philips-software/amp-hal-st/commit/112eedbebb48186059a00b6464dfc8861f2af375))
+* Add SPI master for mcu stm32wba ([#343](https://github.com/philips-software/amp-hal-st/issues/343)) ([8115ac1](https://github.com/philips-software/amp-hal-st/commit/8115ac1e7ad530f24a6e9e3610975ce36a0084f4))
+* Add ST files for mcu stm32wba52cx ([#315](https://github.com/philips-software/amp-hal-st/issues/315)) ([f545781](https://github.com/philips-software/amp-hal-st/commit/f545781e76bfcdbd247a6d21904f57d6cd7ce273))
+* Add support for STM32G474VxT ([#372](https://github.com/philips-software/amp-hal-st/issues/372)) ([fe9ee42](https://github.com/philips-software/amp-hal-st/commit/fe9ee426f18c8dc7df9fb04f73c5abf0e5fd3e18))
+* Add uart pin swap configuration option when supported ([#296](https://github.com/philips-software/amp-hal-st/issues/296)) ([0826e3b](https://github.com/philips-software/amp-hal-st/commit/0826e3b580d3e28f89d389a2bd6743cd8f3c2cea))
+* Extend I2C for stm32wba family ([#324](https://github.com/philips-software/amp-hal-st/issues/324)) ([6030210](https://github.com/philips-software/amp-hal-st/commit/60302104eb46d6f51ad4229ccd56b1fa8550d678))
+* Lpuart with dma ([#340](https://github.com/philips-software/amp-hal-st/issues/340)) ([6577c8e](https://github.com/philips-software/amp-hal-st/commit/6577c8ef73694852becc597e6f4f006685df3218))
+* Make hal::Port's contents depend on actual available ports ([#350](https://github.com/philips-software/amp-hal-st/issues/350)) ([da30d1d](https://github.com/philips-software/amp-hal-st/commit/da30d1db334ad9c55b04e8a2c199251c3460b776))
+* Refactor ble middleware ([#346](https://github.com/philips-software/amp-hal-st/issues/346)) ([6703195](https://github.com/philips-software/amp-hal-st/commit/67031950dbfa4b07fc0000baaa2abb6b51e3cb5e))
+* Remove HAL_GetTick friendship from SystemTickTimerService ([#359](https://github.com/philips-software/amp-hal-st/issues/359)) ([10e1bd1](https://github.com/philips-software/amp-hal-st/commit/10e1bd1a829ce449d576da54bb1611b8492ed798))
+* Removed incorrect using directives for Circular DmaChannels ([#337](https://github.com/philips-software/amp-hal-st/issues/337)) ([c98ba11](https://github.com/philips-software/amp-hal-st/commit/c98ba11b8dbe603b955a50c1375f3156f917afc9))
+* Stm32 wpan for stm32wbaxx ([#321](https://github.com/philips-software/amp-hal-st/issues/321)) ([da44299](https://github.com/philips-software/amp-hal-st/commit/da44299e5c1354578329ce6d6a01bd31a1a348b6))
+
+
+### Bug Fixes
+
+* Command sequence for flash spi with dma ([#370](https://github.com/philips-software/amp-hal-st/issues/370)) ([edbd1e3](https://github.com/philips-software/amp-hal-st/commit/edbd1e3f4422db4728bf334c1230e31f43543dec))
+* Don't disable dma interrupts when stopping a transfer ([#335](https://github.com/philips-software/amp-hal-st/issues/335)) ([bca8097](https://github.com/philips-software/amp-hal-st/commit/bca809731c61eafbc31fd8d7b7b70d2c879d3c97))
+* Handling GPDMA multi byte transfer ([#349](https://github.com/philips-software/amp-hal-st/issues/349)) ([50010c6](https://github.com/philips-software/amp-hal-st/commit/50010c62a3d7a02a8e483d11ebc9db15dbdb919a))
+* Prescaler for ADC ([#347](https://github.com/philips-software/amp-hal-st/issues/347)) ([0d083aa](https://github.com/philips-software/amp-hal-st/commit/0d083aabf876fb24839bd2622267695240a92207))
+* SPI struct sequence data addition ([#352](https://github.com/philips-software/amp-hal-st/issues/352)) ([a1c28bb](https://github.com/philips-software/amp-hal-st/commit/a1c28bb625a31409c62f43096a0bcae95ce1f656))
+* Use mcu database to filter non-existing pin ([#305](https://github.com/philips-software/amp-hal-st/issues/305)) ([c704496](https://github.com/philips-software/amp-hal-st/commit/c704496a109f2a5edeb5d35520f29242af3965f9))
+* When invoking ReceiveData(nullptr), UartStmDuplexDma now stops reception ([#344](https://github.com/philips-software/amp-hal-st/issues/344)) ([df738e9](https://github.com/philips-software/amp-hal-st/commit/df738e975f334831c5fb521f9e66294ecfd46da7))
+
 ## [3.0.0](https://github.com/philips-software/amp-hal-st/compare/v2.1.0...v3.0.0) (2024-02-29)
 
 
