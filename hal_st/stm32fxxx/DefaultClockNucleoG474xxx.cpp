@@ -1,5 +1,5 @@
 #include DEVICE_HEADER
-#include "hal_st/stm32fxxx/DefaultClockNucleoG474RE.hpp"
+#include "hal_st/stm32fxxx/DefaultClockNucleoG474xxx.hpp"
 
 /* The system Clock is configured as follows:
  *    System Clock source            = PLL (HSE)
@@ -8,11 +8,12 @@
  *    AHB Prescaler                  = 1
  *    APB1 Prescaler                 = 1
  *    APB2 Prescaler                 = 1
- *    HSI Frequency(Hz)              = 24MHz
+ *    HSE Frequency(Hz)              = 24MHz
+ *    HSI Frequency(Hz)              = 16MHz
  *    VDD(V)                         = 3.3
  *    Main regulator output voltage  = Scale1 mode
  */
-void ConfigureDefaultClockNucleo474RE()
+void ConfigureDefaultClockNucleoG474xxx()
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };

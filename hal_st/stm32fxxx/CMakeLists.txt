@@ -35,8 +35,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32g070>:DefaultClockNucleoG070RB.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.hpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474RE.cpp>
-    $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474RE.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474xxx.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474xxx.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wba52>:DefaultClockNucleoWBA52CG.cpp>
@@ -119,9 +119,16 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     elseif (TARGET_MCU STREQUAL stm32g431)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G43x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G431R(6-8-B)Tx.xml")
-    elseif (TARGET_MCU STREQUAL stm32g474)
-        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G47x_gpio_v1_0_Modes.xml")
-        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G474R(B-C-E)Tx.xml")
+    elseif(TARGET_MCU STREQUAL stm32g474)
+        if (TARGET_MCU_VARIANT STREQUAL stm32g474rxt)
+            set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G47x_gpio_v1_0_Modes.xml")
+            set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G474R(B-C-E)Tx.xml")
+        elseif (TARGET_MCU_VARIANT STREQUAL stm32g474vxt)
+            set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G47x_gpio_v1_0_Modes.xml")
+            set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G474V(B-C-E)Tx.xml")
+        else()
+            message(FATAL_ERROR "Unknown TARGET_MCU_VARIANT \"${TARGET_MCU_VARIANT}\". Please configure HALST_XML_GPIO and HALST_XML_STM32.")
+        endif()
     elseif (TARGET_MCU_VARIANT STREQUAL stm32wb55rg)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WB55x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WB55RGVx.xml")
@@ -142,6 +149,9 @@ if (TARGET_MCU_VENDOR STREQUAL st)
         --stringparam mcu-document ${mcu_xml})
     elseif (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
         generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableWbaxx.xml
+        --stringparam mcu-document ${mcu_xml})
+    elseif (TARGET_MCU_FAMILY STREQUAL stm32g4xx)
+        generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableGxxx.xml
         --stringparam mcu-document ${mcu_xml})
     else()
         generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl PeripheralTableFxxx.xml

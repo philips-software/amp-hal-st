@@ -145,7 +145,8 @@
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32g4xx",
-        "TARGET_MCU": "stm32g474"
+        "TARGET_MCU": "stm32g474",
+        "TARGET_MCU_VARIANT": "stm32g474rxt"
       }
     },
     {
