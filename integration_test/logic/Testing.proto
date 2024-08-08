@@ -7,12 +7,18 @@ package testing;
 message GpioState
 {
     bool state = 1;
-    uint32 pin = 2;
+}
+
+message Data
+{
+    bytes data = 1 [(bytes_size) = 32];
 }
 
 enum Peripheral
 {
     gpio = 0;
+    uart = 1;
+    uartDuplexDma = 2;
 }
 
 message PeripheralType
@@ -32,27 +38,57 @@ service Tested
 {
     option (service_id) = 2;
 
+    rpc Ping(Nothing) returns (Nothing) { option (method_id) = 1; }
     rpc EnablePeripheral(PeripheralType) returns (Nothing) { option (method_id) = 2; }
 }
 
-service GpioTester
+service TestedObserver
 {
     option (service_id) = 3;
 
-    rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
+    rpc Pong(Nothing) returns (Nothing) { option (method_id) = 1; }
 }
 
-service GpioTested
+service GpioTester
 {
     option (service_id) = 4;
 
     rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
 }
 
-service GpioObserver
+service GpioTested
 {
     option (service_id) = 5;
 
+    rpc SetGpio(GpioState) returns (Nothing) { option (method_id) = 1; }
+}
+
+service GpioObserver
+{
+    option (service_id) = 6;
+
     rpc TesterGpioChanged(GpioState) returns (Nothing) { option (method_id) = 1; }
     rpc TestedGpioChanged(GpioState) returns (Nothing) { option (method_id) = 2; }
+}
+
+service UartTester
+{
+    option (service_id) = 7;
+
+    rpc SendData(Data) returns (Nothing) { option (method_id) = 1; }
+}
+
+service UartTested
+{
+    option (service_id) = 8;
+
+    rpc SendData(Data) returns (Nothing) { option (method_id) = 1; }
+}
+
+service UartObserver
+{
+    option (service_id) = 9;
+
+    rpc TesterReceivedData(Data) returns (Nothing) { option (method_id) = 1; }
+    rpc TestedReceivedData(Data) returns (Nothing) { option (method_id) = 2; }
 }

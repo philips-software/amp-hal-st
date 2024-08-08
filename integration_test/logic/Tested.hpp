@@ -16,10 +16,35 @@ namespace application
         Tested(services::Echo& echo);
 
         // Implementation of Tested
+        void Ping() override;
         void EnablePeripheral(testing::Peripheral type) override;
 
         // Implementation of Peripherals
         services::Echo& GetEcho() const override;
+
+    private:
+        testing::TestedObserverProxy testedObserver;
+    };
+
+    class TestedObserver
+        : public testing::TestedObserver
+    {
+    public:
+        using testing::TestedObserver::TestedObserver;
+
+        void Pong() override
+        {
+            pongReceived = true;
+            MethodDone();
+        }
+
+        bool ReceivedPong()
+        {
+            return std::exchange(pongReceived, false);
+        }
+
+    private:
+        bool pongReceived = false;
     };
 }
 
