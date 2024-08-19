@@ -29,8 +29,8 @@ namespace hal
 
         enum struct Channel : uint32_t
         {
-            channel_1 = 1,
-            channel_2 = 2,
+            channel1 = 1,
+            channel2 = 2,
         };
 
         DigitalToAnalogPinImplStm(Channel channel, hal::DacStm& dac, Internal);
@@ -48,7 +48,7 @@ namespace hal
         uint32_t channel;
 
 #if defined(DAC_CHIPCONNECT_BOTH)
-        const bool internallyConnected{ false };
+        const bool internallyConnected;
 #endif
     };
 

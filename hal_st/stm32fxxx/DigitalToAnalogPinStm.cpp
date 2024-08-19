@@ -25,6 +25,7 @@ namespace hal
         : pin{ infra::inPlace, pin }
         , dac{ dac }
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
+        , internallyConnected{ false }
     {}
 
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, Both)
@@ -39,6 +40,7 @@ namespace hal
         : pin{ infra::inPlace, pin }
         , dac(dac)
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
+        , internallyConnected{ false }
     {
     }
 #endif
