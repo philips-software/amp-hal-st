@@ -16,6 +16,7 @@ function(add_hal_driver target_name hal_driver cmsis)
     )
 
     target_compile_definitions(${target_name} PUBLIC
+        __PROGRAM_START=1
         USE_HAL_DRIVER=1
         USE_FULL_LL_DRIVER=1
         $<$<NOT:$<CONFIG:MinSizeRel>>:USE_FULL_ASSERT=1>
