@@ -415,27 +415,38 @@ namespace hal
 #if !defined(STM32WB)
         __SYSCFG_CLK_ENABLE();
 #endif
+
+#if defined(GPIOA)
         __GPIOA_CLK_ENABLE();
-        __GPIOB_CLK_ENABLE();
-        __GPIOC_CLK_ENABLE();
-#if !defined(STM32WBA)
-        __GPIOD_CLK_ENABLE();
-#else
-        __GPIOH_CLK_ENABLE();
 #endif
-#if !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOB)
+        __GPIOB_CLK_ENABLE();
+#endif
+#if defined(GPIOC)
+        __GPIOC_CLK_ENABLE();
+#endif
+#if defined(GPIOD)
+        __GPIOD_CLK_ENABLE();
+#endif
+#if defined(GPIOE)
         __GPIOE_CLK_ENABLE();
 #endif
-#if !defined(STM32WB) && !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOF)
         __GPIOF_CLK_ENABLE();
 #endif
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
+#if defined(GPIOG)
         __GPIOG_CLK_ENABLE();
+#endif
+#if defined(GPIOH)
         __GPIOH_CLK_ENABLE();
+#endif
+#if defined(GPIOI)
         __GPIOI_CLK_ENABLE();
 #endif
-#if defined(STM32F7)
+#if defined(GPIOJ)
         __GPIOJ_CLK_ENABLE();
+#endif
+#if defined(GPIOK)
         __GPIOK_CLK_ENABLE();
 #endif
     }
