@@ -125,12 +125,13 @@ namespace hal
                 uint32_t CLLR;
             };
 
-            std::array<LinkedList, 8> linkMemoryArrayDma1{};
+            using LinkedListArray = std::array<LinkedList, 8>;
+
 #if defined(DMA2_Channel1) || defined(GPDMA2)
-            std::array<LinkedList, 8> linkMemoryArrayDma2{};
-            std::array<decltype(linkMemoryArrayDma1), 2> linkMemoryArray{ linkMemoryArrayDma1, linkMemoryArrayDma2 };
+            std::array<LinkedListArray, 2> linkMemoryArray{ LinkedListArray{}, LinkedListArray{} };
+#else
+            std::array<LinkedListArray, 1> linkMemoryArray{ LinkedListArray{} };
 #endif
-            std::array<decltype(linkMemoryArrayDma1), 1> linkMemoryArray{ linkMemoryArrayDma1 };
 #endif
         };
 
