@@ -45,8 +45,8 @@ namespace main_
         services::StreamWriterOnSynchronousSerialCommunication traceWriter;
         infra::TextOutputStream::WithErrorPolicy alwaysEnabledTracerOutputStream;
         infra::TextOutputStream::WithErrorPolicy tracerOutputStream;
-        services::TracerWithDateTime alwaysEnabledTracer;
-        services::TracerWithDateTime tracer;
+        services::TracerToStream alwaysEnabledTracer;
+        services::TracerToStream tracer;
     };
 }
 
