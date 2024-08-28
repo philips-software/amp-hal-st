@@ -134,23 +134,23 @@ namespace hal
 
     void SpiSlaveStmDma::EnableDma()
     {
-#if !defined(STM32WBA) && !defined(STM32H5)
+#ifdef SPI_CR2_RXDMAEN
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_RXDMAEN;
         peripheralSpi[spiInstance]->CR2 |= SPI_CR2_TXDMAEN;
 #else
-        peripheralSpi[spiInstance]->CR2 |= SPI_CFG1_RXDMAEN;
-        peripheralSpi[spiInstance]->CR2 |= SPI_CFG1_TXDMAEN;
+        peripheralSpi[spiInstance]->CFG1 |= SPI_CFG1_RXDMAEN;
+        peripheralSpi[spiInstance]->CFG1 |= SPI_CFG1_TXDMAEN;
 #endif
     }
 
     void SpiSlaveStmDma::DisableDma()
     {
-#if !defined(STM32WBA) && !defined(STM32H5)
+#ifdef SPI_CR2_TXDMAEN
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_TXDMAEN;
         peripheralSpi[spiInstance]->CR2 &= ~SPI_CR2_RXDMAEN;
 #else
-        peripheralSpi[spiInstance]->CR2 &= ~SPI_CFG1_TXDMAEN;
-        peripheralSpi[spiInstance]->CR2 &= ~SPI_CFG1_RXDMAEN;
+        peripheralSpi[spiInstance]->CFG1 &= ~SPI_CFG1_TXDMAEN;
+        peripheralSpi[spiInstance]->CFG1 &= ~SPI_CFG1_RXDMAEN;
 #endif
     }
 }
