@@ -20,11 +20,3 @@ target_link_libraries(integration_test.runner PRIVATE
     gmock
     services.network_instantiations
 )
-
-if (EMIL_BUILD_WIN)
-    target_link_libraries(integration_test.runner PRIVATE hal.windows)
-endif()
-
-if (EMIL_BUILD_UNIX OR EMIL_BUILD_DARWIN)
-    target_link_libraries(integration_test.runner PRIVATE hal.unix)
-endif()

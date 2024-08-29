@@ -2,11 +2,7 @@
 #define FIXTURES_ECHO_HPP
 
 #include "generated/echo/TracingTesting.pb.hpp"
-#ifdef EMIL_HAL_WINDOWS
-#include "hal/windows/UartWindows.hpp"
-#else
-#include "hal/unix/UartUnix.hpp"
-#endif
+#include "hal/generic/UartGeneric.hpp"
 #include "services/network/EchoOnConnection.hpp"
 #include "services/network/HttpClientImpl.hpp"
 #include "services/network/WebSocketClientConnectionObserver.hpp"
@@ -21,11 +17,7 @@ namespace main_
             : serial(portName)
         {}
 
-#ifdef EMIL_HAL_WINDOWS
-        hal::UartWindows serial;
-#else
-        hal::UartUnix serial;
-#endif
+        hal::UartGeneric serial;
         services::MethodSerializerFactory::OnHeap serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedSerial{ serial };
     };
