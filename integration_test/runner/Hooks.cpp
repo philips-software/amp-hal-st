@@ -89,26 +89,26 @@ HOOK_BEFORE_ALL()
 
 HOOK_BEFORE_SCENARIO()
 {
-    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Get<testing::TesterProxy>().RequestSend([&]()
                 {
                     context.Get<testing::TesterProxy>().Reset();
                     done();
                 });
-        });
+        }));
 
-    infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
         {
             context.Get<testing::TestedProxy>().RequestSend([&]()
                 {
                     context.Get<testing::TestedProxy>().Ping();
                     done();
                 });
-        });
+        }));
 
-    infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor(context, [&]()
         {
             return context.Get<application::TestedObserver>().ReceivedPong();
-        });
+        }));
 }
