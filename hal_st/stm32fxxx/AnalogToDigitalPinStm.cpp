@@ -126,6 +126,8 @@ namespace hal
         , interruptHandler(ADC1_2_IRQn, [this]()
 #elif defined(STM32WBA)
         , interruptHandler(ADC4_IRQn, [this]()
+#elif defined(STM32H5)
+        , interruptHandler(ADC2_IRQn, [this]()
 #else
         , interruptHandler(ADC_IRQn, [this]()
 #endif

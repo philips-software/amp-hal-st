@@ -3,9 +3,10 @@
 
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/timer/TickOnInterruptTimerService.hpp"
+#include "infra/timer/Timer.hpp"
 #include "infra/util/InterfaceConnector.hpp"
-
-extern "C" uint32_t HAL_GetTick();
+#include <chrono>
+#include <cstdint>
 
 namespace hal
 {
@@ -20,8 +21,6 @@ namespace hal
         infra::TimePoint Now() const override;
 
     private:
-        friend uint32_t ::HAL_GetTick();
-
         void Invoke() override;
     };
 }
