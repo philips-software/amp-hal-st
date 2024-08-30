@@ -66,6 +66,7 @@ namespace hal
     };
 
     class AdcTriggeredByTimerWithDma;
+    class AdcDmaMultiChannelStmBase;
 
     class AdcStm
     {
@@ -87,6 +88,7 @@ namespace hal
         friend class AnalogToDigitalPinImplStm;
         friend class AnalogToDigitalInternalTemperatureStm;
         friend class AdcTriggeredByTimerWithDma;
+        friend class AdcDmaMultiChannelStmBase;
 
         uint8_t index;
         ADC_HandleTypeDef handle{};

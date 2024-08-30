@@ -15,8 +15,6 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>>:AdcDmaStm.cpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>>:AdcDmaStm.hpp>
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
     BackupRamStm.cpp
@@ -100,6 +98,16 @@ target_sources(hal_st.stm32fxxx PRIVATE
     WatchDogStm.cpp
     WatchDogStm.hpp
 )
+
+if (TARGET_MCU STREQUAL stm32wb55
+        OR TARGET_MCU_FAMILY STREQUAL stm32wbaxx
+        OR TARGET_MCU_FAMILY STREQUAL stm32h5xx)
+    target_sources(hal_st.stm32fxxx PRIVATE AdcDmaStm.cpp
+                                            AdcDmaStm.hpp
+                                            AdcDmaMultiChannelStm.cpp
+                                            AdcDmaMultiChannelStm.hpp
+    )
+endif()
 
 if (TARGET_MCU_VENDOR STREQUAL st)
     if (HALST_XML_GPIO AND HALST_XML_STM32)
