@@ -46,10 +46,11 @@ if (EMIL_HOST_BUILD)
     FetchContent_Declare(
         cucumber-cpp-runner
         GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-        GIT_TAG        7a25c498de47eaa53692b583c75ea6a0c4ac807d # unreleased
+        GIT_TAG        f3ef05b18363c2199e0978341b96cb2443a2b8f5 # unreleased
     )
 
     FetchContent_MakeAvailable(cucumber-cpp-runner)
+
 endif()
 
 add_subdirectory(st)
