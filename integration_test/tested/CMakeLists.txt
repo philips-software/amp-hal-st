@@ -3,7 +3,8 @@ emil_build_for(integration_test.tested TARGET_MCU stm32f767)
 
 target_sources(integration_test.tested PRIVATE
     EchoFromTester.hpp
-    Main.cpp
+    $<$<STREQUAL:${TARGET_MCU},stm32f767>:MainStm32f767.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:MainStm32wb55.cpp>
     Tested.cpp
     Tested.hpp
 )

@@ -27,7 +27,7 @@ endif()
 
 project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 
 set_directory_properties(PROPERTY USE_FOLDERS ON)
@@ -40,10 +40,25 @@ else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
 endif()
 
+if (EMIL_HOST_BUILD)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        cucumber-cpp-runner
+        GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
+        GIT_TAG        f3ef05b18363c2199e0978341b96cb2443a2b8f5 # unreleased
+    )
+
+    FetchContent_MakeAvailable(cucumber-cpp-runner)
+
+endif()
+
 add_subdirectory(st)
 add_subdirectory(hal_st)
 add_subdirectory(hal_st_lwip)
-add_subdirectory(integration_test)
+if (HALST_STANDALONE)
+    add_subdirectory(integration_test)
+endif()
 add_subdirectory(services)
 add_subdirectory(examples)
 
