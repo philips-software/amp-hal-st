@@ -43,6 +43,8 @@ namespace hal
         void Set(uint16_t value) override;
 
     private:
+        void Configure();
+
         infra::Optional<AnalogPinStm> pin;
         DacStm& dac;
         uint32_t channel;
