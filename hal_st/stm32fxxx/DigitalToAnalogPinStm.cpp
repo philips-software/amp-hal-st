@@ -19,14 +19,18 @@ namespace hal
         : dac{ dac }
         , channel{ infra::enum_cast(channel) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
         , internallyConnected{ true }
-    {}
+    {
+        Configure();
+    }
 
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, External)
         : pin{ infra::inPlace, pin }
         , dac{ dac }
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
         , internallyConnected{ false }
-    {}
+    {
+        Configure();
+    }
 
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, Both)
         : pin{ infra::inPlace, pin }
@@ -34,17 +38,25 @@ namespace hal
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
         , internallyConnected{ true }
 
-    {}
+    {
+        Configure();
+    }
 #else
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac)
         : pin{ infra::inPlace, pin }
         , dac(dac)
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
     {
+        Configure();
     }
 #endif
 
     void DigitalToAnalogPinImplStm::Set(uint16_t value)
+    {
+        dac.Set(channel, DAC_ALIGN_12B_R, std::min(static_cast<uint32_t>(value), (infra::Bit<uint32_t>(12) - 1)));
+    }
+
+    void DigitalToAnalogPinImplStm::Configure()
     {
         DAC_ChannelConfTypeDef sConfig{ 0 };
         sConfig.DAC_OutputBuffer = pin ? DAC_OUTPUTBUFFER_ENABLE : DAC_OUTPUTBUFFER_DISABLE;
@@ -64,8 +76,6 @@ namespace hal
 
         result = HAL_DAC_Start(&dac.handle, channel);
         assert(result == HAL_OK);
-
-        dac.Set(channel, DAC_ALIGN_12B_R, std::min(static_cast<uint32_t>(value), (infra::Bit<uint32_t>(12) - 1)));
     }
 
     DacStm::DacStm(uint8_t oneBasedIndex)
