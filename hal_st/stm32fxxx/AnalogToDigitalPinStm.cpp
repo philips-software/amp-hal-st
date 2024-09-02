@@ -11,7 +11,7 @@ extern "C"
 
 namespace
 {
-    constexpr std::array<uint32_t, 19> adcChannel = {
+    constexpr uint32_t adcChannel[] = {
         ADC_CHANNEL_0,
         ADC_CHANNEL_1,
         ADC_CHANNEL_2,
@@ -31,7 +31,10 @@ namespace
         ADC_CHANNEL_15,
         ADC_CHANNEL_16,
         ADC_CHANNEL_17,
-        ADC_CHANNEL_18
+        ADC_CHANNEL_18,
+#endif
+#ifdef ADC_CHANNEL_19
+        ADC_CHANNEL_19,
 #endif
     };
 }
@@ -126,6 +129,8 @@ namespace hal
         , interruptHandler(ADC1_2_IRQn, [this]()
 #elif defined(STM32WBA)
         , interruptHandler(ADC4_IRQn, [this]()
+#elif defined(STM32H5)
+        , interruptHandler(ADC2_IRQn, [this]()
 #else
         , interruptHandler(ADC_IRQn, [this]()
 #endif

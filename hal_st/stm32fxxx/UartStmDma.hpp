@@ -6,19 +6,13 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/UartStm.hpp"
 #include <cstdint>
 
 #include DEVICE_HEADER
 
 namespace hal
 {
-#if defined(HAS_PERIPHERAL_LPUART)
-    struct LpUart
-    {};
-
-    extern const LpUart lpUart;
-#endif
-
     namespace detail
     {
 
