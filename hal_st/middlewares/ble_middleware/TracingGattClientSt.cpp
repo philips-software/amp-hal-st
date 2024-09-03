@@ -15,16 +15,16 @@ namespace hal
         GattClientSt::StartServiceDiscovery();
     }
 
-    void TracingGattClientSt::StartCharacteristicDiscovery(const services::GattService& service)
+    void TracingGattClientSt::StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
         tracer.Trace() << "TracingGattClientSt::StartCharacteristicDiscovery";
-        GattClientSt::StartCharacteristicDiscovery(service);
+        GattClientSt::StartCharacteristicDiscovery(handle, endHandle);
     }
 
-    void TracingGattClientSt::StartDescriptorDiscovery(const services::GattService& service)
+    void TracingGattClientSt::StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
         tracer.Trace() << "TracingGattClientSt::StartDescriptorDiscovery";
-        GattClientSt::StartDescriptorDiscovery(service);
+        GattClientSt::StartDescriptorDiscovery(handle, endHandle);
     }
 
     void TracingGattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse) const
