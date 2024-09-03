@@ -26,24 +26,24 @@ namespace hal
         aci_gatt_disc_all_primary_services(connectionHandle);
     }
 
-    void GattClientSt::StartCharacteristicDiscovery(const services::GattService& service)
+    void GattClientSt::StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
         onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
         {
             observer.CharacteristicDiscoveryComplete();
         };
 
-        aci_gatt_disc_all_char_of_service(connectionHandle, service.Handle(), service.EndHandle());
+        aci_gatt_disc_all_char_of_service(connectionHandle, handle, endHandle);
     }
 
-    void GattClientSt::StartDescriptorDiscovery(const services::GattService& service)
+    void GattClientSt::StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
         onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
         {
             observer.DescriptorDiscoveryComplete();
         };
 
-        aci_gatt_disc_all_char_desc(connectionHandle, service.Handle(), service.EndHandle());
+        aci_gatt_disc_all_char_desc(connectionHandle, handle, endHandle);
     }
 
     void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse) const

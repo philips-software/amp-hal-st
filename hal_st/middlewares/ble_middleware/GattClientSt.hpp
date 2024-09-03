@@ -20,8 +20,8 @@ namespace hal
 
         // Implementation of services::GattClientDiscovery
         void StartServiceDiscovery() override;
-        void StartCharacteristicDiscovery(const services::GattService& service) override;
-        void StartDescriptorDiscovery(const services::GattService& service) override;
+        void StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
+        void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
         void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onDone) const override;
