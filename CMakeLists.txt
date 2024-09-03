@@ -22,7 +22,13 @@ if (HALST_STANDALONE)
         GIT_TAG        4dc5736b2814734a66a1de75d2eabb356d1ed6ff # unreleased
     )
 
-    FetchContent_MakeAvailable(emil)
+    FetchContent_Declare(
+        cucumber-cpp-runner
+        GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
+        GIT_TAG        f3ef05b18363c2199e0978341b96cb2443a2b8f5 # unreleased
+    )
+
+    FetchContent_MakeAvailable(emil cucumber-cpp-runner)
 endif()
 
 project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
@@ -38,19 +44,6 @@ if (HALST_STANDALONE)
     set(HALST_EXCLUDE_FROM_ALL "")
 else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
-endif()
-
-if (EMIL_HOST_BUILD)
-    include(FetchContent)
-
-    FetchContent_Declare(
-        cucumber-cpp-runner
-        GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-        GIT_TAG        f3ef05b18363c2199e0978341b96cb2443a2b8f5 # unreleased
-    )
-
-    FetchContent_MakeAvailable(cucumber-cpp-runner)
-
 endif()
 
 add_subdirectory(st)
