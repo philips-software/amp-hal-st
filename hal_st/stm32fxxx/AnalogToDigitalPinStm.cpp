@@ -61,7 +61,9 @@ namespace
 #endif
 
     constexpr std::array adcChannel{
-        ADC_CHANNEL_0,
+        // STM32F4x header defines ADC_CHANNEL_0 as 0x0u, all others are cast to uint32_t
+        // all other device headers are consistent with all their channel types
+        static_cast<decltype(ADC_CHANNEL_1)>(ADC_CHANNEL_0),
         ADC_CHANNEL_1,
         ADC_CHANNEL_2,
         ADC_CHANNEL_3,
