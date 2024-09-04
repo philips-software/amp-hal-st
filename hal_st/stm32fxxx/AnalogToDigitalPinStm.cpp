@@ -5,7 +5,6 @@
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include "stm32g474xx.h"
 #include <algorithm>
 #include <array>
 #include <cassert>
