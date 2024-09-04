@@ -46,7 +46,7 @@ namespace
 #endif
     };
 
-    IRQn_Type lookupIrq(int index)
+    IRQn_Type LookupIrq(std::size_t index)
     {
         auto iter = std::find_if(irqMap.begin(), irqMap.end(), [index](const auto& pair)
             {
@@ -175,7 +175,7 @@ namespace hal
 #if defined(STM32WB) || defined(STM32G0)
         , interruptHandler(ADC1_IRQn, [this]()
 #elif defined(STM32G4)
-        , interruptHandler(lookupIrq(oneBasedIndex), [this]()
+        , interruptHandler(LookupIrq(oneBasedIndex), [this]()
 #elif defined(STM32WBA)
         , interruptHandler(ADC4_IRQn, [this]()
 #elif defined(STM32H5)
