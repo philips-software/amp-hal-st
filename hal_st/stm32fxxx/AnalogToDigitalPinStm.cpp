@@ -11,7 +11,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <tuple>
 
 #include DEVICE_HEADER
 
