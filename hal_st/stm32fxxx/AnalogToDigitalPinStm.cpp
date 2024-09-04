@@ -1,7 +1,19 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "hal_st/cortex/InterruptCortex.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+
+#include DEVICE_HEADER
+
 #if defined(STM32F7)
 extern "C"
 {
@@ -11,8 +23,47 @@ extern "C"
 
 namespace
 {
-    constexpr uint32_t adcChannel[] = {
-        ADC_CHANNEL_0,
+#if defined(STM32G4)
+    constexpr std::array irqMap
+    {
+#if defined(ADC1)
+        std::make_pair(1, IRQn_Type::ADC1_2_IRQn), // only ADC1 or ADC2 can be configured to use the single interrupt vector
+#endif
+#if defined(ADC2)
+            std::make_pair(2, IRQn_Type::ADC1_2_IRQn), // only ADC1 or ADC2 can be configured to use the single interrupt vector
+#endif
+
+#if defined(ADC3)
+            std::make_pair(3, IRQn_Type::ADC3_IRQn),
+#endif
+
+#if defined(ADC4)
+            std::make_pair(4, IRQn_Type::ADC4_IRQn),
+#endif
+
+#if defined(ADC5)
+            std::make_pair(5, IRQn_Type::ADC5_IRQn),
+#endif
+    };
+
+    IRQn_Type LookupIrq(std::size_t index)
+    {
+        auto iter = std::find_if(irqMap.begin(), irqMap.end(), [index](const auto& pair)
+            {
+                return pair.first == index;
+            });
+
+        if (iter == irqMap.end())
+            std::abort();
+
+        return iter->second;
+    }
+#endif
+
+    constexpr std::array adcChannel{
+        // STM32F4x header defines ADC_CHANNEL_0 as 0x0u, all others are cast to uint32_t
+        // all other device headers are consistent with all their channel types
+        static_cast<decltype(ADC_CHANNEL_1)>(ADC_CHANNEL_0),
         ADC_CHANNEL_1,
         ADC_CHANNEL_2,
         ADC_CHANNEL_3,
@@ -126,7 +177,7 @@ namespace hal
 #if defined(STM32WB) || defined(STM32G0)
         , interruptHandler(ADC1_IRQn, [this]()
 #elif defined(STM32G4)
-        , interruptHandler(ADC1_2_IRQn, [this]()
+        , interruptHandler(LookupIrq(oneBasedIndex), [this]()
 #elif defined(STM32WBA)
         , interruptHandler(ADC4_IRQn, [this]()
 #elif defined(STM32H5)
