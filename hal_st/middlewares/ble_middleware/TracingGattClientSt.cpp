@@ -27,43 +27,43 @@ namespace hal
         GattClientSt::StartDescriptorDiscovery(handle, endHandle);
     }
 
-    void TracingGattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse) const
+    void TracingGattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse)
     {
         tracer.Trace() << "TracingGattClientSt::Read, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle();
         GattClientSt::Read(characteristic, onResponse);
     }
 
-    void TracingGattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) const
+    void TracingGattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
         GattClientSt::Write(characteristic, data, onDone);
     }
 
-    void TracingGattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const
+    void TracingGattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
     {
         tracer.Trace() << "TracingGattClientSt::WriteWithoutResponse, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
         GattClientSt::WriteWithoutResponse(characteristic, data);
     }
 
-    void TracingGattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void TracingGattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::EnableNotification, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
         GattClientSt::EnableNotification(characteristic, onDone);
     }
 
-    void TracingGattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void TracingGattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::DisableNotification, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
         GattClientSt::DisableNotification(characteristic, onDone);
     }
 
-    void TracingGattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void TracingGattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::EnableIndication, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
         GattClientSt::EnableIndication(characteristic, onDone);
     }
 
-    void TracingGattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void TracingGattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::DisableIndication, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
         GattClientSt::DisableIndication(characteristic, onDone);
