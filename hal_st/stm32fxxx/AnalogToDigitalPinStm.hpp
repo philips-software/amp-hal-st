@@ -1,11 +1,16 @@
 #ifndef HAL_ANALOG_TO_DIGITAL_PIN_STM_HPP
 #define HAL_ANALOG_TO_DIGITAL_PIN_STM_HPP
 
-#include DEVICE_HEADER
 #include "hal/interfaces/AnalogToDigitalPin.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/AutoResetFunction.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
+#include <cstddef>
+#include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -66,6 +71,7 @@ namespace hal
     };
 
     class AdcTriggeredByTimerWithDma;
+    class AdcDmaMultiChannelStmBase;
 
     class AdcStm
     {
@@ -87,6 +93,7 @@ namespace hal
         friend class AnalogToDigitalPinImplStm;
         friend class AnalogToDigitalInternalTemperatureStm;
         friend class AdcTriggeredByTimerWithDma;
+        friend class AdcDmaMultiChannelStmBase;
 
         uint8_t index;
         ADC_HandleTypeDef handle{};

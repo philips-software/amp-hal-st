@@ -20,7 +20,7 @@ namespace hal
 
         infra::TimePoint Now() const override;
 
-    private:
+    protected:
         void Invoke() override;
     };
 }
