@@ -19,21 +19,19 @@ namespace application
         in.DisableInterrupt();
     }
 
-    void GpioBase::SetGpio(bool state, uint32_t pin)
+    void GpioBase::SetGpio(bool state)
     {
         out.Set(state);
     }
 
     void GpioBase::InChanged()
     {
-        if (!sending)
+        if (!std::exchange(sending, true))
             RequestSend([this]()
                 {
                     sending = false;
-                    TestedGpioChanged(in.Get(), 0);
+                    GpioChanged(in.Get());
                 });
-
-        sending = true;
     }
 
     GpioTester::GpioTester(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
@@ -41,10 +39,15 @@ namespace application
         , testing::GpioTester(echo)
     {}
 
-    void GpioTester::SetGpio(bool state, uint32_t pin)
+    void GpioTester::SetGpio(bool state)
     {
-        GpioBase::SetGpio(state, pin);
+        GpioBase::SetGpio(state);
         MethodDone();
+    }
+
+    void GpioTester::GpioChanged(bool state)
+    {
+        TesterGpioChanged(state);
     }
 
     GpioTested::GpioTested(services::Echo& echo, hal::GpioPin& inPin, hal::GpioPin& outPin)
@@ -52,9 +55,14 @@ namespace application
         , testing::GpioTested(echo)
     {}
 
-    void GpioTested::SetGpio(bool state, uint32_t pin)
+    void GpioTested::SetGpio(bool state)
     {
-        GpioBase::SetGpio(state, pin);
+        GpioBase::SetGpio(state);
         MethodDone();
+    }
+
+    void GpioTested::GpioChanged(bool state)
+    {
+        TestedGpioChanged(state);
     }
 }

@@ -14,6 +14,8 @@
 
 #if defined(STM32WBA)
 unsigned int hse_value = 32'000'000;
+#elif defined(STM32H5)
+unsigned int hse_value = 8'000'000;
 #else
 unsigned int hse_value = 24'000'000;
 #endif
@@ -51,6 +53,13 @@ int main()
 
     static hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, GPDMA1_REQUEST_USART1_TX } };
     static hal::UartStmDma stLinkUartDma{ transmitStream, 1, stLinkUartTxPin, stLinkUartRxPin };
+
+#elif defined(STM32H5)
+    static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
+    static hal::GpioPinStm stLinkUartRxPin{ hal::Port::D, 9 };
+
+    static hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 1, GPDMA1_REQUEST_USART3_TX } };
+    static hal::UartStmDma stLinkUartDma{ transmitStream, 3, stLinkUartTxPin, stLinkUartRxPin };
 #endif
 
     static services::StreamWriterOnSerialCommunication::WithStorage<64> streamWriterOnSerialCommunication{ stLinkUartDma };

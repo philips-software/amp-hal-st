@@ -381,7 +381,7 @@ namespace hal
               { ExtiInterrupt(EXTI3_IRQn, 3, 4); })
         , interruptDispatcher4(EXTI4_IRQn, [this]()
               { ExtiInterrupt(EXTI4_IRQn, 4, 5); })
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         , interruptDispatcher5(EXTI5_IRQn, [this]()
               { ExtiInterrupt(EXTI5_IRQn, 5, 6); })
         , interruptDispatcher6(EXTI6_IRQn, [this]()
@@ -412,30 +412,41 @@ namespace hal
 #endif
 #endif
     {
-#if !defined(STM32WB)
+#if !defined(STM32WB) && !defined(STM32H5)
         __SYSCFG_CLK_ENABLE();
 #endif
+
+#if defined(GPIOA)
         __GPIOA_CLK_ENABLE();
-        __GPIOB_CLK_ENABLE();
-        __GPIOC_CLK_ENABLE();
-#if !defined(STM32WBA)
-        __GPIOD_CLK_ENABLE();
-#else
-        __GPIOH_CLK_ENABLE();
 #endif
-#if !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOB)
+        __GPIOB_CLK_ENABLE();
+#endif
+#if defined(GPIOC)
+        __GPIOC_CLK_ENABLE();
+#endif
+#if defined(GPIOD)
+        __GPIOD_CLK_ENABLE();
+#endif
+#if defined(GPIOE)
         __GPIOE_CLK_ENABLE();
 #endif
-#if !defined(STM32WB) && !defined(STM32G0) && !defined(STM32WBA)
+#if defined(GPIOF)
         __GPIOF_CLK_ENABLE();
 #endif
-#if defined(STM32F2) || defined(STM32F4) || defined(STM32F7)
+#if defined(GPIOG)
         __GPIOG_CLK_ENABLE();
+#endif
+#if defined(GPIOH)
         __GPIOH_CLK_ENABLE();
+#endif
+#if defined(GPIOI)
         __GPIOI_CLK_ENABLE();
 #endif
-#if defined(STM32F7)
+#if defined(GPIOJ)
         __GPIOJ_CLK_ENABLE();
+#endif
+#if defined(GPIOK)
         __GPIOK_CLK_ENABLE();
 #endif
     }
@@ -474,7 +485,7 @@ namespace hal
 
     void GpioStm::EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger)
     {
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         uint8_t pos = 3;
 #else
         uint8_t pos = 2;
@@ -536,7 +547,7 @@ namespace hal
             if (EXTI->PR1 & (1 << line))
             {
                 EXTI->PR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it
-#elif defined(STM32G0) || defined(STM32WBA)
+#elif defined(STM32G0) || defined(STM32WBA) || defined(STM32H5)
             if ((EXTI->RPR1 & (1 << line)) || (EXTI->FPR1 & (1 << line)))
             {
                 EXTI->RPR1 &= (1 << line); // Interrupt pending is cleared by writing a 1 to it

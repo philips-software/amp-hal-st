@@ -6,13 +6,14 @@
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/Variant.hpp"
+#include <array>
 #include <cstdint>
 
 #include DEVICE_HEADER
 
 namespace hal
 {
-#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA)
+#if defined(STM32G0) || defined(STM32G4) || defined(STM32WB) || defined(STM32WBA) || defined(STM32H5)
 #define DMA_CHANNEL_BASED
 #else
 #define DMA_STREAM_BASED
@@ -70,32 +71,32 @@ namespace hal
 
         public:
             uint8_t DataSize() const;
-            void SetDataSize(uint8_t dataSizeInBytes);
-            void SetPeripheralDataSize(uint8_t dataSizeInBytes);
-            void SetMemoryDataSize(uint8_t dataSizeInBytes);
-            bool StopTransfer();
+            void SetDataSize(uint8_t dataSizeInBytes) const;
+            void SetPeripheralDataSize(uint8_t dataSizeInBytes) const;
+            void SetMemoryDataSize(uint8_t dataSizeInBytes) const;
+            bool StopTransfer() const;
 
         protected:
             Stream& operator=(const Stream&) = delete;
             Stream& operator=(Stream&& other);
 
         protected:
-            void Disable();
-            void DisableHalfTransferCompleteInterrupt();
-            void DisableMemoryIncrement();
-            void DisableTransferCompleteInterrupt();
+            void Disable() const;
+            void DisableHalfTransferCompleteInterrupt() const;
+            void DisableMemoryIncrement() const;
+            void DisableTransferCompleteInterrupt() const;
             void DisableCircularMode();
             void Enable();
-            void EnableHalfTransferCompleteInterrupt();
-            void EnableMemoryIncrement();
-            void EnableTransferCompleteInterrupt();
+            void EnableHalfTransferCompleteInterrupt() const;
+            void EnableMemoryIncrement() const;
+            void EnableTransferCompleteInterrupt() const;
             void EnableCircularMode();
             bool Finished() const;
-            void SetMemoryAddress(const void* memoryAddress);
-            void SetMemoryToPeripheralMode();
-            void SetPeripheralAddress(volatile void* peripheralAddress);
-            void SetPeripheralToMemoryMode();
-            void SetTransferSize(uint16_t size);
+            void SetMemoryAddress(const void* memoryAddress) const;
+            void SetMemoryToPeripheralMode() const;
+            void SetPeripheralAddress(volatile void* peripheralAddress) const;
+            void SetPeripheralToMemoryMode() const;
+            void SetTransferSize(uint16_t size) const;
 
             bool IsHalfComplete() const;
             bool IsFullComplete() const;
@@ -114,18 +115,23 @@ namespace hal
             uint8_t dmaMux;
 #endif
             uint8_t streamIndex = 0xff;
-   
+
 #ifdef GPDMA1
             struct LinkedList
             {
-                uint32_t CTR1;
-                uint32_t CTR2;
                 uint32_t CBR1;
                 uint32_t CSAR;
                 uint32_t CDAR;
                 uint32_t CLLR;
             };
-            LinkedList linkRegisters;
+
+            using LinkedListArray = std::array<LinkedList, 8>;
+
+#if defined(DMA2_Channel1) || defined(GPDMA2)
+            std::array<LinkedListArray, 2> linkMemoryArray{ LinkedListArray{}, LinkedListArray{} };
+#else
+            std::array<LinkedListArray, 1> linkMemoryArray{ LinkedListArray{} };
+#endif
 #endif
         };
 
@@ -351,8 +357,8 @@ namespace hal
         ReceiveDmaChannel(DmaStm::ReceiveStream& receiveStream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Immediate& irqHandlerType);
 
 #ifdef GPDMA1
-        using TransceiverDmaChannel::SetPeripheralToMemoryMode;
         using TransceiverDmaChannel::SetPeripheralAddress;
+        using TransceiverDmaChannel::SetPeripheralToMemoryMode;
 #endif
         using TransceiverDmaChannel::SetPeripheralTransferSize;
         using TransceiverDmaChannel::StopTransfer;
@@ -382,8 +388,8 @@ namespace hal
         CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
 #ifdef GPDMA1
-        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
         using CircularTransceiverDmaChannel::SetPeripheralAddress;
+        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
 #endif
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
@@ -399,8 +405,8 @@ namespace hal
         CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
 
 #ifdef GPDMA1
-        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
         using CircularTransceiverDmaChannel::SetPeripheralAddress;
+        using CircularTransceiverDmaChannel::SetPeripheralToMemoryMode;
 #endif
         using CircularTransceiverDmaChannel::SetPeripheralTransferSize;
         using CircularTransceiverDmaChannel::StopTransfer;
