@@ -148,7 +148,8 @@
       "cacheVariables": {
         "TARGET_CORTEX": "m4",
         "TARGET_MCU_FAMILY": "stm32g4xx",
-        "TARGET_MCU": "stm32g474"
+        "TARGET_MCU": "stm32g474",
+        "TARGET_MCU_VARIANT": "stm32g474rxt"
       }
     },
     {
@@ -162,6 +163,26 @@
         "TARGET_MCU_FAMILY": "stm32wbaxx",
         "TARGET_MCU": "stm32wba52",
         "TARGET_MCU_VARIANT": "stm32wba52cg"
+      }
+    },
+    {
+      "name": "stm32h563",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m33",
+        "TARGET_MCU_FAMILY": "stm32h5xx",
+        "TARGET_MCU": "stm32h563"
+      }
+    },
+    {
+      "name": "stm32h573",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake//toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m33",
+        "TARGET_MCU_FAMILY": "stm32h5xx",
+        "TARGET_MCU": "stm32h573"
       }
     }
   ],
@@ -242,6 +263,36 @@
       "name": "stm32wba52-Debug",
       "configuration": "Debug",
       "configurePreset": "stm32wba52"
+    },
+    {
+      "name": "stm32h563-Debug",
+      "configuration": "Debug",
+      "configurePreset": "stm32h563"
+    },
+    {
+      "name": "stm32h563-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32h563"
+    },
+    {
+      "name": "stm32h563-MinSizeRel",
+      "configuration": "MinSizeRel",
+      "configurePreset": "stm32h563"
+    },
+    {
+      "name": "stm32h573-Debug",
+      "configuration": "Debug",
+      "configurePreset": "stm32h573"
+    },
+    {
+      "name": "stm32h573-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32h573"
+    },
+    {
+      "name": "stm32h573-MinSizeRel",
+      "configuration": "MinSizeRel",
+      "configurePreset": "stm32h573"
     }
   ],
   "testPresets": [

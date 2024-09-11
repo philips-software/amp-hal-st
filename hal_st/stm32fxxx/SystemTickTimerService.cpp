@@ -1,6 +1,10 @@
 #include "hal_st/stm32fxxx/SystemTickTimerService.hpp"
+#include "infra/timer/TickOnInterruptTimerService.hpp"
+#include "infra/timer/Timer.hpp"
+#include <chrono>
+#include <cstdint>
+
 #include DEVICE_HEADER
-#include "hal/interfaces/Gpio.hpp"
 
 extern uint32_t SystemCoreClock;
 

@@ -293,7 +293,7 @@ namespace hal
         DispatchedInterruptHandler interruptDispatcher2;
         DispatchedInterruptHandler interruptDispatcher3;
         DispatchedInterruptHandler interruptDispatcher4;
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         DispatchedInterruptHandler interruptDispatcher5;
         DispatchedInterruptHandler interruptDispatcher6;
         DispatchedInterruptHandler interruptDispatcher7;

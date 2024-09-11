@@ -23,17 +23,25 @@ endif()
 if (HALST_STANDALONE)
     set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})
 
-#    include(FetchContent)
-#
-#    FetchContent_Declare(
-#        emil
-#        GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-#        GIT_TAG        d5b66d36efd54d447064fd4c0f2942b4676497a9 # sesame
-#    )
-#
-#    FetchContent_MakeAvailable(emil)
+    include(FetchContent)
+
+    FetchContent_Declare(
+        emil
+        GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
+        GIT_TAG        4dc5736b2814734a66a1de75d2eabb356d1ed6ff # unreleased
+    )
+    FetchContent_MakeAvailable(emil)
+
+    if (EMIL_HOST_BUILD)
+        FetchContent_Declare(
+            cucumber-cpp-runner
+            GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
+            GIT_TAG        f3ef05b18363c2199e0978341b96cb2443a2b8f5 # unreleased
+        )
+
+        FetchContent_MakeAvailable(cucumber-cpp-runner)
+    endif()
 endif()
-add_subdirectory(amp-embedded-infra-lib)
 
 project(hal_st LANGUAGES C CXX ASM VERSION 3.0.0) # x-release-please-version
 
@@ -53,10 +61,6 @@ endif()
 if (HALST_BUILD_TESTS)
     include(CTest)
     emil_enable_testing()
-endif()
-
-if (EMIL_HOST_BUILD)
-    add_subdirectory(amp-cucumber-cpp-runner)
 endif()
 
 add_subdirectory(st)

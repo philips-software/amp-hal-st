@@ -4,6 +4,10 @@
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/DigitalToAnalogPin.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "infra/util/Optional.hpp"
+#include <cstdint>
+
+#include DEVICE_HEADER
 
 #ifdef HAS_PERIPHERAL_DAC
 
@@ -15,14 +19,39 @@ namespace hal
         : public DigitalToAnalogPinImplBase
     {
     public:
+#if defined(DAC_CHIPCONNECT_BOTH)
+        // clang-format off
+        static const struct Internal{} internal;
+        static const struct External{} external;
+        static const struct Both{} both;
+
+        // clang-format on
+
+        enum struct Channel : uint32_t
+        {
+            channel1 = 1,
+            channel2 = 2,
+        };
+
+        DigitalToAnalogPinImplStm(Channel channel, hal::DacStm& dac, Internal);
+        DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, External);
+        DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, Both);
+#else
         DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac);
+#endif
 
         void Set(uint16_t value) override;
 
     private:
-        AnalogPinStm pin;
+        void Configure();
+
+        infra::Optional<AnalogPinStm> pin;
         DacStm& dac;
         uint32_t channel;
+
+#if defined(DAC_CHIPCONNECT_BOTH)
+        const bool internallyConnected;
+#endif
     };
 
     class DacStm

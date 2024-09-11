@@ -7,7 +7,7 @@ namespace hal
     {
 #if defined(STM32G0)
         return infra::MakeRange(&TAMP->BKP0R, &TAMP->BKP4R + 1);
-#elif defined(STM32G4) || defined(STM32WBA)
+#elif defined(STM32G4) || defined(STM32WBA) || defined(STM32H5)
         return infra::MakeRange(&TAMP->BKP0R, &TAMP->BKP15R + 1);
 #else
         return infra::MakeRange(&peripheralRtc[0]->BKP0R, &peripheralRtc[0]->BKP19R + 1);

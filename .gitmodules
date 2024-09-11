@@ -1,6 +1,0 @@
-[submodule "amp-cucumber-cpp-runner"]
-	path = amp-cucumber-cpp-runner
-	url = https://github.com/philips-software/amp-cucumber-cpp-runner.git
-[submodule "amp-embedded-infra-lib"]
-	path = amp-embedded-infra-lib
-	url = https://github.com/philips-software/amp-embedded-infra-lib.git
