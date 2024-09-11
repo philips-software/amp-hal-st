@@ -7,8 +7,6 @@ endif()
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
 option(HALST_BUILD_TESTS "Enable building the tests" Off)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
-option(HALST_BUILD_TESTS "Enable building the tests" Off)
-
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
 set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
