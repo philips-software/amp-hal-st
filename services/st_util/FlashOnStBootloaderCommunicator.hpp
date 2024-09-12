@@ -3,6 +3,7 @@
 
 #include "hal/interfaces/FlashHeterogeneous.hpp"
 #include "hal/interfaces/FlashHomogeneous.hpp"
+#include "infra/util/AutoResetFunction.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
 #include <array>
 #include <cstdint>
@@ -22,10 +23,7 @@ namespace services
         StBootloaderCommunicator& communicator;
         hal::Flash& flash;
 
-        infra::Function<void()> onDone;
-        infra::Function<void()> onWriteMemoryDone;
-        infra::Function<void()> onReadMemoryDone;
-        infra::Function<void()> onExtendedEraseDone;
+        infra::AutoResetFunction<void()> onDone;
         infra::ConstByteRange writeTail;
         infra::ByteRange readTail;
         uint32_t tailAddress = 0;

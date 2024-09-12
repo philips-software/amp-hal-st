@@ -122,8 +122,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, read_big_buffer)
 TEST_F(FlashOnStBootloaderCommunicatorTest, write_small_buffer)
 {
     std::array<uint8_t, 4> writeData = { 0, 1, 2, 3 };
-    std::array<uint8_t, 4> targetBuffer = { 0 };
-    infra::ByteOutputStream stream(targetBuffer);
+    infra::ByteOutputStream::WithStorage<4> stream;
 
     EXPECT_CALL(stBootloaderCommunicator, WriteMemory(0x8000000, testing::_, testing::_)).WillOnce([&stream](auto, auto data, const auto& onDone)
         {
@@ -131,9 +130,9 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_small_buffer)
             onDone();
         });
 
-    NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &targetBuffer]()
+    NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
         {
-            EXPECT_TRUE(writeData == targetBuffer);
+            EXPECT_TRUE(writeData == stream.Storage());
         });
 
     flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
@@ -143,8 +142,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
 {
     std::array<uint8_t, 500> writeData = { 0 };
     std::fill(writeData.begin(), writeData.end(), 15);
-    std::array<uint8_t, 500> targetBuffer = { 0 };
-    infra::ByteOutputStream stream(targetBuffer);
+    infra::ByteOutputStream::WithStorage<500> stream;
 
     EXPECT_CALL(stBootloaderCommunicator, WriteMemory(testing::_, testing::_, testing::_)).Times(2).WillRepeatedly([&stream](auto address, auto data, const auto& onDone)
         {
@@ -157,12 +155,12 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
             onDone();
         });
 
-    NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &targetBuffer]()
+    NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
         {
-            EXPECT_TRUE(writeData == targetBuffer);
+            EXPECT_TRUE(writeData == stream.Storage());
         });
 
     flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
 }
 
-// data received but no commandActions in queue
+// TODO data received but no commandActions in queue

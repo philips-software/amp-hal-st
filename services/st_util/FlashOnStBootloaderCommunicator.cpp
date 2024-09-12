@@ -9,18 +9,6 @@ namespace services
     FlashOnStBootloaderCommunicatorBase::FlashOnStBootloaderCommunicatorBase(hal::Flash& flash, StBootloaderCommunicator& communicator)
         : communicator(communicator)
         , flash(flash)
-        , onWriteMemoryDone([this]()
-              {
-                  WriteBuffer(this->writeTail, this->tailAddress, std::exchange(this->onDone, nullptr));
-              })
-        , onReadMemoryDone([this]()
-              {
-                  ReadBuffer(this->readTail, this->tailAddress, std::exchange(this->onDone, nullptr));
-              })
-        , onExtendedEraseDone([this]()
-              {
-                  EraseSectors(this->beginIndex + 1, this->endIndex, std::exchange(this->onDone, nullptr));
-              })
     {}
 
     void FlashOnStBootloaderCommunicatorBase::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
@@ -33,7 +21,10 @@ namespace services
             const auto head = infra::Head(buffer, 256);
             writeTail = infra::DiscardHead(buffer, 256);
             tailAddress = address + head.size();
-            communicator.WriteMemory(address, head, onWriteMemoryDone);
+            communicator.WriteMemory(address, head, [this]()
+                {
+                    WriteBuffer(this->writeTail, this->tailAddress, this->onDone.Clone());
+                });
         }
     }
 
@@ -47,7 +38,10 @@ namespace services
             auto head = infra::Head(buffer, 256);
             readTail = infra::DiscardHead(buffer, 256);
             tailAddress = address + head.size();
-            communicator.ReadMemory(address, head, onReadMemoryDone);
+            communicator.ReadMemory(address, head, [this]()
+                {
+                    ReadBuffer(this->readTail, this->tailAddress, this->onDone.Clone());
+                });
         }
     }
 
@@ -63,7 +57,10 @@ namespace services
             this->beginIndex = beginIndex;
             this->endIndex = endIndex;
             this->page[1] = static_cast<uint8_t>(beginIndex);
-            communicator.ExtendedErase(infra::MakeConstByteRange(page), onExtendedEraseDone);
+            communicator.ExtendedErase(infra::MakeConstByteRange(page), [this]()
+                {
+                    EraseSectors(this->beginIndex + 1, this->endIndex, this->onDone.Clone());
+                });
         }
     }
 }
