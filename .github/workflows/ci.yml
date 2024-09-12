@@ -68,7 +68,7 @@ jobs:
       #    path: build/host/Testing/Temporary/
   embedded_build:
     name: Embedded Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [host_build_test_ubuntu]
     strategy:
       matrix:
@@ -119,7 +119,7 @@ jobs:
 
   integration_test:
     name: Integration test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [embedded_build, host_build_test_ubuntu]
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
