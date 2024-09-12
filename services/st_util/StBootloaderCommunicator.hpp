@@ -1,8 +1,8 @@
 #ifndef SERVICES_ST_UTIL_ST_BOOTLOADER_COMMUNICATOR_HPP
 #define SERVICES_ST_UTIL_ST_BOOTLOADER_COMMUNICATOR_HPP
 
-#include "infra/util/Function.hpp"
 #include "infra/util/ByteRange.hpp"
+#include "infra/util/Function.hpp"
 
 namespace services
 {
