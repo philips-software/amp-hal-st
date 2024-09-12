@@ -5,7 +5,6 @@
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "infra/util/Optional.hpp"
 
 namespace hal
 {
