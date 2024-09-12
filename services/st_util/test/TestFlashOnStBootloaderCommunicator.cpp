@@ -12,34 +12,6 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 
-template<class Result>
-class NotifyingVerifyingFunctionMock;
-
-template<class Result, class... Args>
-class NotifyingVerifyingFunctionMock<Result(Args...)>
-{
-public:
-    explicit NotifyingVerifyingFunctionMock(infra::Function<Result(Args...)> onCalled)
-        : onCalled(onCalled)
-    {
-        EXPECT_CALL(*this, callback());
-    }
-
-    MOCK_CONST_METHOD0_T(callback, Result());
-
-    operator infra::Function<Result(Args...)>()
-    {
-        return [this](Args&&... args)
-        {
-            onCalled(args...);
-            return callback();
-        };
-    }
-
-private:
-    infra::Function<Result(Args...)> onCalled;
-};
-
 class FlashOnStBootloaderCommunicatorTest
     : public testing::Test
 {
@@ -86,7 +58,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, read_small_buffer)
             onDone();
         });
 
-    NotifyingVerifyingFunctionMock<void()> onDone([&readData, &simulatedData]()
+    infra::NotifyingVerifyingFunctionMock<void()> onDone([&readData, &simulatedData]()
         {
             EXPECT_TRUE(readData == simulatedData);
         });
@@ -111,7 +83,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, read_big_buffer)
             onDone();
         });
 
-    NotifyingVerifyingFunctionMock<void()> onDone([&readData, &simulatedData]()
+    infra::NotifyingVerifyingFunctionMock<void()> onDone([&readData, &simulatedData]()
         {
             EXPECT_TRUE(readData == simulatedData);
         });
@@ -130,7 +102,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_small_buffer)
             onDone();
         });
 
-    NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
+    infra::NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
         {
             EXPECT_TRUE(writeData == stream.Storage());
         });
@@ -155,7 +127,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
             onDone();
         });
 
-    NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
+    infra::NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
         {
             EXPECT_TRUE(writeData == stream.Storage());
         });
