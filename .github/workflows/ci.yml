@@ -123,7 +123,7 @@ jobs:
     needs: [embedded_build, host_build_test_ubuntu]
     services:
       flex:
-        image: ghcr.io/philips-internal/amp-postmaster:pr-183
+        image: dl-innersource-docker.artifactory-ehv.ta.philips.com/philips-internal/amp-postmaster:pr-183
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
