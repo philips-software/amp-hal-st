@@ -96,6 +96,8 @@
   <peripheral name="Can">
     <pin name="Rx"><input name="CAN:_RX"/></pin>
     <pin name="Tx"><input name="CAN:_TX"/></pin>
+    <pin name="Rx"><input name="FDCAN:_RX"/></pin>
+    <pin name="Tx"><input name="FDCAN:_TX"/></pin>
   </peripheral>
   <peripheral name="Timer">
     <pin name="Channel1"><input name="TIM:_CH1"/></pin>
