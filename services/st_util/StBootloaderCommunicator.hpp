@@ -22,10 +22,15 @@ namespace services
         ~StBootloaderCommunicator() = default;
 
     public:
+        // commands.size() >= 14 to accomodate for all possibly received commands.
         virtual void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) = 0;
+
         virtual void GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) = 0;
         virtual void GetId(const infra::Function<void(uint16_t id)>& onDone) = 0;
+
+        // 0 < data.size() <= 256
         virtual void ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone) = 0;
+
         virtual void Go(uint32_t address, const infra::Function<void()>& onDone) = 0;
         virtual void WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone) = 0;
         virtual void MassErase(const infra::Function<void()>& onDone) = 0;

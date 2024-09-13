@@ -50,7 +50,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
-        really_assert(commands.size() >= 15);
+        really_assert(commands.size() >= 14);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(getCommand);
         AddCommandAction<ReceiveAck>();
@@ -107,7 +107,7 @@ namespace services
     void StBootloaderCommunicatorUart::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
         really_assert(data.size() <= 256);
-        really_assert(data.size() > 1);
+        really_assert(data.size() > 0);
 
         this->address = address;
 
@@ -318,11 +318,12 @@ namespace services
             onError(reason);
     }
 
-    void StBootloaderCommunicatorUart::SendData(infra::ConstByteRange data, const uint8_t& checksum)
+    void StBootloaderCommunicatorUart::SendData(infra::ConstByteRange data, uint8_t checksum)
     {
-        serial.SendData(data, [this, &checksum]()
+        this->checksum = checksum;
+        serial.SendData(data, [this]()
             {
-                SendData(infra::MakeConstByteRange(checksum));
+                SendData(infra::MakeConstByteRange(this->checksum));
             });
     }
 
