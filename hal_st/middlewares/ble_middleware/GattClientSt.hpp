@@ -3,6 +3,7 @@
 
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
+#include "infra/event/ClaimableResource.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
@@ -75,9 +76,13 @@ namespace hal
 
         static constexpr uint16_t invalidConnection = 0xffff;
 
-        infra::Function<void(services::GattClientDiscoveryObserver&)> onDiscoveryCompletion;
+        infra::AutoResetFunction<void()> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onResponse;
         infra::AutoResetFunction<void()> onDone;
+
+        infra::ClaimableResource resource;
+        infra::ClaimableResource::Claimer claimerDiscovery{ resource };
+        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange)> claimerCharacteristicOperations{ resource };
     };
 }
 
