@@ -27,7 +27,7 @@ if (HALST_STANDALONE)
         FetchContent_Declare(
             cucumber-cpp-runner
             GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        f3ef05b18363c2199e0978341b96cb2443a2b8f5 # unreleased
+            GIT_TAG        f7610661604cd446a38e72c16702c8f09b3e9c2d # unreleased
         )
 
         FetchContent_MakeAvailable(cucumber-cpp-runner)
@@ -62,6 +62,38 @@ emil_clangformat_directories(hal_st DIRECTORIES .)
 
 if (HALST_STANDALONE)
     emil_folderize_all_targets()
+endif()
+
+if (HALST_STANDALONE AND NOT CMAKE_CROSSCOMPILING)
+    function(generate_export_targets name)
+        install(EXPORT halst${name}Targets
+            FILE halst${name}Targets.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/halst
+        )
+    endfunction()
+
+    foreach(target IN ITEMS IntegrationTest)
+        generate_export_targets(${target})
+    endforeach()
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+        COMPATIBILITY SameMajorVersion
+        # When cross-compiling for a 32-bit architecture and re-using host tooling from a 64-bit architecture
+        # ARCH_INDEPENDENT is necessary here. See: https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html.
+        ARCH_INDEPENDENT
+    )
+
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
 endif()
 
 set(CPACK_GENERATOR "ZIP;TGZ")
