@@ -92,11 +92,7 @@ namespace hal
 
     void GattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
     {
-        claimerCharacteristicOperations.Claim([this, &characteristic, data]()
-            {
-                aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
-                claimerCharacteristicOperations.Release();
-            });
+        aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
     }
 
     void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
