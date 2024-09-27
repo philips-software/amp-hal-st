@@ -8,15 +8,6 @@ namespace hal
     {
         uint32_t defaultRxTimeout = 16;
 
-        volatile void* TransmitRegister(uint8_t uartIndex)
-        {
-#if defined(USART_TDR_TDR)
-            return &peripheralUart[uartIndex]->TDR;
-#else
-            return &peripheralUart[uartIndex]->DR;
-#endif
-        }
-
         volatile void* ReceiveRegister(uint8_t uartIndex)
         {
 #if defined(USART_RDR_RDR)
@@ -28,21 +19,23 @@ namespace hal
     }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, uartTx, uartRx, hal::dummyPinStm, hal::dummyPinStm, config, false }
-    {}
+        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, config)
+        , rxBuffer{ rxBuffer }
+        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
+            {
+                HalfReceiveComplete();
+            },
+            [this]
+            {
+                FullReceiveComplete();
+            } }
+    {
+        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
+    }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
-        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config, true }
-    {}
-
-#if defined(HAS_PERIPHERAL_LPUART)
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config)
-        : UartStm(oneBasedIndex, uartTx, uartRx, lpUart, config)
+        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
-            {
-                TransferComplete();
-            } }
         , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
             {
                 HalfReceiveComplete();
@@ -51,39 +44,13 @@ namespace hal
             {
                 FullReceiveComplete();
             } }
-        , uartIndex{ oneBasedIndex }
     {
         peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
-
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config)
-        : UartStm(oneBasedIndex, uartTx, uartRx, uartRts, uartCts, lpUart, config)
-        , rxBuffer{ rxBuffer }
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
-            {
-                TransferComplete();
-            } }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
-            {
-                HalfReceiveComplete();
-            },
-            [this]
-            {
-                FullReceiveComplete();
-            } }
-        , uartIndex{ oneBasedIndex }
-    {
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
-    }
-#endif
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
-        : UartStm(oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
+        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
-            {
-                TransferComplete();
-            } }
         , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
             {
                 HalfReceiveComplete();
@@ -92,7 +59,6 @@ namespace hal
             {
                 FullReceiveComplete();
             } }
-        , uartIndex{ oneBasedIndex }
     {
         peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -102,17 +68,6 @@ namespace hal
         receiveDmaChannel.StopTransfer();
         peripheralUart[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
         DisableClockUart(uartIndex);
-    }
-
-    void UartStmDuplexDma::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
-    {
-        if (!data.empty())
-        {
-            transferDataComplete = actionOnCompletion;
-            transmitDmaChannel.StartTransmit(data);
-        }
-        else
-            infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
     }
 
     void UartStmDuplexDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
@@ -153,15 +108,6 @@ namespace hal
 
         if (dataReceived != nullptr)
             dataReceived(receivedData);
-    }
-
-    void UartStmDuplexDma::TransferComplete()
-    {
-        if (transferDataComplete)
-        {
-            infra::EventDispatcher::Instance().Schedule(transferDataComplete);
-            transferDataComplete = nullptr;
-        }
     }
 
     void UartStmDuplexDma::Invoke()
