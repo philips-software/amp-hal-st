@@ -1,7 +1,10 @@
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal/interfaces/Gpio.hpp"
+#include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BitLogic.hpp"
 #include "infra/util/ReallyAssert.hpp"
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -160,9 +163,9 @@ namespace hal
         GpioStm::Instance().ClearPinReservation(port, index);
     }
 
-    void GpioPinStm::EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger)
+    void GpioPinStm::EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type)
     {
-        GpioStm::Instance().EnableInterrupt(port, index, action, trigger);
+        GpioStm::Instance().EnableInterrupt(port, index, action, trigger, type);
     }
 
     void GpioPinStm::DisableInterrupt()
@@ -245,7 +248,7 @@ namespace hal
     void DummyPinStm::ResetConfig()
     {}
 
-    void DummyPinStm::EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger)
+    void DummyPinStm::EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type)
     {}
 
     void DummyPinStm::DisableInterrupt()
@@ -483,7 +486,7 @@ namespace hal
         abort();
     }
 
-    void GpioStm::EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger)
+    void GpioStm::EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type)
     {
 #if defined(STM32WBA) || defined(STM32H5)
         uint8_t pos = 3;
@@ -527,6 +530,7 @@ namespace hal
 #endif
         really_assert(!handlers[index]);
         handlers[index] = action;
+        interruptTypes[index] = type;
     }
 
     void GpioStm::DisableInterrupt(Port port, uint8_t index)
@@ -558,7 +562,12 @@ namespace hal
                 EXTI->PR &= (1 << line); // Interrupt pending is cleared by writing a 1 to it
 #endif
                 if (handlers[line])
-                    infra::EventDispatcher::Instance().Schedule(handlers[line]);
+                {
+                    if (interruptTypes[line] == InterruptType::dispatched)
+                        infra::EventDispatcher::Instance().Schedule(handlers[line]);
+                    else
+                        handlers[line]();
+                }
                 NVIC_ClearPendingIRQ(irq);
             }
         }

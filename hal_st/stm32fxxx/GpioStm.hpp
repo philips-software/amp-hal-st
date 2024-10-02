@@ -1,11 +1,12 @@
 #ifndef HAL_GPIO_STM_HPP
 #define HAL_GPIO_STM_HPP
 
-#include DEVICE_HEADER
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
+#include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <cstdint>
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -136,7 +137,7 @@ namespace hal
         void Config(PinConfigType config) override;
         void Config(PinConfigType config, bool startOutputState) override;
         void ResetConfig() override;
-        void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger) override;
+        void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type = InterruptType::dispatched) override;
         void DisableInterrupt() override;
 
         virtual void ConfigAnalog();
@@ -167,7 +168,7 @@ namespace hal
         void Config(PinConfigType config) override;
         void Config(PinConfigType config, bool startOutputState) override;
         void ResetConfig() override;
-        void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger) override;
+        void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type = InterruptType::dispatched) override;
         void DisableInterrupt() override;
         void ConfigAnalog() override;
         void ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral) override;
@@ -268,7 +269,7 @@ namespace hal
         uint32_t AdcChannel(Port port, uint8_t index, uint8_t adc) const;
         uint32_t DacChannel(Port port, uint8_t index, uint8_t dac) const;
 
-        void EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger);
+        void EnableInterrupt(Port port, uint8_t index, const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type);
         void DisableInterrupt(Port port, uint8_t index);
 
         void ReservePin(Port port, uint8_t index);
@@ -281,33 +282,34 @@ namespace hal
         infra::MemoryRange<const GpioStm::AnalogPinPosition> analogTable;
 
         std::array<infra::Function<void()>, 16> handlers;
+        std::array<InterruptType, 16> interruptTypes;
         std::array<uint32_t, 11> assignedPins;
 
 #if defined(STM32F0) || defined(STM32G0)
-        DispatchedInterruptHandler interruptDispatcher0_1;
-        DispatchedInterruptHandler interruptDispatcher2_3;
-        DispatchedInterruptHandler interruptDispatcher4_15;
+        ImmediateInterruptHandler interruptDispatcher0_1;
+        ImmediateInterruptHandler interruptDispatcher2_3;
+        ImmediateInterruptHandler interruptDispatcher4_15;
 #else
-        DispatchedInterruptHandler interruptDispatcher0;
-        DispatchedInterruptHandler interruptDispatcher1;
-        DispatchedInterruptHandler interruptDispatcher2;
-        DispatchedInterruptHandler interruptDispatcher3;
-        DispatchedInterruptHandler interruptDispatcher4;
+        ImmediateInterruptHandler interruptDispatcher0;
+        ImmediateInterruptHandler interruptDispatcher1;
+        ImmediateInterruptHandler interruptDispatcher2;
+        ImmediateInterruptHandler interruptDispatcher3;
+        ImmediateInterruptHandler interruptDispatcher4;
 #if defined(STM32WBA) || defined(STM32H5)
-        DispatchedInterruptHandler interruptDispatcher5;
-        DispatchedInterruptHandler interruptDispatcher6;
-        DispatchedInterruptHandler interruptDispatcher7;
-        DispatchedInterruptHandler interruptDispatcher8;
-        DispatchedInterruptHandler interruptDispatcher9;
-        DispatchedInterruptHandler interruptDispatcher10;
-        DispatchedInterruptHandler interruptDispatcher11;
-        DispatchedInterruptHandler interruptDispatcher12;
-        DispatchedInterruptHandler interruptDispatcher13;
-        DispatchedInterruptHandler interruptDispatcher14;
-        DispatchedInterruptHandler interruptDispatcher15;
+        ImmediateInterruptHandler interruptDispatcher5;
+        ImmediateInterruptHandler interruptDispatcher6;
+        ImmediateInterruptHandler interruptDispatcher7;
+        ImmediateInterruptHandler interruptDispatcher8;
+        ImmediateInterruptHandler interruptDispatcher9;
+        ImmediateInterruptHandler interruptDispatcher10;
+        ImmediateInterruptHandler interruptDispatcher11;
+        ImmediateInterruptHandler interruptDispatcher12;
+        ImmediateInterruptHandler interruptDispatcher13;
+        ImmediateInterruptHandler interruptDispatcher14;
+        ImmediateInterruptHandler interruptDispatcher15;
 #else
-        DispatchedInterruptHandler interruptDispatcher9_5;
-        DispatchedInterruptHandler interruptDispatcher15_10;
+        ImmediateInterruptHandler interruptDispatcher9_5;
+        ImmediateInterruptHandler interruptDispatcher15_10;
 #endif
 #endif
     };
