@@ -18,7 +18,7 @@ namespace hal
 
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex - 1), 1, [this]
             {
                 TransferComplete();
             } }
@@ -28,7 +28,7 @@ namespace hal
 
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex - 1), 1, [this]
             {
                 TransferComplete();
             } }
@@ -39,7 +39,7 @@ namespace hal
 #if defined(HAS_PERIPHERAL_LPUART)
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, lpUart, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex - 1), 1, [this]
             {
                 TransferComplete();
             } }
@@ -49,7 +49,7 @@ namespace hal
 
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, uartRts, uartCts, lpUart, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, TransmitRegister(oneBasedIndex - 1), 1, [this]
             {
                 TransferComplete();
             } }

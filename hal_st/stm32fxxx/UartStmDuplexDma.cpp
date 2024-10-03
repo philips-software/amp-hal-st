@@ -21,7 +21,7 @@ namespace hal
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex - 1), 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -36,7 +36,7 @@ namespace hal
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex - 1), 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -51,7 +51,7 @@ namespace hal
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, ReceiveRegister(oneBasedIndex - 1), 1, [this]
             {
                 HalfReceiveComplete();
             },
