@@ -4,8 +4,13 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
+#include "infra/util/InterfaceConnector.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include <array>
+#include <atomic>
+#include <cstddef>
 #include <cstdint>
+#include <utility>
 #include DEVICE_HEADER
 
 namespace hal
@@ -277,12 +282,14 @@ namespace hal
 
     private:
         void ExtiInterrupt(IRQn_Type irq, std::size_t from, std::size_t to);
+        void DispatchExtiInterrupt(std::size_t line);
 
         infra::MemoryRange<const infra::MemoryRange<const GpioStm::PinoutTable>> pinoutTable;
         infra::MemoryRange<const GpioStm::AnalogPinPosition> analogTable;
 
         std::array<infra::Function<void()>, 16> handlers;
-        std::array<InterruptType, 16> interruptTypes;
+        std::array<InterruptType, 16> interruptTypes{};
+        std::array<std::atomic_bool, 16> notificationScheduled{};
         std::array<uint32_t, 11> assignedPins;
 
 #if defined(STM32F0) || defined(STM32G0)

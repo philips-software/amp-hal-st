@@ -3,7 +3,14 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BitLogic.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include "infra/util/ReallyAssert.hpp"
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <stdlib.h>
+#include <utility>
 #include DEVICE_HEADER
 
 namespace hal
@@ -330,9 +337,9 @@ namespace hal
 
     void MultiGpioPinStm::ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
     {
-        for (const std::pair<Port, uint8_t>& portAndIndex : table)
+        for (const auto& portAndIndex : table)
         {
-            std::pair<const GpioStm::PinPosition&, const GpioStm::PinoutTable&> peripheralPinConfig = GpioStm::Instance().GetPeripheralPinConfig(portAndIndex.first, portAndIndex.second, pinConfigType, peripheral);
+            const auto peripheralPinConfig = GpioStm::Instance().GetPeripheralPinConfig(portAndIndex.first, portAndIndex.second, pinConfigType, peripheral);
 
             GpioStm::Instance().ReservePin(portAndIndex.first, portAndIndex.second);
 
@@ -564,13 +571,26 @@ namespace hal
                 if (handlers[line])
                 {
                     if (interruptTypes[line] == InterruptType::dispatched)
-                        infra::EventDispatcher::Instance().Schedule(handlers[line]);
+                    {
+                        DispatchExtiInterrupt(line);
+                    }
                     else
                         handlers[line]();
                 }
                 NVIC_ClearPendingIRQ(irq);
             }
         }
+    }
+
+    void GpioStm::DispatchExtiInterrupt(std::size_t line)
+    {
+        if (!notificationScheduled[line].exchange(true))
+            infra::EventDispatcher::Instance().Schedule([this, line]
+                {
+                    notificationScheduled[line] = false;
+                    if (handlers[line])
+                        handlers[line]();
+                });
     }
 
     void GpioStm::ReservePin(Port port, uint8_t index)
