@@ -1,6 +1,8 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include <chrono>
+#include <cmath>
 
 namespace hal
 {
@@ -10,6 +12,25 @@ namespace hal
         0,
         50, // 500 ms
     };
+
+    constexpr infra::Duration ToDuration(uint32_t time, float factor)
+    {
+        return std::chrono::milliseconds(static_cast<uint32_t>(ceilf(time * 0.625f)));
+    }
+
+    constexpr infra::Duration ConnectionCreationTimeout(infra::Duration scanWindow, const services::GapConnectionParameters& connectionParameters)
+    {
+        // BLUETOOTH CORE SPEC: 5.3 | Vol 6, PartB, 4.5.3. The max values were considered.
+        const auto maxTransmitWindowDelay = std::chrono::milliseconds(4);
+        const auto maxTransmitWindowOffset = ToDuration(connectionParameters.maxConnIntMultiplier, 1.25f);
+        const auto maxTransmitWindowSize = std::chrono::milliseconds(10);
+
+        // BLUETOOTH CORE SPEC: 5.3 | Vol 6, PartD, 5.5.
+        const auto maxNumberOfConnIntervalWithNoPacktesFromPeerDevice = 6;
+        const auto timeoutConnectionEstablishment = maxTransmitWindowOffset * maxNumberOfConnIntervalWithNoPacktesFromPeerDevice;
+
+        return scanWindow + maxTransmitWindowDelay + maxTransmitWindowOffset + maxTransmitWindowSize + timeoutConnectionEstablishment;
+    }
 
     // Connection Interval parameters
     const uint16_t minConnectionEventLength = 0;
@@ -59,6 +80,16 @@ namespace hal
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
             minConnectionEventLength, maxConnectionEventLength);
+
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+            {
+                observer.StateChanged(services::GapState::initiating);
+            });
+
+        initiatingStateTimer.Start(ConnectionCreationTimeout(ToDuration(leScanWindow, 0.625f), connectionUpdateParameters), [this]()
+            {
+                aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
+            });
     }
 
     void GapCentralSt::Disconnect()
@@ -94,8 +125,7 @@ namespace hal
     }
 
     void GapCentralSt::AllowPairing(bool)
-    {
-    }
+    {}
 
     void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
@@ -117,14 +147,16 @@ namespace hal
             HandleAdvertisingReport(advertisingEvent.Advertising_Report[i]);
     }
 
-    void GapCentralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
-        GapSt::HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
+        GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
+        initiatingStateTimer.Cancel();
+    }
 
-        const auto evtConnectionUpdate = reinterpret_cast<hci_le_connection_update_complete_event_rp0*>(metaEvent->data);
-
-        connectionParameters.slaveLatency = evtConnectionUpdate->Conn_Latency;
-        connectionParameters.supervisorTimeoutMs = evtConnectionUpdate->Supervision_Timeout * 10;
+    void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+        initiatingStateTimer.Cancel();
     }
 
     void GapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -137,6 +169,11 @@ namespace hal
 
         if (gapProcedureEvent.Procedure_Code == GAP_LIMITED_DISCOVERY_PROC || gapProcedureEvent.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC)
             HandleGapDiscoveryProcedureEvent();
+        else if (gapProcedureEvent.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
+            infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+                {
+                    observer.StateChanged(services::GapState::standby);
+                });
     }
 
     void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -184,12 +221,18 @@ namespace hal
         if (!IsTxDataLengthConfigured(dataLengthChangeEvent))
             onMtuExchangeDone = [this]()
             {
-                SetDataLength();
+                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                    {
+                        SetDataLength();
+                    });
             };
         else
             onMtuExchangeDone = [this]()
             {
-                SetPhy();
+                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                    {
+                        SetPhy();
+                    });
             };
 
         if (onDataLengthChanged)
@@ -232,7 +275,10 @@ namespace hal
     {
         onDataLengthChanged = [this]()
         {
-            SetPhy();
+            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                {
+                    SetPhy();
+                });
         };
 
         auto status = hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);

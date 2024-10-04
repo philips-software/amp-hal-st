@@ -3,6 +3,7 @@
 
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "infra/timer/Timer.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 
 namespace hal
@@ -27,7 +28,8 @@ namespace hal
     protected:
         void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
         void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
         void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
         void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
@@ -60,6 +62,7 @@ namespace hal
         services::GapConnectionParameters connectionParameters;
         infra::AutoResetFunction<void()> onMtuExchangeDone;
         infra::AutoResetFunction<void()> onDataLengthChanged;
+        infra::TimerSingleShot initiatingStateTimer;
     };
 }
 
