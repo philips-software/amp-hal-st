@@ -89,8 +89,6 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStmDma.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStmDma.hpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>>:UartStmDuplexDma.cpp>
-    $<$<OR:$<STREQUAL:${TARGET_MCU},stm32wb55>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32f7xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32g4xx>,$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>>:UartStmDuplexDma.hpp>
     UsbLinkLayerStm.cpp
     UsbLinkLayerStm.hpp
     UniqueDeviceId.cpp
@@ -99,9 +97,19 @@ target_sources(hal_st.stm32fxxx PRIVATE
     WatchDogStm.hpp
 )
 
-if (TARGET_MCU STREQUAL stm32wb55
-        OR TARGET_MCU_FAMILY STREQUAL stm32wbaxx
-        OR TARGET_MCU_FAMILY STREQUAL stm32h5xx)
+list(APPEND UartMcus stm32wb55)
+list(APPEND UartMcuFamilies stm32f7xx stm32g4xx stm32wbaxx stm32h5xx)
+
+if (TARGET_MCU IN_LIST UartMcus OR TARGET_MCU_FAMILY IN_LIST UartMcuFamilies)
+    target_sources(hal_st.stm32fxxx PRIVATE UartStmDuplexDma.cpp
+                                            UartStmDuplexDma.hpp
+    )
+endif()
+
+list(APPEND AdcDmaMcus stm32wb55)
+list(APPEND AdcDmaMcuFamilies stm32wbaxx stm32h5xx)
+
+if (TARGET_MCU IN_LIST AdcDmaMcus OR TARGET_MCU_FAMILY IN_LIST AdcDmaMcuFamilies)
     target_sources(hal_st.stm32fxxx PRIVATE AdcDmaStm.cpp
                                             AdcDmaStm.hpp
                                             AdcDmaMultiChannelStm.cpp
