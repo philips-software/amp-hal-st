@@ -185,7 +185,7 @@ namespace hal
 
     void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
     {
-        aci_gap_allow_rebond(connectionContext.connectionHandle);
+        // Let the bonding procedure time-out
     }
 
     void GapSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
