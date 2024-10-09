@@ -104,10 +104,9 @@ namespace hal
 
     void GapCentralSt::StartDeviceDiscovery()
     {
-        if (!discovering)
+        if (!std::exchange(discovering, true))
         {
             aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, GAP_RESOLVABLE_PRIVATE_ADDR, filterDuplicatesEnabled);
-            discovering = true;
             infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
                 {
                     observer.StateChanged(services::GapState::scanning);
@@ -117,11 +116,8 @@ namespace hal
 
     void GapCentralSt::StopDeviceDiscovery()
     {
-        if (discovering)
-        {
+        if (std::exchange(discovering, false))
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
-            discovering = false;
-        }
     }
 
     void GapCentralSt::AllowPairing(bool)
@@ -170,10 +166,7 @@ namespace hal
         if (gapProcedureEvent.Procedure_Code == GAP_LIMITED_DISCOVERY_PROC || gapProcedureEvent.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC)
             HandleGapDiscoveryProcedureEvent();
         else if (gapProcedureEvent.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
-            infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-                {
-                    observer.StateChanged(services::GapState::standby);
-                });
+            HandleGapDirectConnectionProcedureEvent();
     }
 
     void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -263,6 +256,15 @@ namespace hal
             {
                 observer.StateChanged(services::GapState::standby);
             });
+    }
+
+    void GapCentralSt::HandleGapDirectConnectionProcedureEvent()
+    {
+        if (!initiatingStateTimer.Armed())
+            infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+                {
+                    observer.StateChanged(services::GapState::standby);
+                });
     }
 
     void GapCentralSt::MtuExchange() const

@@ -38,6 +38,7 @@ namespace hal
 
     private:
         void HandleGapDiscoveryProcedureEvent();
+        void HandleGapDirectConnectionProcedureEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetPhy() const;
