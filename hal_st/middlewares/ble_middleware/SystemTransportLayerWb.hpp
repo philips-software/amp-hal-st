@@ -33,6 +33,7 @@ namespace hal
             uint8_t firmwareMajor;
             uint8_t firmwareMinor;
             uint8_t firmwareSub;
+            uint8_t firmwareBranch;
             uint8_t firmwareReleaseType;
 
             uint8_t fusMajor;

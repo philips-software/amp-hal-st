@@ -20,6 +20,7 @@ namespace hal
 
         tracer.Trace() << "Wireless Firmware version: " << transportLayerVersion.firmwareMajor << "." << transportLayerVersion.firmwareMinor << "." << transportLayerVersion.firmwareSub;
         tracer.Trace() << "Wireless Firmware build: " << transportLayerVersion.firmwareReleaseType;
+        tracer.Trace() << "Wireless Firmware branch: " << transportLayerVersion.firmwareBranch;
         tracer.Trace() << "FUS version: " << transportLayerVersion.fusMajor << "." << transportLayerVersion.fusMinor << "." << transportLayerVersion.fusSub;
         tracer.Trace() << "SystemTransportLayerWb::UserEventHandler: SHCI_SUB_EVT_CODE_READY";
 
