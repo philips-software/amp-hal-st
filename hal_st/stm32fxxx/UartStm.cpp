@@ -2,6 +2,7 @@
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/ReallyAssert.hpp"
 
 namespace hal
 {
@@ -23,6 +24,7 @@ namespace hal
         , uartArray(peripheralUart)
         , uartIrqArray(peripheralUartIrq)
     {
+        really_assert(oneBasedIndex != 0); // first element is 1 in oneBasedIndex
         RegisterInterrupt(config);
         EnableClockUart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
