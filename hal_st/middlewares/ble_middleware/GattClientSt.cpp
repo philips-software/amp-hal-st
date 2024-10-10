@@ -18,79 +18,121 @@ namespace hal
 
     void GattClientSt::StartServiceDiscovery()
     {
-        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
-        {
-            observer.ServiceDiscoveryComplete();
-        };
+        claimerDiscovery.Claim([this]()
+            {
+                onDiscoveryCompletion = [this]()
+                {
+                    infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([](auto& observer)
+                        {
+                            observer.ServiceDiscoveryComplete();
+                        });
 
-        aci_gatt_disc_all_primary_services(connectionHandle);
+                    claimerDiscovery.Release();
+                };
+
+                aci_gatt_disc_all_primary_services(connectionHandle);
+            });
     }
 
-    void GattClientSt::StartCharacteristicDiscovery(const services::GattService& service)
+    void GattClientSt::StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
-        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
-        {
-            observer.CharacteristicDiscoveryComplete();
-        };
+        claimerDiscovery.Claim([this, handle, endHandle]()
+            {
+                onDiscoveryCompletion = [this]()
+                {
+                    infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([](auto& observer)
+                        {
+                            observer.CharacteristicDiscoveryComplete();
+                        });
 
-        aci_gatt_disc_all_char_of_service(connectionHandle, service.Handle(), service.EndHandle());
+                    claimerDiscovery.Release();
+                };
+
+                aci_gatt_disc_all_char_of_service(connectionHandle, handle, endHandle);
+            });
     }
 
-    void GattClientSt::StartDescriptorDiscovery(const services::GattService& service)
+    void GattClientSt::StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
-        onDiscoveryCompletion = [](services::GattClientDiscoveryObserver& observer)
-        {
-            observer.DescriptorDiscoveryComplete();
-        };
+        claimerDiscovery.Claim([this, handle, endHandle]()
+            {
+                onDiscoveryCompletion = [this]()
+                {
+                    infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers([](auto& observer)
+                        {
+                            observer.DescriptorDiscoveryComplete();
+                        });
 
-        aci_gatt_disc_all_char_desc(connectionHandle, service.Handle(), service.EndHandle());
+                    claimerDiscovery.Release();
+                };
+
+                aci_gatt_disc_all_char_desc(connectionHandle, handle, endHandle);
+            });
     }
 
-    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse) const
+    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse)
     {
         this->onResponse = onResponse;
 
-        aci_gatt_read_char_value(connectionHandle, characteristic.CharacteristicValueHandle());
+        claimerCharacteristicOperations.Claim([this, &characteristic]()
+            {
+                aci_gatt_read_char_value(connectionHandle, characteristic.CharacteristicValueHandle());
+            });
     }
 
-    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) const
+    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
 
-        aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+        claimerCharacteristicOperations.Claim([this, &characteristic, data]()
+            {
+                aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+            });
     }
 
-    void GattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const
+    void GattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
     {
         aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
     }
 
-    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
 
-        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification);
+        claimerCharacteristicOperations.Claim([this, &characteristic]()
+            {
+                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification);
+            });
     }
 
-    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
 
-        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
+        claimerCharacteristicOperations.Claim([this, &characteristic]()
+            {
+                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
+            });
     }
 
-    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
 
-        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication);
+        claimerCharacteristicOperations.Claim([this, &characteristic]()
+            {
+                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication);
+            });
     }
 
-    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) const
+    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
     {
         this->onDone = onDone;
 
-        WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
+        claimerCharacteristicOperations.Claim([this, &characteristic]()
+            {
+                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
+            });
     }
 
     void GattClientSt::HciEvent(hci_event_pckt& event)
@@ -204,9 +246,12 @@ namespace hal
             really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
 
             if (onDiscoveryCompletion)
-                infra::Subject<services::GattClientDiscoveryObserver>::NotifyObservers(std::exchange(onDiscoveryCompletion, nullptr));
+                onDiscoveryCompletion();
             else if (onDone)
-                std::exchange(onDone, nullptr)();
+            {
+                onDone();
+                claimerCharacteristicOperations.Release();
+            }
         }
     }
 
@@ -245,7 +290,10 @@ namespace hal
         really_assert(attReadResponse.Connection_Handle == connectionHandle);
 
         if (onResponse)
-            std::exchange(onResponse, nullptr)(data);
+        {
+            onResponse(data);
+            claimerCharacteristicOperations.Release();
+        }
     }
 
     void GattClientSt::HandleGattIndicationEvent(evt_blecore_aci* vendorEvent)
