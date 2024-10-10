@@ -33,7 +33,7 @@ namespace hal
         : public FlashInternalStmBase
     {
     public:
-        FlashInternalStm(infra::MemoryRange<uint32_t> sectorSizes, infra::ConstByteRange flashMemory);
+        FlashInternalStm(infra::MemoryRange<const uint32_t> sectorSizes, infra::ConstByteRange flashMemory);
 
         uint32_t NumberOfSectors() const override;
         uint32_t SizeOfSector(uint32_t sectorIndex) const override;
@@ -41,7 +41,7 @@ namespace hal
         uint32_t AddressOfSector(uint32_t sectorIndex) const override;
 
     private:
-        infra::MemoryRange<uint32_t> sectorSizes;
+        infra::MemoryRange<const uint32_t> sectorSizes;
     };
 
     class FlashHomogeneousInternalStm

@@ -1,7 +1,9 @@
 #ifndef HAL_ST_INTEGRATION_TEST_ECHO_FROM_CLOUD_HPP
 #define HAL_ST_INTEGRATION_TEST_ECHO_FROM_CLOUD_HPP
 
+#include "generated/echo/Flash.pb.hpp"
 #include "generated/echo/Testing.pb.hpp"
+#include "generated/echo/TracingFlash.pb.hpp"
 #include "generated/echo/TracingTesting.pb.hpp"
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
 #include "services/tracer/GlobalTracer.hpp"
@@ -22,13 +24,14 @@ namespace main_
         hal::DmaStm::TransmitStream transmitStream;
         hal::DmaStm::ReceiveStream receiveStream;
         hal::UartStmDuplexDma::WithRxBuffer<256> hostUart{ transmitStream, receiveStream, 4, hostUartTxPin, hostUartRxPin };
-        services::MethodSerializerFactory::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy> serializerFactory;
+        services::MethodSerializerFactory::ForServices<testing::Tester, testing::Tested, testing::GpioObserverProxy, testing::GpioTester, testing::GpioTested, testing::UartObserverProxy, testing::UartTester, testing::UartTested, flash::Flash>::AndProxies<testing::TesterProxy, testing::TestedProxy, testing::TesterObserverProxy, testing::TestedObserverProxy, testing::GpioObserver, testing::GpioTesterProxy, testing::GpioTestedProxy, testing::UartObserver, testing::UartTesterProxy, testing::UartTestedProxy, flash::FlashResult> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedHostUart{ hostUart };
         services::TracerColoured redTracer;
         main_::TracingEchoOnSesame<256> echo{ bufferedHostUart, serializerFactory, redTracer };
 
         testing::TesterTracer testerTracer{ echo.echo };
         testing::TestedTracer testedTracer{ echo.echo };
+        testing::TesterObserverTracer testerObserverTracer{ echo.echo };
         testing::TestedObserverTracer testedObserverTracer{ echo.echo };
         testing::GpioTesterTracer gpioTesterTracer{ echo.echo };
         testing::GpioTestedTracer gpioTestedTracer{ echo.echo };
@@ -36,6 +39,8 @@ namespace main_
         testing::UartTesterTracer uartTesterTracer{ echo.echo };
         testing::UartTestedTracer uartTestedTracer{ echo.echo };
         testing::UartObserverTracer uartObserverTracer{ echo.echo };
+        flash::FlashTracer flashTracer{ echo.echo };
+        flash::FlashResultTracer flashResultTracer{ echo.echo };
     };
 }
 

@@ -27,19 +27,19 @@ jobs:
         with:
           configurePreset: "host"
           buildPreset: "host-Debug-WithPackage"
-          #testPreset: "host"
+          testPreset: "host"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
       - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: hal_st
           path: build/host/hal_st-*-Linux.tar.gz
           if-no-files-found: error
-      #- name: Upload test logs
-      #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-      #  with:
-      #    name: test-logs
-      #    path: build/host/Testing/Temporary/
+      - name: Upload test logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: test-logs
+          path: build/host/Testing/Temporary/
   host_build_test:
     name: Host Build & Test
     runs-on: ${{ matrix.os }}
@@ -58,14 +58,14 @@ jobs:
         with:
           configurePreset: "host-single-Debug"
           buildPreset: "host-single-Debug"
-          #testPreset: "host-single-Debug"
+          testPreset: "host-single-Debug"
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
-      #- name: Upload test logs
-      #  if: ${{ failure() }}
-      #  uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-      #  with:
-      #    name: test-logs
-      #    path: build/host/Testing/Temporary/
+      - name: Upload test logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: test-logs
+          path: build/host/Testing/Temporary/
   embedded_build:
     name: Embedded Build
     runs-on: ubuntu-latest

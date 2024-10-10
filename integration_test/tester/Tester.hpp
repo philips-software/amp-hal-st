@@ -5,9 +5,11 @@
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/UartStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
+#include "integration_test/logic/Flash.hpp"
 #include "integration_test/logic/Gpio.hpp"
 #include "integration_test/logic/Tester.hpp"
 #include "integration_test/logic/Uart.hpp"
+#include "services/st_util/FlashOnStUartProgrammer.hpp"
 
 namespace main_
 {
@@ -44,11 +46,55 @@ namespace main_
         application::UartTester uartTester;
     };
 
+    struct FlashTested
+    {
+        FlashTested(services::Echo& echo, hal::DmaStm& dma, const infra::Function<void(infra::BoundedConstString result)>& onDone);
+
+        infra::Function<void(infra::BoundedConstString result)> onDone;
+
+        hal::GpioPinStm boot0TestedPin{ hal::Port::A, 5 };
+        hal::OutputPin boot0Tested{ boot0TestedPin, true };
+
+        hal::GpioPinStm tx{ hal::Port::G, 14 };
+        hal::GpioPinStm rx{ hal::Port::G, 9 };
+        hal::DmaStm::TransmitStream transmitStream;
+        hal::DmaStm::ReceiveStream receiveStream;
+        hal::UartStmDuplexDma::WithRxBuffer<256> uart{ transmitStream, receiveStream, 6, tx, rx };
+
+        std::array<uint32_t, 12> sectorSizes{ { 32 * 1024,
+            32 * 1024,
+            32 * 1024,
+            32 * 1024,
+            128 * 1024,
+            256 * 1024,
+            256 * 1024,
+            256 * 1024,
+            256 * 1024,
+            256 * 1024,
+            256 * 1024,
+            256 * 1024 } };
+
+        services::StUartProgrammer programmer{
+            uart, [this]()
+            {
+                this->onDone({});
+            },
+            [this](infra::BoundedConstString reason)
+            {
+                this->onDone(reason);
+            }
+        };
+        services::FlashOnStUartProgrammer flashProgrammer{ infra::MakeRange(sectorSizes), programmer };
+        application::Flash flashOverEcho;
+    };
+
     struct Tester
     {
-        Tester(services::Echo& echo, services::EchoOnSesame& echoToTested, hal::DmaStm& dma);
+        Tester(services::Echo& echo, application::Tester::EchoToTestedCreator& echoToTestedCreator, hal::DmaStm& dma);
 
-        hal::GpioPinStm nResetTester{ hal::Port::E, 6, hal::Drive::OpenDrain };
+        hal::DmaStm& dma;
+        hal::GpioPinStm nResetTested{ hal::Port::E, 6, hal::Drive::OpenDrain };
+        infra::Creator<void, FlashTested, void(services::Echo&, const infra::Function<void(infra::BoundedConstString result)>& onDone)> flashTestedCreator;
         application::Tester tester;
         application::Peripheral<main_::GpioTester> gpioTester{ tester, testing::Peripheral::gpio };
         application::Peripheral<main_::UartTester> uartTester{ tester, testing::Peripheral::uart };

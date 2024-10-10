@@ -13,7 +13,10 @@ target_sources(integration_test.tester PRIVATE
 target_link_libraries(integration_test.tester PRIVATE
     integration_test.logic
     hal_st.instantiations
+    services.st_util
 )
+
+emil_generate_artifacts(TARGET integration_test.tester BIN)
 
 halst_target_default_linker_scripts(integration_test.tester)
 halst_target_default_init(integration_test.tester)

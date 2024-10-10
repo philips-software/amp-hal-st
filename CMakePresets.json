@@ -17,7 +17,8 @@
       "inherits": "defaults",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "EMIL_BUILD_ECHO_COMPILERS": true
+        "EMIL_BUILD_ECHO_COMPILERS": true,
+        "HALST_BUILD_TESTS": true
       },
       "generator": "Ninja Multi-Config"
     },
@@ -26,7 +27,8 @@
       "displayName": "Configuration for Host Tooling and Tests, Single Config Generator, Debug",
       "inherits": "defaults",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "HALST_BUILD_TESTS": true
       }
     },
     {
@@ -34,7 +36,8 @@
       "displayName": "Configuration for Host Tooling and Tests, Single Config Generator, MinSizeRel",
       "inherits": "defaults",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "MinSizeRel"
+        "CMAKE_BUILD_TYPE": "MinSizeRel",
+        "HALST_BUILD_TESTS": true
       }
     },
     {
