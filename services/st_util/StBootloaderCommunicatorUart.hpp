@@ -1,5 +1,5 @@
-#ifndef SERVICES_ST_UTIL_ST_UART_BOOTLOADER_COMMAND_HANDLER_HPP
-#define SERVICES_ST_UTIL_ST_UART_BOOTLOADER_COMMAND_HANDLER_HPP
+#ifndef SERVICES_ST_UTIL_ST_UART_BOOTLOADER_COMMUNICATOR_HPP
+#define SERVICES_ST_UTIL_ST_UART_BOOTLOADER_COMMUNICATOR_HPP
 
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "infra/event/QueueForOneReaderOneIrqWriter.hpp"
@@ -15,7 +15,7 @@
 namespace services
 {
     class StBootloaderCommunicatorUart
-        : protected StBootloaderCommunicator
+        : public StBootloaderCommunicator
     {
     public:
         StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
@@ -31,7 +31,7 @@ namespace services
         void MassErase(const infra::Function<void()>& onDone) override;
         void Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
         void ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) override;
-        void ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
+        void ExtendedErase(const infra::MemoryRange<infra::BigEndian<uint16_t>> pages, const infra::Function<void()>& onDone) override;
         void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) override;
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
 
@@ -153,6 +153,7 @@ namespace services
 
         private:
             uint8_t data;
+            uint8_t checksum = 0;
         };
 
         class TransmitChecksummedBuffer
@@ -210,6 +211,7 @@ namespace services
         infra::ByteRange internalRange{ internalBuffer };
         infra::BigEndian<uint32_t> address;
         infra::BigEndian<uint16_t> subcommand;
+        uint8_t checksum;
     };
 }
 

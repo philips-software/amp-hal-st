@@ -19,6 +19,7 @@ namespace
     constexpr uint8_t extendedSpecial = 0x51;
 
     constexpr uint8_t ack = 0x79;
+    constexpr uint8_t nack = 0x1f;
 
     constexpr auto commandTimeout = std::chrono::seconds(1);
 }
@@ -49,7 +50,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
-        really_assert(commands.size() >= 15);
+        really_assert(commands.size() >= 14);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(getCommand);
         AddCommandAction<ReceiveAck>();
@@ -105,7 +106,8 @@ namespace services
 
     void StBootloaderCommunicatorUart::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
-        really_assert(data.size() <= 255);
+        really_assert(data.size() <= 256);
+        really_assert(data.size() > 0);
 
         this->address = address;
 
@@ -136,7 +138,9 @@ namespace services
 
     void StBootloaderCommunicatorUart::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
-        really_assert(data.size() <= 255);
+        really_assert(data.size() <= 256);
+        really_assert(data.size() > 0);
+        really_assert(data.size() % 4 == 0);
 
         this->address = address;
 
@@ -167,6 +171,7 @@ namespace services
     void StBootloaderCommunicatorUart::Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
         really_assert(pages.size() <= 255);
+        really_assert(pages.size() > 0);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(erase);
         AddCommandAction<ReceiveAck>();
@@ -190,13 +195,13 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StBootloaderCommunicatorUart::ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
+    void StBootloaderCommunicatorUart::ExtendedErase(const infra::MemoryRange<infra::BigEndian<uint16_t>> pages, const infra::Function<void()>& onDone)
     {
-        really_assert(pages.size() % 2 == 0);
+        really_assert(pages.size() > 0);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
         AddCommandAction<ReceiveAck>();
-        AddCommandAction<TransmitBigBuffer>(pages, (pages.size() / 2) - 1);
+        AddCommandAction<TransmitBigBuffer>(infra::ReinterpretCastByteRange(pages), pages.size() - 1);
         AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout extended erasing memory");
@@ -277,7 +282,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::TryHandleDataReceived()
     {
-        if (!queue.Empty())
+        if (!queue.Empty() && !commandActions.empty())
             commandActions.front()->DataReceived();
     }
 
@@ -316,9 +321,10 @@ namespace services
 
     void StBootloaderCommunicatorUart::SendData(infra::ConstByteRange data, uint8_t checksum)
     {
-        serial.SendData(data, [this, checksum]()
+        this->checksum = checksum;
+        serial.SendData(data, [this]()
             {
-                SendData(infra::MakeConstByteRange(checksum));
+                SendData(infra::MakeConstByteRange(this->checksum));
             });
     }
 
@@ -342,12 +348,21 @@ namespace services
 
     void StBootloaderCommunicatorUart::ReceiveAck::DataReceived()
     {
-        auto byte = handler.queue.Get();
+        while (!handler.queue.Empty())
+        {
+            auto byte = handler.queue.Get();
+            if (byte == ack)
+            {
+                handler.OnActionExecuted();
+                return;
+            }
 
-        if (byte == ack)
-            handler.OnActionExecuted();
-        else
-            handler.OnError("NACK received");
+            if (byte == nack)
+            {
+                handler.OnError("NACK received");
+                return;
+            }
+        }
     }
 
     StBootloaderCommunicatorUart::ReceiveBuffer::ReceiveBuffer(StBootloaderCommunicatorUart& handler, infra::ByteRange& data)
@@ -430,7 +445,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::TransmitWithTwosComplementChecksum::Start()
     {
-        uint8_t checksum = data ^ 0xff;
+        checksum = data ^ 0xff;
         handler.SendData(infra::MakeConstByteRange(data), checksum);
     }
 
