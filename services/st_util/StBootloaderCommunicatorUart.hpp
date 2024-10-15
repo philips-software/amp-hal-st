@@ -31,7 +31,7 @@ namespace services
         void MassErase(const infra::Function<void()>& onDone) override;
         void Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
         void ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone) override;
-        void ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone) override;
+        void ExtendedErase(const infra::MemoryRange<infra::BigEndian<uint16_t>> pages, const infra::Function<void()>& onDone) override;
         void Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone) override;
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
 

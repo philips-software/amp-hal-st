@@ -4,6 +4,7 @@
 #include "hal/interfaces/FlashHeterogeneous.hpp"
 #include "hal/interfaces/FlashHomogeneous.hpp"
 #include "infra/util/AutoResetFunction.hpp"
+#include "infra/util/Endian.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
 #include <array>
 #include <cstdint>
@@ -29,7 +30,7 @@ namespace services
         uint32_t tailAddress = 0;
         uint32_t beginIndex = 0;
         uint32_t endIndex = 0;
-        std::array<uint8_t, 2> page = {};
+        infra::BigEndian<uint16_t> page = 0;
     };
 
     template<class T, class... Args>

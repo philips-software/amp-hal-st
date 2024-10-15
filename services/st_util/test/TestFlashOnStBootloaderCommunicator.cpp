@@ -1,6 +1,7 @@
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/stream/ByteOutputStream.hpp"
 #include "infra/util/ByteRange.hpp"
+#include "infra/util/Endian.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
 #include "services/st_util/FlashOnStBootloaderCommunicator.hpp"
@@ -22,7 +23,7 @@ public:
 
 TEST_F(FlashOnStBootloaderCommunicatorTest, erase_all_sectors)
 {
-    infra::VerifyingFunctionMock<void()> onDone;
+    infra::VerifyingFunction<void()> onDone;
 
     EXPECT_CALL(stBootloaderCommunicator, ExtendedMassErase(services::MassEraseSubcommand::global, testing::_)).WillOnce([](auto, const auto& onDone)
         {
@@ -33,14 +34,13 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, erase_all_sectors)
 
 TEST_F(FlashOnStBootloaderCommunicatorTest, erase_some_sectors)
 {
-    infra::VerifyingFunctionMock<void()> onDone;
+    infra::VerifyingFunction<void()> onDone;
     uint8_t iterator = 0;
 
     EXPECT_CALL(stBootloaderCommunicator, ExtendedErase(testing::_, testing::_)).WillRepeatedly([&iterator](auto pages, const auto& onDone)
         {
             ASSERT_TRUE(iterator < 5);
-            EXPECT_EQ(pages.front(), 0);
-            EXPECT_EQ(pages.back(), iterator++);
+            EXPECT_EQ(pages.front(), infra::BigEndian<uint16_t>{iterator++});
             onDone();
         });
     flashOnStBootloaderCommunicator.EraseSectors(0, 5, onDone);
@@ -58,7 +58,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, read_small_buffer)
             onDone();
         });
 
-    infra::NotifyingVerifyingFunctionMock<void()> onDone([&readData, &simulatedData]()
+    infra::VerifyingInvoker<void()> onDone([&readData, &simulatedData]()
         {
             EXPECT_TRUE(readData == simulatedData);
         });
@@ -83,7 +83,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, read_big_buffer)
             onDone();
         });
 
-    infra::NotifyingVerifyingFunctionMock<void()> onDone([&readData, &simulatedData]()
+    infra::VerifyingInvoker<void()> onDone([&readData, &simulatedData]()
         {
             EXPECT_TRUE(readData == simulatedData);
         });
@@ -102,7 +102,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_small_buffer)
             onDone();
         });
 
-    infra::NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
+    infra::VerifyingInvoker<void()> onDone([&writeData, &stream]()
         {
             EXPECT_TRUE(writeData == stream.Storage());
         });
@@ -127,7 +127,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
             onDone();
         });
 
-    infra::NotifyingVerifyingFunctionMock<void()> onDone([&writeData, &stream]()
+    infra::VerifyingInvoker<void()> onDone([&writeData, &stream]()
         {
             EXPECT_TRUE(writeData == stream.Storage());
         });

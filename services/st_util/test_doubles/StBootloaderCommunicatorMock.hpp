@@ -19,7 +19,7 @@ namespace services
         MOCK_METHOD(void, MassErase, (const infra::Function<void()>& onDone));
         MOCK_METHOD(void, Erase, (infra::ConstByteRange pages, const infra::Function<void()>& onDone));
         MOCK_METHOD(void, ExtendedMassErase, (MassEraseSubcommand subcommand, const infra::Function<void()>& onDone));
-        MOCK_METHOD(void, ExtendedErase, (infra::ConstByteRange pages, const infra::Function<void()>& onDone));
+        MOCK_METHOD(void, ExtendedErase, (const infra::MemoryRange<infra::BigEndian<uint16_t>> pages, const infra::Function<void()>& onDone));
         MOCK_METHOD(void, Special, (uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone));
         MOCK_METHOD(void, ExtendedSpecial, (uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone));
     };

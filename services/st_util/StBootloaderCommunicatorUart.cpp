@@ -139,6 +139,7 @@ namespace services
     void StBootloaderCommunicatorUart::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
         really_assert(data.size() <= 256);
+        really_assert(data.size() > 0);
         really_assert(data.size() % 4 == 0);
 
         this->address = address;
@@ -194,13 +195,13 @@ namespace services
         ExecuteCommand(onDone);
     }
 
-    void StBootloaderCommunicatorUart::ExtendedErase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
+    void StBootloaderCommunicatorUart::ExtendedErase(const infra::MemoryRange<infra::BigEndian<uint16_t>> pages, const infra::Function<void()>& onDone)
     {
-        really_assert(pages.size() % 2 == 0);
+        really_assert(pages.size() > 0);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
         AddCommandAction<ReceiveAck>();
-        AddCommandAction<TransmitBigBuffer>(pages, (pages.size() / 2) - 1);
+        AddCommandAction<TransmitBigBuffer>(infra::ReinterpretCastByteRange(pages), pages.size() - 1);
         AddCommandAction<ReceiveAck>();
 
         SetCommandTimeout("Timeout extended erasing memory");

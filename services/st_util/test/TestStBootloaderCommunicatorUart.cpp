@@ -1,5 +1,6 @@
 #include "hal/interfaces/test_doubles/SerialCommunicationMock.hpp"
 #include "infra/timer/test_helper/ClockFixture.hpp"
+#include "infra/util/Endian.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
 #include "services/st_util/StBootloaderCommunicatorUart.hpp"
@@ -400,7 +401,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages)
     std::array<infra::BigEndian<uint16_t>, 4> pages = { 0x0001, 0x0002, 0x0003, 0x0004 };
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedErase(infra::MakeByteRange(pages), ondone);
+    handler.ExtendedErase(infra::MakeRange(pages), ondone);
     ExpectSendData({ 0x00, 0x03 }, { 0x00, 0x01, 0x00, 0x02, 0x00, 0x03, 0x00, 0x04 }, 0x07);
     ReceiveData({ 0x79 });
     ReceiveData({ 0x79 });
@@ -413,7 +414,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages_timeout)
     std::array<infra::BigEndian<uint16_t>, 4> pages = { 0x0001, 0x0002, 0x0003, 0x0004 };
 
     ExpectSendData(0x44, 0xbb);
-    handler.ExtendedErase(infra::MakeByteRange(pages), [&ondone]()
+    handler.ExtendedErase(infra::MakeRange(pages), [&ondone]()
         {
             ondone.callback();
         });

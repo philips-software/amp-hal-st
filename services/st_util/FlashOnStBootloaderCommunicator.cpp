@@ -56,8 +56,9 @@ namespace services
             this->onDone = onDone;
             this->beginIndex = beginIndex;
             this->endIndex = endIndex;
-            this->page[1] = static_cast<uint8_t>(beginIndex);
-            communicator.ExtendedErase(infra::MakeConstByteRange(page), [this]()
+            auto index = static_cast<uint16_t>(beginIndex);;
+            this->page = index;
+            communicator.ExtendedErase(infra::MakeRangeFromSingleObject(page), [this]()
                 {
                     EraseSectors(this->beginIndex + 1, this->endIndex, this->onDone.Clone());
                 });
