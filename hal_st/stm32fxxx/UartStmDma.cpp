@@ -4,21 +4,9 @@
 
 namespace hal
 {
-    namespace
-    {
-        volatile void* TransmitRegister(infra::MemoryRange<USART_TypeDef* const> table, uint8_t uartIndex)
-        {
-#if defined(USART_TDR_TDR)
-            return &table[uartIndex]->TDR;
-#else
-            return &table[uartIndex]->DR;
-#endif
-        }
-    }
-
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(peripheralUart, uartIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, transmitRegister, 1, [this]
             {
                 TransferComplete();
             } }
@@ -28,7 +16,7 @@ namespace hal
 
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(peripheralUart, uartIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, transmitRegister, 1, [this]
             {
                 TransferComplete();
             } }
@@ -39,7 +27,7 @@ namespace hal
 #if defined(HAS_PERIPHERAL_LPUART)
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, lpUart, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(peripheralLpuart, uartIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, transmitRegister, 1, [this]
             {
                 TransferComplete();
             } }
@@ -49,7 +37,7 @@ namespace hal
 
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config)
         : UartStm(oneBasedIndex, uartTx, uartRx, uartRts, uartCts, lpUart, config)
-        , transmitDmaChannel{ transmitStream, TransmitRegister(peripheralLpuart, uartIndex), 1, [this]
+        , transmitDmaChannel{ transmitStream, transmitRegister, 1, [this]
             {
                 TransferComplete();
             } }

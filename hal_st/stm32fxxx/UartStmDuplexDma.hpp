@@ -38,6 +38,12 @@ namespace hal
         void Invoke() override;
 
     private:
+        volatile void* receiveRegister =
+#if defined(USART_RDR_RDR)
+            &peripheralUart[uartIndex]->RDR;
+#else
+            &peripheralUart[uartIndex]->DR;
+#endif
         infra::MemoryRange<uint8_t> rxBuffer;
         hal::CircularReceiveDmaChannel receiveDmaChannel;
         std::atomic<size_t> lastReceivedPosition{};

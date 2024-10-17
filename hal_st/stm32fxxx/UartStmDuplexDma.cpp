@@ -7,21 +7,12 @@ namespace hal
     namespace
     {
         uint32_t defaultRxTimeout = 16;
-
-        volatile void* ReceiveRegister(uint8_t uartIndex)
-        {
-#if defined(USART_RDR_RDR)
-            return &peripheralUart[uartIndex]->RDR;
-#else
-            return &peripheralUart[uartIndex]->DR;
-#endif
-        }
     }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -36,7 +27,7 @@ namespace hal
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -51,7 +42,7 @@ namespace hal
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
                 HalfReceiveComplete();
             },
