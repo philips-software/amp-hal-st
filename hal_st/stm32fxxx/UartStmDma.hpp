@@ -28,6 +28,12 @@ namespace hal
     private:
         void TransferComplete();
 
+        volatile void* transmitRegister =
+#if defined(USART_TDR_TDR)
+            &uartArray[uartIndex]->TDR;
+#else
+            &uartArray[uartIndex]->DR;
+#endif
         TransmitDmaChannel transmitDmaChannel;
         infra::Function<void()> transferDataComplete;
     };
