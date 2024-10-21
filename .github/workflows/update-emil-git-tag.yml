@@ -39,7 +39,7 @@ jobs:
             echo "current_hash=$current_hash"
             echo "latest_hash=$latest_hash"
             echo "git_log<<EOF"
-            echo "$git_log"
+            echo "```\n$git_log\n```"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
