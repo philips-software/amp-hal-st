@@ -1,11 +1,11 @@
 #include "hal_st/middlewares/ble_middleware/SystemTransportLayerWb.hpp"
-#include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include <atomic>
 #include "hci_tl.h"
+#include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "interface/patterns/ble_thread/tl/tl.h"
 #include "shci.h"
 #include "shci_tl.h"
 #include "stm32wbxx_ll_system.h"
+#include <atomic>
 
 extern "C"
 {
@@ -190,6 +190,7 @@ namespace hal
             wirelessInfo.VersionMajor,
             wirelessInfo.VersionMinor,
             wirelessInfo.VersionSub,
+            wirelessInfo.VersionBranch,
             wirelessInfo.VersionReleaseType,
             wirelessInfo.FusVersionMajor,
             wirelessInfo.FusVersionMinor,

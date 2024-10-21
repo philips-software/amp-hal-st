@@ -124,7 +124,7 @@ TEST_F(StBootloaderCommunicatorUartTest, receive_nack)
 TEST_F(StBootloaderCommunicatorUartTest, GetCommand)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 2);
+    infra::VerifyingFunction<void(uint8_t, uint8_t)> ondone(3, 2);
     std::array<uint8_t, 15> commandsbuffer = {};
     infra::ByteRange commands(commandsbuffer);
 
@@ -139,7 +139,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetCommand)
 TEST_F(StBootloaderCommunicatorUartTest, GetCommand_receive_in_parts)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 2);
+    infra::VerifyingFunction<void(uint8_t, uint8_t)> ondone(3, 2);
     std::array<uint8_t, 15> commandsbuffer = {};
     infra::ByteRange commands(commandsbuffer);
 
@@ -169,7 +169,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetCommand_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, GetVersion)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void(uint8_t, uint8_t)> ondone(3, 1);
+    infra::VerifyingFunction<void(uint8_t, uint8_t)> ondone(3, 1);
 
     ExpectSendData(0x01, 0xfe);
     handler.GetVersion(ondone);
@@ -192,7 +192,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetVersion_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, GetId)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void(uint16_t)> ondone(0x0495);
+    infra::VerifyingFunction<void(uint16_t)> ondone(0x0495);
 
     ExpectSendData(0x02, 0xfd);
     handler.GetId(ondone);
@@ -215,7 +215,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetId_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, ReadMemory)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint32_t address = 0x01020304;
     std::array<uint8_t, 3> dataBuffer = {};
     infra::ByteRange data(dataBuffer);
@@ -253,7 +253,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ReadMemory_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, Go)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint32_t address = 0x01020304;
 
     ExpectSendData(0x21, 0xde);
@@ -282,7 +282,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Go_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, WriteMemory)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     std::array<uint8_t, 4> data = { 0x05, 0x06, 0x07, 0x08 };
     uint32_t address = 0x01020304;
 
@@ -315,7 +315,7 @@ TEST_F(StBootloaderCommunicatorUartTest, WriteMemory_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, MassErase)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
 
     ExpectSendData(0x43, 0xbc);
     handler.MassErase(ondone);
@@ -342,7 +342,7 @@ TEST_F(StBootloaderCommunicatorUartTest, MassErase_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, Erase_pages)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     std::array<uint8_t, 4> pages = { 0x01, 0x02, 0x03, 0x04 };
 
     ExpectSendData(0x43, 0xbc);
@@ -369,7 +369,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Erase_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
 
     ExpectSendData(0x44, 0xbb);
     handler.ExtendedMassErase(services::MassEraseSubcommand::bankOne, ondone);
@@ -396,7 +396,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     std::array<infra::BigEndian<uint16_t>, 4> pages = { 0x0001, 0x0002, 0x0003, 0x0004 };
 
     ExpectSendData(0x44, 0xbb);
@@ -423,7 +423,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, Special)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> txData = { 0x01, 0x02, 0x03, 0x04 };
     std::array<uint8_t, 4> rxDataBuffer;
@@ -452,7 +452,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Special)
 TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxData)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> txData = { 0x01, 0x02, 0x03, 0x04 };
     std::array<uint8_t, 4> rxDataBuffer = {};
@@ -481,7 +481,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxData)
 TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxStatus)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> txData = { 0x01, 0x02, 0x03, 0x04 };
     std::array<uint8_t, 4> rxDataBuffer;
@@ -510,7 +510,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxStatus)
 TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxData_rxStatus)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> txData = { 0x01, 0x02, 0x03, 0x04 };
     std::array<uint8_t, 4> rxDataBuffer = {};
@@ -539,7 +539,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Special_empty_rxData_rxStatus)
 TEST_F(StBootloaderCommunicatorUartTest, Special_empty_txData)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> rxDataBuffer;
     std::array<uint8_t, 4> rxStatusBuffer;
@@ -582,7 +582,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Special_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedSpecial)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> txData1 = { 0x01, 0x02, 0x03, 0x04 };
     std::array<uint8_t, 4> txData2 = { 0x05, 0x06, 0x07, 0x08 };
@@ -625,7 +625,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedSpecial_timeout)
 TEST_F(StBootloaderCommunicatorUartTest, receive_data_with_wrapped_around_queue)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
 
     std::vector<uint8_t> rxDataBuffer;
@@ -665,7 +665,7 @@ TEST_F(StBootloaderCommunicatorUartTest, receive_data_with_wrapped_around_queue)
 TEST_F(StBootloaderCommunicatorUartTest, Special_receive_buffer_size_received_in_parts)
 {
     Initialize();
-    infra::VerifyingFunctionMock<void()> ondone;
+    infra::VerifyingFunction<void()> ondone;
     uint16_t subcommand = 0x54;
     std::array<uint8_t, 4> rxDataBuffer;
     std::array<uint8_t, 4> rxStatusBuffer;

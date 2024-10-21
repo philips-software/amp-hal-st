@@ -54,6 +54,11 @@ namespace hal
         void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
+    protected:
+        uint8_t uartIndex;
+        infra::Function<void(infra::ConstByteRange data)> dataReceived;
+        infra::MemoryRange<USART_TypeDef* const> uartArray;
+
     private:
         void UartStmHalInit(const Config& config, bool hasFlowControl);
         void RegisterInterrupt(const Config& config);
@@ -61,7 +66,6 @@ namespace hal
         void Invoke() override;
 
     private:
-        uint8_t uartIndex;
         hal::PeripheralPinStm uartTx;
         hal::PeripheralPinStm uartRx;
         hal::PeripheralPinStm uartRts;
@@ -70,12 +74,9 @@ namespace hal
         UART_HandleTypeDef uartHandle = {};
 
         infra::Function<void()> transferDataComplete;
-        infra::Function<void(infra::ConstByteRange data)> dataReceived;
 
         infra::MemoryRange<const uint8_t> sendData;
         bool sending = false;
-
-        infra::MemoryRange<USART_TypeDef* const> uartArray;
         infra::MemoryRange<IRQn_Type const> uartIrqArray;
     };
 }
