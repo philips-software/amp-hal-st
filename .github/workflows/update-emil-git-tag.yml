@@ -29,19 +29,19 @@ jobs:
           git pull
           latest_hash="$(git rev-parse HEAD)"
 
-          git_log="$(git log --oneline --format="%s" $current_hash..$latest_hash)"
+          git_log="$(git log --oneline --format="%s" "$current_hash".."$latest_hash")"
 
           echo "current_hash=$current_hash"
           echo "latest_hash =$latest_hash"
           echo "$git_log"
 
-          echo "current_hash=$current_hash" >> $GITHUB_OUTPUT
-          echo "latest_hash=$latest_hash" >> $GITHUB_OUTPUT
+          echo "current_hash=$current_hash" >> "$GITHUB_OUTPUT"
+          echo "latest_hash=$latest_hash" >> "$GITHUB_OUTPUT"
           {
             echo "git_log<<EOF"
             echo "$git_log"
             echo "EOF"
-          } >> $GITHUB_OUTPUT
+          } >> "$GITHUB_OUTPUT"
 
       - name: Update CMakeLists.txt
         if: ${{ steps.pull_head.outputs.current_hash != steps.pull_head.outputs.latest_hash }}
