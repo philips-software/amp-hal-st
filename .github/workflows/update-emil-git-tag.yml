@@ -29,7 +29,7 @@ jobs:
           git pull
           latest_hash="$(git rev-parse HEAD)"
 
-          git_log="$(git log --oneline --format="%s" "$current_hash".."$latest_hash")"
+          git_log="```\n$(git log --oneline --format="%s" "$current_hash".."$latest_hash")\n```"
 
           echo "current_hash=$current_hash"
           echo "latest_hash =$latest_hash"
@@ -39,7 +39,7 @@ jobs:
             echo "current_hash=$current_hash"
             echo "latest_hash=$latest_hash"
             echo "git_log<<EOF"
-            echo "```\n$git_log\n```"
+            echo "$git_log"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
