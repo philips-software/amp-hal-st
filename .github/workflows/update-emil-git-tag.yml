@@ -5,6 +5,7 @@ on:
   schedule:
     - cron: "0 6 * * *"
   workflow_dispatch:
+  push:
 
 permissions:
   contents: read
@@ -51,9 +52,16 @@ jobs:
           sed -i 's/${{ steps.pull_head.outputs.current_hash }}/${{ steps.pull_head.outputs.latest_hash }}/g' CMakeLists.txt
           rm -rf ninja-build
 
+      - uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1.11.0
+        id: token
+        with:
+          app-id: ${{ vars.FOREST_RELEASER_APP_ID }}
+          private-key: ${{ secrets.FOREST_RELEASER_APP_PRIVATE_KEY }}
+
       - uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
         if: ${{ steps.pull_head.outputs.current_hash != steps.pull_head.outputs.latest_hash }}
         with:
+          token: ${{ steps.token.outputs.token }}
           commit-message: "chore: update amp-embedded-infra-lib hash to ${{ steps.pull_head.outputs.latest_hash }}"
           title: "chore: update amp-embedded-infra-lib hash to ${{ steps.pull_head.outputs.latest_hash }}"
           body: |
