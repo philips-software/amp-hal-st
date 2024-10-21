@@ -35,9 +35,9 @@ jobs:
           echo "latest_hash =$latest_hash"
           echo "$git_log"
 
-          echo "current_hash=$current_hash" >> "$GITHUB_OUTPUT"
-          echo "latest_hash=$latest_hash" >> "$GITHUB_OUTPUT"
           {
+            echo "current_hash=$current_hash"
+            echo "latest_hash=$latest_hash"
             echo "git_log<<EOF"
             echo "$git_log"
             echo "EOF"
