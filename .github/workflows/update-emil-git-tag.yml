@@ -24,12 +24,12 @@ jobs:
         run: |
           cmake --preset host
           cd ./build/host/_deps/emil-src
-          current_hash=$(git rev-parse HEAD)
+          current_hash="$(git rev-parse HEAD)"
           git switch main
           git pull
-          latest_hash=$(git rev-parse HEAD)
+          latest_hash="$(git rev-parse HEAD)"
 
-          git_log=$(git log --oneline --format="%s" $current_hash..$latest_hash)
+          git_log="$(git log --oneline --format="%s" $current_hash..$latest_hash)"
 
           echo "current_hash=$current_hash"
           echo "latest_hash =$latest_hash"
@@ -52,6 +52,6 @@ jobs:
       - uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
         if: ${{ steps.pull_head.outputs.current_hash != steps.pull_head.outputs.latest_hash }}
         with:
-          commit-message: "chore: Update amp-embedded-infra-lib FetchContent hash to ${{ steps.pull_head.outputs.latest_hash }}"
-          title: "chore: Update amp-embedded-infra-lib FetchContent hash to ${{ steps.pull_head.outputs.latest_hash }}"
+          commit-message: "chore: update amp-embedded-infra-lib hash to ${{ steps.pull_head.outputs.latest_hash }}"
+          title: "chore: update amp-embedded-infra-lib hash to ${{ steps.pull_head.outputs.latest_hash }}"
           body: ${{ steps.pull_head.outputs.git_log }}
