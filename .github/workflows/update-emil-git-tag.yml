@@ -3,9 +3,8 @@ name: Update amp-embedded-infra-lib Git Tag
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
   workflow_dispatch:
-
 
 permissions:
   contents: read
@@ -57,4 +56,9 @@ jobs:
         with:
           commit-message: "chore: update amp-embedded-infra-lib hash to ${{ steps.pull_head.outputs.latest_hash }}"
           title: "chore: update amp-embedded-infra-lib hash to ${{ steps.pull_head.outputs.latest_hash }}"
-          body: ${{ steps.pull_head.outputs.git_log }}
+          body: |
+            commits on amp-embedded-infra-lib:
+
+            ```
+            ${{ steps.pull_head.outputs.git_log }}
+            ```
