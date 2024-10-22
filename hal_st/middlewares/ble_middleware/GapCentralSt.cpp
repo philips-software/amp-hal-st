@@ -54,6 +54,8 @@ namespace hal
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
+        really_assert(initiatingTimeout >= std::chrono::milliseconds(20) && initiatingTimeout <= std::chrono::milliseconds(10240)); // initiating timeout should be between the minimum and maximum values of advertising interval
+
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
         aci_gap_create_connection(
