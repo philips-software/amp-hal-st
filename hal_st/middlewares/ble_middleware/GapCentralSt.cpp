@@ -13,25 +13,6 @@ namespace hal
         50, // 500 ms
     };
 
-    constexpr infra::Duration ToDuration(uint32_t time, float factor)
-    {
-        return std::chrono::milliseconds(static_cast<uint32_t>(ceilf(time * 0.625f)));
-    }
-
-    constexpr infra::Duration ConnectionCreationTimeout(infra::Duration scanWindow, const services::GapConnectionParameters& connectionParameters)
-    {
-        // BLUETOOTH CORE SPEC: 5.3 | Vol 6, PartB, 4.5.3. The max values were considered.
-        const auto maxTransmitWindowDelay = std::chrono::milliseconds(4);
-        const auto maxTransmitWindowOffset = ToDuration(connectionParameters.maxConnIntMultiplier, 1.25f);
-        const auto maxTransmitWindowSize = std::chrono::milliseconds(10);
-
-        // BLUETOOTH CORE SPEC: 5.3 | Vol 6, PartD, 5.5.
-        const auto maxNumberOfConnIntervalWithNoPacktesFromPeerDevice = 6;
-        const auto timeoutConnectionEstablishment = maxTransmitWindowOffset * maxNumberOfConnIntervalWithNoPacktesFromPeerDevice;
-
-        return scanWindow + maxTransmitWindowDelay + maxTransmitWindowOffset + maxTransmitWindowSize + timeoutConnectionEstablishment;
-    }
-
     // Connection Interval parameters
     const uint16_t minConnectionEventLength = 0;
     const uint16_t maxConnectionEventLength = 0x280; // 400 ms
@@ -71,7 +52,7 @@ namespace hal
             });
     }
 
-    void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
@@ -86,7 +67,7 @@ namespace hal
                 observer.StateChanged(services::GapState::initiating);
             });
 
-        initiatingStateTimer.Start(ConnectionCreationTimeout(ToDuration(leScanWindow, 0.625f), connectionUpdateParameters), [this]()
+        initiatingStateTimer.Start(initiatingTimeout, [this]()
             {
                 aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
             });
