@@ -17,6 +17,7 @@ namespace hal
 
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
+        void CancelConnect() override;
         void Disconnect() override;
         void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;

@@ -75,6 +75,15 @@ namespace hal
             });
     }
 
+    void GapCentralSt::CancelConnect()
+    {
+        if (initiatingStateTimer.Armed())
+        {
+            initiatingStateTimer.Cancel();
+            aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
+        }
+    }
+
     void GapCentralSt::Disconnect()
     {
         aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
