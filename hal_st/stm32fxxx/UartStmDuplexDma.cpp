@@ -7,21 +7,12 @@ namespace hal
     namespace
     {
         uint32_t defaultRxTimeout = 16;
-
-        volatile void* ReceiveRegister(uint8_t uartIndex)
-        {
-#if defined(USART_RDR_RDR)
-            return &peripheralUart[uartIndex]->RDR;
-#else
-            return &peripheralUart[uartIndex]->DR;
-#endif
-        }
     }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -30,13 +21,13 @@ namespace hal
                 FullReceiveComplete();
             } }
     {
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
+        uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -45,13 +36,13 @@ namespace hal
                 FullReceiveComplete();
             } }
     {
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
+        uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
     UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
         : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
         , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, ReceiveRegister(uartIndex), 1, [this]
+        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
                 HalfReceiveComplete();
             },
@@ -60,13 +51,13 @@ namespace hal
                 FullReceiveComplete();
             } }
     {
-        peripheralUart[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
+        uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
     UartStmDuplexDma::~UartStmDuplexDma()
     {
         receiveDmaChannel.StopTransfer();
-        peripheralUart[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+        uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
         DisableClockUart(uartIndex);
     }
 
@@ -80,9 +71,9 @@ namespace hal
         {
             receiveDmaChannel.StartReceive(rxBuffer);
 
-            peripheralUart[uartIndex]->CR2 |= USART_CR2_RTOEN;
-            peripheralUart[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RTOIE;
-            peripheralUart[uartIndex]->RTOR = defaultRxTimeout;
+            uartArray[uartIndex]->CR2 |= USART_CR2_RTOEN;
+            uartArray[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RTOIE;
+            uartArray[uartIndex]->RTOR = defaultRxTimeout;
         }
     }
 
@@ -112,9 +103,9 @@ namespace hal
 
     void UartStmDuplexDma::Invoke()
     {
-        if (peripheralUart[uartIndex]->ISR & USART_ISR_RTOF)
+        if (uartArray[uartIndex]->ISR & USART_ISR_RTOF)
         {
-            peripheralUart[uartIndex]->ICR = USART_ICR_RTOCF;
+            uartArray[uartIndex]->ICR = USART_ICR_RTOCF;
 
             const auto receivedSize = receiveDmaChannel.ReceivedSize();
 

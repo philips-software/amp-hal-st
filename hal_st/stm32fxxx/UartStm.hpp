@@ -57,6 +57,7 @@ namespace hal
     protected:
         uint8_t uartIndex;
         infra::Function<void(infra::ConstByteRange data)> dataReceived;
+        infra::MemoryRange<USART_TypeDef* const> uartArray;
 
     private:
         void UartStmHalInit(const Config& config, bool hasFlowControl);
@@ -76,8 +77,6 @@ namespace hal
 
         infra::MemoryRange<const uint8_t> sendData;
         bool sending = false;
-
-        infra::MemoryRange<USART_TypeDef* const> uartArray;
         infra::MemoryRange<IRQn_Type const> uartIrqArray;
     };
 }
