@@ -51,8 +51,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     EthernetMacStm.hpp
     EthernetSmiStm.cpp
     EthernetSmiStm.hpp
-    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:FlashInternalStm.cpp>
-    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:FlashInternalStm.hpp>
+    FlashInternalStm.cpp
+    FlashInternalStm.hpp
     GpioStm.cpp
     GpioStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>

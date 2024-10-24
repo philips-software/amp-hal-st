@@ -1,18 +1,40 @@
 #include "hal_st/stm32fxxx/FlashInternalStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "services/util/FlashAlign.hpp"
+#include <cstdint>
+
+namespace
+{
+#if defined(STM32H5)
+    uint32_t GetBank(const uint8_t* memoryBegin)
+    {
+        auto address = reinterpret_cast<uint32_t>(memoryBegin);
+        if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK) == 0)
+        {
+            // No Bank swap
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
+        }
+        else
+        {
+            // Bank swap
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
+        }
+    }
+#endif
+}
 
 namespace hal
 {
     FlashInternalStmBase::FlashInternalStmBase(infra::ConstByteRange flashMemory)
         : flashMemory(flashMemory)
-    {}
+    {
+    }
 
     void FlashInternalStmBase::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
         HAL_FLASH_Unlock();
 
-#if defined(STM32WBA)
+#if defined(STM32WBA) || defined(STM32H5)
         AlignedWriteBuffer(buffer, address);
 #elif defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         AlignedWriteBuffer<uint64_t, FLASH_TYPEPROGRAM_DOUBLEWORD>(buffer, address);
@@ -30,7 +52,7 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3)
         AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD>(buffer, address);
-#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0) && !defined(STM32WBA)
+#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0) && !defined(STM32WBA) && !defined(STM32H5)
         for (uint8_t byte : buffer)
         {
             auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
@@ -64,6 +86,18 @@ namespace hal
 
         auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
         really_assert(result == HAL_OK);
+
+#elif defined(STM32H5)
+        uint32_t sectorError = 0;
+
+        FLASH_EraseInitTypeDef eraseInitStruct{};
+        eraseInitStruct.Banks = GetBank(flashMemory.begin());
+        eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+        eraseInitStruct.Sector = beginIndex;
+        eraseInitStruct.NbSectors = endIndex - beginIndex;
+
+        auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
+        really_assert(result == HAL_OK);
 #else
         for (uint32_t index = beginIndex; index != endIndex; ++index)
         {
@@ -74,7 +108,8 @@ namespace hal
 #endif
 
             while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_EOP))
-            {}
+            {
+            }
         }
 #endif
 
@@ -105,8 +140,9 @@ namespace hal
         }
     }
 
-#ifdef STM32WBA
+#if defined(STM32WBA) || defined(STM32H5)
     const uint8_t alignment = sizeof(uint64_t) * 2;
+
     void FlashInternalStmBase::AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address)
     {
         services::FlashAlign::WithAlignment<alignment> flashAlign;
