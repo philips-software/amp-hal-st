@@ -57,8 +57,6 @@ namespace hal
     UartStmDuplexDma::~UartStmDuplexDma()
     {
         receiveDmaChannel.StopTransfer();
-        uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-        DisableClockUart(uartIndex);
     }
 
     void UartStmDuplexDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)

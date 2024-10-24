@@ -46,12 +46,6 @@ namespace hal
     }
 #endif
 
-    UartStmDma::~UartStmDma()
-    {
-        uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-        DisableClockUart(uartIndex);
-    }
-
     void UartStmDma::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
     {
         if (!data.empty())
