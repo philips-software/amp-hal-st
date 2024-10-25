@@ -194,10 +194,7 @@
       "name": "host-Debug-WithPackage",
       "configuration": "Debug",
       "configurePreset": "host",
-      "targets": [
-        "all",
-        "package"
-      ]
+      "targets": ["all", "package"]
     },
     {
       "name": "host-RelWithDebInfo",
@@ -213,9 +210,7 @@
       "name": "release-package",
       "configuration": "MinSizeRel",
       "configurePreset": "host-single-MinSizeRel",
-      "targets": [
-        "package"
-      ]
+      "targets": ["package"]
     },
     {
       "name": "stm32wb55-RelWithDebInfo",
