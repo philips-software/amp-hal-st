@@ -54,8 +54,6 @@ namespace hal
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
-        really_assert(initiatingTimeout >= std::chrono::milliseconds(20) && initiatingTimeout <= std::chrono::milliseconds(10240)); // initiating timeout should be between the minimum and maximum values of advertising interval
-
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
         aci_gap_create_connection(
@@ -252,11 +250,10 @@ namespace hal
 
     void GapCentralSt::HandleGapDirectConnectionProcedureCompleteEvent()
     {
-        if (!initiatingStateTimer.Armed())
-            infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-                {
-                    observer.StateChanged(services::GapState::standby);
-                });
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+            {
+                observer.StateChanged(services::GapState::standby);
+            });
     }
 
     void GapCentralSt::MtuExchange() const
