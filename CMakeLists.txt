@@ -19,7 +19,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        c58b2ce19e6795ec873ab687e97d126de2adbd1b # unreleased
+        GIT_TAG        bcfe895ad4509290a47759763412e638f600a0a6 # unreleased
     )
     FetchContent_MakeAvailable(emil)
 
@@ -27,7 +27,7 @@ if (HALST_STANDALONE)
         FetchContent_Declare(
             cucumber-cpp-runner
             GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        bcfe895ad4509290a47759763412e638f600a0a6 # unreleased
+            GIT_TAG        70c424e53f532f520d96a303b6586272d3efc5f5 # unreleased
         )
 
         FetchContent_MakeAvailable(cucumber-cpp-runner)
