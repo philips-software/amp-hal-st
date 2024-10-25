@@ -158,7 +158,7 @@ namespace hal
         if (gapProcedureEvent.Procedure_Code == GAP_LIMITED_DISCOVERY_PROC || gapProcedureEvent.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC)
             HandleGapDiscoveryProcedureEvent();
         else if (gapProcedureEvent.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
-            HandleGapDirectConnectionProcedureEvent();
+            HandleGapDirectConnectionProcedureCompleteEvent();
     }
 
     void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -250,7 +250,7 @@ namespace hal
             });
     }
 
-    void GapCentralSt::HandleGapDirectConnectionProcedureEvent()
+    void GapCentralSt::HandleGapDirectConnectionProcedureCompleteEvent()
     {
         if (!initiatingStateTimer.Armed())
             infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
