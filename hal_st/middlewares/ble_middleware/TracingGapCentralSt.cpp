@@ -7,13 +7,15 @@ namespace hal
         , tracer(tracer)
     {}
 
-    void TracingGapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void TracingGapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
         tracer.Trace() << "TracingGapCentralSt::Connect, MAC address: "
                        << infra::AsMacAddress(macAddress)
                        << ", type: "
-                       << addressType;
-        GapCentralSt::Connect(macAddress, addressType);
+                       << addressType
+                       << ", initiating timeout (ms): "
+                       << std::chrono::duration_cast<std::chrono::milliseconds>(initiatingTimeout).count();
+        GapCentralSt::Connect(macAddress, addressType, initiatingTimeout);
     }
 
     void TracingGapCentralSt::Disconnect()
