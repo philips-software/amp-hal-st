@@ -12,6 +12,7 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
     infra.timer
     st.hal_driver
     hal_st.cortex
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:hal_st.stm32_wpan>
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
@@ -53,6 +54,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     EthernetSmiStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:FlashInternalStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:FlashInternalStm.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.hpp>
     GpioStm.cpp
     GpioStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>
