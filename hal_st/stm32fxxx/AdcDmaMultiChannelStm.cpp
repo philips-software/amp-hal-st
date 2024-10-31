@@ -31,7 +31,7 @@ namespace hal
         auto result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_SINGLE_ENDED);
         assert(result == HAL_OK);
 #elif defined(IS_ADC_CALFACT)
-        auto result = HAL_ADCEx_Calibration_Start(&handle);        
+        auto result = HAL_ADCEx_Calibration_Start(&adc.Handle());        
         assert(result == HAL_OK);
 #endif
 
