@@ -46,6 +46,8 @@ namespace hal
 
 #ifdef ADC_SINGLE_ENDED
         result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_SINGLE_ENDED);
+#elif defined(IS_ADC_CALFACT)
+        result = HAL_ADCEx_Calibration_Start(&adc.Handle());
 #endif
         assert(result == HAL_OK);
     }
