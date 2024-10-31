@@ -1,6 +1,13 @@
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
-#include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "hal_st/stm32fxxx/DmaStm.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/UartStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
+#include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -55,17 +62,6 @@ namespace hal
         }
         else
             infra::EventDispatcher::Instance().Schedule(actionOnCompletion);
-    }
-
-    void UartStmDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
-    {
-        this->dataReceived = dataReceived;
-
-#if defined(STM32F4) || defined(STM32G4)
-        uartArray[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
-#else
-        uartArray[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
-#endif
     }
 
     void UartStmDma::TransferComplete()
