@@ -2,7 +2,11 @@
 #ifndef HAL_FLASH_INTERNAL_STM_BLE_HPP
 #define HAL_FLASH_INTERNAL_STM_BLE_HPP
 
+#include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStm.hpp"
+#include "infra/util/Function.hpp"
+#include "services/util/FlashAlign.hpp"
+#include <cstdint>
 
 namespace hal
 {
@@ -10,19 +14,33 @@ namespace hal
         : public FlashHomogeneousInternalStm
     {
     public:
+        static constexpr uint32_t hwFlashSemaphoreId = 2;
+        static constexpr uint32_t hwBlockFlashReqByCpu2 = 7;
+
         FlashInternalStmBle(uint32_t numberOfSectors, uint32_t sizeOfEachSector, infra::ConstByteRange flashMemory);
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
 
     private:
-        template<typename alignment, uint32_t flashType>
-        void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
-        void EraseSingleSector(uint32_t index);
-        uint32_t EnterSingleFlashOperation();
-        void ExitSingleFlashOperation(uint32_t);
+        void WaitForHwSemaphore(uint32_t hsemId, infra::Function<void()> onAvailable);
+        void HsemInterruptHandler();
+        void TryFlashWrite();
+        void FlashSingleWrite();
+        void TryFlashErase();
+        void FlashSingleErase();
 
         infra::ConstByteRange flashMemory;
+        ImmediateInterruptHandler hwSemInterruptHandler;
+        infra::Function<void()> onHwSemaphoreAvailable;
+
+        services::FlashAlign::WithAlignment<sizeof(uint64_t)> flashAlign;
+        services::FlashAlign::Chunk* chunkToWrite;
+        infra::Function<void()> onWriteDone;
+
+        uint32_t currentEraseIndex;
+        uint32_t endEraseIndex;
+        infra::Function<void()> onEraseDone;
     };
 }
 
