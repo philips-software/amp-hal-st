@@ -1,6 +1,15 @@
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
-#include "generated/stm32fxxx/PeripheralTable.hpp"
-#include "infra/event/EventDispatcher.hpp"
+#include "hal_st/stm32fxxx/DmaStm.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/UartStmDma.hpp"
+#include "infra/util/ByteRange.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
+#include "infra/util/ReallyAssert.hpp"
+#include <cstddef>
+#include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -64,14 +73,17 @@ namespace hal
         this->dataReceived = dataReceived;
 
         if (dataReceived == nullptr)
+        {
+            uartArray[uartIndex]->CR1 &= ~USART_CR1_RE;
             receiveDmaChannel.StopTransfer();
+        }
         else
         {
             receiveDmaChannel.StartReceive(rxBuffer);
 
             uartArray[uartIndex]->CR2 |= USART_CR2_RTOEN;
-            uartArray[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RTOIE;
             uartArray[uartIndex]->RTOR = defaultRxTimeout;
+            uartArray[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RTOIE;
         }
     }
 

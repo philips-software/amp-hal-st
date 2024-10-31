@@ -1,8 +1,15 @@
 #include "hal_st/stm32fxxx/UartStm.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/ByteRange.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include "infra/util/ReallyAssert.hpp"
+#include <cstdint>
+
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -62,7 +69,7 @@ namespace hal
         uartHandle.Init.WordLength = config.parity == USART_PARITY_NONE ? USART_WORDLENGTH_8B : USART_WORDLENGTH_9B;
         uartHandle.Init.StopBits = USART_STOPBITS_1;
         uartHandle.Init.Parity = config.parity;
-        uartHandle.Init.Mode = USART_MODE_TX_RX;
+        uartHandle.Init.Mode = USART_MODE_TX;
         uartHandle.Init.HwFlowCtl = hasFlowControl ? UART_HWCONTROL_RTS_CTS : UART_HWCONTROL_NONE;
 #if defined(UART_ONE_BIT_SAMPLE_ENABLE)
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
@@ -112,9 +119,9 @@ namespace hal
         this->dataReceived = dataReceived;
 
         if (dataReceived == nullptr)
-            uartArray[uartIndex]->CR1 &= ~USART_CR1_RXNEIE;
+            uartArray[uartIndex]->CR1 &= ~(USART_CR1_RE | USART_CR1_RXNEIE);
         else
-            uartArray[uartIndex]->CR1 |= USART_CR1_RXNEIE;
+            uartArray[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RXNEIE;
     }
 
     void UartStm::RegisterInterrupt(const Config& config)
@@ -124,8 +131,9 @@ namespace hal
 
     void UartStm::TransferComplete()
     {
-        infra::EventDispatcher::Instance().Schedule(transferDataComplete);
+        infra::Function<void()> callback = transferDataComplete;
         transferDataComplete = nullptr;
+        infra::EventDispatcher::Instance().Schedule(callback);
     }
 
     void UartStm::Invoke()

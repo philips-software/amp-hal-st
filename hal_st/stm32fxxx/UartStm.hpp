@@ -1,10 +1,13 @@
 #ifndef HAL_UART_STM_HPP
 #define HAL_UART_STM_HPP
 
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "infra/util/ByteRange.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
+#include <cstdint>
 
 namespace hal
 {
