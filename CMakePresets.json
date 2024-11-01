@@ -17,7 +17,8 @@
       "inherits": "defaults",
       "cacheVariables": {
         "CMAKE_CONFIGURATION_TYPES": "Debug;Release;RelWithDebInfo;MinSizeRel",
-        "EMIL_BUILD_ECHO_COMPILERS": true
+        "EMIL_BUILD_ECHO_COMPILERS": true,
+        "EMIL_FETCH_ECHO_COMPILERS": false
       },
       "generator": "Ninja Multi-Config"
     },
