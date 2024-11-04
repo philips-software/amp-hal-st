@@ -1,9 +1,11 @@
 #ifndef HAL_UART_STM_DMA_HPP
 #define HAL_UART_STM_DMA_HPP
 
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/UartStm.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include <cstdint>
 
 namespace hal
@@ -22,7 +24,6 @@ namespace hal
 #endif
 
         void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
-        void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
         void TransferComplete();

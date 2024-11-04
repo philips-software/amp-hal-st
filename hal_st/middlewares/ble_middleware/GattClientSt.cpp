@@ -304,14 +304,12 @@ namespace hal
 
         really_assert(gattIndicationEvent.Connection_Handle == connectionHandle);
 
-        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattIndicationEvent, &data](auto& observer)
+        infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([this, &gattIndicationEvent, &data](auto& observer)
             {
-                observer.UpdateReceived(gattIndicationEvent.Attribute_Handle, data);
-            });
-
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, &gattIndicationEvent]()
-            {
-                this->HandleGattConfirmIndication(gattIndicationEvent.Attribute_Handle);
+                observer.IndicationReceived(gattIndicationEvent.Attribute_Handle, data, [this, &gattIndicationEvent]()
+                    {
+                        this->HandleGattConfirmIndication(gattIndicationEvent.Attribute_Handle);
+                    });
             });
     }
 
@@ -325,7 +323,7 @@ namespace hal
 
         infra::Subject<services::GattClientStackUpdateObserver>::NotifyObservers([&gattNotificationEvent, &data](auto& observer)
             {
-                observer.UpdateReceived(gattNotificationEvent.Attribute_Handle, data);
+                observer.NotificationReceived(gattNotificationEvent.Attribute_Handle, data);
             });
     }
 
