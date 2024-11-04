@@ -250,10 +250,11 @@ namespace hal
 
     void GapCentralSt::HandleGapDirectConnectionProcedureCompleteEvent()
     {
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-            {
-                observer.StateChanged(services::GapState::standby);
-            });
+        if (!initiatingStateTimer.Armed())
+            infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+                {
+                    observer.StateChanged(services::GapState::standby);
+                });
     }
 
     void GapCentralSt::MtuExchange() const
