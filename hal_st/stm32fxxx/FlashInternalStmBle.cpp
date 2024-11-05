@@ -1,13 +1,15 @@
 #include "hal_st/stm32fxxx/FlashInternalStmBle.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "shci.h"
+#include "st/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_def.h"
 #include "stm32wbxx_ll_hsem.h"
 
 namespace hal
 {
-    FlashInternalStmBle::FlashInternalStmBle(uint32_t numberOfSectors, uint32_t sizeOfEachSector, infra::ConstByteRange flashMemory)
+    FlashInternalStmBle::FlashInternalStmBle(uint32_t numberOfSectors, uint32_t sizeOfEachSector, infra::ConstByteRange flashMemory, WatchDogStm& watchdog)
         : FlashHomogeneousInternalStm(numberOfSectors, sizeOfEachSector, flashMemory)
         , flashMemory(flashMemory)
+        , watchdog(watchdog)
         , hwSemInterruptHandler(HSEM_IRQn, [this]()
               {
                   HsemInterruptHandler();
@@ -39,13 +41,6 @@ namespace hal
         endEraseIndex = endIndex;
         onEraseDone = onDone;
         TryFlashErase();
-        // // for (uint32_t i = beginIndex; i < endIndex; ++i)
-        // //     EraseSingleSector(i);
-        // SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
-        // HAL_FLASH_Lock();
-        // LL_HSEM_ReleaseLock(HSEM, hwFlashSemaphoreId, 0);
-
-        // infra::EventDispatcher::Instance().Schedule(onDone);
     }
 
     void FlashInternalStmBle::WaitForHwSemaphore(uint32_t hsemId, infra::Function<void()> onAvailable)
@@ -59,20 +54,6 @@ namespace hal
             HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(hsemId));
         }
     }
-
-    // void FlashInternalStmBle::EraseSingleSector(uint32_t index)
-    // {
-    //     uint32_t pageError = 0;
-    //     FLASH_EraseInitTypeDef eraseInitStruct;
-    //     eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-    //     eraseInitStruct.Page = index;
-    //     eraseInitStruct.NbPages = 1;
-
-    //     auto primaskBit = EnterSingleFlashOperation();
-    //     auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
-    //     really_assert(result == HAL_OK || result == HAL_TIMEOUT);
-    //     ExitSingleFlashOperation(primaskBit);
-    // }
 
     void FlashInternalStmBle::HsemInterruptHandler()
     {
@@ -102,18 +83,18 @@ namespace hal
     {
         uint32_t primaskBit = __get_PRIMASK();
         __disable_irq();
-
         bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
+
         if (lockCpu2FlashReq)
         {
             auto fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunkToWrite->alignedAddress);
             const uint64_t data = *reinterpret_cast<const uint64_t*>(chunkToWrite->data.begin());
             auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, fullAddress, data);
             really_assert(result == HAL_OK);
+            LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
             chunkToWrite = flashAlign.Next();
         }
 
-        LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
         __set_PRIMASK(primaskBit);
 
         if (!lockCpu2FlashReq)
@@ -141,10 +122,16 @@ namespace hal
 
     void FlashInternalStmBle::FlashSingleErase()
     {
+        /* Add at least 5us (CPU1 up to 64MHz) to guarantee that CPU2 can take SEM7 to protect BLE timing */
+        // for (volatile uint32_t i = 0; i < 35; i++)
+        //     ;
+
         uint32_t primaskBit = __get_PRIMASK();
         __disable_irq();
+        watchdog.Interrupt();
 
         bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
+
         if (lockCpu2FlashReq)
         {
             uint32_t pageError = 0;
@@ -155,10 +142,14 @@ namespace hal
             auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
             really_assert(result == HAL_OK);
             currentEraseIndex++;
+            LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
         }
 
-        LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
         __set_PRIMASK(primaskBit);
+        watchdog.Interrupt();
+
+        // while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_CFGBSY))
+        //     ;
 
         if (!lockCpu2FlashReq)
             WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
@@ -167,6 +158,6 @@ namespace hal
                     FlashSingleErase();
                 });
         else
-            TryFlashWrite();
+            TryFlashErase();
     }
 }
