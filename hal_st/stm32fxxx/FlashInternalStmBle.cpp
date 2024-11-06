@@ -81,8 +81,7 @@ namespace hal
 
     void FlashInternalStmBle::FlashSingleWrite()
     {
-        uint32_t primaskBit = __get_PRIMASK();
-        __disable_irq();
+        uint32_t primaskBit = EnterCriticalSection();
         bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
 
         if (lockCpu2FlashReq)
@@ -95,7 +94,7 @@ namespace hal
             chunkToWrite = flashAlign.Next();
         }
 
-        __set_PRIMASK(primaskBit);
+        ExitCriticalSection(primaskBit);
 
         if (!lockCpu2FlashReq)
             WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
@@ -125,11 +124,11 @@ namespace hal
         /* Add at least 5us (CPU1 up to 64MHz) to guarantee that CPU2 can take SEM7 to protect BLE timing */
         // for (volatile uint32_t i = 0; i < 35; i++)
         //     ;
+        debugPin1.Set(false);
+        debugPin1.Set(true);
+        debugPin1.Set(false);
 
-        uint32_t primaskBit = __get_PRIMASK();
-        __disable_irq();
-        watchdog.Interrupt();
-
+        uint32_t primaskBit = EnterCriticalSection();
         bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
 
         if (lockCpu2FlashReq)
@@ -145,19 +144,34 @@ namespace hal
             LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
         }
 
-        __set_PRIMASK(primaskBit);
-        watchdog.Interrupt();
-
-        // while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_CFGBSY))
-        //     ;
+        ExitCriticalSection(primaskBit);
 
         if (!lockCpu2FlashReq)
+        {
+            debugPin2.Set(false);
+            debugPin2.Set(true);
             WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
                 {
+                    debugPin2.Set(false);
                     HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
                     FlashSingleErase();
                 });
+        }
         else
             TryFlashErase();
+    }
+
+    uint32_t FlashInternalStmBle::EnterCriticalSection()
+    {
+        uint32_t primaskBit = __get_PRIMASK();
+        __disable_irq();
+        watchdog.Interrupt();
+        return primaskBit;
+    }
+
+    void FlashInternalStmBle::ExitCriticalSection(uint32_t primaskBit)
+    {
+        __set_PRIMASK(primaskBit);
+        watchdog.Interrupt();
     }
 }

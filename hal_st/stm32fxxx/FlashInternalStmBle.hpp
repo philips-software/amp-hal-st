@@ -4,6 +4,7 @@
 
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStm.hpp"
+#include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/WatchDogStm.hpp"
 #include "infra/util/Function.hpp"
 #include "services/util/FlashAlign.hpp"
@@ -30,6 +31,8 @@ namespace hal
         void FlashSingleWrite();
         void TryFlashErase();
         void FlashSingleErase();
+        uint32_t EnterCriticalSection();
+        void ExitCriticalSection(uint32_t primaskBit);
 
         infra::ConstByteRange flashMemory;
         WatchDogStm& watchdog;
@@ -43,6 +46,9 @@ namespace hal
         uint32_t currentEraseIndex;
         uint32_t endEraseIndex;
         infra::Function<void()> onEraseDone;
+
+        hal::GpioPinStm debugPin1{ hal::Port::D, 12 };
+        hal::GpioPinStm debugPin2{ hal::Port::D, 14 };
     };
 }
 
