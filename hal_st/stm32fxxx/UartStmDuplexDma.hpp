@@ -1,36 +1,27 @@
 #ifndef HAL_UART_STM_DUPLEX_DMA_HPP
 #define HAL_UART_STM_DUPLEX_DMA_HPP
 
-#include "hal/interfaces/SerialCommunication.hpp"
-#include "hal_st/cortex/InterruptCortex.hpp"
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/UartStm.hpp"
+#include "hal_st/stm32fxxx/UartStmDma.hpp"
+#include "infra/util/ByteRange.hpp"
+#include "infra/util/Function.hpp"
+#include "infra/util/MemoryRange.hpp"
+#include "infra/util/WithStorage.hpp"
+#include <array>
 #include <atomic>
+#include <cstddef>
 #include <cstdint>
-
-#include DEVICE_HEADER
 
 namespace hal
 {
-    namespace detail
-    {
-        struct UartStmDuplexDmaConfig
-        {
-            uint32_t baudrate{ 115200 };
-            hal::InterruptPriority priority{ hal::InterruptPriority::Normal };
-
-#if defined(UART_ADVFEATURE_SWAP_INIT)
-            bool swapTxRx{ false };
-#endif
-        };
-    }
-
     class UartStmDuplexDma
-        : public SerialCommunication
-        , private InterruptHandler
+        : public UartStmDma
     {
     public:
-        using Config = detail::UartStmDuplexDmaConfig;
+        using Config = detail::UartStmConfig;
 
         template<std::size_t RxBufferSize>
         using WithRxBuffer = infra::WithStorage<UartStmDuplexDma, std::array<uint8_t, RxBufferSize>>;
@@ -45,33 +36,25 @@ namespace hal
         ~UartStmDuplexDma();
 
         // Implementation of SerialCommunication
-        void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
         void HalfReceiveComplete();
         void FullReceiveComplete();
         void ReceiveComplete(size_t currentPosition);
-        void RegisterInterrupt(const Config& config);
-        void TransferComplete();
 
-        // Implementation of InterruptHandler
+        // Implementation InterruptHandler
         void Invoke() override;
 
     private:
+        volatile void* receiveRegister =
+#if defined(USART_RDR_RDR)
+            &peripheralUart[uartIndex]->RDR;
+#else
+            &peripheralUart[uartIndex]->DR;
+#endif
         infra::MemoryRange<uint8_t> rxBuffer;
-        uint8_t uartIndex;
-        PeripheralPinStm uartTx;
-        PeripheralPinStm uartRx;
-        PeripheralPinStm uartRts;
-        PeripheralPinStm uartCts;
-
-        hal::TransmitDmaChannel transmitDmaChannel;
         hal::CircularReceiveDmaChannel receiveDmaChannel;
-
-        infra::Function<void()> transferDataComplete;
-        infra::Function<void(infra::ConstByteRange data)> dataReceived;
-
         std::atomic<size_t> lastReceivedPosition{};
     };
 }

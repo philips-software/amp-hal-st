@@ -166,10 +166,7 @@ namespace hal
         auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
 
         if (connectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
-        {
             SetConnectionContext(connectionCompleteEvent.Connection_Handle, connectionCompleteEvent.Peer_Address_Type, &connectionCompleteEvent.Peer_Address[0]);
-            maxAttMtu = defaultMaxAttMtuSize;
-        }
     }
 
     void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -177,10 +174,7 @@ namespace hal
         auto connectionCompleteEvt = *reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
         if (connectionCompleteEvt.Status == BLE_STATUS_SUCCESS)
-        {
             SetConnectionContext(connectionCompleteEvt.Connection_Handle, connectionCompleteEvt.Peer_Address_Type, &connectionCompleteEvt.Peer_Address[0]);
-            maxAttMtu = defaultMaxAttMtuSize;
-        }
     }
 
     void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
@@ -338,6 +332,7 @@ namespace hal
             }
         };
 
+        maxAttMtu = defaultMaxAttMtuSize;
         connectionContext.connectionHandle = connectionHandle;
         connectionContext.peerAddressType = deducePeerAddressType(peerAddressType);
         std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
