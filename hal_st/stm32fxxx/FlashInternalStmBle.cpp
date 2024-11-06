@@ -158,7 +158,10 @@ namespace hal
                 });
         }
         else
-            TryFlashErase();
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    TryFlashErase();
+                });
     }
 
     uint32_t FlashInternalStmBle::EnterCriticalSection()
