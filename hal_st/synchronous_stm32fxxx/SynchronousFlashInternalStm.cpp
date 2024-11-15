@@ -1,6 +1,5 @@
 #include "hal_st/synchronous_stm32fxxx/SynchronousFlashInternalStm.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStmDetail.hpp"
-#include "services/util/FlashAlign.hpp"
 
 namespace
 {
@@ -14,6 +13,13 @@ namespace
         uint64_t high;
 #endif
     };
+
+#if defined(FLASH_DBANK_SUPPORT)
+    uint32_t GetBank(uint32_t sectorIndex)
+    {
+        return sectorIndex < FLASH_PAGE_NB ? FLASH_BANK_1 : FLASH_BANK_2;
+    }
+#endif
 }
 
 namespace hal
@@ -67,15 +73,35 @@ namespace hal
         HAL_FLASH_Unlock();
 
 #if defined(STM32WB) || defined(STM32G4) || defined(STM32G0) || defined(STM32WBA)
-        uint32_t pageError = 0;
 
-        FLASH_EraseInitTypeDef eraseInitStruct{};
-        eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-        eraseInitStruct.Page = beginIndex;
-        eraseInitStruct.NbPages = endIndex - beginIndex;
+        auto erase = [](uint32_t beginIndex, uint32_t nbPages, uint32_t bank)
+        {
+            uint32_t sectorError = 0;
 
-        auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
-        really_assert(result == HAL_OK);
+            FLASH_EraseInitTypeDef eraseInitStruct{};
+#if defined(FLASH_DBANK_SUPPORT)
+            eraseInitStruct.Banks = bank;
+#endif
+            eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+            eraseInitStruct.Page = beginIndex;
+            eraseInitStruct.NbPages = nbPages;
+
+            auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
+            really_assert(result == HAL_OK);
+        };
+
+#if defined(FLASH_DBANK_SUPPORT)
+        if (GetBank(beginIndex) == GetBank(endIndex - 1))
+            erase(beginIndex % FLASH_PAGE_NB, endIndex - beginIndex, GetBank(beginIndex));
+        else
+        {
+            erase(beginIndex, FLASH_PAGE_NB - beginIndex, FLASH_BANK_1);
+            erase(0, endIndex - FLASH_PAGE_NB + 1, FLASH_BANK_2);
+        }
+#else
+        erase(beginIndex, endIndex - beginIndex, 0);
+#endif
+
 #else
         for (uint32_t index = beginIndex; index != endIndex; ++index)
         {
