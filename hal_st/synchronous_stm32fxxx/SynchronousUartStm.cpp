@@ -34,21 +34,15 @@ namespace hal
         uartHandle.Init.Parity = USART_PARITY_NONE;
         uartHandle.Init.Mode = USART_MODE_TX_RX;
         uartHandle.Init.HwFlowCtl = flowControl;
-#if defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB)
-        uartHandle.Init.OverSampling = USART_OVERSAMPLING_8;
+#if defined(UART_ONE_BIT_SAMPLE_ENABLE)
         uartHandle.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_ENABLE;
-#else
-        uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
 #endif
+        uartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
+
         HAL_UART_Init(&uartHandle);
 
         peripheralUart[uartIndex]->CR2 &= ~USART_CLOCK_ENABLED;
-
-#if defined(STM32F0) || defined(STM32F1) || defined(STM32F3) || defined(STM32F7) || defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
-        peripheralUart[uartIndex]->CR1 |= 1 << (USART_IT_RXNE & USART_IT_MASK);
-#else
-        peripheralUart[uartIndex]->CR1 |= USART_IT_RXNE & USART_IT_MASK;
-#endif
+        peripheralUart[uartIndex]->CR1 |= USART_CR1_RXNEIE;
     }
 
     SynchronousUartStm::~SynchronousUartStm()
