@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/timer/Timer.hpp"
 
 namespace
 {
@@ -158,13 +159,20 @@ namespace hal
     {
         GapSt::HandleHciDisconnectEvent(eventPacket);
         UpdateState(services::GapState::standby);
+
+        if (connectionIntervalUpdateTimer.Armed())
+        {
+            connectionIntervalIndex = 0;
+            connectionIntervalUpdateTimer.Cancel();
+        }
     }
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
 
-        RequestConnectionParameterUpdate();
+        // RequestConnectionParameterUpdate();
+        StartConnectionIntervalUpdateSpike();
 
         UpdateState(services::GapState::connected);
     }
@@ -174,6 +182,25 @@ namespace hal
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
             connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
             connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
+    }
+
+    void GapPeripheralSt::StartConnectionIntervalUpdateSpike()
+    {
+        connectionIntervalIndex = 0;
+        connectionIntervalUpdateTimer.Start(
+            std::chrono::seconds(30), [this]()
+            {
+                aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
+                    connectionIntervals[connectionIntervalIndex], connectionIntervals[connectionIntervalIndex],
+                    connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
+                connectionIntervalIndex++;
+                if (connectionIntervalIndex == connectionIntervals.size())
+                {
+                    connectionIntervalUpdateTimer.Cancel();
+                    connectionIntervalIndex = 0;
+                }
+            },
+            infra::triggerImmediately);
     }
 
     void GapPeripheralSt::Initialize(const GapService& gapService)

@@ -2,6 +2,7 @@
 #define HAL_ST_GAP_PERIPHERAL_ST_HPP
 
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "infra/timer/Timer.hpp"
 #include "infra/util/BoundedVector.hpp"
 
 namespace hal
@@ -33,6 +34,7 @@ namespace hal
 
     private:
         void RequestConnectionParameterUpdate();
+        void StartConnectionIntervalUpdateSpike();
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);
         void UpdateResolvingList();
@@ -47,6 +49,10 @@ namespace hal
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;
 
         const Whitelist_Identity_Entry_t dummyPeer{ 0x01, { 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF } };
+
+        const std::array<uint16_t, 8> connectionIntervals{ 60, 60, 50, 40, 30, 20, 10, 6 };
+        uint8_t connectionIntervalIndex = 0;
+        infra::TimerRepeating connectionIntervalUpdateTimer;
     };
 }
 
