@@ -32,8 +32,8 @@ namespace hal
     }
 
     const services::GapConnectionParameters GapSt::connectionParameters{
-        30,
-        30,
+        6,
+        6,
         0,
         500,
     };

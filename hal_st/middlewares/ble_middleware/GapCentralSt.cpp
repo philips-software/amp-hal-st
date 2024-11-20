@@ -7,8 +7,8 @@
 namespace hal
 {
     const services::GapConnectionParameters GapCentralSt::connectionUpdateParameters{
-        30, // 7.5 ms
-        30, // 7.5 ms
+        6, // 7.5 ms
+        6, // 7.5 ms
         0,
         50, // 500 ms
     };
