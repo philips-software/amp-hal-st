@@ -121,9 +121,14 @@ jobs:
     name: Integration test
     runs-on: ubuntu-24.04
     needs: [embedded_build, host_build_test_ubuntu]
+    permissions:
+      packages: read
     services:
       flex:
         image: ghcr.io/philips-software/amp-postmaster:pr-5
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
