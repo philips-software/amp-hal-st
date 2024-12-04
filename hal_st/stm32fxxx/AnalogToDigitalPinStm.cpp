@@ -220,8 +220,10 @@ namespace hal
 
 #ifdef IS_ADC_SINGLE_DIFFERENTIAL
         result = HAL_ADCEx_Calibration_Start(&handle, ADC_SINGLE_ENDED);
-        assert(result == HAL_OK);
+#elif defined(IS_ADC_CALFACT)
+        result = HAL_ADCEx_Calibration_Start(&handle);
 #endif
+        assert(result == HAL_OK);
     }
 
     AdcStm::~AdcStm()
