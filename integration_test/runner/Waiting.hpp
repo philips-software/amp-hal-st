@@ -1,7 +1,7 @@
 #ifndef INTEGRATION_TEST_WAITING_HPP
 #define INTEGRATION_TEST_WAITING_HPP
 
-#include "cucumber-cpp/Context.hpp"
+#include "cucumber_cpp/library/Context.hpp"
 #include "infra/timer/Timer.hpp"
 
 namespace infra

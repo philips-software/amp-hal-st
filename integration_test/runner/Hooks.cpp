@@ -1,4 +1,4 @@
-#include "cucumber-cpp/Hooks.hpp"
+#include "cucumber_cpp/library/Hooks.hpp"
 #include "args.hxx"
 #include "generated/echo/Testing.pb.hpp"
 #include "hal/generic/SynchronousRandomDataGeneratorGeneric.hpp"

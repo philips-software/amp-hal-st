@@ -14,7 +14,7 @@ target_sources(integration_test.runner PRIVATE
 
 target_link_libraries(integration_test.runner PRIVATE
     args
-    cucumber-cpp-runner
+    cucumber_cpp.runner
     integration_test.logic
     hal.generic
     gtest
