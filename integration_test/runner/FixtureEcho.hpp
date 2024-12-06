@@ -25,6 +25,8 @@ namespace main_
     struct FixtureEchoSerial
         : FixtureEchoSerialBase
     {
+        using FixtureEchoSerialBase::FixtureEchoSerialBase;
+
         main_::EchoOnSesame<256> echoOnSesame{ bufferedSerial, serializerFactory };
 
         services::Echo& echo{ echoOnSesame.echo };
@@ -33,6 +35,8 @@ namespace main_
     struct FixtureTracingEchoSerial
         : FixtureEchoSerialBase
     {
+        using FixtureEchoSerialBase::FixtureEchoSerialBase;
+
         main_::TracingEchoOnSesame<256> echoOnSesame{ bufferedSerial, serializerFactory, services::GlobalTracer() };
 
         services::Echo& echo{ echoOnSesame.echo };

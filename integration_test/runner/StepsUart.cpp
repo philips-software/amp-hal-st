@@ -1,4 +1,4 @@
-#include "cucumber-cpp/Steps.hpp"
+#include "cucumber_cpp/library/Steps.hpp"
 #include "generated/echo/Testing.pb.hpp"
 #include "integration_test/logic/Tested.hpp"
 #include "integration_test/runner/Waiting.hpp"
