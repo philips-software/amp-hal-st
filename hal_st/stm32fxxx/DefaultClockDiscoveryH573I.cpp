@@ -48,5 +48,5 @@ void ConfigureDefaultClockDiscoveryH573I()
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
     RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
-    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7);
 }

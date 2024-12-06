@@ -122,7 +122,7 @@ TEST_F(FlashProxyTest, WriteBuffer)
                 });
         }));
 
-    infra::VerifyingFunctionMock<void()> onDone;
+    infra::VerifyingFunction<void()> onDone;
     flashProxy.WriteBuffer(infra::MakeRange(data), 1234, onDone);
 }
 
@@ -137,6 +137,6 @@ TEST_F(FlashProxyTest, EraseSectors)
                 });
         }));
 
-    infra::VerifyingFunctionMock<void()> onDone;
+    infra::VerifyingFunction<void()> onDone;
     flashProxy.EraseSectors(12, 34, onDone);
 }

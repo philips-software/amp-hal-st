@@ -15,6 +15,8 @@ namespace hal
             }
             else if (irq == -13 /*HardFault_IRQn*/)
                 ;
+            else if (irq == NonMaskableInt_IRQn)
+                ;
             else if (irq == PendSV_IRQn)
                 ;
             else if (irq == SysTick_IRQn)
@@ -33,6 +35,8 @@ namespace hal
                 NVIC_DisableIRQ(irq);
             }
             else if (irq == -13 /*HardFault_IRQn*/)
+                ;
+            else if (irq == NonMaskableInt_IRQn)
                 ;
             else if (irq == PendSV_IRQn)
                 ;

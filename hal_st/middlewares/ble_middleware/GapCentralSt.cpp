@@ -1,6 +1,8 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include <chrono>
+#include <cmath>
 
 namespace hal
 {
@@ -50,7 +52,7 @@ namespace hal
             });
     }
 
-    void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
@@ -59,6 +61,25 @@ namespace hal
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
             minConnectionEventLength, maxConnectionEventLength);
+
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+            {
+                observer.StateChanged(services::GapState::initiating);
+            });
+
+        initiatingStateTimer.Start(initiatingTimeout, [this]()
+            {
+                aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
+            });
+    }
+
+    void GapCentralSt::CancelConnect()
+    {
+        if (initiatingStateTimer.Armed())
+        {
+            initiatingStateTimer.Cancel();
+            aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
+        }
     }
 
     void GapCentralSt::Disconnect()
@@ -73,10 +94,9 @@ namespace hal
 
     void GapCentralSt::StartDeviceDiscovery()
     {
-        if (!discovering)
+        if (!std::exchange(discovering, true))
         {
             aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, GAP_RESOLVABLE_PRIVATE_ADDR, filterDuplicatesEnabled);
-            discovering = true;
             infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
                 {
                     observer.StateChanged(services::GapState::scanning);
@@ -86,16 +106,12 @@ namespace hal
 
     void GapCentralSt::StopDeviceDiscovery()
     {
-        if (discovering)
-        {
+        if (std::exchange(discovering, false))
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
-            discovering = false;
-        }
     }
 
     void GapCentralSt::AllowPairing(bool)
-    {
-    }
+    {}
 
     void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
@@ -117,14 +133,16 @@ namespace hal
             HandleAdvertisingReport(advertisingEvent.Advertising_Report[i]);
     }
 
-    void GapCentralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
-        GapSt::HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
+        GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
+        initiatingStateTimer.Cancel();
+    }
 
-        const auto evtConnectionUpdate = reinterpret_cast<hci_le_connection_update_complete_event_rp0*>(metaEvent->data);
-
-        connectionParameters.slaveLatency = evtConnectionUpdate->Conn_Latency;
-        connectionParameters.supervisorTimeoutMs = evtConnectionUpdate->Supervision_Timeout * 10;
+    void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+        initiatingStateTimer.Cancel();
     }
 
     void GapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -137,6 +155,8 @@ namespace hal
 
         if (gapProcedureEvent.Procedure_Code == GAP_LIMITED_DISCOVERY_PROC || gapProcedureEvent.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC)
             HandleGapDiscoveryProcedureEvent();
+        else if (gapProcedureEvent.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
+            HandleGapDirectConnectionProcedureCompleteEvent();
     }
 
     void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -184,12 +204,18 @@ namespace hal
         if (!IsTxDataLengthConfigured(dataLengthChangeEvent))
             onMtuExchangeDone = [this]()
             {
-                SetDataLength();
+                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                    {
+                        SetDataLength();
+                    });
             };
         else
             onMtuExchangeDone = [this]()
             {
-                SetPhy();
+                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                    {
+                        SetPhy();
+                    });
             };
 
         if (onDataLengthChanged)
@@ -222,6 +248,15 @@ namespace hal
             });
     }
 
+    void GapCentralSt::HandleGapDirectConnectionProcedureCompleteEvent()
+    {
+        if (!initiatingStateTimer.Armed())
+            infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+                {
+                    observer.StateChanged(services::GapState::standby);
+                });
+    }
+
     void GapCentralSt::MtuExchange() const
     {
         auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
@@ -232,7 +267,10 @@ namespace hal
     {
         onDataLengthChanged = [this]()
         {
-            SetPhy();
+            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                {
+                    SetPhy();
+                });
         };
 
         auto status = hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
