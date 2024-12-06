@@ -9,7 +9,8 @@
 #include "integration_test/logic/Gpio.hpp"
 #include "integration_test/logic/Tester.hpp"
 #include "integration_test/logic/Uart.hpp"
-#include "services/st_util/FlashOnStUartProgrammer.hpp"
+#include "services/st_util/FlashOnStBootloaderCommunicator.hpp"
+#include "services/st_util/StBootloaderCommunicatorUart.hpp"
 
 namespace main_
 {
@@ -74,7 +75,7 @@ namespace main_
             256 * 1024,
             256 * 1024 } };
 
-        services::StUartProgrammer programmer{
+        services::StBootloaderCommunicatorUart programmer{
             uart, [this]()
             {
                 this->onDone({});
@@ -84,7 +85,7 @@ namespace main_
                 this->onDone(reason);
             }
         };
-        services::FlashOnStUartProgrammer flashProgrammer{ infra::MakeRange(sectorSizes), programmer };
+        services::FlashHeterogeneousOnStBootloaderCommunicator flashProgrammer{ infra::MakeRange(sectorSizes), programmer };
         application::Flash flashOverEcho;
     };
 
