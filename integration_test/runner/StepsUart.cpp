@@ -1,7 +1,7 @@
 #include "cucumber-cpp/Steps.hpp"
 #include "generated/echo/Testing.pb.hpp"
+#include "infra/timer/Waiting.hpp"
 #include "integration_test/logic/Tested.hpp"
-#include "integration_test/runner/Waiting.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -34,7 +34,7 @@ namespace
 
 STEP("uart peripherals are enabled")
 {
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Emplace<UartObserver>(context.Get<services::Echo>());
 
@@ -45,7 +45,7 @@ STEP("uart peripherals are enabled")
                 });
         }));
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::TestedProxy>().RequestSend([&]()
                 {
@@ -58,7 +58,7 @@ STEP("uart peripherals are enabled")
                 });
         }));
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<application::TestedObserver>().ReceivedPong();
         }));
@@ -69,7 +69,7 @@ STEP("uart peripherals are enabled")
 
 STEP("uart duplex dma peripherals are enabled")
 {
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Emplace<UartObserver>(context.Get<services::Echo>());
 
@@ -80,7 +80,7 @@ STEP("uart duplex dma peripherals are enabled")
                 });
         }));
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::TestedProxy>().RequestSend([&]()
                 {
@@ -93,7 +93,7 @@ STEP("uart duplex dma peripherals are enabled")
                 });
         }));
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<application::TestedObserver>().ReceivedPong();
         }));
@@ -106,7 +106,7 @@ STEP("the tester sends UART data")
 {
     static const infra::BoundedVector<uint8_t>::WithMaxSize<32> expectedData{ { 1, 2, 3, 4, 5, 6 } };
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::UartTesterProxy>().RequestSend([&]()
                 {
@@ -120,7 +120,7 @@ STEP("the tested sends UART data")
 {
     static const infra::BoundedVector<uint8_t>::WithMaxSize<32> expectedData{ { 1, 2, 3, 4, 5, 6 } };
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::UartTestedProxy>().RequestSend([&]()
                 {
@@ -134,7 +134,7 @@ STEP("the tester sees UART data")
 {
     static const std::vector<uint8_t> expectedData{ 1, 2, 3, 4, 5, 6 };
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<UartObserver>().testerData == expectedData;
         }));
@@ -144,7 +144,7 @@ STEP("the tested sees UART data")
 {
     static const std::vector<uint8_t> expectedData{ 1, 2, 3, 4, 5, 6 };
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<UartObserver>().testedData == expectedData;
         }));
