@@ -13,7 +13,8 @@
 ///        DMA transfer is one shot mode.
 namespace hal
 {
-    class AdcDmaMultiChannelStmBase : public AdcMultiChannel
+    class AdcDmaMultiChannelStmBase
+        : public AdcMultiChannel
     {
     public:
         AdcDmaMultiChannelStmBase(
