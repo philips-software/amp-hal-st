@@ -151,6 +151,13 @@ namespace hal
         std::abort();
     }
 
+    hal::MacAddress GapSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
+    {
+        hal::MacAddress address = connectionContext.peerAddress;
+        aci_gap_resolve_private_addr(deviceAddress.data(), address.data());
+        return address;
+    }
+
     void GapSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
         auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
