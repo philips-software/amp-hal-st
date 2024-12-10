@@ -99,6 +99,12 @@ namespace hal
         GapCentralSt::NumericComparisonConfirm(accept);
     }
 
+    hal::MacAddress TracingGapCentralSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
+    {
+        tracer.Trace() << "TracingGapCentralSt::ResolveDeviceAddress";
+        return GapCentralSt::ResolveDeviceAddress(deviceAddress);
+    }
+
     void TracingGapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
         const auto disconnectEvt = reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);

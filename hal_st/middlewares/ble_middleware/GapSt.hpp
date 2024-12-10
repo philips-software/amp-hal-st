@@ -52,6 +52,7 @@ namespace hal
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
+        hal::MacAddress ResolveDeviceAddress(hal::MacAddress deviceAddress) const override;
 
     protected:
         GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
