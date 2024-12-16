@@ -25,6 +25,7 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
+        void GenerateOutOfBandData() override;
 
     protected:
         void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
@@ -42,10 +43,11 @@ namespace hal
         void HandleGapDirectConnectionProcedureCompleteEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
+        void HandleOobDataGeneration();
         void SetPhy() const;
         void SetDataLength();
         void MtuExchange() const;
-        void Initialize(const GapService& gapService);
+        void Initialize(const Configuration& configuration);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;

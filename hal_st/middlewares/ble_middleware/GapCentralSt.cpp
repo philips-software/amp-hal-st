@@ -1,8 +1,8 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
+#include "hal/interfaces/MacAddress.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
-#include <chrono>
-#include <cmath>
+#include "services/ble/Gap.hpp"
 
 namespace hal
 {
@@ -44,7 +44,7 @@ namespace hal
     GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : GapSt(hciEventSource, bondStorageSynchronizer, configuration)
     {
-        Initialize(configuration.gapService);
+        Initialize(configuration);
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
             {
@@ -57,7 +57,7 @@ namespace hal
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
         aci_gap_create_connection(
-            leScanInterval, leScanWindow, peerAddress, macAddress.data(), GAP_RESOLVABLE_PRIVATE_ADDR,
+            leScanInterval, leScanWindow, peerAddress, macAddress.data(), ownAddressType,
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
             minConnectionEventLength, maxConnectionEventLength);
@@ -96,7 +96,7 @@ namespace hal
     {
         if (!std::exchange(discovering, true))
         {
-            aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, GAP_RESOLVABLE_PRIVATE_ADDR, filterDuplicatesEnabled);
+            aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, ownAddressType, filterDuplicatesEnabled);
             infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
                 {
                     observer.StateChanged(services::GapState::scanning);
@@ -112,6 +112,13 @@ namespace hal
 
     void GapCentralSt::AllowPairing(bool)
     {}
+
+    void GapCentralSt::GenerateOutOfBandData()
+    {
+        const std::array<uint8_t, 8> events = {{ 0x9F, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }};
+        hci_le_set_event_mask(events.data()); // Enable public key generation event
+        GapSt::GenerateOutOfBandData();
+    }
 
     void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
     {
@@ -300,15 +307,15 @@ namespace hal
             });
     }
 
-    void GapCentralSt::Initialize(const GapService& gapService)
+    void GapCentralSt::Initialize(const Configuration& configuration)
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
 
-        aci_gap_init(GAP_CENTRAL_ROLE, PRIVACY_ENABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
+        aci_gap_init(GAP_CENTRAL_ROLE, configuration.privacy ? PRIVACY_ENABLED : PRIVACY_DISABLED, configuration.gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, configuration.gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(configuration.gapService.deviceName.data()));
+        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(configuration.gapService.appearance), reinterpret_cast<const uint8_t*>(&configuration.gapService.appearance));
 
-        SetIoCapabilities(services::GapPairing::IoCapabilities::none);
-        SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
+        SetIoCapabilities(configuration.security.ioCapabilities);
+        SetSecurityMode(configuration.security.securityMode, configuration.security.securityLevel);
     }
 }

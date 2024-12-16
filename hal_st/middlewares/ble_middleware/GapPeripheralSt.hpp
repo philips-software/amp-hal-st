@@ -25,19 +25,21 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
+        void GenerateOutOfBandData() override;
 
     protected:
         // Implementation of GapSt
         void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
+        void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
         void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
 
     private:
-        void RequestConnectionParameterUpdate();
+        void RequestConnectionParameterUpdate() const;
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);
         void UpdateResolvingList();
         void ClearResolvingList();
-        void Initialize(const GapService& gapService);
+        void Initialize(const Configuration& configuration);
 
     private:
         services::GapState state = services::GapState::standby;
