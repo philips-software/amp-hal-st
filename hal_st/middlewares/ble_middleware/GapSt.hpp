@@ -38,7 +38,7 @@ namespace hal
         };
 
         static constexpr Security justWorks{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1 };
-        static constexpr Security outOfBand{ services::GapPairing::IoCapabilities::display, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level4 };
+        static constexpr Security outOfBand{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level4 };
 
         struct Configuration
         {
@@ -75,18 +75,18 @@ namespace hal
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeReadLocalP256PublicKeyCompleteEvent(evt_le_meta_event* metaEvent);
 
         virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
@@ -112,7 +112,7 @@ namespace hal
 
         ConnectionContext connectionContext;
         uint8_t ownAddressType;
-         services::GapPairing::SecurityLevel securityLevel;
+        services::GapPairing::SecurityLevel securityLevel;
 
         const uint16_t invalidConnection = 0xffff;
 
