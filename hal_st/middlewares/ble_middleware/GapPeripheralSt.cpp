@@ -176,22 +176,13 @@ namespace hal
     void GapPeripheralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
-        RequestConnectionParameterUpdate();
         UpdateState(services::GapState::connected);
     }
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-        RequestConnectionParameterUpdate();
         UpdateState(services::GapState::connected);
-    }
-
-    void GapPeripheralSt::RequestConnectionParameterUpdate() const
-    {
-        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
-            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
-            connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
     void GapPeripheralSt::Initialize(const Configuration& configuration)
