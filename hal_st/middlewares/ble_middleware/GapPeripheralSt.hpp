@@ -35,7 +35,6 @@ namespace hal
         void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
 
     private:
-        void RequestConnectionParameterUpdate() const;
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);
         void UpdateResolvingList();

@@ -2,8 +2,8 @@
 #include "ble_defs.h"
 #include "ble_gap_aci.h"
 #include "ble_types.h"
-#include "services/ble/Gap.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "services/ble/Gap.hpp"
 
 namespace hal
 {
@@ -44,7 +44,7 @@ namespace hal
     {
         connectionContext.connectionHandle = GapSt::invalidConnection;
 
-        // HCI Reset to synchronise BLE Stack
+        // HCI Reset to synchronize BLE Stack
         hci_reset();
 
         // Write Identity root key used to derive LTK and CSRK
@@ -264,6 +264,7 @@ namespace hal
         uint8_t addressType = 0;
         hal::MacAddress address{};
         uint8_t dataSize = 0;
+        std::array<uint8_t, 16> temporaryKey{};
         std::array<uint8_t, 16> randomData{};
         std::array<uint8_t, 16> confirmData{};
 
@@ -271,13 +272,15 @@ namespace hal
         aci_gap_set_oob_data(0x00, 0x00, nullptr, 0x00, 0x00, nullptr);
 
         /* OOB data recovery */
-        auto status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
+        auto status = aci_gap_get_oob_data(0x00, &addressType, address.data(), &dataSize, temporaryKey.data());
+        really_assert(status == BLE_STATUS_SUCCESS && dataSize == temporaryKey.size());
+        status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
         really_assert(status == BLE_STATUS_SUCCESS && dataSize == randomData.size());
         status = aci_gap_get_oob_data(0x02, &addressType, address.data(), &dataSize, confirmData.data());
         really_assert(status == BLE_STATUS_SUCCESS && dataSize == confirmData.size());
 
         auto addressTypeConverted = addressType == GAP_PUBLIC_ADDR ? services::GapDeviceAddressType::publicAddress : services::GapDeviceAddressType::randomAddress;
-        services::GapPairingObserver::OutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
+        services::GapPairingObserver::OutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(temporaryKey), infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
 
         infra::Subject<services::GapPairingObserver>::NotifyObservers([outOfBandData](auto& observer)
             {
