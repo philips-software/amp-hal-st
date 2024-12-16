@@ -38,7 +38,7 @@ namespace hal
         };
 
         static constexpr Security justWorks{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1 };
-        static constexpr Security outOfBand{ services::GapPairing::IoCapabilities::display, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level4 };
+        static constexpr Security outOfBand{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level4 };
 
         struct Configuration
         {
@@ -112,7 +112,7 @@ namespace hal
 
         ConnectionContext connectionContext;
         uint8_t ownAddressType;
-         services::GapPairing::SecurityLevel securityLevel;
+        services::GapPairing::SecurityLevel securityLevel;
 
         const uint16_t invalidConnection = 0xffff;
 
