@@ -8,6 +8,9 @@ target_include_directories(services.st_util PUBLIC
 target_sources(services.st_util PRIVATE
     FlashOnStBootloaderCommunicator.cpp
     FlashOnStBootloaderCommunicator.hpp
+    FusOnStBootloaderCommunicator.cpp
+    FusOnStBootloaderCommunicator.hpp
+    FusWirelessStackUpgrade.hpp
     StBootloaderCommunicator.hpp
     StBootloaderCommunicatorUart.cpp
     StBootloaderCommunicatorUart.hpp

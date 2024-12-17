@@ -6,7 +6,6 @@
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/Endian.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
-#include <array>
 #include <cstdint>
 
 namespace services
