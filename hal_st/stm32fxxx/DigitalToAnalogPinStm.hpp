@@ -21,10 +21,9 @@ namespace hal
     public:
 #if defined(DAC_CHIPCONNECT_BOTH)
         // clang-format off
-        static const struct Internal{} internal;
-        static const struct External{} external;
-        static const struct Both{} both;
-
+        static constexpr struct Internal{} internal{};
+        static constexpr struct External{} external{};
+        static constexpr struct Both{} both{};
         // clang-format on
 
         enum struct Channel : uint32_t
