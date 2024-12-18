@@ -65,7 +65,7 @@ namespace hal
         friend class DigitalToAnalogPinImplStm;
 
         uint8_t index;
-        DAC_HandleTypeDef handle;
+        DAC_HandleTypeDef handle{};
     };
 }
 
