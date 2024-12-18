@@ -10,6 +10,7 @@ target_include_directories(hal_st.stm32fxxx PUBLIC
 target_link_libraries(hal_st.stm32fxxx PUBLIC
     hal.interfaces
     infra.timer
+    services.util
     st.hal_driver
     hal_st.cortex
 )
