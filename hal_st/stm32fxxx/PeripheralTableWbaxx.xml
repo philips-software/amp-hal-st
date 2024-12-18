@@ -26,4 +26,5 @@
   <peripheral name="Timer" type="TIM_TypeDef*" prefix="TIM">
     <item name="TIM1_8WBA5"/>
   </peripheral>
+  <peripheral name="Aes" type="AES_TypeDef*"><item name="AES"/></peripheral>
 </peripherals>
