@@ -1,4 +1,4 @@
-#include "hal_st/synchronous_interfaces/SynchronousAesStm.hpp"
+#include "hal_st/synchronous_stm32fxxx/SynchronousAesStm.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include DEVICE_HEADER
 
