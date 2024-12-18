@@ -1,6 +1,7 @@
 #ifndef SYNCHRONOUS_HAL_INSTANTIATIONS_AES_STM_HPP
 #define SYNCHRONOUS_HAL_INSTANTIATIONS_AES_STM_HPP
 
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "services/util/Aes.hpp"
 

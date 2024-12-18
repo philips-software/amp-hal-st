@@ -67,13 +67,13 @@ namespace hal
 
     void SynchronousAes128EcbStm::ConfigureDataSwapping() const
     {
-        if (config.dataSwapping == DataSwapping::halfWord)
+        if (config.dataSwapping == detail::DataSwapping::halfWord)
             peripheralAes[aesIndex]->CR |= AES_CR_DATATYPE_0;
 
-        if (config.dataSwapping == DataSwapping::byte)
+        if (config.dataSwapping == detail::DataSwapping::byte)
             peripheralAes[aesIndex]->CR |= AES_CR_DATATYPE_1;
 
-        if (config.dataSwapping == DataSwapping::bit)
+        if (config.dataSwapping == detail::DataSwapping::bit)
             peripheralAes[aesIndex]->CR |= AES_CR_DATATYPE_0 | AES_CR_DATATYPE_1;
     }
 
