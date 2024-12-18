@@ -1,24 +1,12 @@
 #include "hal_st/stm32fxxx/PkaStm.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include DEVICE_HEADER // NOSONAR
+#include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_PKA)
 
 namespace
 {
-    constexpr std::array<unsigned int, 1> peripheralPkaArray = { {
-        PKA_BASE,
-    } };
-
-    const infra::MemoryRange<PKA_TypeDef* const> peripheralPka = infra::ReinterpretCastMemoryRange<PKA_TypeDef* const>(infra::MakeRange(peripheralPkaArray));
-
-    constexpr std::array<IRQn_Type const, 1> peripheralPkaIrqArray = { {
-        PKA_IRQn,
-    } };
-
-    constexpr infra::MemoryRange<IRQn_Type const> peripheralPkaIrq = peripheralPkaIrqArray;
-
 #if defined(STM32WBA)
     constexpr uint32_t pkaPointOnCurve = PKA_NO_ERROR;
     constexpr uint32_t pkaCompareResultAEqualsB = 0xED2C;
@@ -31,40 +19,9 @@ namespace
     constexpr uint32_t pkaInterruptStatusFlags = PKA_SR_PROCENDF | PKA_SR_RAMERRF | PKA_SR_ADDRERRF | PKA_SR_BUSY;
 #endif
 
-    void EnableClockPka(std::size_t index)
-    {
-        if (index == 0)
-            __HAL_RCC_PKA_CLK_ENABLE();
-        else
-            std::abort();
-    }
-
-    void DisableClockPka(std::size_t index)
-    {
-        if (index == 0)
-            __HAL_RCC_PKA_CLK_DISABLE();
-        else
-            std::abort();
-    }
-
-    bool IsRngEnabled()
-    {
-        return __HAL_RCC_RNG_IS_CLK_ENABLED();
-    }
-
-    void EnableRng()
-    {
-        __HAL_RCC_RNG_CLK_ENABLE();
-    }
-
-    void DisableRng()
-    {
-        __HAL_RCC_RNG_CLK_DISABLE();
-    }
-
     void SetMode(const std::size_t& index, uint32_t mode)
     {
-        peripheralPka[index]->CR = (peripheralPka[index]->CR & ~PKA_CR_MODE) | (mode << PKA_CR_MODE_Pos);
+        hal::peripheralPka[index]->CR = (hal::peripheralPka[index]->CR & ~PKA_CR_MODE) | (mode << PKA_CR_MODE_Pos);
     }
 
     uint32_t Revert(infra::MemoryRange<const std::byte> source, std::size_t size, uint32_t index)
@@ -145,7 +102,7 @@ namespace hal
         Disable();
     }
 
-    void PkaStm::ScalarMultiplication(const application::EllipticCurveExtendedParameters& curve, infra::ConstByteRange scalar, infra::ConstByteRange x, infra::ConstByteRange y, const MultiplicationResult& onDone) const
+    void PkaStm::ScalarMultiplication(const services::EllipticCurveExtendedParameters& curve, infra::ConstByteRange scalar, infra::ConstByteRange x, infra::ConstByteRange y, const MultiplicationResult& onDone) const
     {
         onMultiplicationResult = onDone;
 
@@ -175,7 +132,7 @@ namespace hal
             });
     }
 
-    void PkaStm::CheckPointOnCurve(const application::EllipticCurveExtendedParameters& curve, infra::ConstByteRange x, infra::ConstByteRange y, const infra::Function<void(PointOnCurveResult)>& onDone) const
+    void PkaStm::CheckPointOnCurve(const services::EllipticCurveExtendedParameters& curve, infra::ConstByteRange x, infra::ConstByteRange y, const infra::Function<void(PointOnCurveResult)>& onDone) const
     {
         onCheckPointOnCurveResult = onDone;
 
@@ -259,10 +216,10 @@ namespace hal
 
     void PkaStm::Enable() const
     {
-        auto isRngEnabled = IsRngEnabled();
+        auto isRngEnabled = __HAL_RCC_RNG_IS_CLK_ENABLED();
 
         if (!isRngEnabled)
-            EnableRng();
+            EnableClockRng(0);
 
         EnableClockPka(pkaIndex);
 
@@ -279,7 +236,7 @@ namespace hal
         peripheralPka[pkaIndex]->CLRFR |= PKA_CLRFR_PROCENDFC | PKA_CLRFR_RAMERRFC | PKA_CLRFR_ADDRERRFC;
 
         if (!isRngEnabled)
-            DisableRng();
+            DisableClockRng(0);
     }
 
     void PkaStm::Disable() const

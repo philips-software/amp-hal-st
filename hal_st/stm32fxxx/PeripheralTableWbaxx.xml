@@ -26,5 +26,5 @@
   <peripheral name="Timer" type="TIM_TypeDef*" prefix="TIM">
     <item name="TIM1_8WBA5"/>
   </peripheral>
-  <peripheral name="Pka" type="PKA_TypeDef*"><item name="PKA"/></peripheral>
+  <peripheral name="Pka" type="PKA_TypeDef*"><item name="PKA"/><interrupt/></peripheral>
 </peripherals>

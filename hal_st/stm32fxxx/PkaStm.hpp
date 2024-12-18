@@ -1,6 +1,7 @@
 #ifndef HAL_PKA_STM_HPP
 #define HAL_PKA_STM_HPP
 
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
 #include "services/util/EllipticCurve.hpp"
