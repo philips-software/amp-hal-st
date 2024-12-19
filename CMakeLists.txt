@@ -5,11 +5,18 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 option(CMAKE_COMPILE_WARNING_AS_ERROR "Enable warnings-as-error" ON)
+option(HALST_BUILD_TESTS "Enable building the tests" Off)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
 set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
 set(HALST_XML_STM32 "" CACHE STRING "XML STM32 table")
+
+if (HALST_BUILD_TESTS)
+    # CTest cannot be included before the first project() statement, but amp-embedded-infa-lib
+    # needs to see that test utilities need to be built.
+    set(BUILD_TESTING On)
+endif()
 
 if (HALST_STANDALONE)
     set(EMIL_INCLUDE_FREERTOS ${HALST_BUILD_EXAMPLES_FREERTOS})
@@ -19,7 +26,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        e110c4d31115e2ae14e91bbc40f9cf0f4fa3cb7c # unreleased
+        GIT_TAG        37efc4e7e0ecbdac4ca77c79f13e8f813cc81d8c # unreleased
     )
     FetchContent_MakeAvailable(emil)
 
@@ -47,6 +54,11 @@ if (HALST_STANDALONE)
     set(HALST_EXCLUDE_FROM_ALL "")
 else()
     set(HALST_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
+endif()
+
+if (HALST_BUILD_TESTS)
+    include(CTest)
+    emil_enable_testing()
 endif()
 
 add_subdirectory(st)

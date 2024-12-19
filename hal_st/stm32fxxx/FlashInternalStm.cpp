@@ -131,7 +131,7 @@ namespace hal
         infra::EventDispatcher::Instance().Schedule(onDone);
     }
 
-    FlashInternalStm::FlashInternalStm(infra::MemoryRange<uint32_t> sectorSizes, infra::ConstByteRange flashMemory)
+    FlashInternalStm::FlashInternalStm(infra::MemoryRange<const uint32_t> sectorSizes, infra::ConstByteRange flashMemory)
         : FlashInternalStmBase(flashMemory)
         , sectorSizes(sectorSizes)
     {}

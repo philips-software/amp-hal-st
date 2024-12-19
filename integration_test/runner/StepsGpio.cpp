@@ -1,7 +1,7 @@
 #include "cucumber_cpp/library/Steps.hpp"
 #include "generated/echo/Testing.pb.hpp"
+#include "infra/timer/Waiting.hpp"
 #include "integration_test/logic/Tested.hpp"
-#include "integration_test/runner/Waiting.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -44,7 +44,7 @@ namespace
 
 STEP("gpio peripherals are enabled")
 {
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Emplace<GpioObserver>(context.Get<services::Echo>());
 
@@ -55,7 +55,7 @@ STEP("gpio peripherals are enabled")
                 });
         }));
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::TestedProxy>().RequestSend([&]()
                 {
@@ -68,7 +68,7 @@ STEP("gpio peripherals are enabled")
                 });
         }));
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<application::TestedObserver>().ReceivedPong();
         }));
@@ -81,7 +81,7 @@ STEP("the tester sets its output pin (high|low)", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::GpioTesterProxy>().RequestSend([&]()
                 {
@@ -95,7 +95,7 @@ STEP("the tester sees a (high|low) value", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<GpioObserver>().testerGpio == context.Get<bool>("state");
         }));
@@ -105,7 +105,7 @@ STEP("the tested sets its output pin (high|low)", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    EXPECT_TRUE(infra::WaitUntilDone(context, [&](const std::function<void()>& done)
+    EXPECT_TRUE(infra::WaitUntilDone([&](const infra::Function<void()>& done)
         {
             context.Get<testing::GpioTestedProxy>().RequestSend([&]()
                 {
@@ -119,7 +119,7 @@ STEP("the tested sees a (high|low) value", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
-    EXPECT_TRUE(infra::WaitFor(context, [&]()
+    EXPECT_TRUE(infra::WaitFor([&]()
         {
             return context.Get<GpioObserver>().testedGpio == context.Get<bool>("state");
         }));
