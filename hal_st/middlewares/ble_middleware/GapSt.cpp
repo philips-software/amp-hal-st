@@ -1,8 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
 #include "services/ble/Gap.hpp"
-#include <algorithm>
-#include <cstdint>
 
 namespace hal
 {
@@ -93,9 +91,9 @@ namespace hal
         return numberOfBondedAddress;
     }
 
-    bool GapSt::IsDeviceBounded(MacAddress deviceAddress) const
+    bool GapSt::IsDeviceBonded(MacAddress deviceAddress) const
     {
-        return (aci_gap_is_device_bonded(static_cast<uint8_t>(PeerAddressType::PUBLIC), deviceAddress.data()) == BLE_STATUS_SUCCESS);
+        return aci_gap_is_device_bonded(static_cast<uint8_t>(PeerAddressType::publicStatic), deviceAddress.data()) == BLE_STATUS_SUCCESS;
     }
 
     void GapSt::Pair()
@@ -319,16 +317,16 @@ namespace hal
 
             switch (static_cast<PeerAddressType>(peerAddressType))
             {
-                case PeerAddressType::PUBLIC:
-                case PeerAddressType::RANDOM:
+                case PeerAddressType::publicStatic:
+                case PeerAddressType::randomStatic:
                     return peerAddressType;
 
-                case PeerAddressType::RESOLVED_PUBLIC_IDENTITY:
-                    return infra::enum_cast(PeerAddressType::PUBLIC);
+                case PeerAddressType::resolvablePrivate:
+                    return infra::enum_cast(PeerAddressType::publicStatic);
 
-                case PeerAddressType::RESOLVED_RANDOM_STATIC_IDENTITY:
+                case PeerAddressType::nonResolvablePrivate:
                 default:
-                    return infra::enum_cast(PeerAddressType::RANDOM);
+                    return infra::enum_cast(PeerAddressType::randomStatic);
             }
         };
 
