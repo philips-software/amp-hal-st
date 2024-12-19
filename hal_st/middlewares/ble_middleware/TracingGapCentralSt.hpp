@@ -25,7 +25,7 @@ namespace hal
         void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
-        bool IsDeviceBounded(hal::MacAddress deviceAddress) const override;
+        bool IsDeviceBonded(hal::MacAddress deviceAddress) const override;
 
         // Implementation of GapPairing
         void Pair() override;

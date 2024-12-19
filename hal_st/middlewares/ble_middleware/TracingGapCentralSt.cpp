@@ -48,7 +48,11 @@ namespace hal
     infra::Optional<hal::MacAddress> TracingGapCentralSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
     {
         auto resolvedMac = GapCentralSt::ResolveDeviceAddress(deviceAddress);
-        tracer.Trace() << "TracingGapCentralSt::ResolveDeviceAddress, MAC address: " << infra::AsMacAddress(deviceAddress) << " resolved MAC address " << infra::AsMacAddress(*resolvedMac);
+        tracer.Trace() << "TracingGapCentralSt::ResolveDeviceAddress, MAC address: " << infra::AsMacAddress(deviceAddress);
+        if (resolvedMac)
+            tracer.Continue() << ", resolved MAC address " << infra::AsMacAddress(*resolvedMac);
+        else
+            tracer.Continue() << ", could not resolve MAC address";
         return resolvedMac;
     }
 
@@ -76,10 +80,10 @@ namespace hal
         return GapCentralSt::GetNumberOfBonds();
     }
 
-    bool TracingGapCentralSt::IsDeviceBounded(hal::MacAddress deviceAddress) const
+    bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress deviceAddress) const
     {
-        auto ret = GapCentralSt::IsDeviceBounded(deviceAddress);
-        tracer.Trace() << "TracingGapCentralSt::IsDeviceBounded " <<  infra::AsMacAddress(deviceAddress) << " -> " << (ret ? "true" : "false");
+        auto ret = GapCentralSt::IsDeviceBonded(deviceAddress);
+        tracer.Trace() << "TracingGapCentralSt::IsDeviceBonded " <<  infra::AsMacAddress(deviceAddress) << " -> " << (ret ? "true" : "false");
         return ret;
     }
 
