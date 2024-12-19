@@ -45,6 +45,13 @@ namespace hal
         GapCentralSt::StopDeviceDiscovery();
     }
 
+    infra::Optional<hal::MacAddress> TracingGapCentralSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
+    {
+        auto resolvedMac = GapCentralSt::ResolveDeviceAddress(deviceAddress);
+        tracer.Trace() << "TracingGapCentralSt::ResolveDeviceAddress, MAC address: " << infra::AsMacAddress(deviceAddress) << " resolved MAC address " << infra::AsMacAddress(*resolvedMac);
+        return resolvedMac;
+    }
+
     void TracingGapCentralSt::RemoveAllBonds()
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
@@ -67,6 +74,13 @@ namespace hal
     {
         tracer.Trace() << "TracingGapCentralSt::GetNumberOfBonds";
         return GapCentralSt::GetNumberOfBonds();
+    }
+
+    bool TracingGapCentralSt::IsDeviceBounded(hal::MacAddress deviceAddress) const
+    {
+        auto ret = GapCentralSt::IsDeviceBounded(deviceAddress);
+        tracer.Trace() << "TracingGapCentralSt::IsDeviceBounded " <<  infra::AsMacAddress(deviceAddress) << " -> " << (ret ? "true" : "false");
+        return ret;
     }
 
     void TracingGapCentralSt::Pair()
@@ -97,12 +111,6 @@ namespace hal
     {
         tracer.Trace() << "TracingGapCentralSt::NumericComparisonConfirm";
         GapCentralSt::NumericComparisonConfirm(accept);
-    }
-
-    hal::MacAddress TracingGapCentralSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
-    {
-        tracer.Trace() << "TracingGapCentralSt::ResolveDeviceAddress";
-        return GapCentralSt::ResolveDeviceAddress(deviceAddress);
     }
 
     void TracingGapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
