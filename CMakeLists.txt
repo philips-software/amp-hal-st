@@ -26,7 +26,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        37efc4e7e0ecbdac4ca77c79f13e8f813cc81d8c # unreleased
+        GIT_TAG        d3187781f76783646ceca5e3605cedef0bab364e # unreleased
     )
     FetchContent_MakeAvailable(emil)
 
@@ -34,7 +34,7 @@ if (HALST_STANDALONE)
         FetchContent_Declare(
             cucumber-cpp-runner
             GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        70c424e53f532f520d96a303b6586272d3efc5f5 # unreleased
+            GIT_TAG        145ef9eda8198ba080f610859e24d998cde83b0e # unreleased
         )
 
         FetchContent_MakeAvailable(cucumber-cpp-runner)
@@ -74,6 +74,38 @@ emil_clangformat_directories(hal_st DIRECTORIES .)
 
 if (HALST_STANDALONE)
     emil_folderize_all_targets()
+endif()
+
+if (HALST_STANDALONE AND NOT CMAKE_CROSSCOMPILING)
+    function(generate_export_targets name)
+        install(EXPORT halst${name}Targets
+            FILE halst${name}Targets.cmake
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/halst
+        )
+    endfunction()
+
+    foreach(target IN ITEMS IntegrationTest)
+        generate_export_targets(${target})
+    endforeach()
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+        COMPATIBILITY SameMajorVersion
+        # When cross-compiling for a 32-bit architecture and re-using host tooling from a 64-bit architecture
+        # ARCH_INDEPENDENT is necessary here. See: https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html.
+        ARCH_INDEPENDENT
+    )
+
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    )
 endif()
 
 set(CPACK_GENERATOR "ZIP;TGZ")
