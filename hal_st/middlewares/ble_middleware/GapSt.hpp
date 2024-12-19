@@ -14,7 +14,7 @@ namespace hal
         : public services::AttMtuExchange
         , public services::GapBonding
         , public services::GapPairing
-        , private hal::HciEventSink
+        , private HciEventSink
     {
     public:
         struct GapService
@@ -31,7 +31,7 @@ namespace hal
 
         struct Configuration
         {
-            const hal::MacAddress& address;
+            const MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
             uint8_t txPowerLevel;
@@ -45,6 +45,7 @@ namespace hal
         void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
+        bool IsDeviceBounded(MacAddress deviceAddress) const override;
 
         // Implementation of GapPairing
         void Pair() override;
@@ -52,10 +53,9 @@ namespace hal
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
-        hal::MacAddress ResolveDeviceAddress(hal::MacAddress deviceAddress) const override;
 
     protected:
-        GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
@@ -73,7 +73,7 @@ namespace hal
         virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
-        void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
+        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
 
     private:
         // Implementation of HciEventSink
@@ -86,11 +86,19 @@ namespace hal
         void UpdateNrBonds();
 
     protected:
+        enum class PeerAddressType : uint8_t
+        {
+            PUBLIC,
+            RANDOM,
+            RESOLVED_PUBLIC_IDENTITY,
+            RESOLVED_RANDOM_STATIC_IDENTITY
+        };
+
         struct ConnectionContext
         {
             uint16_t connectionHandle;
             uint8_t peerAddressType;
-            hal::MacAddress peerAddress;
+            MacAddress peerAddress;
         };
 
         ConnectionContext connectionContext;
