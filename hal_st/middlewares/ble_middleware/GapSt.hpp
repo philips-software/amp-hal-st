@@ -45,7 +45,7 @@ namespace hal
         void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
-        bool IsDeviceBounded(MacAddress deviceAddress) const override;
+        bool IsDeviceBonded(MacAddress deviceAddress) const override;
 
         // Implementation of GapPairing
         void Pair() override;
@@ -88,10 +88,10 @@ namespace hal
     protected:
         enum class PeerAddressType : uint8_t
         {
-            PUBLIC,
-            RANDOM,
-            RESOLVED_PUBLIC_IDENTITY,
-            RESOLVED_RANDOM_STATIC_IDENTITY
+            publicStatic,
+            randomStatic,
+            resolvablePrivate,
+            nonResolvablePrivate
         };
 
         struct ConnectionContext
