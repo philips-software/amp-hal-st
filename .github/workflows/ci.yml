@@ -132,7 +132,8 @@ jobs:
         ports:
           - 1234
           - 1235
-        options: ${{ vars.ENV_POSTMASTER_IP }}
+        env:
+          POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
@@ -143,5 +144,5 @@ jobs:
       - run: tar -zxvf hal_st-*.tar.gz
       - run: mkdir install && mv hal_st-*/* install/
       - run: ls install/bin
-      - run: install/bin/integration_test.runner ws://localhost:1234/target/echo/programmer
+      - run: install/bin/integration_test.runner tcp://localhost:1234/target/echo/programmer
       - run: docker logs "${{ job.services.flex.id }}"
