@@ -91,6 +91,11 @@ namespace hal
         return numberOfBondedAddress;
     }
 
+    bool GapSt::IsDeviceBounded(MacAddress deviceAddress) const
+    {
+        return (aci_gap_is_device_bonded(static_cast<uint8_t>(PeerAddressType::PUBLIC), deviceAddress.data()) == BLE_STATUS_SUCCESS);
+    }
+
     void GapSt::Pair()
     {
         really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
@@ -309,13 +314,6 @@ namespace hal
     {
         static constexpr auto deducePeerAddressType = [](auto peerAddressType)
         {
-            enum class PeerAddressType : uint8_t
-            {
-                PUBLIC,
-                RANDOM,
-                RESOLVED_PUBLIC_IDENTITY,
-                RESOLVED_RANDOM_STATIC_IDENTITY
-            };
 
             switch (static_cast<PeerAddressType>(peerAddressType))
             {
