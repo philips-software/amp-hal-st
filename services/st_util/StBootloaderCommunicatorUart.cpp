@@ -37,6 +37,7 @@ namespace services
     {
         serial.ReceiveData([this](auto data)
             {
+                really_assert(!queue.Full());
                 queue.AddFromInterrupt(data);
             });
 
