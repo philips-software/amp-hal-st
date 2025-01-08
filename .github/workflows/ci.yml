@@ -21,14 +21,13 @@ jobs:
       - uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
         with:
           key: ${{ github.job }}-ubuntu-latest
-          variant: sccache
       - uses: seanmiddleditch/gha-setup-ninja@96bed6edff20d1dd61ecff9b75cc519d516e6401 # v5
       - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
         with:
           configurePreset: "host"
           buildPreset: "host-Debug-WithPackage"
           testPreset: "host"
-          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
+          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
       - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: hal_st
@@ -53,19 +52,39 @@ jobs:
       - uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
         with:
           key: ${{ github.job }}-${{ matrix.os }}
-          variant: sccache
       - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
         with:
           configurePreset: "host-single-Debug"
           buildPreset: "host-single-Debug"
           testPreset: "host-single-Debug"
-          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=sccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=sccache']"
+          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
       - name: Upload test logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
           name: test-logs
           path: build/host/Testing/Temporary/
+  host_build_clang_msvc:
+    name: Windows Host Build from Devcontainer
+    runs-on: [ubuntu-latest]
+    container: ghcr.io/philips-software/amp-devcontainer-cpp:5.2.0@sha256:c47fcc83b59fb08f3a3a6e591b18bad49b3862acc35770fca6cec9ad0adb9cb2 # v5.2.0
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        id: cache-winsdk
+        with:
+          path: /winsdk
+          key: cache-winsdk
+      - if: ${{ steps.cache-winsdk.outputs.cache-hit != 'true' }}
+        run: xwin --accept-license --manifest-version 17 splat --preserve-ms-arch-notation --include-debug-libs && mv .xwin-cache/splat/ /winsdk
+      - uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
+        with:
+          key: ${{ github.job }}
+      - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
+        with:
+          configurePreset: "Windows"
+          buildPreset: "Windows-Release"
+          configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
   embedded_build:
     name: Embedded Build
     runs-on: ubuntu-latest

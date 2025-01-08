@@ -177,12 +177,22 @@
     {
       "name": "stm32h573",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake//toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m33",
         "TARGET_MCU_FAMILY": "stm32h5xx",
         "TARGET_MCU": "stm32h573"
       }
+    },
+    {
+      "name": "Windows",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-clang-x86_64-pc-windows-msvc.cmake",
+      "environment": {
+        "CCACHE_DEPEND": "true",
+        "CCACHE_COMPILERTYPE": "clang-cl"
+      },
+      "generator": "Ninja Multi-Config"
     }
   ],
   "buildPresets": [
@@ -292,6 +302,16 @@
       "name": "stm32h573-MinSizeRel",
       "configuration": "MinSizeRel",
       "configurePreset": "stm32h573"
+    },
+    {
+      "name": "Windows-Release",
+      "configuration": "Release",
+      "configurePreset": "Windows"
+    },
+    {
+      "name": "Windows-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "Windows"
     }
   ],
   "testPresets": [
