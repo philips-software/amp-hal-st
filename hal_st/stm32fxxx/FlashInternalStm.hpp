@@ -19,13 +19,6 @@ namespace hal
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
 
     private:
-        template<typename alignment, uint32_t flashType>
-        void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
-#if defined(STM32WBA) || defined(STM32H5)
-        void AlignedWriteBuffer(infra::ConstByteRange buffer, uint32_t address);
-#endif
-
-    private:
         infra::ConstByteRange flashMemory;
     };
 
@@ -33,7 +26,7 @@ namespace hal
         : public FlashInternalStmBase
     {
     public:
-        FlashInternalStm(infra::MemoryRange<uint32_t> sectorSizes, infra::ConstByteRange flashMemory);
+        FlashInternalStm(infra::MemoryRange<const uint32_t> sectorSizes, infra::ConstByteRange flashMemory);
 
         uint32_t NumberOfSectors() const override;
         uint32_t SizeOfSector(uint32_t sectorIndex) const override;
@@ -41,7 +34,7 @@ namespace hal
         uint32_t AddressOfSector(uint32_t sectorIndex) const override;
 
     private:
-        infra::MemoryRange<uint32_t> sectorSizes;
+        infra::MemoryRange<const uint32_t> sectorSizes;
     };
 
     class FlashHomogeneousInternalStm

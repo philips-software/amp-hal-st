@@ -18,7 +18,8 @@ target_link_libraries(services.st_util PUBLIC
     services.util
 )
 
-if (EMIL_BUILD_TESTS)
-    add_subdirectory(test_doubles)
+add_subdirectory(test_doubles)
+
+if (HALST_BUILD_TESTS)
     add_subdirectory(test)
 endif()

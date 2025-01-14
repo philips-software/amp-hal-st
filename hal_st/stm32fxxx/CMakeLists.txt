@@ -10,6 +10,7 @@ target_include_directories(hal_st.stm32fxxx PUBLIC
 target_link_libraries(hal_st.stm32fxxx PUBLIC
     hal.interfaces
     infra.timer
+    services.util
     st.hal_driver
     hal_st.cortex
 )
@@ -51,6 +52,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     EthernetMacStm.hpp
     EthernetSmiStm.cpp
     EthernetSmiStm.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:FlashInternalHighCycleAreaStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:FlashInternalHighCycleAreaStm.hpp>
     FlashInternalStm.cpp
     FlashInternalStm.hpp
     GpioStm.cpp

@@ -34,8 +34,13 @@ int main()
 
     static hal::DmaStm dma;
     static main_::EchoFromCloud echo(dma, tracerInfrastructure.tracer);
-    static main_::ForwardingEchoToTested forwarder(echo.echo, dma, tracerInfrastructure.tracer);
-    static main_::Tester tester(echo.echo, forwarder.echoToTested.echo.echo, dma);
+    static infra::Creator<services::EchoOnSesame, main_::ForwardingEchoToTested, void()> forwarderCreator{
+        [](infra::Optional<main_::ForwardingEchoToTested>& value)
+        {
+            value.Emplace(echo.echo, dma, tracerInfrastructure.tracer);
+        }
+    };
+    static main_::Tester tester(echo.echo, forwarderCreator, dma);
 
     services::GlobalTracer().Trace() << "Starting tester!";
 
