@@ -125,12 +125,12 @@ namespace hal
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
     }
 
-    infra::Optional<hal::MacAddress> GapCentralSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
+    infra::Optional<hal::MacAddress> GapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
     {
-        hal::MacAddress address;
-        if (aci_gap_resolve_private_addr(deviceAddress.data(), address.data()) != BLE_STATUS_SUCCESS)
+        hal::MacAddress identityAddress;
+        if (aci_gap_resolve_private_addr(address.data(), identityAddress.data()) != BLE_STATUS_SUCCESS)
             return infra::none;
-        return infra::MakeOptional(address);
+        return infra::MakeOptional(identityAddress);
     }
 
     void GapCentralSt::AllowPairing(bool)
