@@ -91,9 +91,9 @@ namespace hal
         return numberOfBondedAddress;
     }
 
-    bool GapSt::IsDeviceBonded(MacAddress deviceAddress) const
+    bool GapSt::IsDeviceBonded(MacAddress identityAddress) const
     {
-        return aci_gap_is_device_bonded(static_cast<uint8_t>(PeerAddressType::publicStatic), deviceAddress.data()) == BLE_STATUS_SUCCESS;
+        return aci_gap_is_device_bonded(static_cast<uint8_t>(PeerAddressType::publicStatic), identityAddress.data()) == BLE_STATUS_SUCCESS;
     }
 
     void GapSt::Pair()
