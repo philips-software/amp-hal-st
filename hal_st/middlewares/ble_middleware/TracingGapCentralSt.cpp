@@ -45,10 +45,10 @@ namespace hal
         GapCentralSt::StopDeviceDiscovery();
     }
 
-    infra::Optional<hal::MacAddress> TracingGapCentralSt::ResolveDeviceAddress(hal::MacAddress deviceAddress) const
+    infra::Optional<hal::MacAddress> TracingGapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
     {
-        auto resolvedMac = GapCentralSt::ResolveDeviceAddress(deviceAddress);
-        tracer.Trace() << "TracingGapCentralSt::ResolveDeviceAddress, MAC address: " << infra::AsMacAddress(deviceAddress);
+        auto resolvedMac = GapCentralSt::ResolvePrivateAddress(address);
+        tracer.Trace() << "TracingGapCentralSt::ResolvePrivateAddress, MAC address: " << infra::AsMacAddress(address);
         if (resolvedMac)
             tracer.Continue() << ", resolved MAC address " << infra::AsMacAddress(*resolvedMac);
         else
@@ -80,10 +80,10 @@ namespace hal
         return GapCentralSt::GetNumberOfBonds();
     }
 
-    bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress deviceAddress) const
+    bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress identityAddress) const
     {
-        auto ret = GapCentralSt::IsDeviceBonded(deviceAddress);
-        tracer.Trace() << "TracingGapCentralSt::IsDeviceBonded " <<  infra::AsMacAddress(deviceAddress) << " -> " << (ret ? "true" : "false");
+        auto ret = GapCentralSt::IsDeviceBonded(identityAddress);
+        tracer.Trace() << "TracingGapCentralSt::IsDeviceBonded " <<  infra::AsMacAddress(identityAddress) << " -> " << (ret ? "true" : "false");
         return ret;
     }
 
