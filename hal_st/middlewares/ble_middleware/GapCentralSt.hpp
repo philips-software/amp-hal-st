@@ -22,7 +22,7 @@ namespace hal
         void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;
         void StopDeviceDiscovery() override;
-        infra::Optional<hal::MacAddress> ResolveDeviceAddress(hal::MacAddress deviceAddress) const override;
+        infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
