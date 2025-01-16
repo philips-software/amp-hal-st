@@ -80,10 +80,10 @@ namespace hal
         return GapCentralSt::GetNumberOfBonds();
     }
 
-    bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress identityAddress) const
+    bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress address, services::GapDeviceAddressType addressType) const
     {
-        auto ret = GapCentralSt::IsDeviceBonded(identityAddress);
-        tracer.Trace() << "TracingGapCentralSt::IsDeviceBonded " <<  infra::AsMacAddress(identityAddress) << " -> " << (ret ? "true" : "false");
+        auto ret = GapCentralSt::IsDeviceBonded(address, addressType);
+        tracer.Trace() << "TracingGapCentralSt::IsDeviceBonded " << infra::AsMacAddress(address) << " -> " << (ret ? "true" : "false");
         return ret;
     }
 
