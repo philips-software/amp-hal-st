@@ -31,22 +31,10 @@ namespace hal
         {
             return static_cast<services::GapAdvertisingEventType>(eventType);
         }
-
-        services::GapAdvertisingEventAddressType ToAdvertisingAddressType(uint8_t addressType, const uint8_t address[6])
+        
+        services::GapDeviceAddressType ToAdvertisingAddressType(uint8_t addressType)
         {
-            if (addressType == static_cast<uint8_t>(services::GapDeviceAddressType::publicAddress))
-                return services::GapAdvertisingEventAddressType::publicDeviceAddress;
-            else if (addressType == static_cast<uint8_t>(services::GapDeviceAddressType::randomAddress))
-            {
-                auto mode = address[5] >> 6;  // Address in EUI-48 format
-                if (mode == 0x3)
-                    return services::GapAdvertisingEventAddressType::randomDeviceAddress;
-                else if (mode == 0x01)
-                    return services::GapAdvertisingEventAddressType::publicIdentityAddress;
-                else if (mode == 0x00)
-                    return services::GapAdvertisingEventAddressType::randomIdentityAddress;
-            }
-            return services::GapAdvertisingEventAddressType::randomDeviceAddress;
+            return static_cast<services::GapDeviceAddressType>(addressType);
         }
 
         bool IsTxDataLengthConfigured(const hci_le_data_length_change_event_rp0& dataLengthChangeEvent)
@@ -300,11 +288,11 @@ namespace hal
     void GapCentralSt::HandleAdvertisingReport(const Advertising_Report_t& advertisingReport)
     {
         services::GapAdvertisingReport discoveredDevice;
-
+     
         auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
         std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
         discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
-        discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type, advertisingReport.Address);
+        discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
         discoveredDevice.data.assign(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 

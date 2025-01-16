@@ -45,7 +45,7 @@ namespace hal
         void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
-        bool IsDeviceBonded(MacAddress identityAddress) const override;
+        bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
 
         // Implementation of GapPairing
         void Pair() override;
@@ -82,22 +82,14 @@ namespace hal
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
 
-        void SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress);
+        void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, uint8_t* peerAddress);
         void UpdateNrBonds();
 
     protected:
-        enum class PeerAddressType : uint8_t
-        {
-            publicStatic,
-            randomStatic,
-            resolvablePrivate,
-            nonResolvablePrivate
-        };
-
         struct ConnectionContext
         {
             uint16_t connectionHandle;
-            uint8_t peerAddressType;
+            services::GapDeviceAddressType peerAddressType;
             MacAddress peerAddress;
         };
 
