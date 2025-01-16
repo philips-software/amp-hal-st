@@ -91,9 +91,9 @@ namespace hal
         return numberOfBondedAddress;
     }
 
-    bool GapSt::IsDeviceBonded(MacAddress identityAddress) const
+    bool GapSt::IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const
     {
-        return aci_gap_is_device_bonded(static_cast<uint8_t>(PeerAddressType::publicStatic), identityAddress.data()) == BLE_STATUS_SUCCESS;
+        return aci_gap_is_device_bonded(static_cast<uint8_t>(addressType), address.data()) == BLE_STATUS_SUCCESS;
     }
 
     void GapSt::Pair()
@@ -171,7 +171,7 @@ namespace hal
         auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
 
         if (connectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
-            SetConnectionContext(connectionCompleteEvent.Connection_Handle, connectionCompleteEvent.Peer_Address_Type, &connectionCompleteEvent.Peer_Address[0]);
+            SetConnectionContext(connectionCompleteEvent.Connection_Handle, static_cast<services::GapDeviceAddressType>(connectionCompleteEvent.Peer_Address_Type), &connectionCompleteEvent.Peer_Address[0]);
     }
 
     void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -179,7 +179,7 @@ namespace hal
         auto connectionCompleteEvt = *reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
 
         if (connectionCompleteEvt.Status == BLE_STATUS_SUCCESS)
-            SetConnectionContext(connectionCompleteEvt.Connection_Handle, connectionCompleteEvt.Peer_Address_Type, &connectionCompleteEvt.Peer_Address[0]);
+            SetConnectionContext(connectionCompleteEvt.Connection_Handle, static_cast<services::GapDeviceAddressType>(connectionCompleteEvt.Peer_Address_Type), &connectionCompleteEvt.Peer_Address[0]);
     }
 
     void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
@@ -206,7 +206,7 @@ namespace hal
 
         really_assert(pairingComplete->Connection_Handle == connectionContext.connectionHandle);
 
-        if (aci_gap_is_device_bonded(connectionContext.peerAddressType, connectionContext.peerAddress.data()) == BLE_STATUS_SUCCESS)
+        if (IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
         {
             hal::MacAddress address = connectionContext.peerAddress;
             aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
@@ -310,29 +310,11 @@ namespace hal
         }
     }
 
-    void GapSt::SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress)
+    void GapSt::SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, uint8_t* peerAddress)
     {
-        static constexpr auto deducePeerAddressType = [](auto peerAddressType)
-        {
-
-            switch (static_cast<PeerAddressType>(peerAddressType))
-            {
-                case PeerAddressType::publicStatic:
-                case PeerAddressType::randomStatic:
-                    return peerAddressType;
-
-                case PeerAddressType::resolvablePrivate:
-                    return infra::enum_cast(PeerAddressType::publicStatic);
-
-                case PeerAddressType::nonResolvablePrivate:
-                default:
-                    return infra::enum_cast(PeerAddressType::randomStatic);
-            }
-        };
-
         maxAttMtu = defaultMaxAttMtuSize;
         connectionContext.connectionHandle = connectionHandle;
-        connectionContext.peerAddressType = deducePeerAddressType(peerAddressType);
+        connectionContext.peerAddressType = peerAddressType;
         std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
     }
 
