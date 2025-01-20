@@ -294,9 +294,9 @@ namespace hal
         services::GapAdvertisingReport discoveredDevice;
 
         auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
-        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
+        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.peerAddress.address.size(), std::begin(discoveredDevice.peerAddress.address));
         discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
-        discoveredDevice.addressType = static_cast<services::GapDeviceAddressType>(advertisingReport.Address_Type);
+        discoveredDevice.peerAddress.type = static_cast<services::GapDeviceAddressType>(advertisingReport.Address_Type);
         discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
