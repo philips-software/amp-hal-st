@@ -17,9 +17,9 @@ namespace hal
         Initialize(configuration.gapService);
     }
 
-    services::GapAddress GapPeripheralSt::GetAddress() const
+    services::GapDeviceAddress GapPeripheralSt::GetAddress() const
     {
-        services::GapAddress address;
+        services::GapDeviceAddress address;
         /* Use last peer addres to get current RPA */
         [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(static_cast<uint8_t>(connectionContext.peerAddressType), connectionContext.peerAddress.data(), address.address.data());
 
@@ -30,9 +30,9 @@ namespace hal
         return address;
     }
 
-    services::GapAddress GapPeripheralSt::GetIdentityAddress() const
+    services::GapDeviceAddress GapPeripheralSt::GetIdentityAddress() const
     {
-        services::GapAddress address;
+        services::GapDeviceAddress address;
         uint8_t length = 0;
 
         aci_hal_read_config_data(CONFIG_DATA_PUBADDR_OFFSET, &length, address.address.data());

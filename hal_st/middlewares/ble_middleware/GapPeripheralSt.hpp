@@ -14,8 +14,8 @@ namespace hal
         GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         // Implementation of GapPeripheral
-        services::GapAddress GetAddress() const override;
-        services::GapAddress GetIdentityAddress() const override;
+        services::GapDeviceAddress GetAddress() const override;
+        services::GapDeviceAddress GetIdentityAddress() const override;
         void SetAdvertisementData(infra::ConstByteRange data) override;
         infra::ConstByteRange GetAdvertisementData() const override;
         void SetScanResponseData(infra::ConstByteRange data) override;
