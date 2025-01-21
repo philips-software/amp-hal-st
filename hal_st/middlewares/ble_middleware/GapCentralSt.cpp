@@ -69,6 +69,7 @@ namespace hal
 
         initiatingStateTimer.Start(initiatingTimeout, [this]()
             {
+                services::GlobalTracer().Trace() << "**** Connect timedout - calling aci_gap_terminate_gap_proc";
                 aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
             });
     }
