@@ -170,6 +170,7 @@ namespace hal
         infra::Copy(infra::MakeRange(enhancedConnectionCompleteEvt->Peer_Address), infra::MakeRange(mac));
 
         tracer.Trace() << "TracingGapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent Handle";
+        tracer.Trace() << "\tStatus              : " << enhancedConnectionCompleteEvt->Status;
         tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << enhancedConnectionCompleteEvt->Connection_Handle;
         tracer.Trace() << "\tPeer address        : " << infra::AsMacAddress(mac);
         tracer.Trace() << "\tPeer address type   : " << enhancedConnectionCompleteEvt->Peer_Address_Type;
