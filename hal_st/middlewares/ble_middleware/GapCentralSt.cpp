@@ -1,6 +1,7 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "services/tracer/GlobalTracer.hpp"
 #include <chrono>
 #include <cmath>
 
