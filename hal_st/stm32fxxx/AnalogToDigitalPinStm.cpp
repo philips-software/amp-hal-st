@@ -59,35 +59,6 @@ namespace
         return iter->second;
     }
 #endif
-
-    constexpr std::array adcChannel{
-        // STM32F4x header defines ADC_CHANNEL_0 as 0x0u, all others are cast to uint32_t
-        // all other device headers are consistent with all their channel types
-        static_cast<decltype(ADC_CHANNEL_1)>(ADC_CHANNEL_0),
-        ADC_CHANNEL_1,
-        ADC_CHANNEL_2,
-        ADC_CHANNEL_3,
-        ADC_CHANNEL_4,
-        ADC_CHANNEL_5,
-        ADC_CHANNEL_6,
-        ADC_CHANNEL_7,
-        ADC_CHANNEL_8,
-        ADC_CHANNEL_9,
-        ADC_CHANNEL_10,
-        ADC_CHANNEL_11,
-        ADC_CHANNEL_12,
-        ADC_CHANNEL_13,
-#ifdef ADC_CHANNEL_18
-        ADC_CHANNEL_14,
-        ADC_CHANNEL_15,
-        ADC_CHANNEL_16,
-        ADC_CHANNEL_17,
-        ADC_CHANNEL_18,
-#endif
-#ifdef ADC_CHANNEL_19
-        ADC_CHANNEL_19,
-#endif
-    };
 }
 
 namespace hal
@@ -241,7 +212,7 @@ namespace hal
 
     uint32_t AdcStm::Channel(const hal::AnalogPinStm& pin) const
     {
-        return adcChannel[pin.AdcChannel(index + 1)];
+        return pin.AdcChannel(index + 1);
     }
 
     ADC_HandleTypeDef& AdcStm::Handle()
