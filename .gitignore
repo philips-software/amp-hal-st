@@ -1,6 +1,7 @@
 .cache
 .vs/
 .vscode/.cortex-debug*
+.xwin-cache
 build/
 out/
 megalinter-reports/

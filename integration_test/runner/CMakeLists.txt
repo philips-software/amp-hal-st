@@ -5,6 +5,7 @@ target_sources(integration_test.runner PRIVATE
     FixtureEcho.cpp
     FixtureEcho.hpp
     Hooks.cpp
+    Main.cpp
     StepsGpio.cpp
     StepsUart.cpp
     Waiting.cpp
@@ -13,10 +14,18 @@ target_sources(integration_test.runner PRIVATE
 
 target_link_libraries(integration_test.runner PRIVATE
     args
-    cucumber-cpp-runner
+    cucumber_cpp.library
     integration_test.logic
     hal.generic
     gtest
     gmock
     services.network_instantiations
 )
+
+if (EMIL_BUILD_WIN)
+    target_link_libraries(integration_test.runner PRIVATE hal.windows)
+endif()
+
+if (EMIL_BUILD_UNIX OR EMIL_BUILD_DARWIN)
+    target_link_libraries(integration_test.runner PRIVATE hal.unix)
+endif()

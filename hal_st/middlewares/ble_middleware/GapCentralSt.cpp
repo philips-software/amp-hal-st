@@ -166,11 +166,11 @@ namespace hal
 
         auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        if (onMtuExchangeDone && gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
-        {
+        if (gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
             really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+
+        if (onMtuExchangeDone)
             onMtuExchangeDone();
-        }
     }
 
     void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent)
@@ -188,10 +188,13 @@ namespace hal
                 assert(status == BLE_STATUS_SUCCESS);
             });
 
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-            {
-                MtuExchange();
-            });
+        if (onMtuExchangeDone)
+            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                {
+                    MtuExchange();
+                });
+        else
+            SetDataLength();
     }
 
     void GapCentralSt::HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent)
