@@ -316,8 +316,7 @@ namespace hal
     AnalogPinStm::AnalogPinStm(uint32_t channel)
         : pin(dummyPinStm)
         , channel(channel)
-    {
-    }
+    {}
 
     AnalogPinStm::~AnalogPinStm()
     {
