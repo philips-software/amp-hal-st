@@ -30,11 +30,6 @@ namespace hal
             return static_cast<services::GapAdvertisingEventType>(eventType);
         }
 
-        services::GapAdvertisingEventAddressType ToAdvertisingAddressType(uint8_t addressType)
-        {
-            return static_cast<services::GapAdvertisingEventAddressType>(addressType);
-        }
-
         bool IsTxDataLengthConfigured(const hci_le_data_length_change_event_rp0& dataLengthChangeEvent)
         {
             return dataLengthChangeEvent.MaxTxOctets == services::GapConnectionParameters::connectionInitialMaxTxOctets &&
@@ -109,6 +104,14 @@ namespace hal
     {
         if (std::exchange(discovering, false))
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
+    }
+
+    infra::Optional<hal::MacAddress> GapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
+    {
+        hal::MacAddress identityAddress;
+        if (aci_gap_resolve_private_addr(address.data(), identityAddress.data()) != BLE_STATUS_SUCCESS)
+            return infra::none;
+        return infra::MakeOptional(identityAddress);
     }
 
     void GapCentralSt::AllowPairing(bool)
@@ -294,8 +297,8 @@ namespace hal
         auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
         std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
         discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
-        discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
-        std::copy(discoveredDevice.data.begin(), discoveredDevice.data.begin() + advertisingReport.Length_Data, advertisementData);
+        discoveredDevice.addressType = static_cast<services::GapDeviceAddressType>(advertisingReport.Address_Type);
+        discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer)
