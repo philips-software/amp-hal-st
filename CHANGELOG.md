@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [4.1.0](https://github.com/philips-software/amp-hal-st/compare/v4.0.0...v4.1.0) (2025-01-31)
+
+
+### Features
+
+* Add support for internal ADC channels ([#487](https://github.com/philips-software/amp-hal-st/issues/487)) ([30a6f4e](https://github.com/philips-software/amp-hal-st/commit/30a6f4e274fa86b73691f4e901cb9a1b872f49a9))
+
 ## [4.0.0](https://github.com/philips-software/amp-hal-st/compare/v3.0.0...v4.0.0) (2025-01-16)
 
 
