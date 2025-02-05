@@ -197,6 +197,7 @@ namespace hal
     {
     public:
         AnalogPinStm(GpioPinStm& pin);
+        AnalogPinStm(uint32_t channel);
         AnalogPinStm(const AnalogPinStm& other) = delete;
         AnalogPinStm& operator=(const AnalogPinStm& other) = delete;
         ~AnalogPinStm();
@@ -206,6 +207,7 @@ namespace hal
 
     private:
         GpioPinStm& pin;
+        uint32_t channel{ 0xffffffff };
     };
 
     class MultiGpioPinStm
