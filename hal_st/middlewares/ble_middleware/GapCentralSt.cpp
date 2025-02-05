@@ -295,7 +295,7 @@ namespace hal
         std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
         discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
         discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
-        std::copy(advertisementData, advertisementData + advertisingReport.Length_Data, discoveredDevice.data.begin());
+        discoveredDevice.data.assign(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer)
