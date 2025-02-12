@@ -45,6 +45,7 @@ namespace hal
         void SetDataLength();
         void MtuExchange() const;
         void Initialize(const GapService& gapService);
+        void UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;

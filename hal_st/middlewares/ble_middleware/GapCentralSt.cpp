@@ -2,6 +2,7 @@
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/Function.hpp"
+#include "services/ble/Gap.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -137,24 +138,32 @@ namespace hal
 
     void GapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-            {
-                observer.StateChanged(services::GapState::connected);
-            });
+        UpdateStateOnConnectionComplete(metaEvent);
+
+        initiatingStateTimer.Cancel();
 
         GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
-        initiatingStateTimer.Cancel();
     }
 
     void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-            {
-                observer.StateChanged(services::GapState::connected);
-            });
+        UpdateStateOnConnectionComplete(metaEvent);
+
+        initiatingStateTimer.Cancel();
 
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-        initiatingStateTimer.Cancel();
+    }
+
+    void GapCentralSt::UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent)
+    {
+        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
+
+        services::GapState state = status == BLE_STATUS_SUCCESS ? services::GapState::connected : services::GapState::standby;
+
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([state](services::GapCentralObserver& observer)
+            {
+                observer.StateChanged(state);
+            });
     }
 
     void GapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
