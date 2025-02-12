@@ -148,6 +148,11 @@ namespace hal
 
     void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+            {
+                observer.StateChanged(services::GapState::connected);
+            });
+
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
         initiatingStateTimer.Cancel();
     }
