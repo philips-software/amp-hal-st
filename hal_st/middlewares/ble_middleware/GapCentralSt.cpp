@@ -1,6 +1,7 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/util/Function.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -136,6 +137,11 @@ namespace hal
 
     void GapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
+            {
+                observer.StateChanged(services::GapState::connected);
+            });
+
         GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
         initiatingStateTimer.Cancel();
     }
@@ -213,17 +219,6 @@ namespace hal
                         SetDataLength();
                     });
             };
-        else
-            onMtuExchangeDone = [this]()
-            {
-                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                    {
-                        SetPhy();
-                    });
-            };
-
-        if (onDataLengthChanged)
-            onDataLengthChanged();
     }
 
     void GapCentralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
@@ -235,11 +230,6 @@ namespace hal
         really_assert(phyUpdateCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
 
         onMtuExchangeDone = nullptr;
-
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-            {
-                observer.StateChanged(services::GapState::connected);
-            });
     }
 
     void GapCentralSt::HandleGapDiscoveryProcedureEvent()
@@ -269,21 +259,7 @@ namespace hal
 
     void GapCentralSt::SetDataLength()
     {
-        onDataLengthChanged = [this]()
-        {
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                {
-                    SetPhy();
-                });
-        };
-
         auto status = hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-        assert(status == BLE_STATUS_SUCCESS);
-    }
-
-    void GapCentralSt::SetPhy() const
-    {
-        auto status = hci_le_set_phy(this->connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0);
         assert(status == BLE_STATUS_SUCCESS);
     }
 
@@ -314,5 +290,6 @@ namespace hal
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
         SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
+        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 }
