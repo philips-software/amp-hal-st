@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [4.1.0](https://github.com/philips-software/amp-hal-st/compare/v4.0.0...v4.1.0) (2025-02-13)
+
+
+### Features
+
+* Add support for internal ADC channels ([#487](https://github.com/philips-software/amp-hal-st/issues/487)) ([30a6f4e](https://github.com/philips-software/amp-hal-st/commit/30a6f4e274fa86b73691f4e901cb9a1b872f49a9))
+
+
+### Bug Fixes
+
+* Gap central adv data copy mistake 2  ([#502](https://github.com/philips-software/amp-hal-st/issues/502)) ([a214847](https://github.com/philips-software/amp-hal-st/commit/a2148474685297527b7aee60e5d4c3ede7d50328))
+* Gap central adv data copy mistake 3 ([#503](https://github.com/philips-software/amp-hal-st/issues/503)) ([2eff208](https://github.com/philips-software/amp-hal-st/commit/2eff20830ccc645d1caf6a39e2c7eaa88cb50dc6))
+* Mistake GapCentral adv data copy ([#501](https://github.com/philips-software/amp-hal-st/issues/501)) ([190e2f9](https://github.com/philips-software/amp-hal-st/commit/190e2f9d2f8af098cc1ef0c68a9c110440a84ca2))
+
 ## [4.0.0](https://github.com/philips-software/amp-hal-st/compare/v3.0.0...v4.0.0) (2025-01-16)
 
 
