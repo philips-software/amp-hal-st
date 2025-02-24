@@ -1,9 +1,13 @@
 #ifndef HAL_TIMER_STM_HPP
 #define HAL_TIMER_STM_HPP
 
-#include DEVICE_HEADER
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "hal/interfaces/Gpio.hpp"
+#include "hal_st/cortex/InterruptCortex.hpp"
+#include "infra/util/Function.hpp"
 #include "infra/util/Optional.hpp"
+#include <atomic>
+#include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_TIMER)
 
@@ -43,19 +47,47 @@ namespace hal
             infra::Optional<Trigger> trigger;
         };
 
-        TimerBaseStm(uint8_t aTimerIndex, Timing timing, const Config& config);
+    protected:
+        TimerBaseStm(uint8_t oneBasedIndex, Timing timing, const Config& config);
         ~TimerBaseStm();
-
-        void Start();
-        void Stop();
 
     private:
         void ConfigureTrigger();
 
-    private:
-        uint8_t timerIndex;
+        const uint8_t timerIndex;
         Config config;
+
+    protected:
         TIM_HandleTypeDef handle = {};
+    };
+
+    class FreeRunningTimerStm
+        : public TimerBaseStm
+    {
+    public:
+        FreeRunningTimerStm(uint8_t oneBasedIndex, Timing timing, const Config& config);
+
+        void Start();
+        void Stop();
+    };
+
+    class TimerWithInterruptStm
+        : public TimerBaseStm
+    {
+    public:
+        TimerWithInterruptStm(uint8_t oneBasedIndex, Timing timing);
+
+        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate);
+        void Stop();
+
+    private:
+        ImmediateInterruptHandler interruptHandler;
+        infra::Function<void()> onIrq;
+        InterruptType type;
+        std::atomic_bool scheduled{};
+
+        void OnInterrupt();
+        void ScheduleInterrupt();
     };
 }
 
