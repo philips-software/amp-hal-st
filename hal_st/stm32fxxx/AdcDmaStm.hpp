@@ -30,7 +30,7 @@ namespace hal
         infra::MemoryRange<uint16_t> buffer;
         ReceiveDmaChannel dmaStream;
         AnalogPinStm analogPin;
-        TimerBaseStm timer;
+        FreeRunningTimerStm timer;
         infra::AutoResetFunction<void(infra::MemoryRange<uint16_t>)> onDone;
     };
 }
