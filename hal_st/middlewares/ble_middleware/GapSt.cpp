@@ -31,13 +31,6 @@ namespace hal
         }
     }
 
-    const services::GapConnectionParameters GapSt::connectionParameters{
-        6,
-        6,
-        0,
-        500,
-    };
-
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : HciEventSink(hciEventSource)
         , bondStorageSynchronizer(bondStorageSynchronizer)

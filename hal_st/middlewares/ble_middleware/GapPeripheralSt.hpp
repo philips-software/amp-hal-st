@@ -3,6 +3,7 @@
 
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/Optional.hpp"
 
 namespace hal
 {
@@ -12,6 +13,10 @@ namespace hal
     {
     public:
         GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+
+        virtual void ConnectionUpdate(infra::Function<void(uint16_t intervalMultiplier)> onConnectionUpdate) override;
+        infra::Function<void(uint16_t intervalMultiplier)> onConnectionUpdate;
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
 
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;

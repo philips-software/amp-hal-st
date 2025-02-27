@@ -17,6 +17,19 @@ namespace hal
         Initialize(configuration.gapService);
     }
 
+    void GapPeripheralSt::ConnectionUpdate(infra::Function<void(uint16_t intervalMultiplier)> onConnectionUpdate)
+    {
+        this->onConnectionUpdate = onConnectionUpdate;
+    }
+
+    void GapPeripheralSt::HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent)
+    {
+        const auto evtConnectionUpdate = reinterpret_cast<hci_le_connection_update_complete_event_rp0*>(metaEvent->data);
+
+        if (onConnectionUpdate)
+            onConnectionUpdate(evtConnectionUpdate->Conn_Interval);
+    }
+
     services::GapAddress GapPeripheralSt::GetAddress() const
     {
         services::GapAddress address;
