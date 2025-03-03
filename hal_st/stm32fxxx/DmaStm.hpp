@@ -56,6 +56,10 @@ namespace hal
     class CircularTransmitDmaChannel;
     class CircularReceiveDmaChannel;
 
+    class TransceiverDmaBridgeChannel;
+    class TransmitDmaBridgeChannel;
+    class ReceiveDmaBridgeChannel;
+
     class DmaStm
     {
     public:
@@ -143,13 +147,16 @@ namespace hal
 
             void StartTransmit(infra::ConstByteRange data);
             void StartTransmitDummy(uint16_t size);
+            void StartTransmitFromAddress(const void* memAddress, uint16_t size);
             void StartReceive(infra::ByteRange data);
             void StartReceiveDummy(uint16_t size);
+            void StartReceiveToAddress(const void* memAddress, uint16_t size);
             size_t ReceivedSize() const;
 
             friend DmaStm;
             friend TransceiverDmaChannel;
             friend CircularTransceiverDmaChannel;
+            friend TransceiverDmaBridgeChannel;
 
         private:
             infra::ByteRange data;
@@ -166,6 +173,7 @@ namespace hal
 
             friend TransmitDmaChannel;
             friend CircularTransmitDmaChannel;
+            friend TransmitDmaBridgeChannel;
         };
 
         class ReceiveStream
@@ -180,6 +188,7 @@ namespace hal
 
             friend ReceiveDmaChannel;
             friend CircularReceiveDmaChannel;
+            friend ReceiveDmaBridgeChannel;
         };
 
         class StreamInterruptHandler
@@ -242,10 +251,12 @@ namespace hal
             template<class U>
             void StartTransmit(infra::MemoryRange<const U> data);
             void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1);
+            void StartTransmitFromAddress(const void* memAddress, uint16_t size);
 
             template<class U>
             void StartReceive(infra::MemoryRange<U> data);
             void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1);
+            void StartReceiveToAddress(const void* memAddress, uint16_t size);
 
             size_t ReceivedSize() const;
 
@@ -309,10 +320,12 @@ namespace hal
         template<class U>
         void StartTransmit(infra::MemoryRange<const U> data);
         void StartTransmitDummy(uint16_t size, uint8_t dataSize = 1);
+        void StartTransmitFromAddress(const void* memAddress, uint16_t size);
 
         template<class U>
         void StartReceive(infra::MemoryRange<U> data);
         void StartReceiveDummy(uint16_t size, uint8_t dataSize = 1);
+        void StartReceiveToAddress(const void* memAddress, uint16_t size);
 
         size_t ReceivedSize() const;
 
@@ -417,6 +430,27 @@ namespace hal
         using CircularTransceiverDmaChannel::ReceivedSize;
 
         using CircularTransceiverDmaChannel::IsInterruptPending;
+    };
+
+    class TransceiverDmaBridgeChannel
+        : public TransceiverDmaChannelBase
+    {
+    public:
+        TransceiverDmaBridgeChannel(DmaStm::TransceiveStream& stream, volatile void* sourceAddress, uint8_t peripheralTransferSize);
+    };
+
+    class TransmitDmaBridgeChannel
+        : private TransceiverDmaBridgeChannel
+    {
+    public:
+        TransmitDmaBridgeChannel(DmaStm::TransmitStream& stream, volatile void* sourceAddress, volatile void* destinationAddress, uint8_t transferSize);
+    };
+
+    class ReceiveDmaBridgeChannel
+        : private TransceiverDmaBridgeChannel
+    {
+    public:
+        ReceiveDmaBridgeChannel(DmaStm::ReceiveStream& stream, volatile void* sourceAddress, volatile void* destinationAddress, uint8_t transferSize);
     };
 
     ////    Implementation    ////
