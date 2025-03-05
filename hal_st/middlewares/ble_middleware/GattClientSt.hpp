@@ -54,15 +54,16 @@ namespace hal
         virtual void HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent);
 
+        virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
+        void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
+
     private:
-        void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
-        void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
 
         void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
 
-    private:
+    protected:
         struct Atttributes
         {
             services::AttAttribute::Uuid type;

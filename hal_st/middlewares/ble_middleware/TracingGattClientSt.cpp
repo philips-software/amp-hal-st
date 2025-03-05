@@ -99,4 +99,24 @@ namespace hal
 
         GattClientSt::HandleGattCompleteResponse(vendorEvent);
     }
+
+    void TracingGattClientSt::HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16)
+    {
+        infra::ByteInputStream tracingStream(stream.PeekContiguousRange(0), infra::softFail);
+
+        while (!tracingStream.Empty())
+        {
+            Atttributes attributes;
+
+            tracingStream >> attributes.startHandle >> attributes.endHandle;
+
+            HandleUuidFromDiscovery(tracingStream, isUuid16, attributes.type);
+
+            really_assert(!tracingStream.Failed());
+
+            tracer.Trace() << "TracingGattClientSt::Service discovered, type: " << attributes.type << ", startHandle: 0x" << infra::hex << attributes.startHandle << ", endHandle: 0x" << infra::hex << attributes.endHandle;
+        }
+
+        GattClientSt::HandleServiceDiscovered(stream, isUuid16);
+    }
 }
