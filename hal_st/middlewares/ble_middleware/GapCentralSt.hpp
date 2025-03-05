@@ -42,10 +42,10 @@ namespace hal
         void HandleGapDirectConnectionProcedureCompleteEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
-        void SetPhy() const;
         void SetDataLength();
         void MtuExchange() const;
         void Initialize(const GapService& gapService);
+        void UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
@@ -63,7 +63,6 @@ namespace hal
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
         infra::AutoResetFunction<void()> onMtuExchangeDone;
-        infra::AutoResetFunction<void()> onDataLengthChanged;
         infra::TimerSingleShot initiatingStateTimer;
     };
 }
