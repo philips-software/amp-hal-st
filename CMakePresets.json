@@ -287,6 +287,11 @@
       "configurePreset": "stm32wba52"
     },
     {
+      "name": "stm32wba65-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32wba65"
+    },
+    {
       "name": "stm32wba65-Debug",
       "configuration": "Debug",
       "configurePreset": "stm32wba65"

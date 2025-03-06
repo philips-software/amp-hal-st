@@ -60,9 +60,6 @@ target_compile_definitions(st.hal_driver_stm32wbaxx PUBLIC
     DEVICE_HEADER="stm32wbaxx.h"
 )
 
-# Fix optimization for long file which is breaking the compiler
-set_source_files_properties(STM32WBAxx_HAL_Driver/Src/stm32wbaxx_hal_dma_ex.c PROPERTIES COMPILE_FLAGS -Os)
-
 add_hal_driver(st.hal_driver_stm32h5xx STM32H5xx_HAL_Driver CMSIS_STM32H5xx)
 emil_build_for(st.hal_driver_stm32h5xx TARGET_MCU_FAMILY stm32h5xx PREREQUISITE_BOOL HALST_STANDALONE)
 
