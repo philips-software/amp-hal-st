@@ -58,6 +58,7 @@ namespace main_
         hal::GpioPinStm ledBlue{ hal::Port::B, 4 };
     };
 
+#if defined(GPIOD)
     // UM3448: MB2130 reference board with STM32WBA65RI
     struct Nucleo64WBA6Ui
     {
@@ -68,6 +69,7 @@ namespace main_
         hal::GpioPinStm ledGreen{ hal::Port::C, 4 };
         hal::GpioPinStm ledBlue{ hal::Port::D, 8 };
     };
+#endif
 
     // UM1974: MB1137 reference board with F207ZG, F303ZE, F412ZG, F413ZH, F429ZI, F439ZI, F446ZE, F722ZE, F746ZG, F756ZG, F767ZI, H743ZI
     // UM2179: MB1312 reference board with L496ZG, L496ZG-P, L4A6ZG, L4P5ZG, LR5ZI, L4R5ZI-P
