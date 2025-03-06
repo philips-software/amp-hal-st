@@ -401,10 +401,12 @@ typedef struct
   * @{
   */
 #define LL_LPTIM_LPTIM1_IC1_RMP_GPIO     0x00000000UL                 /*!< IC1 connected to GPIO */
-#if defined(COMP1) && defined(COMP2)
+#if defined(COMP1)
 #define LL_LPTIM_LPTIM1_IC1_RMP_COMP1    LPTIM_CFGR2_IC1SEL_0         /*!< IC1 connected to COMP1 */
+#endif /* COMP1 */
+#if defined(COMP2)
 #define LL_LPTIM_LPTIM1_IC1_RMP_COMP2    LPTIM_CFGR2_IC1SEL_1         /*!< IC1 connected to COMP2 */
-#endif /* COMP1 && COMP2 */
+#endif /* COMP2 */
 /**
   * @}
   */
@@ -423,10 +425,12 @@ typedef struct
   * @{
   */
 #define LL_LPTIM_LPTIM2_IC1_RMP_GPIO     0x00000000UL                 /*!< IC1 connected to GPIO */
-#if defined(COMP1) && defined(COMP2)
+#if defined(COMP1)
 #define LL_LPTIM_LPTIM2_IC1_RMP_COMP1    LPTIM_CFGR2_IC1SEL_0         /*!< IC1 connected to COMP1 */
+#endif /* COMP1 */
+#if defined(COMP2)
 #define LL_LPTIM_LPTIM2_IC1_RMP_COMP2    LPTIM_CFGR2_IC1SEL_1         /*!< IC1 connected to COMP2 */
-#endif /* COMP1 && COMP2 */
+#endif /* COMP2 */
 /**
   * @}
   */
@@ -1171,7 +1175,8 @@ __STATIC_INLINE uint32_t LL_LPTIM_IC_GetPrescaler(const LPTIM_TypeDef *LPTIMx, u
   */
 __STATIC_INLINE void  LL_LPTIM_CC_SetChannelMode(LPTIM_TypeDef *LPTIMx, uint32_t Channel, uint32_t CCMode)
 {
-  SET_BIT(LPTIMx->CCMR1, CCMode << LL_LPTIM_SHIFT_TAB_CCxSEL[Channel]);
+  MODIFY_REG(LPTIMx->CCMR1, LPTIM_CCMR1_CC1SEL << LL_LPTIM_SHIFT_TAB_CCxSEL[Channel],
+             CCMode << LL_LPTIM_SHIFT_TAB_CCxSEL[Channel]);
 }
 
 /**
