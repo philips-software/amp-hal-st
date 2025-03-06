@@ -14,8 +14,7 @@ target_link_libraries(hal_st.ble_middleware PUBLIC
     services.ble
     services.util
     services.tracer
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/ble/stack/lib/stm32wba_ble_stack_basic.a>
-    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:${CMAKE_CURRENT_LIST_DIR}/../STM32_WPAN/STM32CubeWBA/link_layer/ll_cmd_lib/lib/LinkLayer_BLE_Basic_lib.a>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:hal_st.stm32_wpan_stm32wbaxx.libs>
 )
 
 target_sources(hal_st.ble_middleware PRIVATE
