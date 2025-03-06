@@ -14,9 +14,9 @@ namespace hal
     public:
         GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
-        virtual void ConnectionUpdate(infra::Function<void(uint16_t intervalMultiplier)> onConnectionUpdate) override;
+        void ConnectionUpdate(infra::Function<void(uint16_t intervalMultiplier)> onConnectionUpdate) override;
         infra::Function<void(uint16_t intervalMultiplier)> onConnectionUpdate;
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
 
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;
