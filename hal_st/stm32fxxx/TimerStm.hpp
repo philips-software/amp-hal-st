@@ -13,6 +13,8 @@
 
 namespace hal
 {
+    class TimerPwmBaseStm;
+
     class TimerBaseStm
     {
     public:
@@ -59,6 +61,7 @@ namespace hal
 
     protected:
         TIM_HandleTypeDef handle = {};
+        friend TimerPwmBaseStm;
     };
 
     class FreeRunningTimerStm
