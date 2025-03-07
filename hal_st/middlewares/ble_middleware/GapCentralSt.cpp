@@ -32,9 +32,9 @@ namespace hal
             return static_cast<services::GapAdvertisingEventType>(eventType);
         }
 
-        services::GapAdvertisingEventAddressType ToAdvertisingAddressType(uint8_t addressType)
+        services::GapDeviceAddressType ToAdvertisingAddressType(uint8_t addressType)
         {
-            return static_cast<services::GapAdvertisingEventAddressType>(addressType);
+            return static_cast<services::GapDeviceAddressType>(addressType);
         }
 
         bool IsTxDataLengthConfigured(const hci_le_data_length_change_event_rp0& dataLengthChangeEvent)
@@ -111,6 +111,14 @@ namespace hal
     {
         if (std::exchange(discovering, false))
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
+    }
+
+    infra::Optional<hal::MacAddress> GapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
+    {
+        hal::MacAddress identityAddress;
+        if (aci_gap_resolve_private_addr(address.data(), identityAddress.data()) != BLE_STATUS_SUCCESS)
+            return infra::none;
+        return infra::MakeOptional(identityAddress);
     }
 
     void GapCentralSt::AllowPairing(bool)

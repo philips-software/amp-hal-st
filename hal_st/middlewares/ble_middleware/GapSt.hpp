@@ -14,7 +14,7 @@ namespace hal
         : public services::AttMtuExchange
         , public services::GapBonding
         , public services::GapPairing
-        , private hal::HciEventSink
+        , private HciEventSink
     {
     public:
         struct GapService
@@ -31,7 +31,7 @@ namespace hal
 
         struct Configuration
         {
-            const hal::MacAddress& address;
+            const MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
             uint8_t txPowerLevel;
@@ -45,6 +45,7 @@ namespace hal
         void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
+        bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
 
         // Implementation of GapPairing
         void Pair() override;
@@ -54,7 +55,7 @@ namespace hal
         void NumericComparisonConfirm(bool accept) override;
 
     protected:
-        GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
@@ -72,7 +73,7 @@ namespace hal
         virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
-        void SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType);
+        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
 
     private:
         // Implementation of HciEventSink
@@ -81,15 +82,15 @@ namespace hal
         void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
         void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
 
-        void SetConnectionContext(uint16_t connectionHandle, uint8_t peerAddressType, uint8_t* peerAddress);
+        void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, uint8_t* peerAddress);
         void UpdateNrBonds();
 
     protected:
         struct ConnectionContext
         {
             uint16_t connectionHandle;
-            uint8_t peerAddressType;
-            hal::MacAddress peerAddress;
+            services::GapDeviceAddressType peerAddressType;
+            MacAddress peerAddress;
         };
 
         ConnectionContext connectionContext;
