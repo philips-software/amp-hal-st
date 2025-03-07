@@ -30,6 +30,7 @@ namespace hal
         void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent) override;
         void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent) override;
         void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent) override;
+        void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16) override;
 
     private:
         services::Tracer& tracer;
