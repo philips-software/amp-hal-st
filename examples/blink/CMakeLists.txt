@@ -29,11 +29,13 @@ emil_build_for(hal_st.blink_nucleo64
     TARGET_MCU stm32g474
     TARGET_MCU stm32wb55
     TARGET_MCU stm32wba52
+    TARGET_MCU stm32wba65
     PREREQUISITE_BOOL HALST_BUILD_EXAMPLES
 )
 
 target_compile_definitions(hal_st.blink_nucleo64 PUBLIC
     $<$<STREQUAL:${TARGET_MCU},stm32wba52>:NUCLEO=Nucleo64WBAUi>
+    $<$<STREQUAL:${TARGET_MCU},stm32wba65>:NUCLEO=Nucleo64WBA6Ui>
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:NUCLEO=Nucleo64WBUi>
     $<$<OR:$<STREQUAL:${TARGET_MCU},stm32g431>,$<STREQUAL:${TARGET_MCU},stm32g474>>:NUCLEO=Nucleo64Ui>
 )

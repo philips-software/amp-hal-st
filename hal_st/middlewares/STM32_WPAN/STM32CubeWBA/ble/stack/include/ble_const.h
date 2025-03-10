@@ -1,11 +1,11 @@
 /*****************************************************************************
  * @file    ble_const.h
- * @author  MDG
+ *
  * @brief   This file contains the definitions which are compiler dependent.
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2023 STMicroelectronics.
+ * Copyright (c) 2018-2025 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -29,6 +29,12 @@
 #ifndef BASIC_FEATURES
 #define BASIC_FEATURES 0
 #endif
+#ifndef BASIC_PLUS
+#define BASIC_PLUS 0
+#endif
+#ifndef PERIPHERAL_ONLY
+#define PERIPHERAL_ONLY 0
+#endif
 #ifndef LL_ONLY
 #define LL_ONLY 0
 #endif
@@ -41,8 +47,8 @@
  * To change the size of commands and events parameters used in the
  * auto-generated files, you need to update 2 defines:
  *
- *  - BLE_CMD_MAX_PARAM_LEN          
- *  - BLE_EVT_MAX_PARAM_LEN          
+ *  - BLE_CMD_MAX_PARAM_LEN
+ *  - BLE_EVT_MAX_PARAM_LEN
  *
  * These 2 defines are set below with default values and can be changed.
  *

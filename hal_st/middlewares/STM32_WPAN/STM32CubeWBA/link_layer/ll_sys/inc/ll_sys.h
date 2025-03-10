@@ -60,6 +60,7 @@ typedef enum
 
 /* Link Layer system interface general module functions  ************************************************/
 void ll_sys_init(void);
+void ll_sys_reset(void);
 void ll_sys_delay_us(uint32_t delay);
 void ll_sys_assert(uint8_t condition);
 void ll_sys_get_rng(uint8_t *ptr_rnd, uint32_t len);
@@ -69,7 +70,9 @@ void ll_sys_setup_radio_intr(void (*intr_cb)());
 void ll_sys_setup_radio_sw_low_intr(void (*intr_cb)());
 void ll_sys_radio_sw_low_intr_trigger(uint8_t priority);
 void ll_sys_radio_evt_not(uint8_t start);
+void ll_sys_rco_clbr_not(uint8_t start);
 void ll_sys_request_temperature(void);
+void ll_sys_schldr_timing_update_not(Evnt_timing_t * p_evnt_timing);
 
 extern int ll_intf_is_ptr_in_ble_mem(void* inp_ptr);
 void HostStack_Process(void);
@@ -78,6 +81,7 @@ void HostStack_Process(void);
 void ll_sys_bg_process(void);
 void ll_sys_bg_process_init(void);
 void ll_sys_schedule_bg_process(void);
+void ll_sys_schedule_bg_process_isr(void);
 void ll_sys_config_params(void);
 
 /* Link Layer system interface critical sections module functions  ************************************************/
@@ -94,5 +98,26 @@ ll_sys_status_t ll_sys_dp_slp_enter(uint32_t dp_slp_duration);
 ll_sys_status_t ll_sys_dp_slp_exit(void);
 ll_sys_dp_slp_state_t ll_sys_dp_slp_get_state(void);
 void ll_sys_dp_slp_wakeup_evt_clbk(void const *ptr_arg);
+
+/**
+  * @brief  Get the number of concurrent state machines for the Link Layer
+  * @param  None
+  * @retval Supported number of concurrent state machines 
+  */
+uint8_t ll_sys_get_concurrent_state_machines_num(void);
+
+#if BLE
+/**
+  * @brief  Updating Link Layer BLE timings
+  * @param  drift_time[in]: number of Link Layer sleep timer cycles (1 cycle = 31us) for the DRIFT TIME timing.
+  * @param  exec_time[in]: number of Link Layer sleep timer cycles (1 cycle = 31us)  for the EXEC TIME timing.
+  * @note   This interface needs to be called after system initialization
+  *         and before starting any radio activity.  
+  * @retval None
+  */
+void ll_sys_config_BLE_schldr_timings(uint8_t drift_time, uint8_t exec_time);
+#endif /* BLE */
+
+uint32_t ll_intf_cmn_get_slptmr_value(void);
 
 #endif /* LL_SYS_H */

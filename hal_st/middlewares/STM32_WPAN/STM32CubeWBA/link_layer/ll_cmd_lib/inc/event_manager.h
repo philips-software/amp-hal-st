@@ -1,11 +1,39 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/event_manager.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/2.00a-lca01/firmware/public_inc/event_manager.h#1 $*/
 /**
  ********************************************************************************
  * @file    event_manager.h
  * @brief   This file contains all the functions prototypes for the event_manager.c.
  ******************************************************************************
- */
-
+ * @copy
+ * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
+ * associated documentation ( hereinafter the "Software") is an unsupported
+ * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
+ * writing between Synopsys and you. The Software IS NOT an item of Licensed
+ * Software or a Licensed Product under any End User Software License Agreement
+ * or Agreement for Licensed Products with Synopsys or any supplement thereto.
+ * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
+ * the SOFTWARE may be the trademarks of their respective owners.
+ *
+ * Synopsys MIT License:
+ * Copyright (c) 2020-Present Synopsys, Inc
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * the Software), to deal in the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom
+ * the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
+ * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef INCLUDE_EVENT_MANAGER_H_
 #define INCLUDE_EVENT_MANAGER_H_
@@ -44,6 +72,9 @@ typedef enum {
 #if ((SUPPORT_MASTER_CONNECTION) || (SUPPORT_SLAVE_CONNECTION))
 	CONN_EVENT, /*connection event handler ID*/
 	CONN_PARAM_UPDATE_EVENT, /* handler for connection parameter update initiated by link layer */
+#if ((SUPPORT_CONNECTED_ISOCHRONOUS) && (SUPPORT_MASTER_CONNECTION))
+	CONN_DATA_LEN_UPDATE_EVENT, /* handler for connection data length update initiated by link layer */
+#endif /*SUPPORT_CONNECTED_ISOCHRONOUS && SUPPORT_MASTER_CONNECTION*/
 #if(SUPPORT_CONNECTED_ISOCHRONOUS &&( SUPPORT_MASTER_CONNECTION || SUPPORT_SLAVE_CONNECTION))
 	CIS_EVENT,
 #endif /*SUPPORT_CONNECTED_ISOCHRONOUS*/
@@ -52,10 +83,10 @@ typedef enum {
 	BIS_TERM_EVENT,
 #if(SUPPORT_SYNC_ISOCHRONOUS)
 	BIS_SYNC_TIMEOUT_EVENT,
-#endif /* SUPPORT_EXPLCT_OBSERVER_ROLE */
-#endif /* SUPPORT_BROADCAST_ISOCHRONOUS */
+#endif /* SUPPORT_SYNC_ISOCHRONOUS */
+#endif /* SUPPORT_BRD_ISOCHRONOUS || SUPPORT_SYNC_ISOCHRONOUS */
 #endif /*SUPPORT_BLE*/
-#if ((SUPPORT_BLE)||(SUPPORT_MAC_HCI_UART)||(SUPPORT_ANT_HCI_UART) || (SUPPORT_AUG_MAC_HCI_UART))
+#if SUPPORT_BLE
 	HCI_HANDLER, /* handler for the HCI events; handling events from Host to HCI*/
 #endif /*SUPPORT_BLE*/
 #if SUPPORT_BLE
@@ -63,14 +94,20 @@ typedef enum {
 	ADV_TIMEOUT_EVENT, 	/*handler for advertising extended timeout feature */
 	SCN_DURATION_EVENT,	/*handler for extended scanning duration */
 	SCN_PERIOD_EVENT, 	/*handler for extended scanning period */
-	PRDC_SCAN_TIMEOUT_EVENT, /*handler for periodoc scan sync timeout */
+#if SUPPORT_LE_PERIODIC_ADVERTISING
+	PRDC_SCAN_TIMEOUT_EVENT, /*handler for periodic scan sync timeout */
 	PRDC_SCAN_CANCEL_EVENT,
+#endif /* SUPPORT_LE_PERIODIC_ADVERTISING */
+#if SUPPORT_LE_PAWR_ADVERTISER_ROLE
+	PAWR_SEND_FRST_REQ,
+#endif /* SUPPORT_LE_PAWR_ADVERTISER_ROLE */
 #endif /* SUPPORT_LE_EXTENDED_ADVERTISING */
 #endif /*SUPPORT_BLE*/
 #if SUPPORT_COEXISTENCE
 	COEX_TIMER_EVENT,
 #endif
 #if SUPPORT_MAC
+	RADIO_MAC_TX_DONE_EVENT,
 	RAL_SM_DONE_EVENT,
 	MAC_SM_DONE_EVENT,
 	ED_TMR_EVENT,
@@ -89,7 +126,16 @@ typedef enum {
 #if SUPPORT_EXPLCT_OBSERVER_ROLE || SUPPORT_MASTER_CONNECTION || SUPPORT_SYNC_ISOCHRONOUS  || (SUPPORT_AOA_AOD && SUPPORT_SLAVE_CONNECTION)
 	ADV_REPORT_EVENT,
 #endif /* SUPPORT_EXPLCT_OBSERVER_ROLE || SUPPORT_MASTER_CONNECTION || SUPPORT_SYNC_ISOCHRONOUS  || (SUPPORT_AOA_AOD && SUPPORT_SLAVE_CONNECTION) */
+#if (SUPPORT_CONNECTED_ISOCHRONOUS && (SUPPORT_MASTER_CONNECTION || SUPPORT_SLAVE_CONNECTION) || (SUPPORT_BRD_ISOCHRONOUS) || (SUPPORT_SYNC_ISOCHRONOUS))
+	HCI_SYNC_EVENT,
+#endif /* SYNC_EVENT */
+#if END_OF_RADIO_ACTIVITY_REPORTING
+	HCI_RADIO_ACTIVITY_EVENT,
+#endif /* END_OF_RADIO_ACTIVITY_REPORTING */
 #endif /* SUPPORT_HCI_EVENT_ONLY */
+#if (SUPPORT_CHANNEL_SOUNDING &&( SUPPORT_MASTER_CONNECTION || SUPPORT_SLAVE_CONNECTION))
+	CS_EVENT_REMOVE, 
+#endif /*(SUPPORT_CHANNEL_SOUNDING &&( SUPPORT_MASTER_CONNECTION || SUPPORT_SLAVE_CONNECTION))*/
 #if ((SUPPORT_MAC) && (MAC_LAYER_BUILD))
 	MLME_TIMER_EVENT,
 	DIRECT_DATA_TX_EVENT,
@@ -123,7 +169,6 @@ typedef enum {
 #if (NUM_OF_CTSM_EMNGR_HNDLS >= 3)
 	CUSTOM_HANDLE_3,
 #endif
-
 	MAX_EM_HANDLE
 } handler_t;
 /* Exported functions ------------------------------------------------------- */
@@ -322,4 +367,3 @@ uint8_t emngr_process_conditional_event( uint8_t id, uint8_t only_one_event,
 
 #endif /* INCLUDE_EVENT_MANAGER_H_ */
 
-/*****END OF FILE****/
