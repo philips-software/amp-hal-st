@@ -175,6 +175,11 @@ namespace hal
 
     void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        auto connectionCompleteEvt = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
+
+        if (onConnectionUpdate)
+            onConnectionUpdate(connectionCompleteEvt->Conn_Interval);
+
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
 
         RequestConnectionParameterUpdate();
