@@ -90,6 +90,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SystemTickStm.hpp
     SystemTickTimerService.cpp
     SystemTickTimerService.hpp
+    TimerPwmStm.cpp
+    TimerPwmStm.hpp
     TimerStm.cpp
     TimerStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.cpp>
