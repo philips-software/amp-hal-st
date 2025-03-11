@@ -194,6 +194,9 @@ namespace hal
             case ACI_GATT_NOTIFICATION_VSEVT_CODE:
                 HandleGattNotificationEvent(vendorEvent);
                 break;
+            case ACI_ATT_READ_RESP_VSEVT_CODE:
+                HandleAttReadResponse(vendorEvent);
+                break;
             default:
                 break;
         }
