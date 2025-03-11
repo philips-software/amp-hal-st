@@ -46,6 +46,7 @@ namespace hal
         void MtuExchange() const;
         void Initialize(const GapService& gapService);
         void UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent);
+        void HandleConnectionCompleteCommon(evt_le_meta_event* metaEvent);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
@@ -62,7 +63,6 @@ namespace hal
 
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
-        infra::AutoResetFunction<void()> onMtuExchangeDone;
         infra::TimerSingleShot initiatingStateTimer;
     };
 }
