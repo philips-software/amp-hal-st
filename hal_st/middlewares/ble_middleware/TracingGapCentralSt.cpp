@@ -45,6 +45,17 @@ namespace hal
         GapCentralSt::StopDeviceDiscovery();
     }
 
+    infra::Optional<hal::MacAddress> TracingGapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
+    {
+        auto resolvedMac = GapCentralSt::ResolvePrivateAddress(address);
+        tracer.Trace() << "TracingGapCentralSt::ResolvePrivateAddress, MAC address: " << infra::AsMacAddress(address);
+        if (resolvedMac)
+            tracer.Continue() << ", resolved MAC address " << infra::AsMacAddress(*resolvedMac);
+        else
+            tracer.Continue() << ", could not resolve MAC address";
+        return resolvedMac;
+    }
+
     void TracingGapCentralSt::RemoveAllBonds()
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
@@ -67,6 +78,13 @@ namespace hal
     {
         tracer.Trace() << "TracingGapCentralSt::GetNumberOfBonds";
         return GapCentralSt::GetNumberOfBonds();
+    }
+
+    bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress address, services::GapDeviceAddressType addressType) const
+    {
+        auto ret = GapCentralSt::IsDeviceBonded(address, addressType);
+        tracer.Trace() << "TracingGapCentralSt::IsDeviceBonded " << infra::AsMacAddress(address) << " -> " << (ret ? "true" : "false");
+        return ret;
     }
 
     void TracingGapCentralSt::Pair()
