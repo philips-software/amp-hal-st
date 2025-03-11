@@ -820,6 +820,15 @@ namespace hal
         Enable();
     }
 
+    void DmaStm::TransceiveStream::StartTransmitFromAddress(const void* memAddress, uint16_t size)
+    {
+        SetMemoryToPeripheralMode();
+        EnableMemoryIncrement();
+        SetTransferSize(size);
+        SetMemoryAddress(memAddress);
+        Enable();
+    }
+
     void DmaStm::TransceiveStream::StartTransmitDummy(uint16_t size)
     {
         SetMemoryToPeripheralMode();
@@ -837,6 +846,15 @@ namespace hal
         EnableMemoryIncrement();
         SetTransferSize(data.size());
         SetMemoryAddress(data.begin());
+        Enable();
+    }
+
+    void DmaStm::TransceiveStream::StartReceiveToAddress(const void* memAddress, uint16_t size)
+    {
+        SetPeripheralToMemoryMode();
+        EnableMemoryIncrement();
+        SetTransferSize(size);
+        SetMemoryAddress(memAddress);
         Enable();
     }
 
@@ -977,10 +995,20 @@ namespace hal
         stream.StartTransmitDummy(size);
     }
 
+    void DmaStm::PeripheralTransceiveStream::StartTransmitFromAddress(const void* memAddress, uint16_t size)
+    {
+        stream.StartTransmitFromAddress(memAddress, size);
+    }
+
     void DmaStm::PeripheralTransceiveStream::StartReceiveDummy(uint16_t size, uint8_t dataSize)
     {
         stream.SetMemoryDataSize(dataSize);
         stream.StartReceiveDummy(size);
+    }
+
+    void DmaStm::PeripheralTransceiveStream::StartReceiveToAddress(const void* memAddress, uint16_t size)
+    {
+        stream.StartReceiveToAddress(memAddress, size);
     }
 
     size_t DmaStm::PeripheralTransceiveStream::ReceivedSize() const
@@ -1027,6 +1055,11 @@ namespace hal
         peripheralStream.StartTransmitDummy(size, dataSize);
     }
 
+    void TransceiverDmaChannelBase::StartTransmitFromAddress(const void* memAddress, uint16_t size)
+    {
+        peripheralStream.StartTransmitFromAddress(memAddress, size);
+    }
+
     size_t TransceiverDmaChannelBase::ReceivedSize() const
     {
         return peripheralStream.ReceivedSize();
@@ -1035,6 +1068,11 @@ namespace hal
     void TransceiverDmaChannelBase::StartReceiveDummy(uint16_t size, uint8_t dataSize)
     {
         peripheralStream.StartReceiveDummy(size, dataSize);
+    }
+
+    void TransceiverDmaChannelBase::StartReceiveToAddress(const void* memAddress, uint16_t size)
+    {
+        peripheralStream.StartReceiveToAddress(memAddress, size);
     }
 
     TransceiverDmaChannel::TransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType)
@@ -1116,6 +1154,35 @@ namespace hal
         SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
+
+    TransceiverDmaBridgeChannel::TransceiverDmaBridgeChannel(DmaStm::TransceiveStream& stream, volatile void* sourceAddress, uint8_t peripheralTransferSize)
+        : TransceiverDmaChannelBase{ stream, sourceAddress, peripheralTransferSize }
+    {
+        stream.EnableCircularMode();
+    }
+
+    TransmitDmaBridgeChannel::TransmitDmaBridgeChannel(DmaStm::TransmitStream& stream, volatile void* sourceAddress, volatile void* destinationAddress, uint8_t transferSize)
+        : TransceiverDmaBridgeChannel{ stream, sourceAddress, transferSize }
+    {
+#ifdef GPDMA1
+        SetMemoryToPeripheralMode();
+        SetPeripheralAddress(sourceAddress);
+        SetPeripheralTransferSize(transferSize);
+        stream.StartTransmitFromAddress(const_cast<const void*>(destinationAddress), transferSize);
+#endif
+    }
+
+    ReceiveDmaBridgeChannel::ReceiveDmaBridgeChannel(DmaStm::ReceiveStream& stream, volatile void* sourceAddress, volatile void* destinationAddress, uint8_t transferSize)
+        : TransceiverDmaBridgeChannel{ stream, sourceAddress, transferSize }
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(sourceAddress);
+        SetPeripheralTransferSize(transferSize);
+        stream.StartReceiveToAddress(const_cast<const void*>(destinationAddress), transferSize);
+#endif
+    }
+
 }
 
 #endif
