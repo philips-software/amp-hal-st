@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [4.1.0](https://github.com/philips-software/amp-hal-st/compare/v4.0.0...v4.1.0) (2025-03-13)
+
+
+### Features
+
+* Add DMA receive/transmit bridge functions with no interrupts needed ([#518](https://github.com/philips-software/amp-hal-st/issues/518)) ([71f5793](https://github.com/philips-software/amp-hal-st/commit/71f57938210d863ce7c0da864a7b6aea19215d02))
+* Add support for internal ADC channels ([#487](https://github.com/philips-software/amp-hal-st/issues/487)) ([30a6f4e](https://github.com/philips-software/amp-hal-st/commit/30a6f4e274fa86b73691f4e901cb9a1b872f49a9))
+* Add support to return resolve MAC address ([#464](https://github.com/philips-software/amp-hal-st/issues/464)) ([65063f4](https://github.com/philips-software/amp-hal-st/commit/65063f44d8a9a04133a81da57305757dcc481b28))
+* Add wba6 support ([#522](https://github.com/philips-software/amp-hal-st/issues/522)) ([6fc06ff](https://github.com/philips-software/amp-hal-st/commit/6fc06ff445e3329cead9234f8470764a0d91c7f5))
+* Extend Timer and LowPower Timer support ([#510](https://github.com/philips-software/amp-hal-st/issues/510)) ([88dc1e4](https://github.com/philips-software/amp-hal-st/commit/88dc1e40c11db4c9cc58182663c16a34292f10e4))
+* Timer with PWM channels ([#516](https://github.com/philips-software/amp-hal-st/issues/516)) ([6d87c72](https://github.com/philips-software/amp-hal-st/commit/6d87c7251128eb813c5293a443a90d78db4d309b))
+
+
+### Bug Fixes
+
+* Always do mtu exchange after connection event ([#525](https://github.com/philips-software/amp-hal-st/issues/525)) ([bcfd9dd](https://github.com/philips-software/amp-hal-st/commit/bcfd9dd2b3453ca48f58d7a6860619a3d92aeea1))
+* Better gap state update in gap central ([#507](https://github.com/philips-software/amp-hal-st/issues/507)) ([88156e0](https://github.com/philips-software/amp-hal-st/commit/88156e0a5f21846e87d3e50d02b2c923a3d43bfc))
+* Gap central adv data copy mistake 2  ([#502](https://github.com/philips-software/amp-hal-st/issues/502)) ([a214847](https://github.com/philips-software/amp-hal-st/commit/a2148474685297527b7aee60e5d4c3ede7d50328))
+* Gap central adv data copy mistake 3 ([#503](https://github.com/philips-software/amp-hal-st/issues/503)) ([2eff208](https://github.com/philips-software/amp-hal-st/commit/2eff20830ccc645d1caf6a39e2c7eaa88cb50dc6))
+* In GattClientSt handle omitted read response event ([#526](https://github.com/philips-software/amp-hal-st/issues/526)) ([28e778c](https://github.com/philips-software/amp-hal-st/commit/28e778c5e0ba2a4bbaf11863857f81cbc16a1f48))
+* Mistake GapCentral adv data copy ([#501](https://github.com/philips-software/amp-hal-st/issues/501)) ([190e2f9](https://github.com/philips-software/amp-hal-st/commit/190e2f9d2f8af098cc1ef0c68a9c110440a84ca2))
+
 ## [4.0.0](https://github.com/philips-software/amp-hal-st/compare/v3.0.0...v4.0.0) (2025-01-16)
 
 
