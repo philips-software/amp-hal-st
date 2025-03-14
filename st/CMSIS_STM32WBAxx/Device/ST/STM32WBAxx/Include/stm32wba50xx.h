@@ -158,7 +158,7 @@ typedef enum
 
 /** @} */ /* End of group Configuration_of_CMSIS */
 
-#include <core_cm33.h>                   /*!< ARM Cortex-M33 processor and core peripherals */
+#include "core_cm33.h"                   /*!< ARM Cortex-M33 processor and core peripherals */
 #include "system_stm32wbaxx.h"           /*!< system_stm32wbaxx System */
 
 
@@ -253,14 +253,14 @@ typedef struct
   */
 typedef struct
 {
-  __IO uint32_t IDCODE;      /*!< MCU device ID code,                 Address offset: 0x00 */
-  __IO uint32_t SCR;         /*!< Debug MCU status and configuration register,   Address offset: 0x04 */
-  __IO uint32_t APB1LFZR;    /*!< Debug MCU APB1 freeze register 1,   Address offset: 0x08 */
-  __IO uint32_t APB1HFZR;    /*!< Debug MCU APB1 freeze register 2,   Address offset: 0x0C */
-  __IO uint32_t APB2FZR;     /*!< Debug MCU APB2 freeze register,     Address offset: 0x10 */
-       uint32_t RESERVED1[4];/*!< Reserved,                                    0x14 - 0x20 */
-  __IO uint32_t APB7FZR;     /*!< Debug MCU APB7 freeze register,     Address offset: 0x24 */
-  __IO uint32_t AHB1FZR;     /*!< Debug MCU AHB1 freeze register,     Address offset: 0x28 */
+  __IO uint32_t IDCODE;          /*!< MCU device ID code,                             Address offset: 0x00 */
+  __IO uint32_t SCR;             /*!< Debug MCU status and configuration register,    Address offset: 0x04 */
+  __IO uint32_t APB1LFZR;        /*!< Debug MCU APB1 freeze register 1,               Address offset: 0x08 */
+  __IO uint32_t APB1HFZR;        /*!< Debug MCU APB1 freeze register 2,               Address offset: 0x0C */
+  __IO uint32_t APB2FZR;         /*!< Debug MCU APB2 freeze register,                 Address offset: 0x10 */
+       uint32_t RESERVED1[4];    /*!< Reserved,                                       Address offset: 0x14 - 0x20 */
+  __IO uint32_t APB7FZR;         /*!< Debug MCU APB7 freeze register,                 Address offset: 0x24 */
+  __IO uint32_t AHB1FZR;         /*!< Debug MCU AHB1 freeze register,                 Address offset: 0x28 */
 } DBGMCU_TypeDef;
 
 /**
@@ -617,11 +617,11 @@ typedef struct
   */
 typedef struct
 {
-  __IO uint32_t CR;    /*!< RNG control register, Address offset: 0x00 */
-  __IO uint32_t SR;    /*!< RNG status register,  Address offset: 0x04 */
-  __IO uint32_t DR;    /*!< RNG data register,    Address offset: 0x08 */
+  __IO uint32_t CR;      /*!< RNG control register,                   Address offset: 0x00 */
+  __IO uint32_t SR;      /*!< RNG status register,                    Address offset: 0x04 */
+  __IO uint32_t DR;      /*!< RNG data register,                      Address offset: 0x08 */
   uint32_t RESERVED;
-  __IO uint32_t HTCR;  /*!< RNG health test configuration register, Address offset: 0x10 */
+  __IO uint32_t HTCR;    /*!< RNG health test configuration register, Address offset: 0x10 */
 } RNG_TypeDef;
 
 /*
@@ -693,18 +693,18 @@ typedef struct
   */
 typedef struct
 {
-  __IO uint32_t SECCFGR;      /*!< SYSCFG secure configuration register,            Address offset: 0x00 */
-  __IO uint32_t CFGR1;        /*!< SYSCFG configuration register 1,                 Address offset: 0x04 */
-  __IO uint32_t FPUIMR;       /*!< SYSCFG FPU interrupt mask register,              Address offset: 0x08 */
-  __IO uint32_t CNSLCKR;      /*!< SYSCFG CPU non-secure lock register,             Address offset: 0x0C */
-  __IO uint32_t CSLCKR;       /*!< SYSCFG CPU secure lock register,                 Address offset: 0x10 */
-  __IO uint32_t CFGR2;        /*!< SYSCFG configuration register 2,                 Address offset: 0x14 */
-  __IO uint32_t MESR;         /*!< SYSCFG Memory Erase Status register,             Address offset: 0x18 */
-  __IO uint32_t CCCSR;        /*!< SYSCFG Conpensaion Cell Control&Status register, Address offset: 0x1C */
-  __IO uint32_t CCVR;         /*!< SYSCFG Conpensaion Cell value register,          Address offset: 0x20 */
-  __IO uint32_t CCCR;         /*!< SYSCFG Conpensaion Cell Code register,           Address offset: 0x24 */
-       uint32_t RESERVED1;    /*!< RESERVED1,                                       Address offset: 0x28 */
-  __IO uint32_t RSSCMDR;      /*!< SYSCFG RSS command mode register,                Address offset: 0x2C */
+  __IO uint32_t SECCFGR;        /*!< SYSCFG secure configuration register,            Address offset: 0x00 */
+  __IO uint32_t CFGR1;          /*!< SYSCFG configuration register 1,                 Address offset: 0x04 */
+  __IO uint32_t FPUIMR;         /*!< SYSCFG FPU interrupt mask register,              Address offset: 0x08 */
+  __IO uint32_t CNSLCKR;        /*!< SYSCFG CPU non-secure lock register,             Address offset: 0x0C */
+  __IO uint32_t CSLCKR;         /*!< SYSCFG CPU secure lock register,                 Address offset: 0x10 */
+  __IO uint32_t CFGR2;          /*!< SYSCFG configuration register 2,                 Address offset: 0x14 */
+  __IO uint32_t MESR;           /*!< SYSCFG Memory Erase Status register,             Address offset: 0x18 */
+  __IO uint32_t CCCSR;          /*!< SYSCFG Conpensaion Cell Control&Status register, Address offset: 0x1C */
+  __IO uint32_t CCVR;           /*!< SYSCFG Conpensaion Cell value register,          Address offset: 0x20 */
+  __IO uint32_t CCCR;           /*!< SYSCFG Conpensaion Cell Code register,           Address offset: 0x24 */
+       uint32_t RESERVED1;      /*!< RESERVED1,                                       Address offset: 0x28 */
+  __IO uint32_t RSSCMDR;        /*!< SYSCFG RSS command mode register,                Address offset: 0x2C */
 } SYSCFG_TypeDef;
 
 /**
@@ -4256,7 +4256,7 @@ typedef struct
 #define I2C_CR1_ADDRACLR_Pos                (30U)
 #define I2C_CR1_ADDRACLR_Msk                (0x1UL << I2C_CR1_ADDRACLR_Pos)         /*!< 0x40000000 */
 #define I2C_CR1_ADDRACLR                    I2C_CR1_ADDRACLR_Msk                    /*!< ADDRACLR enable */
-#define I2C_CR1_STOPFACLR_Pos               (30U)
+#define I2C_CR1_STOPFACLR_Pos               (31U)
 #define I2C_CR1_STOPFACLR_Msk               (0x1UL << I2C_CR1_STOPFACLR_Pos)        /*!< 0x80000000 */
 #define I2C_CR1_STOPFACLR                   I2C_CR1_STOPFACLR_Msk                   /*!< STOPFACLR enable */
 
@@ -4941,7 +4941,6 @@ typedef struct
 #define LPTIM_CCR2_CCR2_Pos                 (0U)
 #define LPTIM_CCR2_CCR2_Msk                 (0xFFFFUL << LPTIM_CCR2_CCR2_Pos)       /*!< 0x0000FFFF */
 #define LPTIM_CCR2_CCR2                     LPTIM_CCR2_CCR2_Msk                     /*!< Compare register 2 */
-
 
 /******************************************************************************/
 /*                                                                            */
@@ -6669,6 +6668,9 @@ typedef struct
 #define RNG_HTCR_HTCFG_Pos                 (0U)
 #define RNG_HTCR_HTCFG_Msk                 (0xFFFFFFFFUL << RNG_HTCR_HTCFG_Pos)     /*!< 0xFFFFFFFF */
 #define RNG_HTCR_HTCFG                     RNG_HTCR_HTCFG_Msk
+/********************  RNG Nist Compliance Values  *******************/
+#define RNG_CR_NIST_VALUE                   (0x00F02D00U)
+#define RNG_HTCR_NIST_VALUE                 (0xAAC7U)
 
 
 /******************************************************************************/
@@ -7788,11 +7790,12 @@ typedef struct
 #define TAMP_ATCR1_ATOSEL3_0                (0x1UL << TAMP_ATCR1_ATOSEL3_Pos)       /*!< 0x00001000 */
 #define TAMP_ATCR1_ATOSEL3_1                (0x2UL << TAMP_ATCR1_ATOSEL3_Pos)       /*!< 0x00002000 */
 #define TAMP_ATCR1_ATCKSEL_Pos              (16U)
-#define TAMP_ATCR1_ATCKSEL_Msk              (0x7UL << TAMP_ATCR1_ATCKSEL_Pos)       /*!< 0x00070000 */
+#define TAMP_ATCR1_ATCKSEL_Msk              (0xFUL << TAMP_ATCR1_ATCKSEL_Pos)       /*!< 0x000F0000 */
 #define TAMP_ATCR1_ATCKSEL                  TAMP_ATCR1_ATCKSEL_Msk
 #define TAMP_ATCR1_ATCKSEL_0                (0x1UL << TAMP_ATCR1_ATCKSEL_Pos)       /*!< 0x00010000 */
 #define TAMP_ATCR1_ATCKSEL_1                (0x2UL << TAMP_ATCR1_ATCKSEL_Pos)       /*!< 0x00020000 */
 #define TAMP_ATCR1_ATCKSEL_2                (0x4UL << TAMP_ATCR1_ATCKSEL_Pos)       /*!< 0x00040000 */
+#define TAMP_ATCR1_ATCKSEL_3                (0x8UL << TAMP_ATCR1_ATCKSEL_Pos)       /*!< 0x00080000 */
 #define TAMP_ATCR1_ATPER_Pos                (24U)
 #define TAMP_ATCR1_ATPER_Msk                (0x7UL << TAMP_ATCR1_ATPER_Pos)         /*!< 0x07000000 */
 #define TAMP_ATCR1_ATPER                    TAMP_ATCR1_ATPER_Msk
@@ -10293,7 +10296,8 @@ typedef struct
 
 /****************** TIM Instances : supporting OCxREF clear *******************/
 #define IS_TIM_OCXREF_CLEAR_INSTANCE(INSTANCE)  (((INSTANCE) == TIM1_NS)  || \
-                                                 ((INSTANCE) == TIM2_NS))
+                                                 ((INSTANCE) == TIM2_NS)  || \
+                                                 ((INSTANCE) == TIM16_NS))
 
 /********* TIM Instances : supporting bitfield OCCS in SMCR register **********/
 #define IS_TIM_OCCS_INSTANCE(INSTANCE)       (((INSTANCE) == TIM1_NS)  || \

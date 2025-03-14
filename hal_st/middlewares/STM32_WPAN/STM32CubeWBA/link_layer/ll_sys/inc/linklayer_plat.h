@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    hw_radio.h
+  * @file    linklayer_plat.h
   * @author  MCD Application Team
   * @brief   Header for linklayer_plat.c interface module
   ******************************************************************************
@@ -19,6 +19,7 @@
 #ifndef LINKLAYER_PLAT_H
 #define LINKLAYER_PLAT_H
 
+#include "bsp.h"
 #include <stdint.h>
 
 /**
@@ -50,7 +51,25 @@ extern void LINKLAYER_PLAT_Assert(uint8_t condition);
 extern void LINKLAYER_PLAT_AclkCtrl(uint8_t enable);
 
 /**
-  * @brief  Active wait on bus clock readyness.
+  * @brief  Notify the Link Layer platform layer the system will enter in WFI 
+  *         and AHB5 clock may be turned of regarding the 2.4Ghz radio state. 
+  * @param  None
+  * @retval None
+  */
+extern void LINKLAYER_PLAT_NotifyWFIEnter(void);
+
+/**
+  * @brief  Notify the Link Layer platform layer the system exited WFI and AHB5 
+  *         clock may be resynchronized as is may have been turned of during
+  *         low power mode entry.
+  * @param  None
+  * @retval None
+  */
+extern void LINKLAYER_PLAT_NotifyWFIExit(void);
+
+
+/**
+  * @brief  Active wait on bus clock readiness.
   * @param  None
   * @retval None
   */
@@ -152,6 +171,20 @@ extern void LINKLAYER_PLAT_StartRadioEvt(void);
 extern void LINKLAYER_PLAT_StopRadioEvt(void);
 
 /**
+  * @brief  Link Layer notification for RCO calibration start.
+  * @param  None
+  * @retval None
+  */
+extern void LINKLAYER_PLAT_RCOStartClbr(void);
+
+/**
+  * @brief  Link Layer notification for RCO calibration end.
+  * @param  None
+  * @retval None
+  */
+extern void LINKLAYER_PLAT_RCOStopClbr(void);
+
+/**
   * @brief  Link Layer requests temperature.
   * @param  None
   * @retval None
@@ -171,5 +204,26 @@ extern void LINKLAYER_PLAT_EnableOSContextSwitch(void);
   * @retval None
   */
 extern void LINKLAYER_PLAT_DisableOSContextSwitch(void);
+
+/**
+ * @brief Notify the upper layer that new Link Layer timings have been applied.
+ * @param evnt_timing[in]: Evnt_timing_t pointer to structure contains drift time , execution time and scheduling time
+ * @retval None.
+ */
+extern void LINKLAYER_PLAT_SCHLDR_TIMING_UPDATE_NOT(Evnt_timing_t * p_evnt_timing);
+
+/**
+  * @brief  Get the ST company ID.
+  * @param  None
+  * @retval Company ID
+  */
+extern uint32_t LINKLAYER_PLAT_GetSTCompanyID(void);
+
+/**
+  * @brief  Get the Unique Device Number (UDN).
+  * @param  None
+  * @retval UDN
+  */
+extern uint32_t LINKLAYER_PLAT_GetUDN(void);
 
 #endif /* LINKLAYER_PLAT_H */

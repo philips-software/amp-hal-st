@@ -28,8 +28,16 @@
 <a href="https://www.st.com" class="logo"><img src="_htmresc/st_logo_2020.png" alt="ST logo" /></a>
 </center>
 <h1 id="purpose">Purpose</h1>
-<p>Wireless Personal Area Network Middleware supporting Bluetooth Low Energy 5.3.</p>
-<p>The following features are supported for BLE 5.3:</p>
+<p>Wireless Personal Area Network Middleware supporting:</p>
+<ul>
+<li><p>Bluetooth Low Energy 5.4</p></li>
+<li><p>Zigbee stack Revision 23 (R23) and Revision 22 (R22), Zigbee Clusters ZCL 8.0</p></li>
+<li><p>OpenThread: compliant Thread 1.1, 1.2 and 1.3  </p></li>
+<li><p>Mac 802.15.4: compliant Zigbee IEEE 802.15.4 MAC Test Plan V 2.0</p></li>
+<li><p>BLE-Thread and BLE-Zigbee dynamic concurrent modes</p></li>
+<li><p>All libraries are compiled with MDK-ARM (KEIL) ARMCLANG V6.19 AEABI format.</p></li>
+</ul>
+<p>The following features are supported for <strong>BLE</strong> 5.4:</p>
 <ul>
 <li>Advertising</li>
 <li>Scanning</li>
@@ -48,44 +56,821 @@
 <li>Periodic Sync Transfer</li>
 <li>GATT Caching</li>
 <li>LE L2CAP Connection Oriented channel</li>
+<li>Enhanced ATT</li>
+<li>Isochronous Broadcaster / Synchronizer</li>
+<li>Connected Isochronous</li>
+<li>LE Power Control</li>
+<li>Connection Subrating</li>
+<li>Channel Classification Enhancement</li>
+<li>Periodic Advertising Enhancement</li>
 </ul>
 <p>The maximum number of connections is limited to 20.</p>
 <p>The list of BLE commands is documented in the following file: <a href="ble/stack/doc/STM32WBA_BLE_Wireless_Interface.html">STM32WBA_BLE_Wireless_Interface.html</a></p>
-<p>The BLE Stack user manual is available at following location : <a href="ble/stack/doc/STM32WBA_BLE_Stack_User_Manual.html">STM32WBA_BLE_Stack_User_Manual.html</a></p>
+<p>The BLE Stack user manual is available at following location: <a href="ble/stack/doc/STM32WBA_BLE_Stack_User_Manual.html">STM32WBA_BLE_Stack_User_Manual.html</a></p>
 <p>Different Bluetooth® Low Energy Host Stack variants are available in the STM32WBA package, depending on project requirements. Depending on the variant, the associated Link Layer library must be included in the project:</p>
 <ul>
 <li><em>stm32wba_ble_stack_full.a</em>: <strong>full host stack</strong> + <strong>ST LL controller</strong>, requires <em>LinkLayer_BLE_Full_lib.a</em> to work.</li>
 <li><em>stm32wba_ble_stack_basic.a</em>: <strong>basic host stack</strong> + <strong>ST LL controller (basic features)</strong>, requires <em>LinkLayer_BLE_Basic_lib.a</em> or <em>LinkLayer_BLE_Basic_20_links_lib.a</em> to work.</li>
+<li><em>stm32wba_ble_stack_basic_plus.a</em>: <strong>basic host stack</strong> + ST LL controller (basic features + additional features as Advertising Extension feature), requires LinkLayer_BLE_Basic_Plus_lib.a to work.</li>
 <li><em>stm32wba_ble_stack_llo.a</em>: <strong>ST LL controller only</strong>, requires <em>LinkLayer_BLE_Full_lib.a</em> to work.</li>
 <li><em>stm32wba_ble_stack_llobasic.a</em>: <strong>ST LL controller (basic features)</strong> only, requires <em>LinkLayer_BLE_Basic_lib.a</em> or <em>LinkLayer_BLE_Basic_20_links_lib.a</em> to work.</li>
+<li><em>stm32wba_ble_stack_po.a</em>: <strong>basic host stack</strong> + ST LL controller (basic features but supports only peripheral role), requires LinkLayer_BLE_Peripheral_Only_lib.a to work.</li>
+</ul>
+<p>The <strong>BLE audio</strong> feature introduces the following libraries:</p>
+<ul>
+<li><em>ble_audio.a</em>: Generic Audio Framework.</li>
+<li><em>LC3.a</em>: LC3 codec.</li>
+<li><em>codec_mngr.a</em>: codec integration and data path management.</li>
+<li>These libraries require the full feature BLE host stack and full feature link layer. (stm32wba_ble_stack_full.a).</li>
+</ul>
+<p>The following <strong>OpenThread</strong> libraries are provided:</p>
+<ul>
+<li><em>stm32wba_ot_ftd_lib.a</em> (Full Thread Device)<br />
+</li>
+<li><em>stm32wba_ot_mtd_lib.a</em> (Minimal Thread Device)</li>
+</ul>
+<p><strong>Zigbee</strong>:</p>
+<ul>
+<li>Stack:
+<ul>
+<li><em>ZigbeeProR23_FFD.a</em> (R23 Full Functional Device)</li>
+<li><em>ZigbeeProR23_RFD.a</em> (R23 Reduced Functional Device)</li>
+<li><em>ZigbeeProR22_FFD.a</em> (R22 Full Functional Device)</li>
+<li><em>ZigbeeProR22_RFD.a</em> (R22 Reduced Functional Device)</li>
+<li><em>ZigBeeProR22_SE_FFD.a</em> (R22 SE Full Functional Device)</li>
+<li><em>ZigBeeProR23_ZDD.a</em> (R23 Zigbee Direct)</li>
+</ul></li>
+<li>Clusters:
+<ul>
+<li>One cluster library for R23: <em>ZigbeeClusters.a</em> and one cluster library for R22: <em>ZigbeeClustersR22.a</em> containing the following clusters (ZCL 8.0 compliant). On demand, those clusters may be provided in source code.</li>
+<li>List of generic clusters:
+<ul>
+<li>Alarm</li>
+<li>Ballast Configuration</li>
+<li>Basic</li>
+<li>Color Control</li>
+<li>Commissioning</li>
+<li>Dehumidification Control</li>
+<li>Device Temperature Configuration</li>
+<li>Diagnostics<br />
+</li>
+<li>Door Lock</li>
+<li>Electrical Measurement</li>
+<li>Fan Control</li>
+<li>Groups</li>
+<li>Identify</li>
+<li>Illuminance Level Sensing</li>
+<li>Illuminance Measurement</li>
+<li>Level</li>
+<li>Meter Identification</li>
+<li>Nearest Gateway</li>
+<li>Occupancy Sensing</li>
+<li>OnOff</li>
+<li>OnOff Switch Configuration</li>
+<li>Over-The-Air (OTA) Upgrade</li>
+<li>Poll Control</li>
+<li>Power Configuration<br />
+</li>
+<li>Power Profile<br />
+</li>
+<li>Pressure Measurement</li>
+<li>Pump Configuration and Control<br />
+</li>
+<li>RSSI Location</li>
+<li>Scenes</li>
+<li>Temperature Measurement</li>
+<li>Thermostat<br />
+</li>
+<li>Thermostat User Interface</li>
+<li>Time</li>
+<li>Voice Over Zigbee</li>
+<li>Water Content Measurement</li>
+<li>Window Covering<br />
+</li>
+</ul></li>
+<li>List of Security Clusters:
+<ul>
+<li>Intruder Alarm Systems Ancillary Control Equipment (IAS_ACE)</li>
+<li>Security IAS Warning Device (IAS_WD)</li>
+<li>Security IAS Zone</li>
+</ul></li>
+<li>Zigbee SE 1.4[a] (Zigbee r22.2) with following clusters:
+<ul>
+<li>Basic (Server)</li>
+<li>Key Establishment (Client &amp; Server)</li>
+<li>Time (Client &amp; Server)</li>
+<li>OTA Upgrade cluster (Client)</li>
+<li>Events cluster (Server)</li>
+<li>Keep-Alive (Client - Router)</li>
+<li>Metering (Server)</li>
+<li>Messaging (Server)</li>
+<li>Price (Server)</li>
+<li>DRLC (Server)</li>
+<li>Calendar (Server)</li>
+<li>Prepayment (Server)</li>
+<li>Device Management (Server)</li>
+<li>Tunneling (Server)</li>
+</ul></li>
+</ul></li>
 </ul>
 </div>
 <div class="col-sm-12 col-lg-8">
 <h1 id="update-history">Update History</h1>
 <div class="collapse">
-<input type="checkbox" id="collapse-section2" checked aria-hidden="true"> <label for="collapse-section2" aria-hidden="false">V2.1.0 / 30-May-2023</label>
+<input type="checkbox" id="collapse-section8" checked aria-hidden="true"> <label for="collapse-section8" aria-hidden="false">V2.6.0 / 04-February-2025</label>
 <div>
 <h2 id="main-changes">Main Changes</h2>
 <ul>
 <li>BLE:
 <ul>
-<li>Maximum number of simultaneous connections supported by the device is now 20 : requires library LinkLayer_BLE_Basic_20_links_lib.a</li>
-<li>New RF-PHY settings which allow to pass FCC regulatory requirements (specifically FCC Band edge measurement) have been integrated</li>
-<li>Add ble_legacy.h include : file which ensures the compatibility with previous BLE Stack naming.</li>
-<li>Update BLE types and names in include files.</li>
-<li>ID 143688 : Radio Deep Sleep mode can be used with white lists, resolving lists or periodic advertiser lists.</li>
-<li>ID 143240 : Calibration improvement :calibration is done channel by channel from radio interrupt. Calibration is not delaying Link Layer scheduling activities. </li>
-<li>ID 146629 : Fix issue of events conflict with multi links.</li>
-<li>ID 144736 : Scan response Data handled correctly when it is set after the advertising enabling.</li>
-<li>ID 149353 : Channel Map update wrong behavior fixed.</li>
+<li>Update the BLE stack in compliance with the 2024-2 TCRL</li>
+<li>Update the duplicate filter policy to replace the oldest address in the list once full.<br />
+</li>
+<li>Implementation of the optional HCI_LE_CIS_Established [v2] event<br />
+</li>
+<li>Update HCI_Hardware_Error event’s returned HW_code parameter.</li>
+<li>The Connection Handle has been added to the ACI_GAP_BOND_LOST_EVENT parameters.</li>
+<li>ACI_GAP_PERIPHERAL_SECURITY_INITIATED_EVENT has been removed.</li>
+<li>The application can now call HCI_LE_GENERATE_DHKEY in BLE stack variants with host.</li>
+<li>Add a check for ACI commands used in the Extended/Legacy mode</li>
+<li>Issues fixed :
+<ul>
+<li>ID 195808: Wrong RSSI calculation while doing a CIS</li>
+<li>ID 191485: An occasional conflict between the scanning and initiating states might lead to an ACL connection creation failure<br />
+</li>
+<li>ID 195596: ASSERT failed raised when a disconnection happens while initializing 2 CIS</li>
+<li>ID 196330: Issue with creating an advertising set when the memory is exceeded</li>
+<li>ID 184833: Add a check for NULL ISO Intervals</li>
+<li>ID 176696: Key refresh failed due to a wrong timer state after a failed encryption</li>
+<li>ID 198896: The commands ACI_GAP_RESOLVE_PRIVATE_ADDR and ACI_GAP_IS_DEVICE_BONDED are removed and replaced by only one new enhanced command called ACI_GAP_CHECK_BONDED_DEVICE</li>
+<li>ID 199855: The channel number reported by ACI_L2CAP_COC_CONNECT_EVENT is now the number of channels that are effectively created rather than the number of channels requested by the initiator</li>
+<li>ID 196368: A new BLE stack warning event is now generated on peripheral side when an unpaired central device attempts to encrypt the link</li>
+<li>ID 189781: An unoptimized mechanism of sending ACL packets might lead to giving the priority to empty packets</li>
+<li>ID 185281: The Central should disconnect right after acknowledging the LL_TERMINATE_IND PDU sent by the peripheral</li>
+<li>ID 195788: Wrong iso_data_path allocation when ISO events return a FAILED status</li>
+</ul></li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>New ‘CachingEn’ field in BAP_AudioStreamCtrlSrvConfig_t allowing to enable/disable Audio Stream Endpoint State Caching in Unicast Server role</li>
+<li>Add flags in BAP_PA_Sync_Established_Data_t structure : additional info to Periodic Advertising Synced notification</li>
+<li>Defined new Macro CAP_ACC_ATT_VALUE_ARRAY_SIZE in cap_types.h used to calculate ATT Value Array size requested in CAP Acceptor registering many CSIP Set Member Instances ( ref CAP_RegisterCoordinatedSetMember())</li>
+<li>New constant CCP_SRV_MEM_CALL_STATE_INFO_PER_CALL_SIZE_BYTES defined in the ccp_types.h and used in the BLE_CCP_SRV_TOTAL_BUFFER_SIZE Macro</li>
+<li>LC3 codec V1.5 : ram management optimization with dedicated stack for processing and object size depending on codec frequency.</li>
+<li>Codec Manager V1.7 : change default mode to CODEC_MODE_FLOW_CTRL</li>
+<li>Codec Manager : change initialization parameters for new RAM management</li>
+<li>Issues Fixed :
+<ul>
+<li>ID 187013 : ACI_GATT_NOTIFICATION_COMPLETE_VSEVT_CODE event is not generated after MCP_SERVER_SetTrackTitle() is called</li>
+<li>ID 192029 : Add process during CAP Audio Unicast Start procedure to fix remote Unicast Server’s issue when remote Unicast Server doesn’t notify Sink ASE change from ENABLING State to STREAMING state</li>
+<li>ID 193036 : Fix issue in PAC Records reporting : PACS Records are not read correcly</li>
+<li>ID 192029 : CAP Unicast Audio Start procedure is not aborted in Telephony mode (only one ASE out of 2 went to streaming state)</li>
+<li>ID 192711 : start audio telephony is using 2 sink ASEs on 1 earbud instead of 1 Source ASE + 1 Sink ASE</li>
+<li>ID 193397 : Unicast Client releases ASE if Enabling Notification is received when associated CIS already up</li>
+<li>ID 196820 : CAP Unicast Audio Start Procedure is not correctly aborted in CAP Initiator if disconnection occurs during the procedure</li>
+<li>ID 197413 : VCP Audio location not checked on update and update on PACS to accept audio location to 0x00000000</li>
+<li>ID 197417 : CAP Unicast Audio Stop not done correctly on 2 remote CSIP members</li>
+<li>ID 198730 : In CAP Initiator role, the CAP_UNICAST_AUDIO_DATA_PATH_SETUP_REQ_EVT event not received for Source ASE in ENABLING State if associated CIS already connected</li>
+<li>ID 198862 : CAP_VolumeController_StartSetVolumeOffsetProcedure() function is not working on only one remote member of a group. The event CAP_SET_VOLUME_OFFSET_PROCEDURE_COMPLETE_EVT is not notified once the procedure is complete</li>
+<li>ID 196580 : Codec Manager V1.7 : fix message queue reinitialization</li>
+</ul></li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>Issues Fixed :
+<ul>
+<li>ID 191800 &amp; 192786 : During association sequence, don’t received association confirm</li>
+<li>ID 188986: Assert in RxEnable MAC API on WBA<br />
+</li>
+<li>ID 192786: Not received association.confirm when beacon request is received during the association sequence<br />
+</li>
+<li>ID 189839 &amp; 191232: Information Element compatible with Zigbee standard</li>
+<li>ID 190388: Send beacon frame coherence with BSN suppression enable</li>
+<li>ID 191444: Malformed Beacon frame is rejected ow</li>
+<li>ID 192162: Broadcast frame is not acknowledged anymore (depending to this frame version)</li>
+<li>ID 192320: Indirect data are more stable</li>
+<li>ID 194921: Fix several issues in disassociation primitive</li>
+<li>ID 194955: Missing addressing information in COMM-STATUS.ind following an unsuccessful association</li>
+<li>ID 198108: RSSI field is prensent in data.indication callback</li>
+<li>ID 195607: Invalid scan status in case of channel access failure</li>
+<li>ID 195704: Empty panDescriptorList after an enhanced scan</li>
+</ul></li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>A new stack library is available adressing ZigbeeDirect: <em>ZigBeeProR23_ZDD.a</em>. Zigbee Direct is a new communication protocol designed to enable direct communication between Zigbee devices and smartphones.</li>
+<li>MISRA compliancy corrections.</li>
+<li>Zigbee Touchlink :
+<ul>
+<li>Zigbee Touchlink interoperability improved.</li>
+</ul></li>
+<li>Zigbee Smart Energy R22 :
+<ul>
+<li>Zigbee Smart Energy minor bug fixing.</li>
+</ul></li>
+<li>Zigbee Miscellaneous R23 :
+<ul>
+<li>Zigbee BDB moving to version 3.1.</li>
+<li>Clusters code cleanup (mainly Poll Control cluster).</li>
+<li>Sleepy End Device keep alive enhancements for realistic use corner cases scenarios.</li>
+<li>Added ZB_NWK_STATUS_CODE_PANID_UPDATE filter message support for when the PAN Id is updated.</li>
+</ul></li>
+<li>Issue fixed:
+<ul>
+<li>ID 193402 : Router.Neighbor timed-out Removing from NNT of SED happen too early. Better handling of EDKA by parent.</li>
+<li>ID 183768 : TOUCHLINK Initiator configured as SED not able to commission</li>
+<li>ID 202291 : Zigbee direct updates and Smart Energy bug fixing and BDB 3.1 and Clusters updates and PANID updates</li>
+</ul></li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>Add support of NVM in platform/flash.c (Demonstration application in Thread_Coap_Generic_NVM)</li>
+<li>Add support of SHA256 HW accelerator (crypto acceleration during commissioning)</li>
+<li>New OT lib dedicated to matter optimized in footprint : stm32wba_mtd_light_no_tcp_matter_lib.a</li>
+<li>Issue fixed:
+<ul>
+<li>ID 191203 : SSED do not update CSL IE phase after retries leading to desynchronization<br />
+</li>
+<li>ID 190279 : SHA256 mbedtls is still executed in software and not with hardware accelerator.</li>
+</ul></li>
+</ul></li>
+<li>BLE Thread:
+<ul>
+<li>Issue fixed:
+<ul>
+<li>ID 192199, 192192, 192486, 192653 : CSL feature unstable in noisy environment</li>
+<li>ID 191905 : SED crash after several hours in noisy environment</li>
+<li>ID 197494 : OT Discovery requests stopped when LinkLayer returns OT_ERROR_ABORT</li>
+</ul></li>
+</ul></li>
+<li><strong>Known limitations</strong>:
+<ul>
+<li>BLE:
+<ul>
+<li>ID 143245 : ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Framed mode not supported (44.1 KHz).</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>Information Element and Enhanced beacon implemented according the Zigbee standard (annex D)</li>
+<li>ID 191973: Impossible to send beacon with a payload length greater than 52 bytes</li>
+<li>ID 194748: Incorrect TX power in the zigbee IE of an EBR</li>
+<li>ID 195186: Out of range TX power power IE in enhanced beacon</li>
+<li>ID 195939: Receiving Corrupted Data Indication after received a frame with extended type</li>
+<li>ID 195702: Invalid coordinator short address after an association with an extended address</li>
+<li>ID 196397 &amp; 197903 &amp; 197909: Buffer deleted in a very rare case</li>
+<li>ID 197948: Association is cancelled when purging handle 0</li>
+<li>ID 197959: Frame pending field is not set to 1 when multiple data are pending</li>
+<li>ID 197976: Memory corruption when purging a frame between data request and data</li>
+<li>ID 188347: [WBA6] Too high PER (&gt; 1%) observed for Packet size modulo 16</li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>ZigbeeDirect stack (ZigBeeProR23_ZDD.a) certification has not been executed.</li>
+</ul></li>
+<li>BLE Thread:
+<ul>
+<li>ID 198973 : Under 802.15.4 noisy environment, some BLE events could be missed.</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section7" aria-hidden="true"> <label for="collapse-section7" aria-hidden="false">V2.5.0 / 29-October-2024</label>
+<div>
+<h2 id="main-changes-1">Main Changes</h2>
+<ul>
+<li>BLE:
+<ul>
+<li>Advertising Coding Scheme Selection features added.</li>
+<li><p>LE Power Control Golden Range configurable through ACI_HAL_WRITE_CONFIG_DATA command.</p></li>
+<li>Issues fixed :
+<ul>
+<li>ID 189505 : Respond with an error when HCI_LE_Setup_ISO_Data_Path is called when the controller is in test mode</li>
+<li>ID 190991 : Active scanning affected by privacy</li>
+<li>ID 183978 : Conflict of LL procedure timer at disconnection.</li>
+<li>ID 186135 : Possibility to disable any SMP Association Model via ACI_HAL_WRITE_CONFIG_DATA command.</li>
+<li>ID 189284 : New SMP event ACI_GAP_PAIRING_REQUEST_EVENT and command ACI_GAP_PAIRING_REQUEST_REPLY.</li>
+<li>ID 186138 : Support Advertising Coding selection.</li>
+<li>ID 189465 : A new configuration of the static random address is now taken into account by GAP at next operation start.</li>
+<li>ID 180738 : Added a mechanism to control the number of received ACL packets through the ACI_HAL_WRITE_CONFIG_DATA command</li>
+<li>ID 181488 : Improve RF calibration mechanism when no BLE activity</li>
+<li>ID 186386 : Disconnection observed with multiple connections with specific connection intervals</li>
+<li>ID 184112 : Wrong handling of create connection when maximum number of connections is reached.</li>
+<li>ID 177968 : Wrong reject of pairing key refresh procedure</li>
+<li>ID 175965 : Slave Latency is not applied correctly with Connection Subrating</li>
+<li>ID 186777 : Optimization of delta between two connections events</li>
+<li>ID 183074 : Incorrect values in Connectionless_IQ_report in DTM</li>
+<li>ID 176898 : Collision between encryption request and PHY update request</li>
+<li>ID 184023 : Connection lost after conflicting with Ext. Scanning</li>
+<li>ID 186090 : ASSERT Failed when sending ACI_GAP_TERMINATE on ACI_GAP_CREATE_CONNECTION</li>
+<li>ID 185792 : Update of ACI_HAL_END_OF_RADIO_ACTIVITY_EVENT event</li>
+<li>ID 187176 : Extended Adv. Set. with duration not correctly terminated if periodic advertising isn’t supported</li>
+</ul></li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Codec Manager : Add status to audio trigger callback functions</li>
+<li>New field ‘CachingEn’ in BAP_AudioStreamCtrlSrvConfig_t allowing to enable/disable Audio Stream Endpoint State Caching in Unicast Server role</li>
+<li>Issues fixed :
+<ul>
+<li>ID 187013 : ACI_GATT_NOTIFICATION_COMPLETE_VSEVT_CODE is not generated after MCP_SERVER_SetTrackTitle() is called</li>
+</ul></li>
+</ul></li>
+<li><p>MAC 802.15.4:</p>
+<ul>
+<li>Issues fixed :
+<ul>
+<li>ID 182157 : Assert with enhanced ACK received when SUPPORT_RADIO_SECURITY_OT_1_2 = 0</li>
+<li>ID 182902 : Bad associate short address during unsuccessful association</li>
+<li>ID 182970 : Deadlock on noisy channel after several hours/days</li>
+<li>ID 183144 : Missing Association Callbacks in noisy environment in MAC Test Apps</li>
+<li>ID 183125 : Set macAssociatedPanCoord PIB when the device is associate to PAN Coordinator</li>
+<li>ID 184661 : Don’t received ACK time out in a stressful setup</li>
+<li>ID 184756 : Timestamps field in MCPS-data.indication always set to 0</li>
+<li>ID 185204 : Beacons sent on a channel while we receive no beacon request on the current channel</li>
+<li>ID 185489 : Assert during ED scan sequence</li>
+<li>ID 185739 : Assert because queue handle is full</li>
+<li>ID 185953 : Defenscis test makes the WBA board stuck</li>
+<li>ID 185980 : Assert in mlme_orphan_scn because the timer event is not completely aborted</li>
+<li>ID 186084 : Poll.confirm missing after Poll.request</li>
+<li>ID 186316 : MAC/LinkLayer assert_failed mac_proc_tx_data_req</li>
+<li>ID 186852 : Deadlock timer overflow</li>
+</ul></li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>OpenThread update to SHA-1: 4a0d6b7b6495a1e4e2e03ab7a4f8baa064df4a6e (June 11th 2024)</li>
+<li>stm32wba_mbedtls_ftd_lib.a/stm32wba_mbedtls_mtd_lib.a generated with mbedtls 3.6.1 &amp; mbedtls_alt (HW acceleration)</li>
+<li>Issue fixed :
+<ul>
+<li>ID 192664 : Align CLI echo with WB55 for CubeMonitorRF</li>
+<li>ID 186567 : RxOnwhenIdle=1 device doesn’t receive frame anymore during few seconds</li>
+<li>ID 184518 &amp; 184513 : OT alarm platform file reworked to avoid overflow after 36.2 hours</li>
+<li>ID 180428 : CSMA-CA retries algorithm reviewed to be compliant with Thread standard</li>
+<li>ID 178797 : Thread_RCP uart interface stabilized at high baudrate to avoid Border Router crash</li>
+</ul></li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>Zigbee SE1.4[a] (Zigbee r22.2) with following clusters:
+<ul>
+<li>Basic (Server)</li>
+<li>Key Establishment (Client &amp; Server)</li>
+<li>Time (Client &amp; Server)</li>
+<li>OTA Upgrade cluster (Client)</li>
+<li>Events cluster (Server)</li>
+<li>Keep-Alive (Client - Router)</li>
+<li>Metering (Server)</li>
+<li>Messaging (Server)</li>
+<li>Price (Server)</li>
+<li>DRLC (Server)</li>
+<li>Calendar (Server)</li>
+<li>Prepayment (Server)</li>
+<li>Device Management (Server)</li>
+<li>Tunneling (Server)</li>
+</ul></li>
+</ul></li>
+<li>BLE_Thread:
+<ul>
+<li>Thread FTD/MTD pre-certified</li>
+<li>Issue fixed :
+<ul>
+<li>ID 182045 : SED stop sending data_req , SED pre-certification test OK</li>
+<li>ID 183973 : Device cannot transmit CSL frame in noisy environment, CSL pre-certification test OK</li>
+<li>ID 191058 : Hardfault during bonding operation</li>
+</ul></li>
+</ul></li>
+<li><strong>Known limitations</strong>:
+<ul>
+<li>BLE:
+<ul>
+<li>ID 143245 : ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
+<li>ID 189781 : An unoptimized mechanism of sending ACL packets might lead to giving the priority to empty packets.</li>
+<li>ID 191485 : An occasional conflict between the scanning and initiating states might lead to an ACL connection creation failure.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Framed mode not supported (44.1 KHz).</li>
+<li>ID 165710 : Audio Latency may not be respected with high transport latency.</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>ID 191973 : Impossible to send beacon with a payload length greater than 52 bytes</li>
+<li>ID 191800 : During association sequence, don’t received association confirm</li>
+<li>ID 188986 : Assert in RxEnable MAC API on WBA</li>
+<li>ID 192786 : Not received association.confirm when beacon request is received during the association sequence</li>
+<li>ID 191239 : Information elements partially implemented</li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>ID 191203 : SSED do not update CSL IE phase after retries leading to desynchronization</li>
+<li>ID 190279 : SHA256 mbedtls is still executed in software and not with hardware accelerator</li>
+</ul></li>
+<li>BLE Zigbee:
+<ul>
+<li>ID 191836: Hardfault when close to 37h overflow</li>
+</ul></li>
+<li>BLE Thread:
+<ul>
+<li>ID 192199, 192192, 192486, 192653 : CSL feature unstable in noisy environment</li>
+<li>ID 191905 : SED crash after several hours in noisy environment</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section6" aria-hidden="true"> <label for="collapse-section6" aria-hidden="false">V2.4.0 / 03-June-2024</label>
+<div>
+<h2 id="main-changes-2">Main Changes</h2>
+<ul>
+<li>BLE:
+<ul>
+<li>Two new BLE stack configurations added:
+<ul>
+<li>Basic Plus stack(<em>stm32wba_ble_stack_basic_plus.a</em>) includes the LE Controller and the Host Stack, both with the basic features along with additional features as Extended Advertising/Scanning, LE Power Control and Connection Subrating, Enhanced ATT, L2CAP connection oriented channels and GATT caching features.</li>
+<li>Peripheral Only stack(<em>stm32wba_ble_stack_po.a</em>) includes the LE Controller and the Host Stack, both with the basic features but only for peripheral role.</li>
+</ul></li>
+<li>BLE wrapper added : pre and post command handling</li>
+<li>Encrypted Advertising Data feature added.</li>
+<li>Issues fixed:
+<ul>
+<li>ID 175965: Slave Latency is not applied correctly on FULL configuration</li>
+<li>ID 162754: Scheduling issue while having an ongoing CIS may lead to non-handling of LLCP in time causing a Disconnection with “Instant passed” </li>
+<li>ID 168123: MIC failure when initiating an LE Power Control request during an encryption procedure.</li>
+<li>ID 172235: RSSI miscalculation in CIG Event.</li>
+<li>ID 175620: “Pairing Not Supported” reception cause upcoming pairing to fail</li>
+<li>ID 175680: Wrong pairing failed reason in case the Security Request cannot be handled</li>
+<li>ID 175796: Remove limitation of the number of pairing procedures in parallel</li>
+</ul></li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>The event CAP_CODEC_CONFIGURED_EVT is renamed CAP_AUDIO_CLOCK_REQ_EVT</li>
+<li>Audio Stack process change to allow to respond asynchronously to an ASCS Enable Request operation from a remote CAP Initiator:<br />
+</li>
+<li>New event CAP_UNICAST_SERVER_ENABLE_REQ_EVT definition.<br />
+</li>
+<li>New structure BAP_ASE_Enable_Req_Params_t defined in bap_types.h associated to an Enable Operation request Event</li>
+<li>New function CAP_Unicast_EnableOpRsp() used to respond to an Enable Request operation for a specified Audio Stream Endpoint</li>
+<li>New function CAP_UpdateAvailableAudioContexts() used to update available audio context for reception and transmission associated to the specified remote CAP Acceptor</li>
+<li>Add num_ble_links parameter in BAP_PACS_SRV_TOTAL_BUFFER_SIZE macro in bap_bufsize.h</li>
+<li>Define new BAP_PACS_SRV_INST_MEM_PER_CONN_SIZE_BYTES constant in bap_bufsize.h</li>
+<li>Issues fixed:
+<ul>
+<li>In case of disconnection occurs while the CAP Unicast Audio Start, invalid pointer access.</li>
+<li>Broadcast sink Process locked in infinite loop during scanning because index used to parse data packet is a 8 bits instead of 16bits.</li>
+<li>Audio data path done 2 times when peripheral goes to Streaming state before CIS establishment.</li>
+<li>Hardfault in case of CIS Establisment event is received in BAP Unicast Client layer with a failure status.</li>
+<li>Number of remote Audio Stream Endpoints are not reset by CAP initiator between successive CAP linkup.</li>
+</ul></li>
+</ul></li>
+<li>802.15.4:
+<ul>
+<li>Long term robustness improvement for MAC applications.</li>
+<li>Stability improved on noisy channels environment.</li>
+</ul></li>
+<li>BLE_Zigbee:
+<ul>
+<li>Use of a new library (<em>wba_mac_concurrent.a</em>) dedicated to Concurrent BLE_Zigbee applications.</li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>MbedTLS 2.28.7 update</li>
+<li>ID 172831: RCP CSL instability fixed</li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>Stack:
+<ul>
+<li>Enhancement of the CBKE mechanism. Adding of a status code named ZB_BDB_KE_Status updated during startup.</li>
+<li>Removal of the MAC data Pool keep alive mechanism for security reasons.</li>
+</ul></li>
+<li>Clusters:
+<ul>
+<li>OTA cluster enhancements (Writing to File Version attribute at end of OTA upgrade, Improve OTA robustness and transfer error management, etc.. )</li>
+<li>ZCL library enhancement especially for Colour and Level clusters (MISRA rules compliancy update)</li>
+</ul></li>
+</ul></li>
+<li><strong>Known limitations</strong>:
+<ul>
+<li>BLE:
+<ul>
+<li>ID 143245 : ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
+<li>ID 178561 : White list not updated when advertising in privacy mode.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Framed mode not supported (44.1 KHz).</li>
+<li>ID 135240 : Long synchronization time in Broadcast due to scheduling conflict between extended advertising and BIG event.</li>
+<li>ID 165710 : Audio Latency may not be respected with high transport latency.</li>
+</ul></li>
+<li>Common 802.15.4 (MAC / Thread / Zigbee):
+<ul>
+<li>ID 182045 : [BLE_Thread_SED] issue with data polling / device crash</li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>ID 182978 In color cluster, wrong parsing for enhanced move to hue command.</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>ID 182781 : During association, the capable information with receiver On When Idle doesn’t work</li>
+<li>ID 182904 : Not received MLME-Sync-Loss.ind for associate device to a PAN coordinator</li>
+</ul></li>
+<li>PHY 802.15.4:
+<ul>
+<li>ID 160933 : API for continuous wave not yet supported</li>
+<li>ID 160930 : API for continuous modulation not yet supported</li>
+<li>ID 164825 : RSSI reading incorrect : around 6dbm loss from –90 to -30dbm</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section5" aria-hidden="true"> <label for="collapse-section5" aria-hidden="false">V2.3.1 / 22-March-2024</label>
+<div>
+<h2 id="main-changes-3">Main Changes</h2>
+<ul>
+<li><p>Productive RF-PHY settings.</p></li>
+<li>Zigbee:
+<ul>
+<li>Adding support of R22. (Stack and clusters)</li>
+</ul></li>
+<li>BLE:
+<ul>
+<li>ID 171974 : Fix issue of Confirm Indication when a Read Request is sent simultaneously</li>
+<li>ID 173054 : Reject pairing with a peer device using debug public key</li>
+<li>ID 174185 : Fix unaligned access memory on Keil with new MEMMOVE macro.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>ID 171331: libraries are not linked anymore with hardfp convention</li>
+<li>Unicast Audio Start Procedure is not correctly ended if a disconnection with one of the CAP acceptors occurs during the Uniacst Audio Start Procedure</li>
+<li>Fixed issue where CSIP expiring timer would cause Hardfault.<br />
+</li>
+<li>Added procedure check and clean to Broadcast Audio Start/Stop.</li>
+</ul></li>
+<li>802.15.4:
+<ul>
+<li>ID 166793: [Robustness] Assert during active scan on noisy channel</li>
+<li>ID 165757: [Robustness] Dead lock during CSMA-CA sequence after several hours (depending number of frames send, noisy channel)</li>
+<li>ID 167369: MAC &amp; Zigbee solution not Low Power compatible for sleepy end devices. System could stay in high power consumption and does not return back to standby low power consumption level.</li>
+</ul></li>
+<li><strong>Known limitations</strong>:
+<ul>
+<li>BLE:
+<ul>
+<li>ID 175965: Slave Latency is not applied correctly on FULL configuration</li>
+<li>ID 162754: Scheduling issue while having an ongoing CIS may lead to non-handling of LLCP in time causing a Disconnection with “Instant passed”</li>
+<li>ID 143245: ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.<br />
+</li>
+<li>ID 168123: MIC failure when initiating an LE Power Control request during an encryption procedure.</li>
+<li>ID 172235: RSSI miscalculation in CIG Event.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Framed mode not supported (44.1 KHz)</li>
+<li>ID 135240 : Long synchronization time in Broadcast due to scheduling conflict between extended advertising and BIG event<br />
+</li>
+<li>ID 165710 : Audio Latency may not be respected with high transport latency</li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>ID 173756: [Robustness] Dead lock after 36 hours, timer overflow</li>
+<li>ID 172831: RCP CSL Tx instability</li>
+<li>ID 174323: [CSL] Enh-Ack timestamp calculation issue / radio crash</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>ID 164074: Coordinator receiveSyncLoss.IndicationduringCoord_realign</li>
+<li>ID 171812: [Robustness] Data.cnfreceived bad error code (CHANNEL_ACCESS_FAILLURE normally NO_ACK)</li>
+<li>ID 173756: [Robustness] Dead lock after 36 hours, timer overflow</li>
+</ul></li>
+<li>PHY 802.15.4:
+<ul>
+<li>ID 160933: API for continuous wave not yet supported</li>
+<li>ID 160930: API for continuous modulation not yet supported</li>
+<li>ID 164825: RSSI reading incorrect: around 6dbm loss from –90 to -30dbm</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section4" aria-hidden="true"> <label for="collapse-section4" aria-hidden="false">V2.3.0 / 05-Feb-2024</label>
+<div>
+<h2 id="main-changes-4">Main Changes</h2>
+<ul>
+<li><p>Adding support of BLE-Thread and BLE-Zigbee Dynamic Concurrent Modes.</p></li>
+<li><p>All libraries are now compiled with MDK-ARM (KEIL) ARMCLANG V6.19 AEABI format.</p></li>
+<li>BLE:
+<ul>
+<li>New features supported:
+<ul>
+<li>Connection Subrating</li>
+<li>Channel Classification Enhancement</li>
+<li>Periodic Advertising Enhancement</li>
+</ul></li>
+<li>Issues fixed :
+<ul>
+<li>ID 161043: Periodic advertising list entries not used properly during periodic advertising synchronization.</li>
+<li>ID 165155: ACL Data packet not cleared correctly if disconnection occurred and ACL Data couldn’t be sent.</li>
+<li>ID 160222: Maximum ATT MTU limited to 362 bytes.</li>
+<li>ID 168842: Wrong RSSI calculation</li>
+<li>ID 164684: Issue in SMP Pairing if Central received SMP Pairing Public Key and Pairing Confirm packets in the same Connection Event.</li>
+<li>ID 162525: HardFault happens when sending ISO Data from BIS Broadcaster with PTO &gt; 0 and Encryption enabled</li>
+<li>ID 168913: Issue when mixing LE Credit Based Flow Control mode and Enhanced Credit Based Flow Control Mode</li>
+</ul></li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Release of the Generic Audio Framework with support CAP Initiator, Commander and Acceptor roles (ble_audio.a V1.1) (inc. CAP, BAP,CCP,MCP,VCP,MICP,CSIP) compiled by ARMCLANG V6.19<br />
+</li>
+<li>Change codec library extension to LC3.a (V1.3)<br />
+</li>
+<li>Release of codec_manager V1.1 (adapted for LC3 V1.3)</li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>Several fixes and enhancement has been introduced in the Zigbee stack library including:
+<ul>
+<li>Cleaning the ZbZgpProxyBasicCommandReq before rejoining a new network</li>
+<li>Parent Link Failure is now triggred for every EDKA failure.</li>
+<li>Added ZB_MSG_STACK_EVENT_PARENT_LINK_FAIL, to separate out ZB_MSG_STACK_EVENT_ATTEMPT_REJOIN which is called on a NWK Leave with rejoin bit set.<br />
+</li>
+<li>Application can now more easily distinguish aParent Link Failure from a Leave with Rejoin.</li>
+</ul></li>
+<li>Several fixes and enhancement has been introduced in the Zigbee cluster library including:
+<ul>
+<li>Rework of the Zbcli SE Messaging cluster.</li>
+<li>Code cleaning in order to comply with MISRA rules</li>
+</ul></li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>OT stack update to SHA-1 : 8bc25042ba5cde20605eec2a329c0dff575303f4 (07/07/2023).</li>
+<li><p>OT RCP (Radio Co-Processor) support.</p></li>
+<li>Issues fixed:
+<ul>
+<li>ID 167850 - Linklayer compatibility with OT 8bc25042ba5cde20605eec2a329c0dff575303f4 (OT stack update)</li>
+<li>ID 167322 - OT_RADIO_CAPS_CSMA_BACKOFF should be returned in otPlatRadioGetCaps() (RCP border router compatibility)</li>
+<li>ID 143488 - Add RCP support</li>
+<li>ID 162977 - OtPlatRadioTransmit() OT_ERROR_BUSY assert in OT stack (robustness improvement)</li>
+<li>ID ID 164508 - llhwc_cmn_evnt_notify(EVNT_START) calls whereas radio already started (Low power SCM 16MHz to 32MHz now working)</li>
+<li>ID 165748 - [WBA_Cut2.0_OpenThread] Exploring doesn’t working on WBA (cubeMonRf)</li>
+</ul></li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>MLME-SyncLoss.Indication is now supported.</li>
+<li>Issues fixed :
+<ul>
+<li>ID 162221 - if device receives several beacons with same Panid beacon Notifications are provided to upper layer</li>
+<li>ID 168643 - Implementation pending addresses completely delete</li>
+<li>ID 170005 - CSMA sequence after No ACK</li>
+</ul></li>
+</ul></li>
+<li><strong>Known limitations</strong>:
+<ul>
+<li>BLE:
+<ul>
+<li>ID 162754: Scheduling issue while having an ongoing CIS may lead to non-handling of LLCP in time causing a Disconnection with “Instant passed”</li>
+<li>ID 143245: ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.<br />
+</li>
+<li>ID 168123: MIC failure when initiating an LE Power Control request during an encryption procedure.</li>
+<li>ID 172235: RSSI miscalculation in CIG Event.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Framed mode not supported (44.1 KHz)</li>
+<li>ID 135240 : Long synchronization time in Broadcast due to scheduling conflict between extended advertising and BIG event<br />
+</li>
+<li>ID 165710 : Audio Latency may not be respected with high transport latency</li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>ID 165757: After ral_start_tx, we don’t receive ral_tx_done (robustness crash after few hours)</li>
+<li>ID 165757: [Robustness] Dead lock during CSMA-CA sequence after several hours (depending number of frames send, noisy channel)</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>ID 167369: MAC &amp; Zigbee solution not Low Power compatible for sleepy end devices. System could stay in high power consumption and does not return back to standby low power consumption level.</li>
+<li>ID 164074: Coordinator receive SyncLoss.Indication during Coord_realign</li>
+<li>ID 165757: [Robustness] Dead lock during CSMA-CA sequence after several hours (depending number of frames send, noisy channel)</li>
+<li>ID 171812: [Robustness] Data.cnf received bad error code (CHANNEL_ACCESS_FAILLURE normally NO_ACK)</li>
+<li>ID 166793: [Robustness] Assert during active scan on noisy channel</li>
+</ul></li>
+<li>PHY 802.15.4:
+<ul>
+<li>ID 160933: API for continuous wave not yet supported</li>
+<li>ID 160930: API for continuous modulation not yet supported</li>
+<li>ID 164825: RSSI reading incorrect: around 6dbm loss from –90 to -30dbm</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section3" aria-hidden="true"> <label for="collapse-section3" aria-hidden="false">V2.2.0 / 22-Sept-2023</label>
+<div>
+<h2 id="main-changes-5">Main Changes</h2>
+<ul>
+<li>BLE:
+<ul>
+<li>New features supported:
+<ul>
+<li>Enhanced ATT</li>
+<li>Isochronous Broadcaster / Synchronizer</li>
+<li>Connected Isochronous</li>
+<li>LE Power Control(with autonomous request)</li>
+</ul></li>
+<li>Audio:
+<ul>
+<li>Initial release of the Generic Audio Framework with support CAP Initiator, Commander and Acceptor roles (ble_audio.a V0.6) (inc. CAP, BAP,CCP,MCP,VCP,MICP,CSIP).</li>
+<li>Initial release faster LC3.lib (V1.3) compiled by ARMCLANG V6.14.1</li>
+<li>Initial release of codec_manager V0.6 adapted for LC3 V1.3</li>
+</ul></li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>Initial release supporting:
+<ul>
+<li>Zigbee stack compliant with latest Zigbee R23 revision.</li>
+<li>Zigbee Clusters library (ZCL 8.0 compliant). On demand, those clusters may be provided in source code.</li>
+</ul></li>
+</ul></li>
+<li>Thread:
+<ul>
+<li>Initial release supporting GRL Tests pre-certified on OT 1.1 / 1.2 / 1.3</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>Initial release supporting Zigbee IEEE 802.15.4 MAC Test Plan V 2.0 - ZigBee IEEE 802.15.4 Test Specification 14-0332-01 (pre-certified)</li>
 </ul></li>
 <li>Known limitations:
 <ul>
-<li>ID 144495 : Radio Calibration is not supported on standby mode.</li>
-<li>ID 143245 : ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
-<li>ID 145802 : Pairing request fails with error SMP timeout when connection interval set to max value: 4s.</li>
-<li>ID 150795/151333 : Sleep timer overflow (each 36h) stops RF activities ongoing.</li>
-<li>ID 150914 : Wrong CONNECT_IND packet not correctly handled.</li>
+<li>BLE:
+<ul>
+<li>ID 143245: ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
+<li>ID 161043: Periodic advertising list entries not used properly during periodic advertising synchronization.</li>
+<li>ID 156915: Incorrect handling of the interruption of a PHY update procedure or a connection update procedure, by another LL control</li>
+<li>ID 150795/151333: Sleep timer overflow (each 36h) stops Audio RF activities ongoing.</li>
+</ul></li>
+<li>BLE Audio:
+<ul>
+<li>Framed mode not supported</li>
+<li>ID 154525: conflict on air may lead to a drift on audio latency</li>
+<li>Generic Audio Framework not certified yet</li>
+</ul></li>
+<li>Zigbee:
+<ul>
+<li>Zigbee stack not yet certified</li>
+</ul></li>
+<li>MAC 802.15.4:
+<ul>
+<li>MAC_SECURITY not yet supported.</li>
+<li>PAN_ID_CONFLICT feature not yet supported</li>
+</ul></li>
+<li>PHY 802.15.4:
+<ul>
+<li>ID 160933: API for continuous wave not yet supported</li>
+<li>ID 160930: API for continuous modulation not yet supported</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section2" aria-hidden="true"> <label for="collapse-section2" aria-hidden="false">V2.1.0 / 30-May-2023</label>
+<div>
+<h2 id="main-changes-6">Main Changes</h2>
+<ul>
+<li>BLE:
+<ul>
+<li>Maximum number of simultaneous connections supported by the device is now 20: requires library LinkLayer_BLE_Basic_20_links_lib.a</li>
+<li>New RF-PHY settings which allow to pass FCC regulatory requirements (specifically FCC Band edge measurement) have been integrated</li>
+<li>Add ble_legacy.h include: file which ensures the compatibility with previous BLE Stack naming.</li>
+<li>Update BLE types and names in include files.</li>
+<li>ID 143688: Radio Deep Sleep mode can be used with white lists, resolving lists or periodic advertiser lists.</li>
+<li>ID 143240: Calibration improvement:calibration is done channel by channel from radio interrupt. Calibration is not delaying Link Layer scheduling activities. </li>
+<li>ID 146629: Fix issue of events conflict with multi links.</li>
+<li>ID 144736: Scan response Data handled correctly when it is set after the advertising enabling.</li>
+<li>ID 149353: Channel Map update wrong behavior fixed.</li>
+</ul></li>
+<li>Known limitations:
+<ul>
+<li>ID 144495: Radio Calibration is not supported on standby mode.</li>
+<li>ID 143245: ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
+<li>ID 145802: Pairing request fails with error SMP timeout when connection interval set to max value: 4s.</li>
+<li>ID 150795/151333: Sleep timer overflow (each 36h) stops RF activities ongoing.</li>
+<li>ID 150914: Wrong CONNECT_IND packet not correctly handled.</li>
 </ul></li>
 </ul>
 </div>
@@ -93,17 +878,17 @@
 <div class="collapse">
 <input type="checkbox" id="collapse-section1" aria-hidden="true"> <label for="collapse-section1" aria-hidden="false">V2.0.0 / 08-February-2023</label>
 <div>
-<h2 id="main-changes-1">Main Changes</h2>
+<h2 id="main-changes-7">Main Changes</h2>
 <p>First official release for WBA</p>
 <ul>
 <li>Known limitations:
 <ul>
-<li>ID 143688 : Radio Deep Sleep mode shall not be used if we want to use white lists, resolving lists or periodic advertiser lists.</li>
-<li>ID 144507 : The BleStack_Process function should also be called when a BLE stack callback function is called by the platform software(PKA, timer).</li>
-<li>ID 143393 : [THREADX] RNG and PKA tasks priorities must be higher than BLE Host stack task.</li>
-<li>ID 143395 : [THREADX] No Uart traces supported while in low power modes.</li>
-<li>ID 144495 : Radio Calibration is not supported on standby mode.</li>
-<li>ID 143245 : ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
+<li>ID 143688: Radio Deep Sleep mode shall not be used if we want to use white lists, resolving lists or periodic advertiser lists.</li>
+<li>ID 144507: The BleStack_Process function should also be called when a BLE stack callback function is called by the platform software(PKA, timer).</li>
+<li>ID 143393: [THREADX] RNG and PKA tasks priorities must be higher than BLE Host stack task.</li>
+<li>ID 143395: [THREADX] No Uart traces supported while in low power modes.</li>
+<li>ID 144495: Radio Calibration is not supported on standby mode.</li>
+<li>ID 143245: ACI_HAL_GET_ANCHOR_PERIOD, ACI_HAL_SET_SLAVE_LATENCY not yet supported.</li>
 </ul></li>
 </ul>
 </div>

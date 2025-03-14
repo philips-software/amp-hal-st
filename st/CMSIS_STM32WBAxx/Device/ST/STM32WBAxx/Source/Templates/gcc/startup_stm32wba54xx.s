@@ -114,8 +114,6 @@ LoopForever:
     .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
 	b  Default_Handler_Forwarded
-Infinite_Loop:
-	b	Infinite_Loop
 	.size	Default_Handler, .-Default_Handler
 /******************************************************************************
 *
