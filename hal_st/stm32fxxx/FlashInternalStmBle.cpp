@@ -20,8 +20,6 @@ namespace hal
 
     void FlashInternalStmBle::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
-        while (LL_HSEM_1StepLock(HSEM, hwFlashSemaphoreId))
-            ;
         HAL_FLASH_Unlock();
 
         onWriteDone = onDone;
@@ -32,8 +30,6 @@ namespace hal
 
     void FlashInternalStmBle::EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone)
     {
-        while (LL_HSEM_1StepLock(HSEM, hwFlashSemaphoreId))
-            ;
         HAL_FLASH_Unlock();
         SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
 
@@ -63,7 +59,7 @@ namespace hal
         /*Clear Flags*/
         HSEM_COMMON->ICR = ((uint32_t)statusreg);
 
-        if (statusreg == __HAL_HSEM_SEMID_TO_MASK(hwFlashSemaphoreId) || statusreg == __HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2))
+        if (statusreg == __HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2))
             onHwSemaphoreAvailable();
     }
 
@@ -72,7 +68,6 @@ namespace hal
         if (chunkToWrite == nullptr)
         {
             HAL_FLASH_Lock();
-            LL_HSEM_ReleaseLock(HSEM, hwFlashSemaphoreId, 0);
             infra::EventDispatcher::Instance().Schedule(onWriteDone);
         }
         else
@@ -112,7 +107,6 @@ namespace hal
         {
             SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
             HAL_FLASH_Lock();
-            LL_HSEM_ReleaseLock(HSEM, hwFlashSemaphoreId, 0);
             infra::EventDispatcher::Instance().Schedule(onEraseDone);
         }
         else
@@ -121,13 +115,6 @@ namespace hal
 
     void FlashInternalStmBle::FlashSingleErase()
     {
-        /* Add at least 5us (CPU1 up to 64MHz) to guarantee that CPU2 can take SEM7 to protect BLE timing */
-        // for (volatile uint32_t i = 0; i < 35; i++)
-        //     ;
-        debugPin1.Set(false);
-        debugPin1.Set(true);
-        debugPin1.Set(false);
-
         uint32_t primaskBit = EnterCriticalSection();
         bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
 
@@ -147,16 +134,11 @@ namespace hal
         ExitCriticalSection(primaskBit);
 
         if (!lockCpu2FlashReq)
-        {
-            debugPin2.Set(false);
-            debugPin2.Set(true);
             WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
                 {
-                    debugPin2.Set(false);
                     HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
                     FlashSingleErase();
                 });
-        }
         else
             infra::EventDispatcher::Instance().Schedule([this]()
                 {
