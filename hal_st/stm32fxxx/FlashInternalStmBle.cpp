@@ -18,11 +18,16 @@ namespace hal
         SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
     }
 
+    void FlashInternalStmBle::ActiveBleRfAwareness(infra::Function<void()> onDone)
+    {
+        // SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
+    }
+
     void FlashInternalStmBle::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
-        HAL_FLASH_Unlock();
-
         onWriteDone = onDone;
+
+        HAL_FLASH_Unlock();
         flashAlign.Align(address, buffer);
         chunkToWrite = flashAlign.First();
         TryFlashWrite();
@@ -30,12 +35,12 @@ namespace hal
 
     void FlashInternalStmBle::EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone)
     {
+        onEraseDone = onDone;
+
         HAL_FLASH_Unlock();
         SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
-
         currentEraseIndex = beginIndex;
         endEraseIndex = endIndex;
-        onEraseDone = onDone;
         TryFlashErase();
     }
 
@@ -71,34 +76,16 @@ namespace hal
             infra::EventDispatcher::Instance().Schedule(onWriteDone);
         }
         else
-            FlashSingleWrite();
-    }
-
-    void FlashInternalStmBle::FlashSingleWrite()
-    {
-        uint32_t primaskBit = EnterCriticalSection();
-        bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
-
-        if (lockCpu2FlashReq)
         {
-            auto fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunkToWrite->alignedAddress);
-            const uint64_t data = *reinterpret_cast<const uint64_t*>(chunkToWrite->data.begin());
-            auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, fullAddress, data);
-            really_assert(result == HAL_OK);
-            LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
-            chunkToWrite = flashAlign.Next();
+            if (!FlashSingleOperation(FlashOperation::write))
+                WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
+                    {
+                        HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
+                        TryFlashWrite();
+                    });
+            else
+                TryFlashWrite();
         }
-
-        ExitCriticalSection(primaskBit);
-
-        if (!lockCpu2FlashReq)
-            WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
-                {
-                    HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
-                    FlashSingleWrite();
-                });
-        else
-            TryFlashWrite();
     }
 
     void FlashInternalStmBle::TryFlashErase()
@@ -110,51 +97,68 @@ namespace hal
             infra::EventDispatcher::Instance().Schedule(onEraseDone);
         }
         else
-            FlashSingleErase();
+        {
+            if (!FlashSingleOperation(FlashOperation::erase))
+                WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
+                    {
+                        HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
+                        TryFlashErase();
+                    });
+            else
+                infra::EventDispatcher::Instance().Schedule([this]()
+                    {
+                        TryFlashErase();
+                    });
+        }
     }
 
-    void FlashInternalStmBle::FlashSingleErase()
+    bool FlashInternalStmBle::FlashSingleOperation(FlashOperation operation)
     {
-        uint32_t primaskBit = EnterCriticalSection();
+        CriticalSectionScoped criticalSectionScoped(watchdog);
         bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
 
         if (lockCpu2FlashReq)
         {
-            uint32_t pageError = 0;
-            FLASH_EraseInitTypeDef eraseInitStruct;
-            eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
-            eraseInitStruct.Page = currentEraseIndex;
-            eraseInitStruct.NbPages = 1;
-            auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
-            really_assert(result == HAL_OK);
-            currentEraseIndex++;
+            if (operation == FlashOperation::write)
+                FlashSingleWrite();
+            else if (operation == FlashOperation::erase)
+                FlashSingleErase();
             LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
         }
 
-        ExitCriticalSection(primaskBit);
-
-        if (!lockCpu2FlashReq)
-            WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
-                {
-                    HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
-                    FlashSingleErase();
-                });
-        else
-            infra::EventDispatcher::Instance().Schedule([this]()
-                {
-                    TryFlashErase();
-                });
+        return lockCpu2FlashReq;
     }
 
-    uint32_t FlashInternalStmBle::EnterCriticalSection()
+    void FlashInternalStmBle::FlashSingleWrite()
     {
-        uint32_t primaskBit = __get_PRIMASK();
+        auto fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunkToWrite->alignedAddress);
+        const uint64_t data = *reinterpret_cast<const uint64_t*>(chunkToWrite->data.begin());
+        auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, fullAddress, data);
+        really_assert(result == HAL_OK);
+        chunkToWrite = flashAlign.Next();
+    }
+
+    void FlashInternalStmBle::FlashSingleErase()
+    {
+        uint32_t pageError = 0;
+        FLASH_EraseInitTypeDef eraseInitStruct;
+        eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
+        eraseInitStruct.Page = currentEraseIndex;
+        eraseInitStruct.NbPages = 1;
+        auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
+        really_assert(result == HAL_OK);
+        currentEraseIndex++;
+    }
+
+    FlashInternalStmBle::CriticalSectionScoped::CriticalSectionScoped(WatchDogStm& watchdog)
+        : watchdog(watchdog)
+    {
+        primaskBit = __get_PRIMASK();
         __disable_irq();
         watchdog.Interrupt();
-        return primaskBit;
     }
 
-    void FlashInternalStmBle::ExitCriticalSection(uint32_t primaskBit)
+    FlashInternalStmBle::CriticalSectionScoped::~CriticalSectionScoped()
     {
         __set_PRIMASK(primaskBit);
         watchdog.Interrupt();

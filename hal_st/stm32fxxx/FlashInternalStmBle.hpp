@@ -15,23 +15,40 @@ namespace hal
         : public FlashHomogeneousInternalStm
     {
     public:
-        static constexpr uint32_t hwFlashSemaphoreId = 2;
         static constexpr uint32_t hwBlockFlashReqByCpu2 = 7;
 
         FlashInternalStmBle(uint32_t numberOfSectors, uint32_t sizeOfEachSector, infra::ConstByteRange flashMemory, WatchDogStm& watchdog);
+
+        void ActiveBleRfAwareness(infra::Function<void()> onDone);
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
 
     private:
+        enum class FlashOperation
+        {
+            write,
+            erase
+        };
+
         void WaitForHwSemaphore(uint32_t hsemId, infra::Function<void()> onAvailable);
         void HsemInterruptHandler();
         void TryFlashWrite();
-        void FlashSingleWrite();
         void TryFlashErase();
+        bool FlashSingleOperation(FlashOperation operation);
+        void FlashSingleWrite();
         void FlashSingleErase();
-        uint32_t EnterCriticalSection();
-        void ExitCriticalSection(uint32_t primaskBit);
+
+        class CriticalSectionScoped
+        {
+        public:
+            CriticalSectionScoped(WatchDogStm& watchdog);
+            ~CriticalSectionScoped();
+
+        private:
+            uint32_t primaskBit;
+            WatchDogStm& watchdog;
+        };
 
         infra::ConstByteRange flashMemory;
         WatchDogStm& watchdog;
