@@ -15,12 +15,12 @@ namespace hal
                   HsemInterruptHandler();
               })
     {
-        SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
+        // SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
     }
 
     void FlashInternalStmBle::ActiveBleRfAwareness(infra::Function<void()> onDone)
     {
-        // SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
+        SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
     }
 
     void FlashInternalStmBle::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
@@ -87,7 +87,10 @@ namespace hal
                         TryFlashWrite();
                     });
             else
-                TryFlashWrite();
+                infra::EventDispatcher::Instance().Schedule([this]()
+                    {
+                        TryFlashWrite();
+                    });
         }
     }
 
@@ -171,5 +174,6 @@ namespace hal
     {
         __set_PRIMASK(primaskBit);
         watchdog.Interrupt();
+        watchdog.Feed();
     }
 }
