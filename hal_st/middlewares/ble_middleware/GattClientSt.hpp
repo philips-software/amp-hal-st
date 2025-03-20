@@ -7,6 +7,7 @@
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/Function.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal
@@ -77,13 +78,15 @@ namespace hal
 
         static constexpr uint16_t invalidConnection = 0xffff;
 
+        infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
         infra::AutoResetFunction<void()> onDiscoveryCompletion;
-        infra::AutoResetFunction<void(const infra::ConstByteRange&)> onResponse;
-        infra::AutoResetFunction<void()> onDone;
+        infra::AutoResetFunction<void(), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationDone;
+        infra::AutoResetFunction<void(), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicEnablingOperationDone;
 
         infra::ClaimableResource resource;
         infra::ClaimableResource::Claimer claimerDiscovery{ resource };
         infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange)> claimerCharacteristicOperations{ resource };
+        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange)> claimerCharacteristicEnablingOperations{ resource };
     };
 }
 
