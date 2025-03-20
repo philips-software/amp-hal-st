@@ -44,15 +44,15 @@ namespace hal
         TryFlashErase();
     }
 
-    void FlashInternalStmBle::WaitForHwSemaphore(uint32_t hsemId, infra::Function<void()> onAvailable)
+    void FlashInternalStmBle::WaitForCpu2AllowFlashOperation(infra::Function<void()> onAvailable)
     {
-        if (LL_HSEM_GetStatus(HSEM, hsemId) == 0)
+        if (LL_HSEM_GetStatus(HSEM, hwBlockFlashReqByCpu2) == 0)
             onAvailable();
         else
         {
             onHwSemaphoreAvailable = onAvailable;
-            LL_HSEM_ClearFlag_C1ICR(HSEM, __HAL_HSEM_SEMID_TO_MASK(hsemId));
-            HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(hsemId));
+            LL_HSEM_ClearFlag_C1ICR(HSEM, __HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
+            HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
         }
     }
 
@@ -64,6 +64,7 @@ namespace hal
         /*Clear Flags*/
         HSEM_COMMON->ICR = ((uint32_t)statusreg);
 
+        HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
         if (statusreg == __HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2))
             onHwSemaphoreAvailable();
     }
@@ -73,14 +74,16 @@ namespace hal
         if (chunkToWrite == nullptr)
         {
             HAL_FLASH_Lock();
-            infra::EventDispatcher::Instance().Schedule(onWriteDone);
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    onWriteDone();
+                });
         }
         else
         {
             if (!FlashSingleOperation(FlashOperation::write))
-                WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
+                WaitForCpu2AllowFlashOperation([this]()
                     {
-                        HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
                         TryFlashWrite();
                     });
             else
@@ -94,14 +97,16 @@ namespace hal
         {
             SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
             HAL_FLASH_Lock();
-            infra::EventDispatcher::Instance().Schedule(onEraseDone);
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    onEraseDone();
+                });
         }
         else
         {
             if (!FlashSingleOperation(FlashOperation::erase))
-                WaitForHwSemaphore(hwBlockFlashReqByCpu2, [this]()
+                WaitForCpu2AllowFlashOperation([this]()
                     {
-                        HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
                         TryFlashErase();
                     });
             else
@@ -135,7 +140,11 @@ namespace hal
         const uint64_t data = *reinterpret_cast<const uint64_t*>(chunkToWrite->data.begin());
         auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, fullAddress, data);
         really_assert(result == HAL_OK);
-        chunkToWrite = flashAlign.Next();
+
+        chunkToWrite->data.pop_front(sizeof(uint64_t));
+        chunkToWrite->alignedAddress += sizeof(uint64_t);
+        if (chunkToWrite->data.empty())
+            chunkToWrite = flashAlign.Next();
     }
 
     void FlashInternalStmBle::FlashSingleErase()

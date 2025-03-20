@@ -31,7 +31,7 @@ namespace hal
             erase
         };
 
-        void WaitForHwSemaphore(uint32_t hsemId, infra::Function<void()> onAvailable);
+        void WaitForCpu2AllowFlashOperation(infra::Function<void()> onAvailable);
         void HsemInterruptHandler();
         void TryFlashWrite();
         void TryFlashErase();
