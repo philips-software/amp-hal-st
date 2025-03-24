@@ -27,10 +27,12 @@ namespace hal
 
         WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
 
+        void WatchDogRefresh();
         void Interrupt();
-        void Feed();
 
     private:
+        void Feed();
+
         ImmediateInterruptHandler interruptRegistration;
         infra::TimerRepeating feedingTimer;
         WWDG_HandleTypeDef handle;

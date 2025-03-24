@@ -15,11 +15,6 @@ namespace hal
                   HsemInterruptHandler();
               })
     {
-        // SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
-    }
-
-    void FlashInternalStmBle::ActiveBleRfAwareness(infra::Function<void()> onDone)
-    {
         SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
     }
 
@@ -71,27 +66,23 @@ namespace hal
 
     void FlashInternalStmBle::TryFlashWrite()
     {
-        if (chunkToWrite == nullptr)
-        {
-            HAL_FLASH_Lock();
-            infra::EventDispatcher::Instance().Schedule([this]()
-                {
-                    onWriteDone();
-                });
-        }
-        else
+        while (chunkToWrite != nullptr)
         {
             if (!FlashSingleOperation(FlashOperation::write))
+            {
                 WaitForCpu2AllowFlashOperation([this]()
                     {
                         TryFlashWrite();
                     });
-            else
-                infra::EventDispatcher::Instance().Schedule([this]()
-                    {
-                        TryFlashWrite();
-                    });
+                return;
+            }
         }
+
+        HAL_FLASH_Lock();
+        infra::EventDispatcher::Instance().Schedule([this]()
+            {
+                onWriteDone();
+            });
     }
 
     void FlashInternalStmBle::TryFlashErase()
@@ -167,13 +158,12 @@ namespace hal
     {
         primaskBit = __get_PRIMASK();
         __disable_irq();
-        watchdog.Interrupt();
+        watchdog.WatchDogRefresh();
     }
 
     FlashInternalStmBle::CriticalSectionScoped::~CriticalSectionScoped()
     {
         __set_PRIMASK(primaskBit);
-        watchdog.Interrupt();
-        watchdog.Feed();
+        watchdog.WatchDogRefresh();
     }
 }
