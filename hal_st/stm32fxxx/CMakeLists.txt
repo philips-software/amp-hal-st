@@ -18,6 +18,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 target_sources(hal_st.stm32fxxx PRIVATE
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
+    AdcTimerTriggeredBase.cpp
+    AdcTimerTriggeredBase.hpp
     BackupRamStm.cpp
     BackupRamStm.hpp
     CanStm.cpp
@@ -119,7 +121,9 @@ list(APPEND AdcDmaMcus stm32wb55)
 list(APPEND AdcDmaMcuFamilies stm32wbaxx stm32h5xx)
 
 if (TARGET_MCU IN_LIST AdcDmaMcus OR TARGET_MCU_FAMILY IN_LIST AdcDmaMcuFamilies)
-    target_sources(hal_st.stm32fxxx PRIVATE AdcDmaStm.cpp
+    target_sources(hal_st.stm32fxxx PRIVATE AdcDmaDifferentialStm.cpp
+                                            AdcDmaDifferentialStm.hpp
+                                            AdcDmaStm.cpp
                                             AdcDmaStm.hpp
                                             AdcDmaMultiChannelStm.cpp
                                             AdcDmaMultiChannelStm.hpp
