@@ -26,17 +26,17 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: oxsecurity/megalinter/flavors/c_cpp@ec124f7998718d79379a3c5b39f5359952baf21d # v8.4.2
+      - uses: oxsecurity/megalinter/flavors/c_cpp@146333030da68e2e58c6ff826633824fabe01eaf # v8.5.0
         env:
           APPLY_FIXES: all
           VALIDATE_ALL_CODEBASE: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: git diff
-      - uses: github/codeql-action/upload-sarif@6bb031afdd8eb862ea3fc1848194185e076637e5 # v3.28.11
+      - uses: github/codeql-action/upload-sarif@5f8171a638ada777af81d42b55959a643bb29017 # v3.28.12
         if: ${{ success() || failure() }}
         with:
           sarif_file: megalinter-reports/megalinter-report.sarif
-      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: ${{ success() || failure() }}
         with:
           name: linter
