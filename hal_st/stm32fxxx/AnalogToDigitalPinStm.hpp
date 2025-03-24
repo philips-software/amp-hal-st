@@ -25,6 +25,7 @@ namespace hal
 #else
             uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES };
 #endif
+            bool differential{ false };
         };
 
         struct AdcStmConfig

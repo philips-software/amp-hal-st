@@ -1,5 +1,7 @@
-#include "AdcDmaMultiChannelStm.hpp"
-#include "infra/event/EventDispatcher.hpp"
+#include "hal_st/stm32fxxx/AdcDmaMultiChannelStm.hpp"
+#include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
+#include <cstdint>
+#include DEVICE_HEADER
 
 namespace
 {
@@ -15,20 +17,19 @@ namespace
 
 namespace hal
 {
-    AdcDmaMultiChannelStmBase::AdcDmaMultiChannelStmBase(
-        infra::MemoryRange<uint16_t> buffer, infra::MemoryRange<AnalogPinStm> analogPins, AdcStm& adc,
-        DmaStm::ReceiveStream& receiveStream)
+    AdcDmaMultiChannelStmBase::AdcDmaMultiChannelStmBase(infra::MemoryRange<uint16_t> buffer, infra::MemoryRange<AnalogPinStm> analogPins, AdcStm& adc, DmaStm::ReceiveStream& receiveStream)
         : buffer{ buffer }
         , analogPins{ analogPins }
         , adc{ adc }
         , dmaStream{ receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), [this]()
-            {
-                TransferDone();
+              {
+                  TransferDone();
             } }
     {
-
 #ifdef ADC_SINGLE_ENDED
         auto result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_SINGLE_ENDED);
+        assert(result == HAL_OK);
+        result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_DIFFERENTIAL_ENDED);
         assert(result == HAL_OK);
 #elif defined(IS_ADC_CALFACT)
         auto result = HAL_ADCEx_Calibration_Start(&adc.Handle());
@@ -53,17 +54,9 @@ namespace hal
         LL_ADC_REG_StartConversion(adc.Handle().Instance);
     }
 
-    void AdcDmaMultiChannelStmBase::ConfigureChannels()
+    void AdcDmaMultiChannelStmBase::ConfigureChannels(infra::MemoryRange<const detail::AdcStmChannelConfig> configs)
     {
         ADC_ChannelConfTypeDef channelConfig = { 0 };
-#ifdef ADC_SMPR_SMP1
-        channelConfig.SamplingTime = ADC_SAMPLINGTIME_COMMON_1;
-#else
-        channelConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5;
-#endif
-#ifdef ADC_SINGLE_ENDED
-        channelConfig.SingleDiff = ADC_SINGLE_ENDED;
-#endif
 #ifdef ADC_OFFSET_NONE
         channelConfig.OffsetNumber = ADC_OFFSET_NONE;
         channelConfig.Offset = 0;
@@ -71,6 +64,10 @@ namespace hal
 
         for (std::size_t i = 0; i != analogPins.size(); ++i)
         {
+            channelConfig.SamplingTime = configs[i].samplingTime;
+#ifdef ADC_SINGLE_ENDED
+            channelConfig.SingleDiff = configs[i].differential ? ADC_DIFFERENTIAL_ENDED : ADC_SINGLE_ENDED;
+#endif
             channelConfig.Channel = adc.Channel(analogPins[i]);
             channelConfig.Rank = rank[i];
             auto result = HAL_ADC_ConfigChannel(&adc.Handle(), &channelConfig);
@@ -80,14 +77,11 @@ namespace hal
     }
 
     void AdcDmaMultiChannelStmBase::TransferDone()
-    {
-        auto result = ADC_Disable(&adc.Handle());
-        assert(result == HAL_OK);
+        {
+            auto result = ADC_Disable(&adc.Handle());
+            assert(result == HAL_OK);
 
         if (this->onDone)
-            infra::EventDispatcher::Instance().Schedule([this]()
-                {
-                    onDone(buffer);
-                });
+            onDone(buffer);
     }
 }
