@@ -6,6 +6,7 @@
 #include "hal_st/stm32fxxx/FlashInternalStm.hpp"
 #include "hal_st/stm32fxxx/WatchDogStm.hpp"
 #include "infra/util/AutoResetFunction.hpp"
+#include "services/ble/Gap.hpp"
 #include "services/util/FlashAlign.hpp"
 #include <cstdint>
 #include <variant>
@@ -69,7 +70,7 @@ namespace hal
     public:
         FlashInternalWithBleAware(uint32_t numberOfSectors, uint32_t sizeOfEachSector, infra::ConstByteRange flashMemory, hal::WatchDogStm& watchdog);
 
-        void EnableBleAwareness();
+        void BleStackInitialized(services::GapPeripheralIntervalController& intervalController);
 
         uint32_t NumberOfSectors() const override;
         uint32_t SizeOfSector(uint32_t sectorIndex) const override;
@@ -86,6 +87,7 @@ namespace hal
         uint32_t sizeOfEachSector;
         infra::ConstByteRange flashMemory;
         hal::WatchDogStm& watchdog;
+        services::GapPeripheralIntervalController* intervalController = nullptr;
         std::variant<hal::FlashHomogeneousInternalStm, hal::FlashInternalStmBle> flash;
         bool pendingSwitch = false;
         infra::AutoResetFunction<void()> onFlashDone;

@@ -175,8 +175,9 @@ namespace hal
         , flash(std::in_place_type<hal::FlashHomogeneousInternalStm>, numberOfSectors, sizeOfEachSector, flashMemory)
     {}
 
-    void FlashInternalWithBleAware::EnableBleAwareness()
+    void FlashInternalWithBleAware::BleStackInitialized(services::GapPeripheralIntervalController& intervalController)
     {
+        this->intervalController = &intervalController;
         if (onFlashDone)
             pendingSwitch = true;
         else
@@ -239,10 +240,14 @@ namespace hal
         this->onFlashDone = onDone;
         std::visit([buffer, address, this](auto& flash)
             {
+                if (intervalController)
+                    intervalController->SwitchToLongInterval();
                 flash.WriteBuffer(buffer, address, [this]()
                     {
                         if (pendingSwitch)
                             SwitchFlashToBleAware();
+                        if (intervalController)
+                            intervalController->SwitchToUserInterval();
                         onFlashDone();
                     });
             },
@@ -254,10 +259,14 @@ namespace hal
         this->onFlashDone = onDone;
         std::visit([beginIndex, endIndex, this](auto& flash)
             {
+                if (intervalController)
+                    intervalController->SwitchToLongInterval();
                 flash.EraseSectors(beginIndex, endIndex, [this]()
                     {
                         if (pendingSwitch)
                             SwitchFlashToBleAware();
+                        if (intervalController)
+                            intervalController->SwitchToUserInterval();
                         onFlashDone();
                     });
             },

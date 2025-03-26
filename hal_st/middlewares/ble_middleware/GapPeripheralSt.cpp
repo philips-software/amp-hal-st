@@ -115,6 +115,11 @@ namespace hal
         }
     }
 
+    void GapPeripheralSt::SetConnectionInterval(uint16_t connMultiplierMin, uint16_t connMultiplierMax)
+    {
+        RequestConnectionParameterUpdate(connMultiplierMin, connMultiplierMax);
+    }
+
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
@@ -164,15 +169,15 @@ namespace hal
     {
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
 
-        RequestConnectionParameterUpdate();
+        RequestConnectionParameterUpdate(connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier);
 
         UpdateState(services::GapState::connected);
     }
 
-    void GapPeripheralSt::RequestConnectionParameterUpdate()
+    void GapPeripheralSt::RequestConnectionParameterUpdate(uint16_t connMultiplierMin, uint16_t connMultiplierMax)
     {
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
-            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
+            connMultiplierMin, connMultiplierMax,
             connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
