@@ -170,6 +170,13 @@ namespace hal
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
 
         RequestConnectionParameterUpdate(connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier);
+        infra::EventDispatcher::Instance().Schedule([this]()
+            {
+                GapPeripheral::NotifyObservers([this](auto& obs)
+                    {
+                        obs.ConnectionIntervalUpdated(connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier);
+                    });
+            });
 
         UpdateState(services::GapState::connected);
     }
