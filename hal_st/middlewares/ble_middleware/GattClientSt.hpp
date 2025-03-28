@@ -26,13 +26,13 @@ namespace hal
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onDone) override;
-        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) override;
+        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, OperationOnDone onDone) override;
+        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, OperationOnDone onDone) override;
         void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
-        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
-        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
-        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
-        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
+        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
+        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
+        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
+        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -65,15 +65,15 @@ namespace hal
         void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
 
         template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
-        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
+        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
         {
             claimerCharacteristicOperations.Claim([this, &characteristic, onDone]()
                 {
-                    this->onCharacteristicOperationsDone = [this, onDone]()
+                    this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
                     {
                         auto onDoneCopy = onDone;
                         claimerCharacteristicOperations.Release();
-                        onDoneCopy();
+                        onDoneCopy(result);
                     };
 
                     WriteCharacteristicDescriptor(characteristic, p, v);
@@ -96,11 +96,11 @@ namespace hal
 
         infra::AutoResetFunction<void()> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
-        infra::AutoResetFunction<void(), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationsDone;
+        infra::AutoResetFunction<void(uint8_t), sizeof(void*) + sizeof(infra::Function<void(uint8_t)>)> onCharacteristicOperationsDone;
 
         infra::ClaimableResource resource;
         infra::ClaimableResource::Claimer claimerDiscovery{ resource };
-        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange)> claimerCharacteristicOperations{ resource };
+        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(OperationOnDone)> claimerCharacteristicOperations{ resource };
     };
 }
 
