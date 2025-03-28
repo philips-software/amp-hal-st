@@ -18,6 +18,8 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
 target_sources(hal_st.stm32fxxx PRIVATE
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
+    AdcTimerTriggeredBase.cpp
+    AdcTimerTriggeredBase.hpp
     BackupRamStm.cpp
     BackupRamStm.hpp
     CanStm.cpp
