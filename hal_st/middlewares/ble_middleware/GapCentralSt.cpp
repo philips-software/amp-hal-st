@@ -1,6 +1,9 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/util/Function.hpp"
+#include "services/ble/Gap.hpp"
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 
@@ -29,9 +32,9 @@ namespace hal
             return static_cast<services::GapAdvertisingEventType>(eventType);
         }
 
-        services::GapAdvertisingEventAddressType ToAdvertisingAddressType(uint8_t addressType)
+        services::GapDeviceAddressType ToAdvertisingAddressType(uint8_t addressType)
         {
-            return static_cast<services::GapAdvertisingEventAddressType>(addressType);
+            return static_cast<services::GapDeviceAddressType>(addressType);
         }
 
         bool IsTxDataLengthConfigured(const hci_le_data_length_change_event_rp0& dataLengthChangeEvent)
@@ -110,6 +113,14 @@ namespace hal
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
     }
 
+    infra::Optional<hal::MacAddress> GapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
+    {
+        hal::MacAddress identityAddress;
+        if (aci_gap_resolve_private_addr(address.data(), identityAddress.data()) != BLE_STATUS_SUCCESS)
+            return infra::none;
+        return infra::MakeOptional(identityAddress);
+    }
+
     void GapCentralSt::AllowPairing(bool)
     {}
 
@@ -135,14 +146,26 @@ namespace hal
 
     void GapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        HandleConnectionCompleteCommon(metaEvent);
         GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
-        initiatingStateTimer.Cancel();
     }
 
     void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
     {
+        HandleConnectionCompleteCommon(metaEvent);
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
-        initiatingStateTimer.Cancel();
+    }
+
+    void GapCentralSt::UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent)
+    {
+        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
+
+        services::GapState state = status == BLE_STATUS_SUCCESS ? services::GapState::connected : services::GapState::standby;
+
+        infra::Subject<services::GapCentralObserver>::NotifyObservers([state](services::GapCentralObserver& observer)
+            {
+                observer.StateChanged(state);
+            });
     }
 
     void GapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
@@ -165,11 +188,8 @@ namespace hal
 
         auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        if (onMtuExchangeDone && gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
-        {
+        if (gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
             really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-            onMtuExchangeDone();
-        }
     }
 
     void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent)
@@ -186,11 +206,6 @@ namespace hal
                     minConnectionEventLength, maxConnectionEventLength, identifier, rejectParameters);
                 assert(status == BLE_STATUS_SUCCESS);
             });
-
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-            {
-                MtuExchange();
-            });
     }
 
     void GapCentralSt::HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent)
@@ -202,24 +217,12 @@ namespace hal
         really_assert(dataLengthChangeEvent.Connection_Handle == connectionContext.connectionHandle);
 
         if (!IsTxDataLengthConfigured(dataLengthChangeEvent))
-            onMtuExchangeDone = [this]()
-            {
-                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                    {
-                        SetDataLength();
-                    });
-            };
-        else
-            onMtuExchangeDone = [this]()
-            {
-                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                    {
-                        SetPhy();
-                    });
-            };
-
-        if (onDataLengthChanged)
-            onDataLengthChanged();
+        {
+            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                {
+                    SetDataLength();
+                });
+        }
     }
 
     void GapCentralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
@@ -229,13 +232,6 @@ namespace hal
         auto phyUpdateCompleteEvent = *reinterpret_cast<hci_le_phy_update_complete_event_rp0*>(metaEvent->data);
 
         really_assert(phyUpdateCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-
-        onMtuExchangeDone = nullptr;
-
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](services::GapCentralObserver& observer)
-            {
-                observer.StateChanged(services::GapState::connected);
-            });
     }
 
     void GapCentralSt::HandleGapDiscoveryProcedureEvent()
@@ -265,21 +261,7 @@ namespace hal
 
     void GapCentralSt::SetDataLength()
     {
-        onDataLengthChanged = [this]()
-        {
-            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                {
-                    SetPhy();
-                });
-        };
-
         auto status = hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
-        assert(status == BLE_STATUS_SUCCESS);
-    }
-
-    void GapCentralSt::SetPhy() const
-    {
-        auto status = hci_le_set_phy(this->connectionContext.connectionHandle, GapSt::allPhys, GapSt::speed2Mbps, GapSt::speed2Mbps, 0);
         assert(status == BLE_STATUS_SUCCESS);
     }
 
@@ -291,7 +273,7 @@ namespace hal
         std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
         discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
         discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
-        discoveredDevice.data = infra::MemoryRange(advertisementData, advertisementData + advertisingReport.Length_Data);
+        discoveredDevice.data.assign(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([&discoveredDevice](auto& observer)
@@ -310,5 +292,21 @@ namespace hal
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
         SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
+        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
+    }
+
+    void GapCentralSt::HandleConnectionCompleteCommon(evt_le_meta_event* metaEvent)
+    {
+        UpdateStateOnConnectionComplete(metaEvent);
+        initiatingStateTimer.Cancel();
+
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                MtuExchange();
+                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                    {
+                        SetDataLength();
+                    });
+            });
     }
 }

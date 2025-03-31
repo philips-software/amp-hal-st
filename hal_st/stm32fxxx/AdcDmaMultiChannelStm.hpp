@@ -1,23 +1,27 @@
 #ifndef HAL_ST_ADC_DMA_MULTI_CHANNEL_HPP
 #define HAL_ST_ADC_DMA_MULTI_CHANNEL_HPP
 
+#include "hal/interfaces/AdcMultiChannel.hpp"
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/AutoResetFunction.hpp"
+#include <array>
+#include <cstddef>
 
 /// @brief This ADC implementation supports multiple channels with DMA transfer and software trigger.
 ///        DMA transfer is one shot mode.
 namespace hal
 {
     class AdcDmaMultiChannelStmBase
+        : public AdcMultiChannel
     {
     public:
         AdcDmaMultiChannelStmBase(
             infra::MemoryRange<uint16_t> buffer, infra::MemoryRange<AnalogPinStm> analogPins, AdcStm& adc,
             DmaStm::ReceiveStream& receiveStream);
 
-        void Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone);
+        void Measure(const infra::Function<void(Samples)>& onDone) override;
 
         constexpr static std::size_t MaxChannels{ 16 };
 
@@ -29,7 +33,7 @@ namespace hal
         infra::MemoryRange<AnalogPinStm> analogPins;
         AdcStm& adc;
         ReceiveDmaChannel dmaStream;
-        infra::AutoResetFunction<void(infra::MemoryRange<uint16_t>)> onDone;
+        infra::AutoResetFunction<void(Samples)> onDone;
 
         void TransferDone();
     };

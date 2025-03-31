@@ -7,6 +7,7 @@
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/Function.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal
@@ -54,15 +55,32 @@ namespace hal
         virtual void HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent);
 
+        virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
+        void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
+
     private:
-        void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
-        void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
 
         void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
 
-    private:
+        template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
+        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
+        {
+            claimerCharacteristicOperations.Claim([this, &characteristic, onDone]()
+                {
+                    this->onCharacteristicOperationsDone = [this, onDone]()
+                    {
+                        auto onDoneCopy = onDone;
+                        claimerCharacteristicOperations.Release();
+                        onDoneCopy();
+                    };
+
+                    WriteCharacteristicDescriptor(characteristic, p, v);
+                });
+        }
+
+    protected:
         struct Atttributes
         {
             services::AttAttribute::Uuid type;
@@ -77,8 +95,8 @@ namespace hal
         static constexpr uint16_t invalidConnection = 0xffff;
 
         infra::AutoResetFunction<void()> onDiscoveryCompletion;
-        infra::AutoResetFunction<void(const infra::ConstByteRange&)> onResponse;
-        infra::AutoResetFunction<void()> onDone;
+        infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
+        infra::AutoResetFunction<void(), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationsDone;
 
         infra::ClaimableResource resource;
         infra::ClaimableResource::Claimer claimerDiscovery{ resource };

@@ -1,15 +1,59 @@
-/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/1.30a-SOW04PatchV2/firmware/public_inc/ll_error.h#1 $*/
+/*$Id: //dwh/bluetooth/DWC_ble154combo/firmware/rel/2.00a-lca01/firmware/public_inc/ll_error.h#1 $*/
 /**
  ********************************************************************************
  * @file    error.h
  * @brief   This file contains error defines across BLE FW LL.
  ******************************************************************************
- */
+ * @copy
+ * This Synopsys DWC Bluetooth Low Energy Combo Link Layer/MAC software and
+ * associated documentation ( hereinafter the "Software") is an unsupported
+ * proprietary work of Synopsys, Inc. unless otherwise expressly agreed to in
+ * writing between Synopsys and you. The Software IS NOT an item of Licensed
+ * Software or a Licensed Product under any End User Software License Agreement
+ * or Agreement for Licensed Products with Synopsys or any supplement thereto.
+ * Synopsys is a registered trademark of Synopsys, Inc. Other names included in
+ * the SOFTWARE may be the trademarks of their respective owners.
+ *
+ * Synopsys MIT License:
+ * Copyright (c) 2020-Present Synopsys, Inc
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * the Software), to deal in the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom
+ * the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE ARISING FROM,
+ * OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 
 #ifndef ERROR_H_
 #define ERROR_H_
+
+typedef enum _HW_ERROR_CODES
+{
+	HW_ERROR_CODE_UNDEFINED_ERROR,
+	HW_ERROR_CODE_BL_SEARCH, /* this error code indicates an issue while searching in the HW Black list */
+	HW_ERROR_CODE_RL_SEARCH, /* this error code indicates an issue while searching in the HW Resolving list */
+	HW_ERROR_CODE_WL_SEARCH, /* this error code indicates an issue while searching in the HW White list */
+	HW_ERROR_CODE_PDU_PARSING, /* this error code indicates an issue while Parsing PDU */
+	HW_ERROR_CODE_PDU_RECEIVING, /* this error code indicates an unexpected PDU type received */
+	HW_ERROR_CODE_SM_UPDATE, /* this error code indicates an update in the state machine */
+	HW_ERROR_CODE_UNREGISTERING_EVENT, /* this error code indicates an issue while unregistering an event */
+	HW_ERROR_CODE_STARTING_CONNECTION, /* this error code indicates an issue while starting a connection  */
+	HW_ERROR_CODE_MEMORY_EXCEEDED, /* this error code indicates an issue in allocating */
+	HW_ERROR_CODE_UNEXPECTED_ADV_STATE /* this error code indicates unexpected adv state */
+}HW_ERROR_CODES;
 
 /* Includes ---------------------------------------------------------------------*/
 
@@ -62,7 +106,7 @@
 #define		RESERVED_FOR_FUTURE_1                                                           0x2B
 #define		QOS_UNACCEPTABLE_PARAMETER                                                  	0x2C
 #define		QOS_REJECTED                                                                	0x2D
-#define		CHANNEL_ASSESSMENT_NOT_SUPPORTED                                        	0x2E
+#define		CHANNEL_ASSESSMENT_NOT_SUPPORTED                                            	0x2E
 #define		INSUFFICIENT_SECURITY                                                       	0x2F
 #define		PARAMETER_OUT_OF_MANDATORY_RANGE                                            	0x30
 #define		RESERVED_FOR_FUTURE_2                                                           0x31
@@ -87,7 +131,9 @@
 #define		LIMIT_REACHED																	0x43
 #define     OPERATION_CANCELLED_BY_HOST														0x44
 #define		PACKET_TOO_LONG																	0x45
-
+#define 	TOO_LATE																		0x46
+#define     INSUFFICIENT_CHANNELS                                                           0x48
+#if SUPPORT_BLE
 
 #if ((MAX_NUM_CNCRT_STAT_MCHNS > 1) && !((SUPPORT_MASTER_CONNECTION) || (SUPPORT_SLAVE_CONNECTION)||(SUPPORT_LE_EXTENDED_ADVERTISING)))
 #error define at least either master or slave role
@@ -117,8 +163,16 @@
 #error LE Power Control feature shall be enabled only when the master role or slave role is enabled
 #endif /* #error */
 
+#if ((SUPPORT_AOA_AOD) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION && !SUPPORT_LE_PERIODIC_ADVERTISING))
+#error CTE feature shall be enabled only when the master role or slave role or periodic advertising is enabled
+#endif /* #error */
+
 #if ((SUPPORT_BRD_ISOCHRONOUS || SUPPORT_SYNC_ISOCHRONOUS) && (!SUPPORT_LE_PERIODIC_ADVERTISING))
 #error Broadcast Isochronous feature shall be enabled only when periodic advertisng is enabled
+#endif /* #error */
+
+#if ((SUPPORT_CONNECTED_ISOCHRONOUS) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION))
+#error Connection Isochronous feature shall be enabled when at least one the master role or slave role is enabled
 #endif /* #error */
 
 #if (SUPPORT_PERIODIC_ADV_ADI && (!SUPPORT_LE_PERIODIC_ADVERTISING))
@@ -129,13 +183,52 @@
 #error Channel Classification feature shall be enabled only when the master role or slave role is enabled 
 #endif /* #error */
 
+#if (SUPPORT_LE_ENHANCED_CONN_UPDATE) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION)
+#error "LE Enhanced Connection Update(subrating) enabled only if master or slave enabled"
+#endif /* #error */
+
+#if ((SUPPORT_CSSA) && (!SUPPORT_LE_EXTENDED_ADVERTISING))
+#error If controller supports Code Scheme selection feature , then it shall support Extended advertising feature
+#endif /* ((SUPPORT_CSSA) && (!SUPPORT_LE_EXTENDED_ADVERTISING)) */
+
+#if ((SUPPORT_LE_PAWR_ADVERTISER_ROLE) && (!SUPPORT_PERIODIC_SYNC_TRANSFER || !SUPPORT_EXPLCT_BROADCASTER_ROLE))
+#error PAWR feature shall be enabled only if PAST transmitter feature is enabled
+#endif /* #error */
+
+#if ((SUPPORT_LE_PAWR_SYNC_ROLE) && (!SUPPORT_PERIODIC_SYNC_TRANSFER || !SUPPORT_EXPLCT_OBSERVER_ROLE))
+#error PAWR feature shall be enabled only if PAST recipient feature is enabled
+#endif /* #error */
+
+#if ((SUPPORT_FRAME_SPACE_UPDATE) && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION))
+#error Frame Space update feature shall be enabled only when the master role or slave role is enabled
+#endif /* #error */
+
+#if ((SUPPORT_FRAME_SPACE_UPDATE) && (!SUPPORT_EXT_FEATURE_SET))
+#error Frame Space update feature shall be enabled only when the extended feature set is enabled.
+#endif /* #error */
+
+#if (SUPPORT_CHANNEL_SOUNDING && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION))
+#error Channel Sounding feature can be enabled only if the master role or slave role is enabled
+#endif /* #error */
+
+#if (SUPPORT_EXT_FEATURE_SET && (!SUPPORT_MASTER_CONNECTION && !SUPPORT_SLAVE_CONNECTION))
+#error Extended Feature Set Exchange feature can be enabled only if the master role or slave role is enabled
+#endif /* #error */
+
+#if ((SUPPORT_LE_ADVERTISERS_MONITORING) && (!SUPPORT_EXPLCT_OBSERVER_ROLE))
+#error Advertisers Monitoring feature can be enabled when the device is an observer.
+#endif /* ((SUPPORT_LE_ADVERTISERS_MONITORING) && (!SUPPORT_EXPLCT_OBSERVER_ROLE)) */
+
+#if ((SUPPORT_PHY_SHUTDOWN_MODE) && !(defined(PHY_40nm_3_60_a_tc) || defined(PHY_40nm_3_00_a) || defined(PHY_40nm_3_40_a)))
+#error Phy Shutdown feature is only supported on PHY_40nm_3_60_a_tc, PHY_40nm_3_00_a and PHY_40nm_3_40_a
+#endif /* ((SUPPORT_PHY_SHUTDOWN_MODE) && !(defined(PHY_40nm_3_60_a_tc) || defined(PHY_40nm_3_00_a) || defined(PHY_40nm_3_40_a))) */
 
 /* Exported macros ------------------------------------------------------------*/
 
 /* Exported types -------------------------------------------------------------*/
 
 /* Exported functions ---------------------------------------------------------*/
-
+#endif /* SUPPORT_BLE */
 #endif /* ERROR_H_ */
 
-/*****END OF FILE****/
+/******************* (C) (C) COPYRIGHT 2024 SYNOPSYS, INC. *****END OF FILE****/

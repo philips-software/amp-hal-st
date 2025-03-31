@@ -1,19 +1,19 @@
 #ifndef INTEGRATION_TEST_WAITING_HPP
 #define INTEGRATION_TEST_WAITING_HPP
 
-#include "cucumber-cpp/Context.hpp"
+#include "cucumber_cpp/library/Context.hpp"
 #include "infra/timer/Timer.hpp"
 
 namespace infra
 {
     constexpr inline infra::Duration defaultTimeout{ std::chrono::seconds{ 1 } };
 
-    bool WaitUntilDone(cucumber_cpp::Context& context, const std::function<void(const std::function<void()>&)>& action, infra::Duration timeout = defaultTimeout);
-    bool WaitFor(cucumber_cpp::Context& context, const std::function<bool()>& pred, infra::Duration timeout = defaultTimeout);
-    void WaitFor(cucumber_cpp::Context& context, infra::Duration timeout);
+    bool WaitUntilDone(cucumber_cpp::library::Context& context, const std::function<void(const std::function<void()>&)>& action, infra::Duration timeout = defaultTimeout);
+    bool WaitFor(cucumber_cpp::library::Context& context, const std::function<bool()>& pred, infra::Duration timeout = defaultTimeout);
+    void WaitFor(cucumber_cpp::library::Context& context, infra::Duration timeout);
 
     template<class Obj, class T, class... Arg, class Proj = std::identity>
-    bool WaitForValue(cucumber_cpp::Context& context, const Obj& obj, const T& value, Proj proj = {}, Arg&&... args, infra::Duration timeout = defaultTimeout)
+    bool WaitForValue(cucumber_cpp::library::Context& context, const Obj& obj, const T& value, Proj proj = {}, Arg&&... args, infra::Duration timeout = defaultTimeout)
     {
         return WaitFor(
             context, [&proj, &obj, &args..., &value]()
@@ -25,8 +25,8 @@ namespace infra
 
     struct Async
     {
-        explicit Async(cucumber_cpp::Context& context);
-        Async(cucumber_cpp::Context& context, std::function<bool()> func);
+        explicit Async(cucumber_cpp::library::Context& context);
+        Async(cucumber_cpp::library::Context& context, std::function<bool()> func);
 
         operator infra::Function<void()>();
 
@@ -35,7 +35,7 @@ namespace infra
         [[nodiscard]] bool Wait(infra::Duration timeout = defaultTimeout) const;
 
     private:
-        cucumber_cpp::Context& context;
+        cucumber_cpp::library::Context& context;
         std::function<bool()> func;
         bool notified{ false };
     };

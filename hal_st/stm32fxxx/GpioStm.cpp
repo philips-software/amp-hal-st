@@ -91,6 +91,35 @@ namespace hal
             GPIO_MODE_AF_PP,
             GPIO_MODE_AF_OD
         };
+
+        constexpr std::array adcChannel{
+            // STM32F4x header defines ADC_CHANNEL_0 as 0x0u, all others are cast to uint32_t
+            // all other device headers are consistent with all their channel types
+            static_cast<decltype(ADC_CHANNEL_1)>(ADC_CHANNEL_0),
+            ADC_CHANNEL_1,
+            ADC_CHANNEL_2,
+            ADC_CHANNEL_3,
+            ADC_CHANNEL_4,
+            ADC_CHANNEL_5,
+            ADC_CHANNEL_6,
+            ADC_CHANNEL_7,
+            ADC_CHANNEL_8,
+            ADC_CHANNEL_9,
+            ADC_CHANNEL_10,
+            ADC_CHANNEL_11,
+            ADC_CHANNEL_12,
+            ADC_CHANNEL_13,
+#ifdef ADC_CHANNEL_18
+            ADC_CHANNEL_14,
+            ADC_CHANNEL_15,
+            ADC_CHANNEL_16,
+            ADC_CHANNEL_17,
+            ADC_CHANNEL_18,
+#endif
+#ifdef ADC_CHANNEL_19
+            ADC_CHANNEL_19,
+#endif
+        };
     }
 
     DummyPinStm dummyPinStm;
@@ -284,6 +313,11 @@ namespace hal
         pin.ConfigAnalog();
     }
 
+    AnalogPinStm::AnalogPinStm(uint32_t channel)
+        : pin(dummyPinStm)
+        , channel(channel)
+    {}
+
     AnalogPinStm::~AnalogPinStm()
     {
         pin.ResetConfig();
@@ -291,7 +325,9 @@ namespace hal
 
     uint32_t AnalogPinStm::AdcChannel(uint8_t adc) const
     {
-        return pin.AdcChannel(adc);
+        if (channel != 0xffffffff)
+            return channel;
+        return adcChannel[pin.AdcChannel(adc)];
     }
 
     uint32_t AnalogPinStm::DacChannel(uint8_t dac) const

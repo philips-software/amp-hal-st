@@ -1,12 +1,11 @@
 /*****************************************************************************
  * @file    ble_hal_aci.h
- * @author  MDG
- * @brief   STM32WBA BLE API (hal_aci)
+ * @brief   STM32WBA BLE API (HAL_ACI)
  *          Auto-generated file: do not edit!
  *****************************************************************************
  * @attention
  *
- * Copyright (c) 2018-2023 STMicroelectronics.
+ * Copyright (c) 2018-2025 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -36,32 +35,39 @@ tBleStatus aci_hal_get_fw_build_number( uint16_t* Build_Number );
  * @brief ACI_HAL_WRITE_CONFIG_DATA
  * This command writes a value to a configure data structure. It is useful to
  * setup directly some parameters for the BLE stack.
- * Note: the static random address set by this command is taken into account by
- * the GAP only when it receives the ACI_GAP_INIT command.
+ * Refer to Annex for details on the different parameters that can be
+ * configured.
  * 
  * @param Offset Offset of the element in the configuration data structure
  *        which has to be written.
  *        Values:
- *        - 0x00: CONFIG_DATA_PUBADDR_OFFSET;
+ *        - 0x00: CONFIG_DATA_PUBLIC_ADDRESS_OFFSET;
  *          Bluetooth public address; 6 bytes
  *        - 0x08: CONFIG_DATA_ER_OFFSET;
- *          Encryption root key used to derive LTK (legacy) and CSRK; 16 bytes
+ *          Encryption root key; 16 bytes
  *        - 0x18: CONFIG_DATA_IR_OFFSET;
- *          Identity root key used to derive DHK (legacy) and IRK; 16 bytes
+ *          Identity root key; 16 bytes
  *        - 0x2E: CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
  *          Static Random Address; 6 bytes
  *        - 0x34: CONFIG_DATA_GAP_ADD_REC_NBR_OFFSET;
- *          GAP service additional record number
+ *          GAP service additional record number; 1 byte
  *        - 0x35: CONFIG_DATA_SC_KEY_TYPE_OFFSET;
- *          Secure Connections key type (0: "normal", 1: "debug"); 1 byte
+ *          Secure Connections key type; 1 byte
  *        - 0xB0: CONFIG_DATA_SMP_MODE_OFFSET;
- *          SMP mode (0: "normal", 1: "bypass", 2: "no blacklist"); 1 byte
- *        - 0xC0: CONFIG_DATA_LL_SCAN_CHAN_MAP_OFFSET (only for STM32WB);
- *          LL scan channel map (same format as Primary_Adv_Channel_Map); 1
- *          byte
- *        - 0xC1: CONFIG_DATA_LL_BG_SCAN_MODE_OFFSET (only for STM32WB);
- *          LL background scan mode (0: "BG scan disabled", 1: "BG scan
- *          enabled"); 1 byte
+ *          SMP mode; 1 byte
+ *        - 0xC0: CONFIG_DATA_LL_SCAN_CHAN_MAP_OFFSET [only for STM32WB];
+ *          LL scan channel map; 1 byte
+ *        - 0xC1: CONFIG_DATA_LL_BG_SCAN_MODE_OFFSET [only for STM32WB];
+ *          LL background scan mode; 1 byte
+ *        - 0xC2: CONFIG_DATA_LL_RSSI_GOLDEN_RANGE_OFFSET [only for STM32WBA];
+ *          LL RSSI golden range; 2 bytes
+ *        - 0xC3: CONFIG_DATA_LL_RPA_MODE_OFFSET [only for STM32WB];
+ *          LL RPA mode; 1 byte
+ *        - 0xC4: CONFIG_DATA_LL_RX_ACL_CTRL_OFFSET [only for STM32WBA];
+ *          LL RX ACL control; 2 bytes
+ *        - 0xD1: CONFIG_DATA_LL_MAX_DATA_EXT_OFFSET [only for STM32WB full
+ *          stack];
+ *          LL maximum data length extension; 8 bytes
  * @param Length Length of data to be written
  * @param Value Data to be written
  * @return Value indicating success or error code.
@@ -78,7 +84,7 @@ tBleStatus aci_hal_write_config_data( uint8_t Offset,
  * @param Offset Offset of the element in the configuration data structure
  *        which has to be read.
  *        Values:
- *        - 0x00: CONFIG_DATA_PUBADDR_OFFSET;
+ *        - 0x00: CONFIG_DATA_PUBLIC_ADDRESS_OFFSET;
  *          Bluetooth public address; 6 bytes
  *        - 0x08: CONFIG_DATA_ER_OFFSET;
  *          Encryption root key used to derive LTK (legacy) and CSRK; 16 bytes
@@ -86,6 +92,9 @@ tBleStatus aci_hal_write_config_data( uint8_t Offset,
  *          Identity root key used to derive DHK (legacy) and IRK; 16 bytes
  *        - 0x2E: CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
  *          Static Random Address; 6 bytes
+ *        - 0xC2: CONFIG_DATA_LL_RSSI_GOLDEN_RANGE_OFFSET [only for STM32WBA];
+ *          LL RSSI golden range (two 8-bit signed values in dBm - byte #0 is
+ *          the lower value, byte #1 is the upper value); 2 bytes
  * @param[out] Data_Length Length of Data in octets
  * @param[out] Data Data field associated with Offset parameter
  * @return Value indicating success or error code.
@@ -191,30 +200,15 @@ tBleStatus aci_hal_tone_stop( void );
  *        - 0x0020: Central connection
  *        - 0x0040: TX test mode
  *        - 0x0080: RX test mode
- *        - 0x0200: Periodic advertising (only for STM32WBA)
- *        - 0x0400: Periodic sync (only for STM32WBA)
- *        - 0x0800: Iso broadcast (only for STM32WBA)
- *        - 0x1000: Iso sync (only for STM32WBA)
- *        - 0x2000: Iso peripheral connection (only for STM32WBA)
- *        - 0x4000: Iso central connection (only for STM32WBA)
+ *        - 0x0200: Periodic advertising [only for STM32WBA]
+ *        - 0x0400: Periodic sync [only for STM32WBA]
+ *        - 0x0800: Iso broadcast [only for STM32WBA]
+ *        - 0x1000: Iso sync [only for STM32WBA]
+ *        - 0x2000: Iso peripheral connection [only for STM32WBA]
+ *        - 0x4000: Iso central connection [only for STM32WBA]
  * @return Value indicating success or error code.
  */
 tBleStatus aci_hal_set_radio_activity_mask( uint16_t Radio_Activity_Mask );
-
-/**
- * @brief ACI_HAL_GET_ANCHOR_PERIOD
- * This command returns information about the Anchor Period to help application
- * in selecting slot timings when operating in multi-link scenarios.
- * 
- * @param[out] Anchor_Period Current anchor period.
- *        T = N * 0.625 ms.
- * @param[out] Max_Free_Slot Maximum available time that can be allocated for a
- *        new slot.
- *        T = N * 0.625 ms.
- * @return Value indicating success or error code.
- */
-tBleStatus aci_hal_get_anchor_period( uint32_t* Anchor_Period,
-                                      uint32_t* Max_Free_Slot );
 
 /**
  * @brief ACI_HAL_SET_EVENT_MASK
@@ -225,19 +219,19 @@ tBleStatus aci_hal_get_anchor_period( uint32_t* Anchor_Period,
  * @param Event_Mask Mask to enable/disable generation of HAL events
  *        Flags:
  *        - 0x00000000: No events specified (Default)
- *        - 0x00000001: ACI_HAL_SCAN_REQ_REPORT_EVENT
- *        - 0x00000002: ACI_HAL_SYNC_EVENT (only for STM32WBA)
+ *        - 0x00000001: ACI_HAL_SCAN_REQ_REPORT_EVENT [only for STM32WB]
+ *        - 0x00000002: ACI_HAL_SYNC_EVENT [only for STM32WBA]
  * @return Value indicating success or error code.
  */
 tBleStatus aci_hal_set_event_mask( uint32_t Event_Mask );
 
 /**
  * @brief ACI_HAL_GET_LINK_STATUS_V2
- * This command returns the status of the 10 Bluetooth Low Energy links managed
- * by the device
+ * This command returns the status of the Bluetooth Low Energy links managed by
+ * the device.
  * 
- * @param[out] Link_Status Array of link status (8 links). Each link status is
- *        1 byte.
+ * @param[out] Link_Status Array of link status (up to 20 links plus 2 ISO
+ *        streams). Each link status is 1 byte.
  *        Values:
  *        - 0x00: Idle
  *        - 0x01: Advertising
@@ -340,6 +334,44 @@ tBleStatus aci_hal_read_rssi( uint8_t* RSSI );
 tBleStatus aci_hal_continuous_tx_start( uint8_t RF_Channel,
                                         uint8_t PHY,
                                         uint8_t Pattern );
+
+/**
+ * @brief ACI_HAL_EAD_ENCRYPT_DECRYPT
+ * This command encrypts or decrypts data following the Encrypted Advertising
+ * Data scheme.
+ * When encryption mode is selected, In_Data shall only contain the Payload
+ * field to encrypt. The command adds the Randomizer and MIC fields in the
+ * result. The result data length (Out_Data_Length) is equal to the input
+ * length plus 9.
+ * When decryption mode is selected, In_Data shall contain the full Encrypted
+ * Data (Randomizer + Payload + MIC). The result data length (Out_Data_Length)
+ * is equal to the input length minus 9.
+ * If the decryption fails, the returned status is BLE_STATUS_FAILED, otherwise
+ * it is BLE_STATUS_SUCCESS.
+ * Note: on STM32WB, the In_Data_Length value must not exceed
+ * (BLE_CMD_MAX_PARAM_LEN - 27) i.e. 228 for BLE_CMD_MAX_PARAM_LEN default
+ * value.
+ * 
+ * @param Mode EAD operation mode: encryption or decryption.
+ *        Values:
+ *        - 0x00: Encryption
+ *        - 0x01: Decryption
+ * @param Key Session key used for EAD operation (in Little Endian format).
+ * @param IV Initialization vector used for EAD operation (in Little Endian
+ *        format).
+ * @param In_Data_Length Length of input data
+ * @param In_Data Input data
+ * @param[out] Out_Data_Length Length of result data
+ * @param[out] Out_Data Result data
+ * @return Value indicating success or error code.
+ */
+tBleStatus aci_hal_ead_encrypt_decrypt( uint8_t Mode,
+                                        const uint8_t* Key,
+                                        const uint8_t* IV,
+                                        uint16_t In_Data_Length,
+                                        const uint8_t* In_Data,
+                                        uint16_t* Out_Data_Length,
+                                        uint8_t* Out_Data );
 
 
 #endif /* BLE_HAL_ACI_H__ */

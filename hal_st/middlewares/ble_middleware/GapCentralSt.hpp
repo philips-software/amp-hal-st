@@ -22,6 +22,7 @@ namespace hal
         void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;
         void StopDeviceDiscovery() override;
+        infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
@@ -42,10 +43,11 @@ namespace hal
         void HandleGapDirectConnectionProcedureCompleteEvent();
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
-        void SetPhy() const;
         void SetDataLength();
         void MtuExchange() const;
         void Initialize(const GapService& gapService);
+        void UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent);
+        void HandleConnectionCompleteCommon(evt_le_meta_event* metaEvent);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
@@ -62,8 +64,6 @@ namespace hal
 
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
-        infra::AutoResetFunction<void()> onMtuExchangeDone;
-        infra::AutoResetFunction<void()> onDataLengthChanged;
         infra::TimerSingleShot initiatingStateTimer;
     };
 }
