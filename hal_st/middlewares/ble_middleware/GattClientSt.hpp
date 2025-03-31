@@ -26,7 +26,7 @@ namespace hal
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, OperationOnDone onDone) override;
+        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::Function<void(const infra::ConstByteRange&)> onResponse, OperationOnDone onDone) override;
         void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, OperationOnDone onDone) override;
         void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
         void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;

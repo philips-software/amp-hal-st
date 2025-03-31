@@ -27,7 +27,7 @@ namespace hal
         GattClientSt::StartDescriptorDiscovery(handle, endHandle);
     }
 
-    void TracingGattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, OperationOnDone onDone)
+    void TracingGattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::Function<void(const infra::ConstByteRange&)> onResponse, OperationOnDone onDone)
     {
         tracer.Trace() << "TracingGattClientSt::Read, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle();
         GattClientSt::Read(characteristic, onResponse, onDone);

@@ -70,7 +70,7 @@ namespace hal
             });
     }
 
-    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, OperationOnDone onDone)
+    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::Function<void(const infra::ConstByteRange&)> onResponse, OperationOnDone onDone)
     {
         claimerCharacteristicOperations.Claim([this, &characteristic, onResponse, onDone]()
             {
