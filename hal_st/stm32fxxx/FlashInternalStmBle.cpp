@@ -66,7 +66,10 @@ namespace hal
 
     void FlashInternalStmBle::TryFlashWrite()
     {
-        while (chunkToWrite != nullptr)
+        constexpr uint32_t maxWriteSize = 2048; // 2KB write takes ~21ms, which is similar to one sector erase
+        uint32_t writtenSize = 0;
+
+        while (chunkToWrite != nullptr && writtenSize < maxWriteSize)
         {
             if (!FlashSingleOperation(FlashOperation::write))
             {
@@ -76,13 +79,22 @@ namespace hal
                     });
                 return;
             }
+            writtenSize += sizeof(uint64_t);
         }
 
-        HAL_FLASH_Lock();
-        infra::EventDispatcher::Instance().Schedule([this]()
-            {
-                onWriteDone();
-            });
+        if (chunkToWrite == nullptr)
+        {
+            HAL_FLASH_Lock();
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    onWriteDone();
+                });
+        }
+        else if (writtenSize >= maxWriteSize)
+            infra::EventDispatcher::Instance().Schedule([this]()
+                {
+                    TryFlashWrite();
+                });
     }
 
     void FlashInternalStmBle::TryFlashErase()
