@@ -25,6 +25,7 @@ namespace hal
 #else
             uint32_t samplingTime{ ADC_SAMPLETIME_3CYCLES };
 #endif
+            bool differential{ false };
         };
 
         struct AdcStmConfig
@@ -70,9 +71,6 @@ namespace hal
         Config config;
     };
 
-    class AdcTriggeredByTimerWithDma;
-    class AdcDmaMultiChannelStmBase;
-
     class AdcStm
     {
     public:
@@ -81,7 +79,6 @@ namespace hal
         explicit AdcStm(uint8_t adcIndex, const Config& config = Config());
         ~AdcStm();
 
-    protected:
         uint32_t Channel(const hal::AnalogPinStm& pin) const;
         ADC_HandleTypeDef& Handle();
 
@@ -92,8 +89,6 @@ namespace hal
     private:
         friend class AnalogToDigitalPinImplStm;
         friend class AnalogToDigitalInternalTemperatureStm;
-        friend class AdcTriggeredByTimerWithDma;
-        friend class AdcDmaMultiChannelStmBase;
 
         uint8_t index;
         ADC_HandleTypeDef handle{};
