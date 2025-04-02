@@ -59,6 +59,12 @@ namespace hal
 
     protected:
         TIM_HandleTypeDef handle = {};
+
+    public:
+        auto& Handle()
+        {
+            return handle;
+        }
     };
 
     class FreeRunningTimerStm
