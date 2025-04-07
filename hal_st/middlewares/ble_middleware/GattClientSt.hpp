@@ -26,13 +26,13 @@ namespace hal
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::Function<void(const infra::ConstByteRange&)> onResponse, OperationOnDone onDone) override;
-        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, OperationOnDone onDone) override;
+        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
+        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
         void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
-        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
-        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
-        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
-        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone) override;
+        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -100,7 +100,7 @@ namespace hal
 
         infra::ClaimableResource resource;
         infra::ClaimableResource::Claimer claimerDiscovery{ resource };
-        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(OperationOnDone)> claimerCharacteristicOperations{ resource };
+        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(const infra::Function<void(uint8_t)>&)> claimerCharacteristicOperations{ resource };
     };
 }
 

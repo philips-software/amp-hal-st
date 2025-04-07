@@ -70,7 +70,7 @@ namespace hal
             });
     }
 
-    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::Function<void(const infra::ConstByteRange&)> onResponse, OperationOnDone onDone)
+    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone)
     {
         claimerCharacteristicOperations.Claim([this, &characteristic, onResponse, onDone]()
             {
@@ -86,7 +86,7 @@ namespace hal
             });
     }
 
-    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, OperationOnDone onDone)
+    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
     {
         claimerCharacteristicOperations.Claim([this, &characteristic, data, onDone]()
             {
@@ -106,22 +106,22 @@ namespace hal
         aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
     }
 
-    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone)
+    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification>(characteristic, onDone);
     }
 
-    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone)
+    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(characteristic, onDone);
     }
 
-    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone)
+    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication>(characteristic, onDone);
     }
 
-    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, OperationOnDone onDone)
+    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(characteristic, onDone);
     }
