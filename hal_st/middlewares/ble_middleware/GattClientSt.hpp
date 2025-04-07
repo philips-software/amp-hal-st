@@ -96,11 +96,11 @@ namespace hal
 
         infra::AutoResetFunction<void()> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
-        infra::AutoResetFunction<void(uint8_t), sizeof(void*) + sizeof(infra::Function<void(uint8_t)>)> onCharacteristicOperationsDone;
+        infra::AutoResetFunction<void(uint8_t), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationsDone;
 
         infra::ClaimableResource resource;
         infra::ClaimableResource::Claimer claimerDiscovery{ resource };
-        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(const infra::Function<void(uint8_t)>&)> claimerCharacteristicOperations{ resource };
+        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(infra::Function<void()>)> claimerCharacteristicOperations{ resource };
     };
 }
 
