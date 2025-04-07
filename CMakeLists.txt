@@ -34,7 +34,7 @@ if (HALST_STANDALONE)
         FetchContent_Declare(
             cucumber-cpp-runner
             GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        08d653fe47d31d7e070195f7536d4f32e03180e6 # unreleased
+            GIT_TAG        752b9f6f82b1f2f35bc01a4ae19aff4fd43ad97f # v1.1.0
         )
 
         FetchContent_MakeAvailable(cucumber-cpp-runner)
