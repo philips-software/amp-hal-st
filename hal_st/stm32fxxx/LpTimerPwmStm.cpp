@@ -112,4 +112,5 @@ namespace hal
         HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
     }
 }
+
 #endif

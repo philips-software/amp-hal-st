@@ -14,7 +14,6 @@
 
 namespace hal
 {
-
     namespace detail
     {
         template<typename T, std::size_t... Is>
@@ -87,4 +86,4 @@ namespace hal
 
 #endif
 
-#endif // HAL_ST_LPTIMER_PWM_ST_HPP
+#endif
