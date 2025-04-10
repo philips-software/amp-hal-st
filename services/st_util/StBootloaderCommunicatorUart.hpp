@@ -11,14 +11,22 @@
 #include "infra/util/Endian.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
+#include <cstdint>
 
 namespace services
 {
+    enum class StBootloaderCommunicatorError : uint8_t
+    {
+        initializationTimeout,
+        commandtimeout,
+        nackReceived
+    };
+
     class StBootloaderCommunicatorUart
         : public StBootloaderCommunicator
     {
     public:
-        StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
+        StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(StBootloaderCommunicatorError error)>& onError);
         virtual ~StBootloaderCommunicatorUart();
 
         // Implementation of StBootloaderCommunicator
@@ -46,8 +54,9 @@ namespace services
         void TryHandleDataReceived();
         void OnCommandExecuted();
         void OnActionExecuted();
-        void SetCommandTimeout(infra::BoundedConstString reason);
-        void OnError(infra::BoundedConstString reason);
+        void SetCommandTimeout(StBootloaderCommunicatorError error);
+        void SetInitializationTimeoutWithRetry();
+        void OnError(StBootloaderCommunicatorError error);
         void SendData(infra::ConstByteRange data, uint8_t checksum);
         void SendData(infra::ConstByteRange data);
 
@@ -199,19 +208,20 @@ namespace services
     private:
         hal::SerialCommunication& serial;
         infra::AutoResetFunction<void()> onInitialized;
-        infra::AutoResetFunction<void(infra::BoundedConstString reason)> onError;
+        infra::AutoResetFunction<void(StBootloaderCommunicatorError error)> onError;
         infra::QueueForOneReaderOneIrqWriter<uint8_t>::WithStorage<257> queue;
 
         infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAck, ReceivePredefinedBuffer, ReceiveSmallBuffer, ReceiveBigBuffer, TransmitRaw, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
         infra::AutoResetFunction<void(), sizeof(StBootloaderCommunicatorUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
-        infra::BoundedString::WithStorage<46> timeoutReason;
         infra::TimerSingleShot timeout;
+        StBootloaderCommunicatorError timeoutError;
 
         std::array<uint8_t, 3> internalBuffer;
         infra::ByteRange internalRange{ internalBuffer };
         infra::BigEndian<uint32_t> address;
         infra::BigEndian<uint16_t> subcommand;
         uint8_t checksum;
+        uint8_t initRetryCounter = 0;
     };
 }
 

@@ -26,7 +26,7 @@ namespace
 
 namespace services
 {
-    StBootloaderCommunicatorUart::StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError)
+    StBootloaderCommunicatorUart::StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(StBootloaderCommunicatorError error)>& onError)
         : serial(serial)
         , onInitialized(onInitialized)
         , onError(onError)
@@ -57,7 +57,7 @@ namespace services
         AddCommandAction<ReceiveSmallBuffer>(commands);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout getting commands");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand([onDone, &commands]()
             {
                 uint8_t major = commands.front() >> 4;
@@ -80,7 +80,7 @@ namespace services
         AddCommandAction<ReceivePredefinedBuffer>(internalRange, 3);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout getting version");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand([this, onDone]()
             {
                 uint8_t major = internalBuffer[0] >> 4;
@@ -96,7 +96,7 @@ namespace services
         AddCommandAction<ReceiveSmallBuffer>(internalRange);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout getting id");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand([this, onDone]()
             {
                 uint16_t id = (internalBuffer[0] << 8) | internalBuffer[1];
@@ -119,7 +119,7 @@ namespace services
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceivePredefinedBuffer>(data, data.size());
 
-        SetCommandTimeout("Timeout reading memory");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -132,7 +132,7 @@ namespace services
         AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->address));
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout go");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -151,7 +151,7 @@ namespace services
         AddCommandAction<TransmitSmallBuffer>(data);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout writing memory");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -164,7 +164,7 @@ namespace services
         AddCommandAction<TransmitWithTwosComplementChecksum>(globalEraseSubCommand);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout mass erasing memory");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -178,7 +178,7 @@ namespace services
         AddCommandAction<TransmitSmallBuffer>(pages);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout erasing memory");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -191,7 +191,7 @@ namespace services
         AddCommandAction<TransmitChecksummedBuffer>(infra::MakeConstByteRange(this->subcommand));
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout extended mass erasing memory");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -204,7 +204,7 @@ namespace services
         AddCommandAction<TransmitBigBuffer>(infra::ReinterpretCastByteRange(pages), pages.size() - 1);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout extended erasing memory");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -224,7 +224,7 @@ namespace services
         AddCommandAction<ReceiveBigBuffer>(rxStatus);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout special command");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -246,7 +246,7 @@ namespace services
         AddCommandAction<ReceiveBigBuffer>(rxData);
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout extended special command");
+        SetCommandTimeout(StBootloaderCommunicatorError::commandtimeout);
         ExecuteCommand(onDone);
     }
 
@@ -255,9 +255,10 @@ namespace services
         AddCommandAction<TransmitRaw>(infra::MakeByteRange(uartInitializationData));
         AddCommandAction<ReceiveAck>();
 
-        SetCommandTimeout("Timeout waiting for bootloader initialization");
+        SetInitializationTimeoutWithRetry();
         ExecuteCommand([this]()
             {
+                initRetryCounter = 0;
                 onInitialized();
             });
     }
@@ -302,21 +303,35 @@ namespace services
             StartCurrentAction();
     }
 
-    void StBootloaderCommunicatorUart::SetCommandTimeout(infra::BoundedConstString reason)
+    void StBootloaderCommunicatorUart::SetCommandTimeout(StBootloaderCommunicatorError error)
     {
-        timeoutReason = reason;
+        timeoutError = error;
         timeout.Start(commandTimeout, [this]()
             {
-                OnError(timeoutReason);
+                OnError(timeoutError);
             });
     }
 
-    void StBootloaderCommunicatorUart::OnError(infra::BoundedConstString reason)
+    void StBootloaderCommunicatorUart::SetInitializationTimeoutWithRetry()
+    {
+        timeout.Start(commandTimeout, [this]()
+            {
+                if (++initRetryCounter < 10)
+                {
+                    commandActions.clear();
+                    InitializeUartBootloader();
+                }
+                else
+                    OnError(StBootloaderCommunicatorError::initializationTimeout);
+            });
+    }
+
+    void StBootloaderCommunicatorUart::OnError(StBootloaderCommunicatorError error)
     {
         timeout.Cancel();
         serial.ReceiveData([](auto data) {});
         if (onError != nullptr)
-            onError(reason);
+            onError(error);
     }
 
     void StBootloaderCommunicatorUart::SendData(infra::ConstByteRange data, uint8_t checksum)
@@ -359,7 +374,7 @@ namespace services
 
             if (byte == nack)
             {
-                handler.OnError("NACK received");
+                handler.OnError(StBootloaderCommunicatorError::nackReceived);
                 return;
             }
         }

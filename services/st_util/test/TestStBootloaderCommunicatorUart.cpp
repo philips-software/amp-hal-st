@@ -6,6 +6,7 @@
 #include "services/st_util/StBootloaderCommunicatorUart.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include <chrono>
 #include <cstdint>
 #include <stdint.h>
 #include <sys/types.h>
@@ -16,6 +17,11 @@ class StBootloaderCommunicatorUartTest
     , public infra::ClockFixture
 {
 public:
+    void ExpectSendInitialization()
+    {
+        ExpectSendData({ 0x7f });
+    }
+
     void Initialize()
     {
         serialCommunication.dataReceived(std::vector<uint8_t>{ 0x79 });
@@ -63,9 +69,9 @@ public:
             });
     }
 
-    void ExpectErrorOnTimeout(infra::Duration timeout, std::string errorMessage)
+    void ExpectErrorOnTimeout(infra::Duration timeout, services::StBootloaderCommunicatorError errorReason)
     {
-        EXPECT_CALL(onErrorMock, callback(infra::BoundedConstString{ errorMessage }));
+        EXPECT_CALL(onErrorMock, callback(errorReason));
         ForwardTime(timeout);
     }
 
@@ -78,18 +84,18 @@ public:
 public:
     testing::StrictMock<hal::SerialCommunicationMock> serialCommunication;
     testing::StrictMock<infra::MockCallback<void()>> onInitializedMock;
-    testing::StrictMock<infra::MockCallback<void(infra::BoundedConstString)>> onErrorMock;
+    testing::StrictMock<infra::MockCallback<void(services::StBootloaderCommunicatorError)>> onErrorMock;
     const infra::Function<void()> onInitialized{ [this]()
         {
             onInitializedMock.callback();
         } };
-    const infra::Function<void(infra::BoundedConstString reason)> onError{ [this](infra::BoundedConstString reason)
+    const infra::Function<void(services::StBootloaderCommunicatorError error)> onError{ [this](services::StBootloaderCommunicatorError error)
         {
-            onErrorMock.callback(reason);
+            onErrorMock.callback(error);
         } };
     infra::Execute execute{ [this]
         {
-            ExpectSendData({ 0x7f });
+            ExpectSendInitialization();
         } };
     services::StBootloaderCommunicatorUart handler{ serialCommunication, onInitialized, onError };
 };
@@ -99,11 +105,39 @@ TEST_F(StBootloaderCommunicatorUartTest, creation_initializes_uart_bootloader)
     Initialize();
 }
 
+TEST_F(StBootloaderCommunicatorUartTest, creation_initializes_uart_bootloader_retries)
+{
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    Initialize();
+}
+
 TEST_F(StBootloaderCommunicatorUartTest, creation_initializes_uart_bootloader_fails)
 {
-    infra::BoundedConstString::WithStorage<64> errorMessage("Timeout waiting for bootloader initialization");
-    EXPECT_CALL(onErrorMock, callback(errorMessage));
-    ForwardTime(std::chrono::milliseconds(1000));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    ExpectSendInitialization();
+    ForwardTime(std::chrono::seconds(1));
+    EXPECT_CALL(onErrorMock, callback(services::StBootloaderCommunicatorError::initializationTimeout));
+    ForwardTime(std::chrono::seconds(1));
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, receive_nack)
@@ -118,7 +152,7 @@ TEST_F(StBootloaderCommunicatorUartTest, receive_nack)
         {
             ondone.callback();
         });
-    EXPECT_CALL(onErrorMock, callback(infra::BoundedConstString{ "NACK received" }));
+    EXPECT_CALL(onErrorMock, callback(services::StBootloaderCommunicatorError::nackReceived));
     ReceiveData({ 0x1f });
 }
 
@@ -164,7 +198,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetCommand_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting commands");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, GetVersion)
@@ -187,7 +221,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetVersion_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting version");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, GetId)
@@ -210,7 +244,7 @@ TEST_F(StBootloaderCommunicatorUartTest, GetId_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout getting id");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, ReadMemory)
@@ -248,7 +282,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ReadMemory_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout reading memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, Go)
@@ -277,7 +311,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Go_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout go");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, WriteMemory)
@@ -310,7 +344,7 @@ TEST_F(StBootloaderCommunicatorUartTest, WriteMemory_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout writing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, MassErase)
@@ -337,7 +371,7 @@ TEST_F(StBootloaderCommunicatorUartTest, MassErase_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout mass erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, Erase_pages)
@@ -364,7 +398,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Erase_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase)
@@ -391,7 +425,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended mass erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages)
@@ -418,7 +452,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, Special)
@@ -577,7 +611,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Special_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout special command");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedSpecial)
@@ -620,7 +654,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedSpecial_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended special command");
+    ExpectErrorOnTimeout(std::chrono::seconds(1), services::StBootloaderCommunicatorError::commandtimeout);
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, receive_data_with_wrapped_around_queue)
