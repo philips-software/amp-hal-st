@@ -20,6 +20,7 @@ namespace hal
             uint32_t period{};
             uint32_t repetitionCounter{ 0 };
             uint32_t prescaler{ LPTIM_PRESCALER_DIV1 };
+            uint32_t updateMode{ repetitionCounter == 0 ? LPTIM_UPDATE_IMMEDIATE : LPTIM_UPDATE_ENDOFPERIOD };
         };
 
     protected:
@@ -28,6 +29,12 @@ namespace hal
 
         LPTIM_HandleTypeDef handle{};
         const uint8_t timerIndex;
+
+    public:
+        auto& Handle()
+        {
+            return handle;
+        }
     };
 
     class FreeRunningLowPowerTimerStm
