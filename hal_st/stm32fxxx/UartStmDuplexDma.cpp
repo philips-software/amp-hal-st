@@ -66,6 +66,8 @@ namespace hal
     UartStmDuplexDma::~UartStmDuplexDma()
     {
         receiveDmaChannel.StopTransfer();
+        uartArray[uartIndex]->CR3 &= ~USART_CR3_DMAT & ~USART_CR3_DMAR;
+        uartArray[uartIndex]->CR1 &= ~USART_CR1_RTOIE;
     }
 
     void UartStmDuplexDma::ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived)
