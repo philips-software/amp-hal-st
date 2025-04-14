@@ -22,7 +22,7 @@ namespace hal
         infra::ConstByteRange GetScanResponseData() const override;
         void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         void Standby() override;
-        void SetConnectionInterval(uint16_t connMultiplierMin, uint16_t connMultiplierMax) override;
+        void SetConnectionParameter(const services::GapConnectionParameters& connParam) override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
@@ -33,7 +33,6 @@ namespace hal
         void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
 
     private:
-        void RequestConnectionParameterUpdate(uint16_t connMultiplierMin, uint16_t connMultiplierMax);
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);
         void UpdateResolvingList();
