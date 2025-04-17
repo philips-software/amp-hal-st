@@ -75,6 +75,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     LowPowerStrategyStm.hpp
     LpTimerStm.cpp
     LpTimerStm.hpp
+    LpTimerPwmStm.cpp
+    LpTimerPwmStm.hpp
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
