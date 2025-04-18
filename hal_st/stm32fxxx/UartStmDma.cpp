@@ -53,6 +53,11 @@ namespace hal
     }
 #endif
 
+    UartStmDma::~UartStmDma()
+    {
+        uartArray[uartIndex]->CR3 &= ~USART_CR3_DMAT;
+    }
+
     void UartStmDma::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
     {
         if (!data.empty())
