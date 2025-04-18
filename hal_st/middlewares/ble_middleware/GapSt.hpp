@@ -95,8 +95,6 @@ namespace hal
 
         ConnectionContext connectionContext;
 
-        static const services::GapConnectionParameters connectionParameters;
-
         const uint16_t invalidConnection = 0xffff;
 
         // Set PHY

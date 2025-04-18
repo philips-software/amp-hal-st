@@ -33,10 +33,15 @@ namespace hal
             });
     }
 
-    void WatchDogStm::Interrupt()
+    void WatchDogStm::WatchDogRefresh()
     {
         HAL_WWDG_Refresh(&handle);
         WWDG->SR = 0;
+    }
+
+    void WatchDogStm::Interrupt()
+    {
+        WatchDogRefresh();
         if (++delay == 41) // 41 * 36ms = 1.5s
             onExpired();
     }
