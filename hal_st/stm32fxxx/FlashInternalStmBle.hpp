@@ -14,8 +14,6 @@ namespace hal
         : public FlashHomogeneousInternalStm
     {
     public:
-        static constexpr uint32_t hwBlockFlashReqByCpu2 = 7;
-
         FlashInternalStmBle(uint32_t numberOfSectors, uint32_t sizeOfEachSector, infra::ConstByteRange flashMemory, WatchDogStm& watchdog);
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
@@ -31,8 +29,8 @@ namespace hal
         void WaitForCpu2AllowFlashOperation(infra::Function<void()> onAvailable);
         void HsemInterruptHandler();
         void EccErrorHandler();
-        void TryFlashWrite();
-        void TryFlashErase();
+        void TryWrite();
+        void TryErase();
         bool FlashSingleOperation(FlashOperation operation);
         void FlashSingleWrite();
         void FlashSingleErase();
@@ -48,6 +46,7 @@ namespace hal
             WatchDogStm& watchdog;
         };
 
+        static constexpr uint32_t hwBlockFlashReqByCpu2 = 7;
         infra::ConstByteRange flashMemory;
         WatchDogStm& watchdog;
         ImmediateInterruptHandler hwSemInterruptHandler;

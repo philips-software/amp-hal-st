@@ -30,7 +30,7 @@ namespace hal
         HAL_FLASH_Unlock();
         flashAlign.Align(address, buffer);
         chunkToWrite = flashAlign.First();
-        TryFlashWrite();
+        TryWrite();
     }
 
     void FlashInternalStmBle::EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone)
@@ -41,7 +41,7 @@ namespace hal
         SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
         currentEraseIndex = beginIndex;
         endEraseIndex = endIndex;
-        TryFlashErase();
+        TryErase();
     }
 
     void FlashInternalStmBle::WaitForCpu2AllowFlashOperation(infra::Function<void()> onAvailable)
@@ -82,7 +82,7 @@ namespace hal
         }
     }
 
-    void FlashInternalStmBle::TryFlashWrite()
+    void FlashInternalStmBle::TryWrite()
     {
         constexpr uint32_t maxWriteSize = 2048; // 2KB write takes ~21ms, which is similar to one sector erase
         uint32_t writtenSize = 0;
@@ -93,7 +93,7 @@ namespace hal
             {
                 WaitForCpu2AllowFlashOperation([this]()
                     {
-                        TryFlashWrite();
+                        TryWrite();
                     });
                 return;
             }
@@ -111,11 +111,11 @@ namespace hal
         else if (writtenSize >= maxWriteSize)
             infra::EventDispatcher::Instance().Schedule([this]()
                 {
-                    TryFlashWrite();
+                    TryWrite();
                 });
     }
 
-    void FlashInternalStmBle::TryFlashErase()
+    void FlashInternalStmBle::TryErase()
     {
         if (currentEraseIndex == endEraseIndex)
         {
@@ -131,12 +131,12 @@ namespace hal
             if (!FlashSingleOperation(FlashOperation::erase))
                 WaitForCpu2AllowFlashOperation([this]()
                     {
-                        TryFlashErase();
+                        TryErase();
                     });
             else
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
-                        TryFlashErase();
+                        TryErase();
                     });
         }
     }
@@ -144,18 +144,18 @@ namespace hal
     bool FlashInternalStmBle::FlashSingleOperation(FlashOperation operation)
     {
         CriticalSectionScoped criticalSectionScoped(watchdog);
-        bool lockCpu2FlashReq = LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0;
 
-        if (lockCpu2FlashReq)
+        if (LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0)
         {
             if (operation == FlashOperation::write)
                 FlashSingleWrite();
             else if (operation == FlashOperation::erase)
                 FlashSingleErase();
             LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
+            return true;
         }
-
-        return lockCpu2FlashReq;
+        else
+            return false;
     }
 
     void FlashInternalStmBle::FlashSingleWrite()
