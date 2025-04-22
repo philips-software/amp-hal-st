@@ -115,7 +115,7 @@ namespace hal
         }
     }
 
-    void GapPeripheralSt::SetConnectionParameter(const services::GapConnectionParameters& connParam)
+    void GapPeripheralSt::SetConnectionParameters(const services::GapConnectionParameters& connParam)
     {
         aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
             connParam.minConnIntMultiplier, connParam.maxConnIntMultiplier,

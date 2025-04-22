@@ -22,7 +22,7 @@ namespace hal
         infra::ConstByteRange GetScanResponseData() const override;
         void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         void Standby() override;
-        void SetConnectionParameter(const services::GapConnectionParameters& connParam) override;
+        void SetConnectionParameters(const services::GapConnectionParameters& connParam) override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
