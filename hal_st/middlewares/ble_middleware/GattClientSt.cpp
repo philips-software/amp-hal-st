@@ -101,9 +101,16 @@ namespace hal
             });
     }
 
-    void GattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
+    services::GattCharacteristicOperationsResult GattClientSt::WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
     {
-        aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+        auto result = aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+
+        if (result == BLE_STATUS_SUCCESS)
+            return services::GattCharacteristicOperationsResult::success;
+        else if (result == BLE_STATUS_INSUFFICIENT_RESOURCES)
+            return services::GattCharacteristicOperationsResult::retry;
+        else
+            return services::GattCharacteristicOperationsResult::error;
     }
 
     void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
