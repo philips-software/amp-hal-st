@@ -89,7 +89,7 @@ namespace hal
 
         while (chunkToWrite != nullptr && writtenSize < maxWriteSize)
         {
-            if (!FlashSingleOperation(FlashOperation::write))
+            if (!SingleOperation(FlashOperation::write))
             {
                 WaitForCpu2AllowFlashOperation([this]()
                     {
@@ -128,7 +128,7 @@ namespace hal
         }
         else
         {
-            if (!FlashSingleOperation(FlashOperation::erase))
+            if (!SingleOperation(FlashOperation::erase))
                 WaitForCpu2AllowFlashOperation([this]()
                     {
                         TryErase();
@@ -141,16 +141,16 @@ namespace hal
         }
     }
 
-    bool FlashInternalStmBle::FlashSingleOperation(FlashOperation operation)
+    bool FlashInternalStmBle::SingleOperation(FlashOperation operation)
     {
         CriticalSectionScoped criticalSectionScoped(watchdog);
 
         if (LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0)
         {
             if (operation == FlashOperation::write)
-                FlashSingleWrite();
+                SingleWrite();
             else if (operation == FlashOperation::erase)
-                FlashSingleErase();
+                SingleErase();
             LL_HSEM_ReleaseLock(HSEM, hwBlockFlashReqByCpu2, 0);
             return true;
         }
@@ -158,7 +158,7 @@ namespace hal
             return false;
     }
 
-    void FlashInternalStmBle::FlashSingleWrite()
+    void FlashInternalStmBle::SingleWrite()
     {
         uint32_t fullAddress = reinterpret_cast<uint32_t>(flashMemory.begin() + chunkToWrite->alignedAddress);
         const uint64_t data = *reinterpret_cast<const uint64_t*>(chunkToWrite->data.begin());
@@ -171,7 +171,7 @@ namespace hal
             chunkToWrite = flashAlign.Next();
     }
 
-    void FlashInternalStmBle::FlashSingleErase()
+    void FlashInternalStmBle::SingleErase()
     {
         uint32_t pageError = 0;
         FLASH_EraseInitTypeDef eraseInitStruct;

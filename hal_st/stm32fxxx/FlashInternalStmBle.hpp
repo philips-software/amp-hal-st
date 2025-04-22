@@ -31,9 +31,9 @@ namespace hal
         void EccErrorHandler();
         void TryWrite();
         void TryErase();
-        bool FlashSingleOperation(FlashOperation operation);
-        void FlashSingleWrite();
-        void FlashSingleErase();
+        bool SingleOperation(FlashOperation operation);
+        void SingleWrite();
+        void SingleErase();
 
         class CriticalSectionScoped
         {
