@@ -38,7 +38,7 @@ namespace hal
         AdcDmaMultiChannelStmBase(infra::MemoryRange<uint16_t> buffer, infra::MemoryRange<AnalogPinStm> analogPins, AdcStm& adc, DmaStm::ReceiveStream& receiveStream, Unlimited);
 
         void Measure(const infra::Function<void(Samples)>& onDone) override;
-        virtual void Stop();
+        void Stop() override;
 
     protected:
         void ConfigureChannels(infra::MemoryRange<const detail::AdcStmChannelConfig> configs);
