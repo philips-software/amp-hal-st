@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/TracingGapPeripheralSt.hpp"
+#include "ble_gap_aci.h"
 
 namespace hal
 {
@@ -59,6 +60,10 @@ namespace hal
     {
         const auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
         tracer.Trace() << "GapPeripheralSt::HandlePairingCompleteEvent " << pairingComplete->Status;
+
+        if (pairingComplete->Status != SMP_PAIRING_STATUS_SUCCESS)
+            tracer.Continue() << " fail reason " << pairingComplete->Reason;
+
         GapPeripheralSt::HandlePairingCompleteEvent(vendorEvent);
     }
 
