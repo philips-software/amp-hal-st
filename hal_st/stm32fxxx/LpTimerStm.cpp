@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/LpTimerStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include <chrono>
 #include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_LPTIMER)
@@ -21,7 +22,7 @@ namespace hal
         handle.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
         handle.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
         handle.Init.RepetitionCounter = timing.repetitionCounter;
-        handle.Init.UpdateMode = timing.repetitionCounter > 0 ? LPTIM_UPDATE_ENDOFPERIOD : LPTIM_UPDATE_IMMEDIATE;
+        handle.Init.UpdateMode = timing.updateMode;
 
         auto result = HAL_LPTIM_Init(&handle);
         assert(result == HAL_OK);

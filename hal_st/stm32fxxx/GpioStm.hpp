@@ -58,7 +58,9 @@ namespace hal
         timerChannel1,
         timerChannel2,
         timerChannel3,
-        timerChannel4
+        timerChannel4,
+        lpTimerChannel1,
+        lpTimerChannel2
     };
 
     enum class Type : uint8_t

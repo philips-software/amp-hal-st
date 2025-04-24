@@ -105,6 +105,10 @@
     <pin name="Channel3"><input name="TIM:_CH3"/></pin>
     <pin name="Channel4"><input name="TIM:_CH4"/></pin>
   </peripheral>
+  <peripheral name="LpTimer">
+    <pin name="Channel1"><input name="LPTIM:_CH1"/></pin>
+    <pin name="Channel2"><input name="LPTIM:_CH2"/></pin>
+  </peripheral>
   <peripheral name="Fmc">
     <pin name="" speed="High">
       <input name="FMC_NL"/>      <input name="FMC_CLK"/>     <input name="FMC_NBL0"/>     <input name="FMC_NBL1"/>
