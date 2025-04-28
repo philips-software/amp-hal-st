@@ -27,6 +27,7 @@ namespace hal
 
         WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
 
+        void WatchDogRefresh();
         void Interrupt();
 
     private:
