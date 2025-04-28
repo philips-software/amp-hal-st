@@ -14,6 +14,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 #include <utility>
 
 /// @brief This ADC implementation supports multiple channels with DMA transfer and software trigger.
@@ -37,7 +38,7 @@ namespace hal
         AdcDmaMultiChannelStmBase(infra::MemoryRange<uint16_t> buffer, infra::MemoryRange<AnalogPinStm> analogPins, AdcStm& adc, DmaStm::ReceiveStream& receiveStream, Unlimited);
 
         void Measure(const infra::Function<void(Samples)>& onDone) override;
-        virtual void Stop();
+        void Stop() override;
 
     protected:
         void ConfigureChannels(infra::MemoryRange<const detail::AdcStmChannelConfig> configs);
@@ -86,7 +87,7 @@ namespace hal
     concept IsAnyOf = (std::same_as<T, U> || ...);
 
     template<class T>
-    concept PinConfig = IsAnyOf<T, AdcPinConfig<GpioPinStm&>, AdcPinConfig<uint32_t>, AdcPinConfig<unsigned long>>;
+    concept PinConfig = IsAnyOf<std::decay_t<T>, AdcPinConfig<GpioPinStm&>, AdcPinConfig<uint32_t>, AdcPinConfig<unsigned long>>;
 
     template<class T>
     concept DmaMode = IsAnyOf<T, AdcDmaMultiChannelStmBase::OneShot, AdcDmaMultiChannelStmBase::Unlimited>;
