@@ -122,7 +122,7 @@ namespace hal
 
     void GapPeripheralSt::GenerateOutOfBandData()
     {
-        const std::array<uint8_t, 8> events = {{ 0xDF, 0x18, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00 }};
+        const std::array<uint8_t, 8> events = {{ 0x9F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }};
         hci_le_set_event_mask(events.data()); // Enable public key generation event
         GapSt::GenerateOutOfBandData();
     }
