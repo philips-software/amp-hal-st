@@ -56,6 +56,7 @@ namespace hal
         auto result = HAL_ADCEx_Calibration_Start(&adc.Handle());
         assert(result == HAL_OK);
 #endif
+        adc.EnableOverrunInterrupt();
     }
 
     void AdcDmaMultiChannelStmBase::Measure(const infra::Function<void(Samples)>& onDone)
