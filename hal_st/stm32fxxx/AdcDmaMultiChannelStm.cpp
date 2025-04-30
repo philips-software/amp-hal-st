@@ -2,6 +2,8 @@
 #include "hal_st/stm32fxxx/AnalogToDigitalPinStm.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include <cstdint>
+#include <utility>
+#include <variant>
 #include DEVICE_HEADER
 
 namespace
@@ -22,7 +24,7 @@ namespace hal
         : buffer{ buffer }
         , analogPins{ analogPins }
         , adc{ adc }
-        , dmaStream(infra::InPlaceType<ReceiveDmaChannel>{}, receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), [this]()
+        , dmaStream(std::in_place_type_t<ReceiveDmaChannel>{}, receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), [this]()
               {
                   TransferDone();
               },
@@ -36,7 +38,7 @@ namespace hal
         : buffer{ buffer }
         , analogPins{ analogPins }
         , adc{ adc }
-        , dmaStream(infra::InPlaceType<CircularReceiveDmaChannel>{}, receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), infra::emptyFunction, [this]()
+        , dmaStream(std::in_place_type_t<CircularReceiveDmaChannel>{}, receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), infra::emptyFunction, [this]()
               {
                   TransferDone();
               })
@@ -69,10 +71,11 @@ namespace hal
         assert(result == HAL_OK);
 
         __HAL_ADC_CLEAR_FLAG(&adc.Handle(), (ADC_FLAG_EOC | ADC_FLAG_EOS | ADC_FLAG_OVR));
-        if (dmaStream.Is<ReceiveDmaChannel>())
-            dmaStream.Get<ReceiveDmaChannel>().StartReceive(buffer);
-        else
-            dmaStream.Get<CircularReceiveDmaChannel>().StartReceive(buffer);
+
+        // clang-format off
+        std::visit([this](auto& v) { v.StartReceive(buffer); }, dmaStream);
+        // clang-format on
+
         LL_ADC_REG_StartConversion(adc.Handle().Instance);
     }
 
@@ -81,10 +84,9 @@ namespace hal
         if (LL_ADC_REG_IsConversionOngoing(adc.Handle().Instance))
             LL_ADC_REG_StopConversion(adc.Handle().Instance);
 
-        if (dmaStream.Is<ReceiveDmaChannel>())
-            dmaStream.Get<ReceiveDmaChannel>().StopTransfer();
-        else
-            dmaStream.Get<CircularReceiveDmaChannel>().StopTransfer();
+        // clang-format off
+        std::visit([this](auto& v) { v.StopTransfer(); }, dmaStream);
+        // clang-format on
 
         auto result = ADC_Disable(&adc.Handle());
         assert(result == HAL_OK);
@@ -114,7 +116,7 @@ namespace hal
 
     void AdcDmaMultiChannelStmBase::TransferDone()
     {
-        if (dmaStream.Is<ReceiveDmaChannel>())
+        if (std::holds_alternative<ReceiveDmaChannel>(dmaStream))
         {
             auto result = ADC_Disable(&adc.Handle());
             assert(result == HAL_OK);
