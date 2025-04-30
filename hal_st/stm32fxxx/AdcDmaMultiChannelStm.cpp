@@ -47,10 +47,9 @@ namespace hal
 
     void AdcDmaMultiChannelStmBase::Initialize()
     {
-#ifdef ADC_SINGLE_ENDED
-        auto result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_SINGLE_ENDED);
-        assert(result == HAL_OK);
-        result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_DIFFERENTIAL_ENDED);
+#ifdef ADC_DIFFERENTIAL_ENDED
+        // single ended calibration is already done by AdcStm
+        auto result = HAL_ADCEx_Calibration_Start(&adc.Handle(), ADC_DIFFERENTIAL_ENDED);
         assert(result == HAL_OK);
 #elif defined(IS_ADC_CALFACT)
         auto result = HAL_ADCEx_Calibration_Start(&adc.Handle());
