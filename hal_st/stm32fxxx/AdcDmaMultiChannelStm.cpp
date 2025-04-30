@@ -84,12 +84,12 @@ namespace hal
         if (LL_ADC_REG_IsConversionOngoing(adc.Handle().Instance))
             LL_ADC_REG_StopConversion(adc.Handle().Instance);
 
+        auto result = ADC_Disable(&adc.Handle());
+        assert(result == HAL_OK);
+
         // clang-format off
         std::visit([this](auto& v) { v.StopTransfer(); }, dmaStream);
         // clang-format on
-
-        auto result = ADC_Disable(&adc.Handle());
-        assert(result == HAL_OK);
     }
 
     void AdcDmaMultiChannelStmBase::ConfigureChannels(infra::MemoryRange<const detail::AdcStmChannelConfig> configs)
