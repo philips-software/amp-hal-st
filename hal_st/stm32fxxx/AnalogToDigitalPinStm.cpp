@@ -244,9 +244,7 @@ namespace hal
         assert(onDone != nullptr);
 
         if (__HAL_ADC_GET_FLAG(&handle, ovrFlag) && __HAL_ADC_GET_IT_SOURCE(&handle, ADC_IT_OVR))
-        {
             std::abort();
-        }
 
 #ifdef ADC_ISR_EOC
         handle.Instance->ISR |= (ADC_ISR_EOC | ADC_ISR_EOS);
