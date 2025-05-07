@@ -82,6 +82,8 @@ namespace hal
         uint32_t Channel(const hal::AnalogPinStm& pin) const;
         ADC_HandleTypeDef& Handle();
 
+        void EnableOverrunInterrupt();
+
     private:
         void Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone);
         void MeasurementDone();
