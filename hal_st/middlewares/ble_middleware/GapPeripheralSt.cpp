@@ -1,5 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
-#include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/event/EventDispatcher.hpp"
 
 namespace
 {
@@ -21,9 +21,9 @@ namespace hal
     {
         services::GapAddress address;
         /* Use last peer addres to get current RPA */
-        [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(connectionContext.peerAddressType, connectionContext.peerAddress.data(), address.address.data());
+        [[maybe_unused]] auto status = hci_le_read_local_resolvable_address(static_cast<uint8_t>(connectionContext.peerAddressType), connectionContext.peerAddress.data(), address.address.data());
 
-        address.type = services::GapDeviceAddressType::publicAddress;
+        address.type = services::GapDeviceAddressType::randomAddress;
 
         assert(status == BLE_STATUS_SUCCESS);
 
@@ -115,6 +115,13 @@ namespace hal
         }
     }
 
+    void GapPeripheralSt::SetConnectionParameters(const services::GapConnectionParameters& connParam)
+    {
+        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
+            connParam.minConnIntMultiplier, connParam.maxConnIntMultiplier,
+            connParam.slaveLatency, connParam.supervisorTimeoutMs);
+    }
+
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
@@ -133,14 +140,14 @@ namespace hal
             aci_gap_add_devices_to_resolving_list(1, &dummyPeer, 1);
 
             std::copy(std::begin(dummyPeer.Peer_Identity_Address), std::end(dummyPeer.Peer_Identity_Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = dummyPeer.Peer_Identity_Address_Type;
+            connectionContext.peerAddressType = static_cast<services::GapDeviceAddressType>(dummyPeer.Peer_Identity_Address_Type);
         }
         else
         {
             aci_gap_add_devices_to_resolving_list(numberOfBondedAddress, reinterpret_cast<const Whitelist_Identity_Entry_t*>(bondedDevices.begin()), 1);
 
             std::copy(std::begin(bondedDevices[numberOfBondedAddress - 1].Address), std::end(bondedDevices[numberOfBondedAddress - 1].Address), connectionContext.peerAddress.begin());
-            connectionContext.peerAddressType = bondedDevices[numberOfBondedAddress - 1].Address_Type;
+            connectionContext.peerAddressType = static_cast<services::GapDeviceAddressType>(bondedDevices[numberOfBondedAddress - 1].Address_Type);
 
             for (uint8_t i = 0; i < numberOfBondedAddress; i++)
                 hci_le_set_privacy_mode(bondedDevices[i].Address_Type, bondedDevices[i].Address, HCI_PRIV_MODE_DEVICE);
@@ -164,16 +171,7 @@ namespace hal
     {
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
 
-        RequestConnectionParameterUpdate();
-
         UpdateState(services::GapState::connected);
-    }
-
-    void GapPeripheralSt::RequestConnectionParameterUpdate()
-    {
-        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
-            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
-            connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
     void GapPeripheralSt::Initialize(const GapService& gapService)

@@ -23,6 +23,10 @@
     <item name="TIM1_8H5"/>
     <item name="TIM6_7H5"/>
   </peripheral>
+  <peripheral name="LpTimer" type="LPTIM_TypeDef*" prefix="LPTIM">
+    <item name="LPTIM"/>
+    <interrupt/>
+  </peripheral>
   <peripheral name="Adc" type="ADC_TypeDef*">
     <item name="ADC"/>
   </peripheral>

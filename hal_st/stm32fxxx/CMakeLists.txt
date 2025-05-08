@@ -13,11 +13,14 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
     services.util
     st.hal_driver
     hal_st.cortex
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:hal_st.stm32_wpan>
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
+    AdcTimerTriggeredBase.cpp
+    AdcTimerTriggeredBase.hpp
     BackupRamStm.cpp
     BackupRamStm.hpp
     CanStm.cpp
@@ -44,6 +47,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:DefaultClockNucleoWB55RG.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wba52>:DefaultClockNucleoWBA52CG.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32wba52>:DefaultClockNucleoWBA52CG.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wba65>:DefaultClockNucleoWBA65RI.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wba65>:DefaultClockNucleoWBA65RI.hpp>
     DigitalToAnalogPinStm.cpp
     DigitalToAnalogPinStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.cpp>
@@ -56,6 +61,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:FlashInternalHighCycleAreaStm.hpp>
     FlashInternalStm.cpp
     FlashInternalStm.hpp
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.hpp>
     GpioStm.cpp
     GpioStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>
@@ -66,6 +73,10 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.hpp>
     LowPowerStrategyStm.cpp
     LowPowerStrategyStm.hpp
+    LpTimerStm.cpp
+    LpTimerStm.hpp
+    LpTimerPwmStm.cpp
+    LpTimerPwmStm.hpp
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
@@ -86,6 +97,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SystemTickStm.hpp
     SystemTickTimerService.cpp
     SystemTickTimerService.hpp
+    TimerPwmStm.cpp
+    TimerPwmStm.hpp
     TimerStm.cpp
     TimerStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:UartStm.cpp>
@@ -158,6 +171,9 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     elseif (TARGET_MCU STREQUAL stm32wba52)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WBA52x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WBA52CGUx.xml")
+    elseif (TARGET_MCU STREQUAL stm32wba65)
+        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32WBA6_gpio_v1_0_Modes.xml")
+        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32WBA65RIVx.xml")
     elseif (TARGET_MCU STREQUAL stm32h563)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32H56x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32H563ZITx.xml")

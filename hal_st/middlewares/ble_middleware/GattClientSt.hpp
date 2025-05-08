@@ -7,6 +7,7 @@
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
+#include "infra/util/Function.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal
@@ -25,13 +26,13 @@ namespace hal
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onDone) override;
-        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone) override;
+        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
+        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
         void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
-        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
-        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
-        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
-        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone) override;
+        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -54,15 +55,32 @@ namespace hal
         virtual void HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent);
         virtual void HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent);
 
+        virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
+        void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
+
     private:
-        void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
-        void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
 
         void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
 
-    private:
+        template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
+        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+        {
+            claimerCharacteristicOperations.Claim([this, &characteristic, onDone]()
+                {
+                    this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+                    {
+                        auto onDoneCopy = onDone;
+                        claimerCharacteristicOperations.Release();
+                        onDoneCopy(result);
+                    };
+
+                    WriteCharacteristicDescriptor(characteristic, p, v);
+                });
+        }
+
+    protected:
         struct Atttributes
         {
             services::AttAttribute::Uuid type;
@@ -77,12 +95,12 @@ namespace hal
         static constexpr uint16_t invalidConnection = 0xffff;
 
         infra::AutoResetFunction<void()> onDiscoveryCompletion;
-        infra::AutoResetFunction<void(const infra::ConstByteRange&)> onResponse;
-        infra::AutoResetFunction<void()> onDone;
+        infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
+        infra::AutoResetFunction<void(uint8_t), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationsDone;
 
         infra::ClaimableResource resource;
         infra::ClaimableResource::Claimer claimerDiscovery{ resource };
-        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange)> claimerCharacteristicOperations{ resource };
+        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(infra::Function<void()>)> claimerCharacteristicOperations{ resource };
     };
 }
 

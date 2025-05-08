@@ -4,7 +4,7 @@
 
 namespace infra
 {
-    bool WaitUntilDone(cucumber_cpp::Context& context, const std::function<void(const std::function<void()>&)>& action, infra::Duration timeout)
+    bool WaitUntilDone(cucumber_cpp::library::Context& context, const std::function<void(const std::function<void()>&)>& action, infra::Duration timeout)
     {
         bool done{ false };
         bool timedOut{ false };
@@ -29,7 +29,7 @@ namespace infra
         return !timedOut;
     }
 
-    bool WaitFor(cucumber_cpp::Context& context, const std::function<bool()>& pred, infra::Duration timeout)
+    bool WaitFor(cucumber_cpp::library::Context& context, const std::function<bool()>& pred, infra::Duration timeout)
     {
         bool timedOut{ false };
 
@@ -46,7 +46,7 @@ namespace infra
         return !timedOut;
     }
 
-    void WaitFor(cucumber_cpp::Context& context, infra::Duration timeout)
+    void WaitFor(cucumber_cpp::library::Context& context, infra::Duration timeout)
     {
         bool done{ false };
 
@@ -61,14 +61,14 @@ namespace infra
             });
     }
 
-    Async::Async(cucumber_cpp::Context& context)
+    Async::Async(cucumber_cpp::library::Context& context)
         : Async{ context, [this]()
             {
                 return notified;
             } }
     {}
 
-    Async::Async(cucumber_cpp::Context& context, std::function<bool()> func)
+    Async::Async(cucumber_cpp::library::Context& context, std::function<bool()> func)
         : context{ context }
         , func{ std::move(func) }
     {}

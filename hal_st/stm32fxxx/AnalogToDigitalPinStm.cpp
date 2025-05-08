@@ -23,26 +23,34 @@ extern "C"
 
 namespace
 {
+#if defined(STM32G4) || defined(STM32H5)
+    constexpr std::array irqMap{
 #if defined(STM32G4)
-    constexpr std::array irqMap
-    {
 #if defined(ADC1)
         std::make_pair(1, IRQn_Type::ADC1_2_IRQn), // only ADC1 or ADC2 can be configured to use the single interrupt vector
 #endif
 #if defined(ADC2)
-            std::make_pair(2, IRQn_Type::ADC1_2_IRQn), // only ADC1 or ADC2 can be configured to use the single interrupt vector
+        std::make_pair(2, IRQn_Type::ADC1_2_IRQn), // only ADC1 or ADC2 can be configured to use the single interrupt vector
+#endif
+#else
+#if defined(ADC1)
+        std::make_pair(1, IRQn_Type::ADC1_IRQn),
+#endif
+#if defined(ADC2)
+        std::make_pair(2, IRQn_Type::ADC2_IRQn),
+#endif
 #endif
 
 #if defined(ADC3)
-            std::make_pair(3, IRQn_Type::ADC3_IRQn),
+        std::make_pair(3, IRQn_Type::ADC3_IRQn),
 #endif
 
 #if defined(ADC4)
-            std::make_pair(4, IRQn_Type::ADC4_IRQn),
+        std::make_pair(4, IRQn_Type::ADC4_IRQn),
 #endif
 
 #if defined(ADC5)
-            std::make_pair(5, IRQn_Type::ADC5_IRQn),
+        std::make_pair(5, IRQn_Type::ADC5_IRQn),
 #endif
     };
 
@@ -60,34 +68,11 @@ namespace
     }
 #endif
 
-    constexpr std::array adcChannel{
-        // STM32F4x header defines ADC_CHANNEL_0 as 0x0u, all others are cast to uint32_t
-        // all other device headers are consistent with all their channel types
-        static_cast<decltype(ADC_CHANNEL_1)>(ADC_CHANNEL_0),
-        ADC_CHANNEL_1,
-        ADC_CHANNEL_2,
-        ADC_CHANNEL_3,
-        ADC_CHANNEL_4,
-        ADC_CHANNEL_5,
-        ADC_CHANNEL_6,
-        ADC_CHANNEL_7,
-        ADC_CHANNEL_8,
-        ADC_CHANNEL_9,
-        ADC_CHANNEL_10,
-        ADC_CHANNEL_11,
-        ADC_CHANNEL_12,
-        ADC_CHANNEL_13,
-#ifdef ADC_CHANNEL_18
-        ADC_CHANNEL_14,
-        ADC_CHANNEL_15,
-        ADC_CHANNEL_16,
-        ADC_CHANNEL_17,
-        ADC_CHANNEL_18,
+#ifdef ADC_ISR_OVR
+    constexpr auto ovrFlag{ ADC_ISR_OVR };
+#else
+    constexpr auto ovrFlag{ ADC_SR_OVR };
 #endif
-#ifdef ADC_CHANNEL_19
-        ADC_CHANNEL_19,
-#endif
-    };
 }
 
 namespace hal
@@ -181,7 +166,7 @@ namespace hal
 #elif defined(STM32WBA)
         , interruptHandler(ADC4_IRQn, [this]()
 #elif defined(STM32H5)
-        , interruptHandler(ADC2_IRQn, [this]()
+        , interruptHandler(LookupIrq(oneBasedIndex), [this]()
 #else
         , interruptHandler(ADC_IRQn, [this]()
 #endif
@@ -241,7 +226,7 @@ namespace hal
 
     uint32_t AdcStm::Channel(const hal::AnalogPinStm& pin) const
     {
-        return adcChannel[pin.AdcChannel(index + 1)];
+        return pin.AdcChannel(index + 1);
     }
 
     ADC_HandleTypeDef& AdcStm::Handle()
@@ -249,11 +234,20 @@ namespace hal
         return handle;
     }
 
+    void AdcStm::EnableOverrunInterrupt()
+    {
+        __HAL_ADC_ENABLE_IT(&handle, ADC_IT_OVR);
+    }
+
     void AdcStm::MeasurementDone()
     {
         assert(onDone != nullptr);
+
+        if (__HAL_ADC_GET_FLAG(&handle, ovrFlag) && __HAL_ADC_GET_IT_SOURCE(&handle, ADC_IT_OVR))
+            std::abort();
+
 #ifdef ADC_ISR_EOC
-        handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
+        handle.Instance->ISR |= (ADC_ISR_EOC | ADC_ISR_EOS);
 #else
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif

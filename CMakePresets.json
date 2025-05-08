@@ -165,6 +165,19 @@
       }
     },
     {
+      "name": "stm32wba65",
+      "displayName": "stm32wba65",
+      "description": "Build for stm32wba65",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m33",
+        "TARGET_MCU_FAMILY": "stm32wbaxx",
+        "TARGET_MCU": "stm32wba65",
+        "TARGET_MCU_VARIANT": "stm32wba65ri"
+      }
+    },
+    {
       "name": "stm32h563",
       "inherits": "stm32",
       "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
@@ -177,12 +190,22 @@
     {
       "name": "stm32h573",
       "inherits": "stm32",
-      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake//toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m33-fpv5-sp-d16.cmake",
       "cacheVariables": {
         "TARGET_CORTEX": "m33",
         "TARGET_MCU_FAMILY": "stm32h5xx",
         "TARGET_MCU": "stm32h573"
       }
+    },
+    {
+      "name": "Windows",
+      "inherits": "defaults",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-clang-x86_64-pc-windows-msvc.cmake",
+      "environment": {
+        "CCACHE_DEPEND": "true",
+        "CCACHE_COMPILERTYPE": "clang-cl"
+      },
+      "generator": "Ninja Multi-Config"
     }
   ],
   "buildPresets": [
@@ -264,6 +287,16 @@
       "configurePreset": "stm32wba52"
     },
     {
+      "name": "stm32wba65-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32wba65"
+    },
+    {
+      "name": "stm32wba65-Debug",
+      "configuration": "Debug",
+      "configurePreset": "stm32wba65"
+    },
+    {
       "name": "stm32h563-Debug",
       "configuration": "Debug",
       "configurePreset": "stm32h563"
@@ -292,6 +325,16 @@
       "name": "stm32h573-MinSizeRel",
       "configuration": "MinSizeRel",
       "configurePreset": "stm32h573"
+    },
+    {
+      "name": "Windows-Release",
+      "configuration": "Release",
+      "configurePreset": "Windows"
+    },
+    {
+      "name": "Windows-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "Windows"
     }
   ],
   "testPresets": [

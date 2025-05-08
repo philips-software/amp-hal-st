@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 /**
-  * @brief  Enable interrutps
+  * @brief  Enable interrupts
   * @param  None
   * @retval None
   */
@@ -30,7 +30,7 @@ void ll_sys_enable_irq(void) {
 }
 
 /**
-  * @brief  Disable interrutps
+  * @brief  Disable interrupts
   * @param  None
   * @retval None
   */

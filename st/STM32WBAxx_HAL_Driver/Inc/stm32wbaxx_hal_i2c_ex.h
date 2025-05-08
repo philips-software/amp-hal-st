@@ -99,10 +99,10 @@ typedef struct
 /** @defgroup I2CEx_AutonomousMode_TriggerSelection I2C Extended Autonomous Mode Trigger Selection
   * @{
   */
-#if defined(I2C1)
-#define I2C_TRIG_GRP1                   (0x10000000U)         /*!< Trigger Group for I2C1, I2C2 */
-#endif /* I2C1, I2C2 */
-#define I2C_TRIG_GRP2                   (0x20000000U)         /*!< Trigger Group for I2C3, I2C4 */
+#if (defined(I2C1) || defined(I2C2) || defined(I2C4))
+#define I2C_TRIG_GRP1                   (0x10000000U)         /*!< Trigger Group for I2C1, I2C2, I2C4 */
+#endif /* I2C1, I2C2, I2C4 */
+#define I2C_TRIG_GRP2                   (0x20000000U)         /*!< Trigger Group for I2C3 */
 
 #if defined(I2C_TRIG_GRP1)
 #define I2C_GRP1_GPDMA_CH0_TCF_TRG      (uint32_t)(I2C_TRIG_GRP1 | (0x00000000U))

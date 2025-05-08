@@ -58,7 +58,9 @@ namespace hal
         timerChannel1,
         timerChannel2,
         timerChannel3,
-        timerChannel4
+        timerChannel4,
+        lpTimerChannel1,
+        lpTimerChannel2
     };
 
     enum class Type : uint8_t
@@ -197,6 +199,7 @@ namespace hal
     {
     public:
         AnalogPinStm(GpioPinStm& pin);
+        AnalogPinStm(uint32_t channel);
         AnalogPinStm(const AnalogPinStm& other) = delete;
         AnalogPinStm& operator=(const AnalogPinStm& other) = delete;
         ~AnalogPinStm();
@@ -206,6 +209,7 @@ namespace hal
 
     private:
         GpioPinStm& pin;
+        uint32_t channel{ 0xffffffff };
     };
 
     class MultiGpioPinStm

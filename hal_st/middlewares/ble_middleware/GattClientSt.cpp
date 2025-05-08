@@ -70,22 +70,33 @@ namespace hal
             });
     }
 
-    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse)
+    void GattClientSt::Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone)
     {
-        this->onResponse = onResponse;
-
-        claimerCharacteristicOperations.Claim([this, &characteristic]()
+        claimerCharacteristicOperations.Claim([this, &characteristic, onResponse, onDone]()
             {
+                this->onReadResponse = onResponse;
+                this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+                {
+                    auto onDoneCopy = onDone;
+                    claimerCharacteristicOperations.Release();
+                    onDoneCopy(result);
+                };
+
                 aci_gatt_read_char_value(connectionHandle, characteristic.CharacteristicValueHandle());
             });
     }
 
-    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void()>& onDone)
+    void GattClientSt::Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
     {
-        this->onDone = onDone;
-
-        claimerCharacteristicOperations.Claim([this, &characteristic, data]()
+        claimerCharacteristicOperations.Claim([this, &characteristic, data, onDone]()
             {
+                this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+                {
+                    auto onDoneCopy = onDone;
+                    claimerCharacteristicOperations.Release();
+                    onDoneCopy(result);
+                };
+
                 aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
             });
     }
@@ -95,44 +106,24 @@ namespace hal
         aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
     }
 
-    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
+    void GattClientSt::EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
-        this->onDone = onDone;
-
-        claimerCharacteristicOperations.Claim([this, &characteristic]()
-            {
-                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification);
-            });
+        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification>(characteristic, onDone);
     }
 
-    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
+    void GattClientSt::DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
-        this->onDone = onDone;
-
-        claimerCharacteristicOperations.Claim([this, &characteristic]()
-            {
-                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
-            });
+        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(characteristic, onDone);
     }
 
-    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
+    void GattClientSt::EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
-        this->onDone = onDone;
-
-        claimerCharacteristicOperations.Claim([this, &characteristic]()
-            {
-                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication);
-            });
+        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication>(characteristic, onDone);
     }
 
-    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void()>& onDone)
+    void GattClientSt::DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
     {
-        this->onDone = onDone;
-
-        claimerCharacteristicOperations.Claim([this, &characteristic]()
-            {
-                WriteCharacteristicDescriptor(characteristic, services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable);
-            });
+        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(characteristic, onDone);
     }
 
     void GattClientSt::HciEvent(hci_event_pckt& event)
@@ -194,6 +185,9 @@ namespace hal
             case ACI_GATT_NOTIFICATION_VSEVT_CODE:
                 HandleGattNotificationEvent(vendorEvent);
                 break;
+            case ACI_ATT_READ_RESP_VSEVT_CODE:
+                HandleAttReadResponse(vendorEvent);
+                break;
             default:
                 break;
         }
@@ -241,18 +235,12 @@ namespace hal
     {
         auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        if (gattProcedureEvent.Error_Code == BLE_STATUS_SUCCESS)
-        {
-            really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
+        really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
 
-            if (onDiscoveryCompletion)
-                onDiscoveryCompletion();
-            else if (onDone)
-            {
-                onDone();
-                claimerCharacteristicOperations.Release();
-            }
-        }
+        if (onDiscoveryCompletion)
+            onDiscoveryCompletion(); // Does this conflict with other operations? If not, why do we even get a GattComplete for discovery?
+        else if (onCharacteristicOperationsDone)
+            onCharacteristicOperationsDone(gattProcedureEvent.Error_Code);
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
@@ -289,9 +277,9 @@ namespace hal
 
         really_assert(attReadResponse.Connection_Handle == connectionHandle);
 
-        if (onResponse)
+        if (onReadResponse)
         {
-            onResponse(data);
+            onReadResponse(data);
             claimerCharacteristicOperations.Release();
         }
     }
@@ -405,7 +393,6 @@ namespace hal
     {
         const uint16_t offsetCccd = 1;
 
-        if ((characteristic.CharacteristicProperties() & property) == property)
-            aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        aci_gatt_write_char_desc(connectionHandle, characteristic.CharacteristicValueHandle() + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
     }
 }

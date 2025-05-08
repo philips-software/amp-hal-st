@@ -30,25 +30,24 @@ namespace hal
             std::array{ DMA2_Stream0_IRQn, DMA2_Stream1_IRQn, DMA2_Stream2_IRQn, DMA2_Stream3_IRQn, DMA2_Stream4_IRQn, DMA2_Stream5_IRQn, DMA2_Stream6_IRQn, DMA2_Stream7_IRQn },
         };
 
-        const std::array dmaChannel
-        {
+        const std::array dmaChannel{
             DMA_CHANNEL_0,
-                DMA_CHANNEL_1,
-                DMA_CHANNEL_2,
-                DMA_CHANNEL_3,
-                DMA_CHANNEL_4,
-                DMA_CHANNEL_5,
-                DMA_CHANNEL_6,
-                DMA_CHANNEL_7,
+            DMA_CHANNEL_1,
+            DMA_CHANNEL_2,
+            DMA_CHANNEL_3,
+            DMA_CHANNEL_4,
+            DMA_CHANNEL_5,
+            DMA_CHANNEL_6,
+            DMA_CHANNEL_7,
 #if defined(DMA_CHANNEL_15)
-                DMA_CHANNEL_8,
-                DMA_CHANNEL_9,
-                DMA_CHANNEL_10,
-                DMA_CHANNEL_11,
-                DMA_CHANNEL_12,
-                DMA_CHANNEL_13,
-                DMA_CHANNEL_14,
-                DMA_CHANNEL_15,
+            DMA_CHANNEL_8,
+            DMA_CHANNEL_9,
+            DMA_CHANNEL_10,
+            DMA_CHANNEL_11,
+            DMA_CHANNEL_12,
+            DMA_CHANNEL_13,
+            DMA_CHANNEL_14,
+            DMA_CHANNEL_15,
 #endif
         };
 
@@ -578,11 +577,15 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #ifdef GPDMA1
-        streamRegister->CCR |= (DMA_CCR_SUSP | DMA_CCR_RESET);
+        streamRegister->CCR |= DMA_CCR_SUSP;
+        if ((streamRegister->CCR & DMA_CCR_EN) == DMA_CCR_EN)
+        {
+            while ((streamRegister->CSR & DMA_CSR_SUSPF) == 0)
+                ;
+        }
+        streamRegister->CCR |= DMA_CCR_RESET;
 #endif
-#if defined(DMA_CCR_EN)
-        streamRegister->CCR &= ~DMA_CCR_EN;
-#else
+#if defined(DMA_SxCR_EN)
         streamRegister->CR &= ~DMA_SxCR_EN;
 #endif
     }
@@ -820,6 +823,15 @@ namespace hal
         Enable();
     }
 
+    void DmaStm::TransceiveStream::StartTransmitFromAddress(const void* memAddress, uint16_t size)
+    {
+        SetMemoryToPeripheralMode();
+        EnableMemoryIncrement();
+        SetTransferSize(size);
+        SetMemoryAddress(memAddress);
+        Enable();
+    }
+
     void DmaStm::TransceiveStream::StartTransmitDummy(uint16_t size)
     {
         SetMemoryToPeripheralMode();
@@ -837,6 +849,15 @@ namespace hal
         EnableMemoryIncrement();
         SetTransferSize(data.size());
         SetMemoryAddress(data.begin());
+        Enable();
+    }
+
+    void DmaStm::TransceiveStream::StartReceiveToAddress(const void* memAddress, uint16_t size)
+    {
+        SetPeripheralToMemoryMode();
+        EnableMemoryIncrement();
+        SetTransferSize(size);
+        SetMemoryAddress(memAddress);
         Enable();
     }
 
@@ -977,10 +998,20 @@ namespace hal
         stream.StartTransmitDummy(size);
     }
 
+    void DmaStm::PeripheralTransceiveStream::StartTransmitFromAddress(const void* memAddress, uint16_t size)
+    {
+        stream.StartTransmitFromAddress(memAddress, size);
+    }
+
     void DmaStm::PeripheralTransceiveStream::StartReceiveDummy(uint16_t size, uint8_t dataSize)
     {
         stream.SetMemoryDataSize(dataSize);
         stream.StartReceiveDummy(size);
+    }
+
+    void DmaStm::PeripheralTransceiveStream::StartReceiveToAddress(const void* memAddress, uint16_t size)
+    {
+        stream.StartReceiveToAddress(memAddress, size);
     }
 
     size_t DmaStm::PeripheralTransceiveStream::ReceivedSize() const
@@ -1027,6 +1058,11 @@ namespace hal
         peripheralStream.StartTransmitDummy(size, dataSize);
     }
 
+    void TransceiverDmaChannelBase::StartTransmitFromAddress(const void* memAddress, uint16_t size)
+    {
+        peripheralStream.StartTransmitFromAddress(memAddress, size);
+    }
+
     size_t TransceiverDmaChannelBase::ReceivedSize() const
     {
         return peripheralStream.ReceivedSize();
@@ -1035,6 +1071,11 @@ namespace hal
     void TransceiverDmaChannelBase::StartReceiveDummy(uint16_t size, uint8_t dataSize)
     {
         peripheralStream.StartReceiveDummy(size, dataSize);
+    }
+
+    void TransceiverDmaChannelBase::StartReceiveToAddress(const void* memAddress, uint16_t size)
+    {
+        peripheralStream.StartReceiveToAddress(memAddress, size);
     }
 
     TransceiverDmaChannel::TransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferFullComplete, const DmaStm::StreamInterruptHandler::Dispatched& irqHandlerType)
@@ -1116,6 +1157,35 @@ namespace hal
         SetPeripheralTransferSize(peripheralTransferSize);
 #endif
     }
+
+    TransceiverDmaBridgeChannel::TransceiverDmaBridgeChannel(DmaStm::TransceiveStream& stream, volatile void* sourceAddress, uint8_t peripheralTransferSize)
+        : TransceiverDmaChannelBase{ stream, sourceAddress, peripheralTransferSize }
+    {
+        stream.EnableCircularMode();
+    }
+
+    TransmitDmaBridgeChannel::TransmitDmaBridgeChannel(DmaStm::TransmitStream& stream, volatile void* sourceAddress, volatile void* destinationAddress, uint8_t transferSize)
+        : TransceiverDmaBridgeChannel{ stream, sourceAddress, transferSize }
+    {
+#ifdef GPDMA1
+        SetMemoryToPeripheralMode();
+        SetPeripheralAddress(sourceAddress);
+        SetPeripheralTransferSize(transferSize);
+        stream.StartTransmitFromAddress(const_cast<const void*>(destinationAddress), transferSize);
+#endif
+    }
+
+    ReceiveDmaBridgeChannel::ReceiveDmaBridgeChannel(DmaStm::ReceiveStream& stream, volatile void* sourceAddress, volatile void* destinationAddress, uint8_t transferSize)
+        : TransceiverDmaBridgeChannel{ stream, sourceAddress, transferSize }
+    {
+#ifdef GPDMA1
+        SetPeripheralToMemoryMode();
+        SetPeripheralAddress(sourceAddress);
+        SetPeripheralTransferSize(transferSize);
+        stream.StartReceiveToAddress(const_cast<const void*>(destinationAddress), transferSize);
+#endif
+    }
+
 }
 
 #endif
