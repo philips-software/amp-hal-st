@@ -1,5 +1,6 @@
 #include "cucumber_cpp/library/Hooks.hpp"
 #include "generated/echo/Testing.pb.hpp"
+#include "generated/echo/TracingTesting.pb.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
 #include "infra/timer/Waiting.hpp"
 #include "integration_test/logic/Tested.hpp"
@@ -21,6 +22,9 @@ HOOK_BEFORE_ALL()
     try
     {
         context.SetShared(application::OpenEcho(target, context.Get<services::ConnectionFactoryWithNameResolver>()));
+        //auto tracingEcho = application::OpenTracingEcho(target, context.Get<services::ConnectionFactoryWithNameResolver>(), services::GlobalTracer());
+        //context.SetShared(tracingEcho.first);
+        //context.SetShared(tracingEcho.second);
     }
     catch (std::exception& e)
     {
@@ -32,6 +36,17 @@ HOOK_BEFORE_ALL()
     context.Emplace<testing::TestedProxy>(context.Get<services::Echo>());
     context.Emplace<application::TesterObserver>(context.Get<services::Echo>());
     context.Emplace<application::TestedObserver>(context.Get<services::Echo>());
+
+    //context.Emplace<testing::TesterTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::TestedTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::TesterObserverTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::TestedObserverTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::GpioTesterTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::GpioTestedTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::GpioObserverTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::UartTesterTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::UartTestedTracer>(context.Get<services::TracingEchoOnStreams>());
+    //context.Emplace<testing::UartObserverTracer>(context.Get<services::TracingEchoOnStreams>());
 }
 
 HOOK_BEFORE_SCENARIO()
