@@ -16,6 +16,7 @@ service Leds
     option (service_id) = 1;
 
     rpc On(Led) returns (Nothing) { option (method_id) = 1; }
+    rpc Off(Led) returns (Nothing) { option (method_id) = 2; }
 }
 
 service Button

@@ -2,11 +2,50 @@
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
+#include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "services/util/DebugLed.hpp"
 #include "services/util/EchoInstantiation.hpp"
 
 namespace application
 {
+    class LedsHandler
+        : private leds_and_button::Leds
+    {
+    public:
+        LedsHandler(hal::GpioPin& led0, hal::GpioPin& led1, hal::GpioPin& led2, services::Echo& echo)
+            : leds_and_button::Leds(echo)
+            , led0(led0)
+            , led1(led1)
+            , led2(led2)
+        {}
+
+    private:
+        virtual void On(uint32_t id) override
+        {
+            switch (id)
+            {
+                case 0: led0.Set(true); break;
+                case 1: led1.Set(true); break;
+                case 2: led2.Set(true); break;
+            }
+        }
+
+        virtual void Off(uint32_t id) override
+        {
+            switch (id)
+            {
+                case 0: led0.Set(false); break;
+                case 1: led1.Set(false); break;
+                case 2: led2.Set(false); break;
+            }
+        }
+
+    private:
+        hal::OutputPin led0;
+        hal::OutputPin led1;
+        hal::OutputPin led2;
+    };
+
     class ButtonHandler
     {
     public:
@@ -48,13 +87,11 @@ unsigned int hse_value = 8'000'000;
 int main()
 {
     HAL_Init();
-
-    // Configure your clock here
     ConfigureDefaultClockNucleo767ZI();
 
     static main_::StmEventInfrastructure eventInfrastructure;
     static main_::Nucleo144Ui ui;
-    static services::DebugLed debugLed(ui.ledGreen);
+    static hal::DmaStm dmaStm;
 
     static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
     static hal::GpioPinStm stLinkUartRxPin{ hal::Port::D, 9 };
@@ -62,8 +99,11 @@ int main()
     static hal::UartStmDma stLinkUart{ transmitStream, 3, stLinkUartTxPin, stLinkUartRxPin };
     static hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedStLinkUart{ stLinkUart };
 
-    static services::MethodSerializerFactory::ForServices<>::AndProxies<> serializerFactory;
+    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
     static main_::EchoOnSesame<256> echo{ bufferedStLinkUart, serializerFactory };
+
+    static application::ButtonHandler buttonHandler{ ui.buttonOne, echo };
+    static application::LedsHandler ledsHandler{ ui.ledBlue, ui.ledGreen, ui.ledRed, echo };
 
     eventInfrastructure.Run();
     __builtin_unreachable();
