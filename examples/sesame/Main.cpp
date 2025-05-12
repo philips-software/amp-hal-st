@@ -24,9 +24,15 @@ namespace application
         {
             switch (id)
             {
-                case 0: led0.Set(true); break;
-                case 1: led1.Set(true); break;
-                case 2: led2.Set(true); break;
+                case 0:
+                    led0.Set(true);
+                    break;
+                case 1:
+                    led1.Set(true);
+                    break;
+                case 2:
+                    led2.Set(true);
+                    break;
             }
 
             MethodDone();
@@ -36,9 +42,15 @@ namespace application
         {
             switch (id)
             {
-                case 0: led0.Set(false); break;
-                case 1: led1.Set(false); break;
-                case 2: led2.Set(false); break;
+                case 0:
+                    led0.Set(false);
+                    break;
+                case 1:
+                    led1.Set(false);
+                    break;
+                case 2:
+                    led2.Set(false);
+                    break;
             }
 
             MethodDone();
