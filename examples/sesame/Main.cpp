@@ -28,6 +28,8 @@ namespace application
                 case 1: led1.Set(true); break;
                 case 2: led2.Set(true); break;
             }
+
+            MethodDone();
         }
 
         virtual void Off(uint32_t id) override
@@ -38,6 +40,8 @@ namespace application
                 case 1: led1.Set(false); break;
                 case 2: led2.Set(false); break;
             }
+
+            MethodDone();
         }
 
     private:
