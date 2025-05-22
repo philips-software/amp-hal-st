@@ -67,6 +67,12 @@ namespace
         return iter->second;
     }
 #endif
+
+#ifdef ADC_ISR_OVR
+    constexpr auto ovrFlag{ ADC_ISR_OVR };
+#else
+    constexpr auto ovrFlag{ ADC_SR_OVR };
+#endif
 }
 
 namespace hal
@@ -228,11 +234,20 @@ namespace hal
         return handle;
     }
 
+    void AdcStm::EnableOverrunInterrupt()
+    {
+        __HAL_ADC_ENABLE_IT(&handle, ADC_IT_OVR);
+    }
+
     void AdcStm::MeasurementDone()
     {
         assert(onDone != nullptr);
+
+        if (__HAL_ADC_GET_FLAG(&handle, ovrFlag) && __HAL_ADC_GET_IT_SOURCE(&handle, ADC_IT_OVR))
+            std::abort();
+
 #ifdef ADC_ISR_EOC
-        handle.Instance->ISR |= ADC_ISR_EOC | ADC_ISR_EOS;
+        handle.Instance->ISR |= (ADC_ISR_EOC | ADC_ISR_EOS);
 #else
         handle.Instance->SR &= ~ADC_SR_EOC;
 #endif

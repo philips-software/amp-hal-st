@@ -3,7 +3,6 @@
 
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
-#include "infra/event/ClaimableResource.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
@@ -13,8 +12,7 @@
 namespace hal
 {
     class GattClientSt
-        : public services::GattClientDiscovery
-        , public services::GattClientCharacteristicOperations
+        : public services::GattClient
         , public hal::HciEventSink
     {
     public:
@@ -26,13 +24,13 @@ namespace hal
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
-        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
-        void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
-        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void Read(const services::GattClientObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
+        void Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
+        void WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data) override;
+        void EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -47,7 +45,7 @@ namespace hal
 
         virtual void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGattConfirmIndication(services::AttAttribute::Handle handle);
+        virtual void HandleGattConfirmIndication();
         virtual void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent);
 
         virtual void HandleAttReadResponse(evt_blecore_aci* vendorEvent);
@@ -62,22 +60,17 @@ namespace hal
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
 
-        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
+        void WriteCharacteristicDescriptor(const services::GattClientObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
 
         template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
-        void WriteCharacteristicDescriptor(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+        void WriteCharacteristicDescriptor(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
         {
-            claimerCharacteristicOperations.Claim([this, &characteristic, onDone]()
-                {
-                    this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
-                    {
-                        auto onDoneCopy = onDone;
-                        claimerCharacteristicOperations.Release();
-                        onDoneCopy(result);
-                    };
+            this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+            {
+                onDone(result);
+            };
 
-                    WriteCharacteristicDescriptor(characteristic, p, v);
-                });
+            WriteCharacteristicDescriptor(characteristic, p, v);
         }
 
     protected:
@@ -97,10 +90,6 @@ namespace hal
         infra::AutoResetFunction<void()> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
         infra::AutoResetFunction<void(uint8_t), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationsDone;
-
-        infra::ClaimableResource resource;
-        infra::ClaimableResource::Claimer claimerDiscovery{ resource };
-        infra::ClaimableResource::Claimer::WithSize<2 * sizeof(services::GattClientDiscovery&) + sizeof(infra::ByteRange) + sizeof(infra::Function<void()>)> claimerCharacteristicOperations{ resource };
     };
 }
 

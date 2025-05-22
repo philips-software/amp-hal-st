@@ -9,13 +9,13 @@
 #include "hal_st/stm32fxxx/TimerStm.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include "infra/util/Variant.hpp"
 #include <array>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+#include <variant>
 
 /// @brief This ADC implementation supports multiple channels with DMA transfer and software trigger.
 ///        DMA transfer is either one shot or unlimited mode. In unlimited mode, ADC converion will run continuously until Stop() is called.
@@ -47,7 +47,7 @@ namespace hal
         infra::MemoryRange<uint16_t> buffer;
         infra::MemoryRange<AnalogPinStm> analogPins;
         AdcStm& adc;
-        infra::Variant<ReceiveDmaChannel, CircularReceiveDmaChannel> dmaStream;
+        std::variant<ReceiveDmaChannel, CircularReceiveDmaChannel> dmaStream;
         infra::Function<void(Samples)> onDone;
 
         void Initialize();

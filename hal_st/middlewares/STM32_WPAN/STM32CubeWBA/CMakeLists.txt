@@ -66,7 +66,7 @@ target_sources(hal_st.stm32_wpan_stm32wbaxx PRIVATE
 )
 
 add_library(hal_st.stm32_wpan_stm32wbaxx.link_layer_basic STATIC IMPORTED)
-set_target_properties(hal_st.stm32_wpan_stm32wbaxx.link_layer_basic PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/link_layer/ll_cmd_lib/lib/WBA6_LinkLayer_BLE_Basic_lib.a)
+set_target_properties(hal_st.stm32_wpan_stm32wbaxx.link_layer_basic PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/link_layer/ll_cmd_lib/lib/LinkLayer_BLE_Basic_lib.a)
 
 add_library(hal_st.stm32_wpan_stm32wbaxx.link_layer_basic_wba6 STATIC IMPORTED)
 set_target_properties(hal_st.stm32_wpan_stm32wbaxx.link_layer_basic_wba6 PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_LIST_DIR}/link_layer/ll_cmd_lib/lib/WBA6_LinkLayer_BLE_Basic_lib.a)
