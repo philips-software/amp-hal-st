@@ -21,6 +21,8 @@ namespace services
         StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(infra::BoundedConstString reason)>& onError);
         virtual ~StBootloaderCommunicatorUart();
 
+        void Stop();
+
         // Implementation of StBootloaderCommunicator
         void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
         void GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
@@ -36,6 +38,9 @@ namespace services
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
 
     private:
+        static constexpr auto commandTimeout = std::chrono::seconds(1);
+        static constexpr auto commandEraseTimeout = std::chrono::seconds(60);
+
         void InitializeUartBootloader();
 
         template<class T, class... Args>
@@ -46,7 +51,7 @@ namespace services
         void TryHandleDataReceived();
         void OnCommandExecuted();
         void OnActionExecuted();
-        void SetCommandTimeout(infra::BoundedConstString reason);
+        void SetCommandTimeout(infra::BoundedConstString reason, infra::Duration timeout = commandTimeout);
         void OnError(infra::BoundedConstString reason);
         void SendData(infra::ConstByteRange data, uint8_t checksum);
         void SendData(infra::ConstByteRange data);
@@ -205,7 +210,7 @@ namespace services
         infra::BoundedDeque<infra::PolymorphicVariant<Action, ReceiveAck, ReceivePredefinedBuffer, ReceiveSmallBuffer, ReceiveBigBuffer, TransmitRaw, TransmitWithTwosComplementChecksum, TransmitChecksummedBuffer, TransmitSmallBuffer, TransmitBigBuffer>>::WithMaxSize<12> commandActions;
         infra::AutoResetFunction<void(), sizeof(StBootloaderCommunicatorUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)> onCommandExecuted;
         infra::BoundedString::WithStorage<46> timeoutReason;
-        infra::TimerSingleShot timeout;
+        infra::TimerSingleShot timeoutTimer;
 
         std::array<uint8_t, 3> internalBuffer;
         infra::ByteRange internalRange{ internalBuffer };
