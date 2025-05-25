@@ -1,10 +1,16 @@
 #include "generated/echo/LedsAndButton.pb.hpp"
+#include "generated/echo/SesameSecurity.pb.hpp"
+#include "generated/PeerA.key"
+#include "infra/stream/ByteInputStream.hpp"
+#include "infra/syntax/ProtoParser.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
+#include "hal_st/synchronous_stm32fxxx/SynchronousRandomDataGeneratorStm.hpp"
 #include "services/util/DebugLed.hpp"
 #include "services/util/EchoInstantiation.hpp"
+#include "services/util/EchoInstantiationSecured.hpp"
 
 namespace application
 {
@@ -98,6 +104,18 @@ namespace application
 
 }
 
+services::SesameSecured::KeyMaterial Convert(const sesame_security::SymmetricKeyFile& keyMaterial)
+{
+    services::SesameSecured::KeyMaterial result;
+
+    infra::Copy(infra::MakeRange(keyMaterial.sendBySelf.key), infra::MakeRange(result.sendKey));
+    infra::Copy(infra::MakeRange(keyMaterial.sendBySelf.iv), infra::MakeRange(result.sendIv));
+    infra::Copy(infra::MakeRange(keyMaterial.sendByOther.key), infra::MakeRange(result.receiveKey));
+    infra::Copy(infra::MakeRange(keyMaterial.sendByOther.iv), infra::MakeRange(result.receiveIv));
+
+    return result;
+}
+
 unsigned int hse_value = 8'000'000;
 
 int main()
@@ -108,6 +126,7 @@ int main()
     static main_::StmEventInfrastructure eventInfrastructure;
     static main_::Nucleo144Ui ui;
     static hal::DmaStm dmaStm;
+    static hal::SynchronousRandomDataGeneratorStm randomDataGenerator;
 
     static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
     static hal::GpioPinStm stLinkUartRxPin{ hal::Port::D, 9 };
@@ -116,7 +135,15 @@ int main()
     static hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedStLinkUart{ stLinkUart };
 
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
+#ifdef SECURE_SYMMETRIC
+    infra::ByteInputStream keyMaterialStream{ key_material::SymmetricKey };
+    infra::ProtoParser keyMaterialParser{ keyMaterialStream };
+    sesame_security::SymmetricKeyFile keyMaterial{ keyMaterialParser };
+    // hal::BufferedSerialCommunication &serialCommunication, services::MethodSerializerFactory &serializerFactory, const services::SesameSecured::KeyMaterial &keyMaterial, hal::SynchronousRandomDataGenerator &randomDataGenerator
+    static main_::EchoOnSesameSecured<256> echo{ bufferedStLinkUart, serializerFactory, Convert(keyMaterial), randomDataGenerator };
+#else
     static main_::EchoOnSesame<256> echo{ bufferedStLinkUart, serializerFactory };
+#endif
 
     static application::ButtonHandler buttonHandler{ ui.buttonOne, echo };
     static application::LedsHandler ledsHandler{ ui.ledBlue, ui.ledGreen, ui.ledRed, echo };
