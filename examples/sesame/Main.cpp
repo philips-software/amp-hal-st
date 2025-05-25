@@ -1,6 +1,6 @@
 #include "generated/echo/LedsAndButton.pb.hpp"
 #include "generated/echo/SesameSecurity.pb.hpp"
-#include "generated/PeerA.key"
+#include "generated/key_material/SymmetricKey.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/syntax/ProtoParser.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
@@ -104,18 +104,6 @@ namespace application
 
 }
 
-services::SesameSecured::KeyMaterial Convert(const sesame_security::SymmetricKeyFile& keyMaterial)
-{
-    services::SesameSecured::KeyMaterial result;
-
-    infra::Copy(infra::MakeRange(keyMaterial.sendBySelf.key), infra::MakeRange(result.sendKey));
-    infra::Copy(infra::MakeRange(keyMaterial.sendBySelf.iv), infra::MakeRange(result.sendIv));
-    infra::Copy(infra::MakeRange(keyMaterial.sendByOther.key), infra::MakeRange(result.receiveKey));
-    infra::Copy(infra::MakeRange(keyMaterial.sendByOther.iv), infra::MakeRange(result.receiveIv));
-
-    return result;
-}
-
 unsigned int hse_value = 8'000'000;
 
 int main()
@@ -140,7 +128,7 @@ int main()
     infra::ProtoParser keyMaterialParser{ keyMaterialStream };
     sesame_security::SymmetricKeyFile keyMaterial{ keyMaterialParser };
     // hal::BufferedSerialCommunication &serialCommunication, services::MethodSerializerFactory &serializerFactory, const services::SesameSecured::KeyMaterial &keyMaterial, hal::SynchronousRandomDataGenerator &randomDataGenerator
-    static main_::EchoOnSesameSecured<256> echo{ bufferedStLinkUart, serializerFactory, Convert(keyMaterial), randomDataGenerator };
+    static main_::EchoOnSesameSecured<256> echo{ bufferedStLinkUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
 #else
     static main_::EchoOnSesame<256> echo{ bufferedStLinkUart, serializerFactory };
 #endif
