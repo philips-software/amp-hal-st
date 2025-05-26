@@ -10,7 +10,7 @@ namespace hal
         : public SystemTransportLayerWb
     {
     public:
-        TracingSystemTransportLayerWb(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized, services::Tracer& tracer);
+        TracingSystemTransportLayerWb(Configuration configuration, const infra::Function<void()>& onInitialized, services::Tracer& tracer);
 
     protected:
         void UserEventHandler(void* pPayload) override;

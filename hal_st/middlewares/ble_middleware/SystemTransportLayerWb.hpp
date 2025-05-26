@@ -44,7 +44,7 @@ namespace hal
     public:
         using BondStorageSynchronizerCreator = infra::CreatorBase<services::BondStorageSynchronizer, void()>;
 
-        SystemTransportLayerWb(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized);
+        SystemTransportLayerWb(Configuration configuration, const infra::Function<void()>& onInitialized);
 
         Version GetVersion() const;
 
@@ -69,10 +69,8 @@ namespace hal
         void MemoryChannelInit();
 
     private:
-        services::BondBlobPersistence bondBlobPersistence;
-        infra::DelayedProxyCreator<services::BondStorageSynchronizer, void()> bondStorageSynchronizerCreator;
         Configuration configuration;
-        infra::AutoResetFunction<void(services::BondStorageSynchronizer&)> onInitialized;
+        infra::AutoResetFunction<void()> onInitialized;
     };
 }
 

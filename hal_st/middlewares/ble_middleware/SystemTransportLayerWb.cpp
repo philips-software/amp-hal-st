@@ -157,10 +157,8 @@ namespace
 
 namespace hal
 {
-    SystemTransportLayerWb::SystemTransportLayerWb(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized)
-        : bondBlobPersistence(flashStorage, infra::MakeByteRange(bleBondsStorage))
-        , bondStorageSynchronizerCreator(bondStorageSynchronizerCreator)
-        , configuration(configuration)
+    SystemTransportLayerWb::SystemTransportLayerWb(Configuration configuration, const infra::Function<void()>& onInitialized)
+        : configuration(configuration)
         , onInitialized(onInitialized)
     {
         really_assert(configuration.maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && configuration.maxAttMtuSize <= 251);
@@ -203,7 +201,6 @@ namespace hal
 
     void SystemTransportLayerWb::HandleBleNvmRamUpdateEvent(void* sysEvent)
     {
-        bondBlobPersistence.Update();
     }
 
     void SystemTransportLayerWb::HandleUnknownEvent(void* SysEvent)
@@ -233,10 +230,9 @@ namespace hal
     void SystemTransportLayerWb::HandleWirelessFwEvent(void*)
     {
         ShciCore2Init(configuration);
-        bondStorageSynchronizerCreator.Emplace();
 
         if (onInitialized)
-            onInitialized(*bondStorageSynchronizerCreator);
+            onInitialized();
     }
 
     void SystemTransportLayerWb::HandleFusFwEvent(void* payload)

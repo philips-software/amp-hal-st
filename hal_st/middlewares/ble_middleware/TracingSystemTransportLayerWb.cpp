@@ -4,8 +4,8 @@
 
 namespace hal
 {
-    TracingSystemTransportLayerWb::TracingSystemTransportLayerWb(services::ConfigurationStoreAccess<infra::ByteRange> flashStorage, BondStorageSynchronizerCreator& bondStorageSynchronizerCreator, Configuration configuration, const infra::Function<void(services::BondStorageSynchronizer&)>& onInitialized, services::Tracer& tracer)
-        : SystemTransportLayerWb(flashStorage, bondStorageSynchronizerCreator, configuration, onInitialized)
+    TracingSystemTransportLayerWb::TracingSystemTransportLayerWb(Configuration configuration, const infra::Function<void()>& onInitialized, services::Tracer& tracer)
+        : SystemTransportLayerWb(configuration, onInitialized)
         , tracer(tracer)
     {}
 
