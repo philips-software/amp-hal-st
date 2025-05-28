@@ -337,7 +337,7 @@ TEST_F(StBootloaderCommunicatorUartTest, MassErase_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout mass erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(60), "Timeout mass erasing memory");
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, Erase_pages)
@@ -364,7 +364,7 @@ TEST_F(StBootloaderCommunicatorUartTest, Erase_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(60), "Timeout erasing memory");
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase)
@@ -391,7 +391,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedMassErase_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended mass erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(60), "Timeout extended mass erasing memory");
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages)
@@ -418,7 +418,7 @@ TEST_F(StBootloaderCommunicatorUartTest, ExtendedErase_pages_timeout)
         {
             ondone.callback();
         });
-    ExpectErrorOnTimeout(std::chrono::seconds(1), "Timeout extended erasing memory");
+    ExpectErrorOnTimeout(std::chrono::seconds(60), "Timeout extended erasing memory");
 }
 
 TEST_F(StBootloaderCommunicatorUartTest, Special)
