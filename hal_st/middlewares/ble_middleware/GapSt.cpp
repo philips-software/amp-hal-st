@@ -96,21 +96,9 @@ namespace hal
         aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
     }
 
-    void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    void GapSt::SetSecurityRequirements(services::GapPairing::ConnectionMode connectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
     {
-        assert(mode == services::GapPairing::SecurityMode::mode1);
-
-        enum class SecureConnection : uint8_t
-        {
-            notSupported = 0, // Legacy only
-            optional = 1,     // Secure if available, otherwise Legacy
-            mandatory         // Secure only
-        };
-
-        SecureConnection secureConnectionSupport = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
-        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
-
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(mitmMode), static_cast<uint8_t>(connectionMode), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
