@@ -102,9 +102,9 @@ namespace hal
 
         enum class SecureConnection : uint8_t
         {
-            notSupported = 0,
-            optional = 1,
-            mandatory
+            notSupported = 0, // Legacy only
+            optional = 1,     // Secure if available, otherwise Legacy
+            mandatory         // Secure only
         };
 
         SecureConnection secureConnectionSupport = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
