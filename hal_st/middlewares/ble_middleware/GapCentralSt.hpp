@@ -26,6 +26,7 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
+        void GenerateOutOfBandData() override;
 
     protected:
         void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
@@ -48,6 +49,8 @@ namespace hal
         void Initialize(const GapService& gapService);
         void UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent);
         void HandleConnectionCompleteCommon(evt_le_meta_event* metaEvent);
+        void HandleOobDataGeneration();
+        void Initialize(const Configuration& configuration);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
