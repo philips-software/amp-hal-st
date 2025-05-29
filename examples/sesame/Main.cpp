@@ -127,10 +127,9 @@ int main()
     infra::ByteInputStream keyMaterialStream{ key_material::SymmetricKey };
     infra::ProtoParser keyMaterialParser{ keyMaterialStream };
     sesame_security::SymmetricKeyFile keyMaterial{ keyMaterialParser };
-    // hal::BufferedSerialCommunication &serialCommunication, services::MethodSerializerFactory &serializerFactory, const services::SesameSecured::KeyMaterial &keyMaterial, hal::SynchronousRandomDataGenerator &randomDataGenerator
-    static main_::EchoOnSesameSecured<256> echo{ bufferedStLinkUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
+    static main_::EchoOnSesameSecuredSymmetricKey::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
 #else
-    static main_::EchoOnSesame<256> echo{ bufferedStLinkUart, serializerFactory };
+    static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory };
 #endif
 
     static application::ButtonHandler buttonHandler{ ui.buttonOne, echo };
