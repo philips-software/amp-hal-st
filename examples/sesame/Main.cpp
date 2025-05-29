@@ -1,6 +1,13 @@
 #include "generated/echo/LedsAndButton.pb.hpp"
 #include "generated/echo/SesameSecurity.pb.hpp"
+#include "infra/util/ByteRange.hpp"
+#ifdef SECURE_SYMMETRIC
 #include "generated/key_material/SymmetricKey.hpp"
+#elif SECURE_DIFFIE_HELLMAN
+#include "generated/key_material/RootCaCertificate.hpp"
+#include "generated/key_material/DeviceCertificate.hpp"
+#include "generated/key_material/DeviceCertificatePrivateKey.hpp"
+#endif
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DefaultClockNucleoF767ZI.hpp"
@@ -102,6 +109,13 @@ namespace application
         bool busy = false;
     };
 
+    template<class T>
+    T ParseProto(infra::ConstByteRange data)
+    {
+        infra::ByteInputStream stream{ data };
+        infra::ProtoParser parser{ stream };
+        return T{ parser };
+    }
 }
 
 unsigned int hse_value = 8'000'000;
@@ -124,16 +138,19 @@ int main()
 
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
 #ifdef SECURE_SYMMETRIC
-    infra::ByteInputStream keyMaterialStream{ key_material::SymmetricKey };
-    infra::ProtoParser keyMaterialParser{ keyMaterialStream };
-    sesame_security::SymmetricKeyFile keyMaterial{ keyMaterialParser };
+    auto keyMaterial{ application::ParseProto<sesame_security::SymmetricKeyFile>(key_material::SymmetricKey) };
     static main_::EchoOnSesameSecuredSymmetricKey::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
+#elif SECURE_DIFFIE_HELLMAN
+    auto rootCaCertificate{ application::ParseProto<sesame_security::Certificate>(key_material::RootCaCertificate) };
+    auto deviceCertificate{ application::ParseProto<sesame_security::Certificate>(key_material::DeviceCertificate) };
+    auto deviceCertificatePrivateKey{ application::ParseProto<sesame_security::CertificatePrivateKey>(key_material::DeviceCertificatePrivateKey) };
+    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory, infra::MakeRange(deviceCertificate.certificate), infra::MakeRange(deviceCertificatePrivateKey.privateKey), infra::MakeRange(rootCaCertificate.certificate), randomDataGenerator };
 #else
     static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory };
 #endif
 
-    static application::ButtonHandler buttonHandler{ ui.buttonOne, echo };
-    static application::LedsHandler ledsHandler{ ui.ledBlue, ui.ledGreen, ui.ledRed, echo };
+    static application::ButtonHandler buttonHandler{ ui.buttonOne, echo.echo };
+    static application::LedsHandler ledsHandler{ ui.ledBlue, ui.ledGreen, ui.ledRed, echo.echo };
 
     eventInfrastructure.Run();
     __builtin_unreachable();
