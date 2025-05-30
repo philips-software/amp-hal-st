@@ -127,26 +127,30 @@ int main()
 
     static main_::StmEventInfrastructure eventInfrastructure;
     static main_::Nucleo144Ui ui;
-    static hal::DmaStm dmaStm;
+    static hal::DmaStm dma;
     static hal::SynchronousRandomDataGeneratorStm randomDataGenerator;
 
     static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
     static hal::GpioPinStm stLinkUartRxPin{ hal::Port::D, 9 };
-    static hal::DmaStm::TransmitStream transmitStream{ dmaStm, hal::DmaChannelId{ 1, 3, 4 } };
+    static hal::DmaStm::TransmitStream transmitStream{ dma, hal::DmaChannelId{ 1, 3, 4 } };
     static hal::UartStmDma stLinkUart{ transmitStream, 3, stLinkUartTxPin, stLinkUartRxPin };
-    static hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedStLinkUart{ stLinkUart };
+    static hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedUart{ stLinkUart };
 
-    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
 #ifdef SECURE_SYMMETRIC
+    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::SymmetricKeyEstablishment>
+        ::AndProxies<leds_and_button::ButtonProxy, sesame_security::SymmetricKeyEstablishment> serializerFactory;
     auto keyMaterial{ application::ParseProto<sesame_security::SymmetricKeyFile>(key_material::SymmetricKey) };
-    static main_::EchoOnSesameSecuredSymmetricKey::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
+    static main_::EchoOnSesameSecuredSymmetricKey::WithMessageSize<256> echo{ bufferedUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
 #elif SECURE_DIFFIE_HELLMAN
+    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::DiffieHellmanKeyEstablishment>
+        ::AndProxies<leds_and_button::ButtonProxy, sesame_security::DiffieHellmanKeyEstablishment> serializerFactory;
     auto rootCaCertificate{ application::ParseProto<sesame_security::Certificate>(key_material::RootCaCertificate) };
     auto deviceCertificate{ application::ParseProto<sesame_security::Certificate>(key_material::DeviceCertificate) };
     auto deviceCertificatePrivateKey{ application::ParseProto<sesame_security::CertificatePrivateKey>(key_material::DeviceCertificatePrivateKey) };
-    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory, infra::MakeRange(deviceCertificate.certificate), infra::MakeRange(deviceCertificatePrivateKey.privateKey), infra::MakeRange(rootCaCertificate.certificate), randomDataGenerator };
+    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedUart, serializerFactory, infra::MakeRange(deviceCertificate.certificate), infra::MakeRange(deviceCertificatePrivateKey.privateKey), infra::MakeRange(rootCaCertificate.certificate), randomDataGenerator };
 #else
-    static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedStLinkUart, serializerFactory };
+    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
+    static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedUart, serializerFactory };
 #endif
 
     static application::ButtonHandler buttonHandler{ ui.buttonOne, echo.echo };
