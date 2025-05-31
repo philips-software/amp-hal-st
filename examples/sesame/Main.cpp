@@ -144,10 +144,7 @@ int main()
 #elif SECURE_DIFFIE_HELLMAN
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::DiffieHellmanKeyEstablishment>
         ::AndProxies<leds_and_button::ButtonProxy, sesame_security::DiffieHellmanKeyEstablishment> serializerFactory;
-    auto rootCaCertificate{ application::ParseProto<sesame_security::Certificate>(key_material::RootCaCertificate) };
-    auto deviceCertificate{ application::ParseProto<sesame_security::Certificate>(key_material::DeviceCertificate) };
-    auto deviceCertificatePrivateKey{ application::ParseProto<sesame_security::CertificatePrivateKey>(key_material::DeviceCertificatePrivateKey) };
-    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedUart, serializerFactory, infra::MakeRange(deviceCertificate.certificate), infra::MakeRange(deviceCertificatePrivateKey.privateKey), infra::MakeRange(rootCaCertificate.certificate), randomDataGenerator };
+    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedUart, serializerFactory, key_material::DeviceCertificate, key_material::DeviceCertificatePrivateKey, key_material::RootCaCertificate, randomDataGenerator };
 #else
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
     static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedUart, serializerFactory };
