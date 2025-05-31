@@ -4,9 +4,9 @@
 #ifdef SECURE_SYMMETRIC
 #include "generated/key_material/SymmetricKey.hpp"
 #elif SECURE_DIFFIE_HELLMAN
-#include "generated/key_material/RootCaCertificate.hpp"
 #include "generated/key_material/DeviceCertificate.hpp"
 #include "generated/key_material/DeviceCertificatePrivateKey.hpp"
+#include "generated/key_material/RootCaCertificate.hpp"
 #endif
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
@@ -137,13 +137,11 @@ int main()
     static hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedUart{ stLinkUart };
 
 #ifdef SECURE_SYMMETRIC
-    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::SymmetricKeyEstablishment>
-        ::AndProxies<leds_and_button::ButtonProxy, sesame_security::SymmetricKeyEstablishment> serializerFactory;
+    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::SymmetricKeyEstablishment>::AndProxies<leds_and_button::ButtonProxy, sesame_security::SymmetricKeyEstablishment> serializerFactory;
     auto keyMaterial{ application::ParseProto<sesame_security::SymmetricKeyFile>(key_material::SymmetricKey) };
     static main_::EchoOnSesameSecuredSymmetricKey::WithMessageSize<256> echo{ bufferedUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
 #elif SECURE_DIFFIE_HELLMAN
-    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::DiffieHellmanKeyEstablishment>
-        ::AndProxies<leds_and_button::ButtonProxy, sesame_security::DiffieHellmanKeyEstablishment> serializerFactory;
+    static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::DiffieHellmanKeyEstablishment>::AndProxies<leds_and_button::ButtonProxy, sesame_security::DiffieHellmanKeyEstablishment> serializerFactory;
     static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedUart, serializerFactory, key_material::DeviceCertificate, key_material::DeviceCertificatePrivateKey, key_material::RootCaCertificate, randomDataGenerator };
 #else
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
