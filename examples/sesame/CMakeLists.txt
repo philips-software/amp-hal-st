@@ -1,21 +1,37 @@
-add_executable(examples_st.sesame)
-emil_build_for(examples_st.sesame
-    TARGET_MCU stm32f767
-    PREREQUISITE_BOOL HALST_BUILD_EXAMPLES
-)
+macro(add_sesame_example target_name)
 
-protocol_buffer_echo_cpp(examples_st.sesame LedsAndButton.proto)
+    add_executable(${target_name})
+    emil_build_for(${target_name}
+        TARGET_MCU stm32f767
+        PREREQUISITE_BOOL HALST_BUILD_EXAMPLES
+    )
 
-target_sources(examples_st.sesame PRIVATE
-    Main.cpp
-)
+    protocol_buffer_echo_cpp(${target_name} LedsAndButton.proto)
 
-target_link_libraries(examples_st.sesame PRIVATE
-    services.util
-    hal_st.instantiations
-)
+    target_sources(${target_name} PRIVATE
+        Main.cpp
+    )
 
-halst_target_default_linker_scripts(examples_st.sesame)
-halst_target_default_init(examples_st.sesame)
+    target_link_libraries(${target_name} PRIVATE
+        services.util
+        hal_st.instantiations
+    )
 
-emil_generate_artifacts(TARGET examples_st.sesame HEX)
+    halst_target_default_linker_scripts(${target_name})
+    halst_target_default_init(${target_name})
+
+    emil_generate_artifacts(TARGET ${target_name} HEX)
+
+endmacro()
+
+add_sesame_example(examples_st.sesame)
+add_sesame_example(examples_st.sesame_symmetric)
+add_sesame_example(examples_st.sesame_diffie_hellman)
+
+target_compile_definitions(examples_st.sesame_symmetric PUBLIC SECURE_SYMMETRIC)
+emil_target_range_source(examples_st.sesame_symmetric ExamplePeerA.key SymmetricKey key_material SymmetricKey)
+
+target_compile_definitions(examples_st.sesame_diffie_hellman PUBLIC SECURE_DIFFIE_HELLMAN)
+emil_target_range_source(examples_st.sesame_diffie_hellman ExampleRoot.der RootCaCertificate key_material RootCaCertificate)
+emil_target_range_source(examples_st.sesame_diffie_hellman ExampleDevice.der DeviceCertificate key_material DeviceCertificate)
+emil_target_range_source(examples_st.sesame_diffie_hellman ExampleDevice.prv DeviceCertificatePrivateKey key_material DeviceCertificatePrivateKey)

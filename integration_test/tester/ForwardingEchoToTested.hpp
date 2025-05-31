@@ -27,7 +27,7 @@ namespace main_
         services::MethodSerializerFactory::ForServices<testing::Tested, testing::GpioObserverProxy, testing::GpioTested, testing::UartObserverProxy, testing::UartTested>::AndProxies<testing::TestedProxy, testing::GpioObserver, testing::GpioTestedProxy, testing::UartObserver, testing::UartTestedProxy> serializerFactory;
         hal::BufferedSerialCommunicationOnUnbuffered::WithStorage<256> bufferedEchoUart{ echoUart };
         services::TracerColoured blueTracer;
-        main_::TracingEchoOnSesame<256> echo{ bufferedEchoUart, serializerFactory, blueTracer };
+        main_::TracingEchoOnSesame::WithMessageSize<256> echo{ bufferedEchoUart, serializerFactory, blueTracer };
 
         testing::TestedTracer testedTracer{ echo.echo };
         testing::TestedObserverTracer testedObserverTracer{ echo.echo };
