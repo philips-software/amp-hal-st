@@ -81,6 +81,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
     ResetStm.hpp
+    RtcStm.cpp
+    RtcStm.hpp
     SdRamStm.cpp
     SdRamStm.hpp
     SpiDataSizeConfiguratorStm.cpp
@@ -97,6 +99,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     SystemTickStm.hpp
     SystemTickTimerService.cpp
     SystemTickTimerService.hpp
+    TamperStm.cpp
+    TamperStm.hpp
     TimerPwmStm.cpp
     TimerPwmStm.hpp
     TimerStm.cpp
