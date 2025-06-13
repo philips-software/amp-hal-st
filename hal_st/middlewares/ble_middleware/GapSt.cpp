@@ -96,7 +96,7 @@ namespace hal
         aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
     }
 
-    void GapSt::SetSecurityRequirements(services::GapPairing::ConnectionMode connectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
+    void GapSt::SetSecurityRequirements(services::GapPairing::SecureConnectionMode connectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
     {
         aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(mitmMode), static_cast<uint8_t>(connectionMode), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }

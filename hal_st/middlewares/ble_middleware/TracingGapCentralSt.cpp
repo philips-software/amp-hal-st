@@ -93,7 +93,7 @@ namespace hal
         GapCentralSt::Pair();
     }
 
-    void TracingGapCentralSt::SetSecurityRequirements(services::GapPairing::ConnectionMode connectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
+    void TracingGapCentralSt::SetSecurityRequirements(services::GapPairing::SecureConnectionMode connectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
     {
         tracer.Trace() << "TracingGapCentralSt::SetSecurityRequirements";
         GapCentralSt::SetSecurityRequirements(connectionMode, mitmMode);
