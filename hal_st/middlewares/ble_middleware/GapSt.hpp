@@ -49,7 +49,10 @@ namespace hal
 
         // Implementation of GapPairing
         void Pair() override;
-        void SetSecurityRequirements(services::GapPairing::SecureConnectionMode connectionMode, services::GapPairing::ManInTheMiddleMode mitmMode) override;
+
+        void SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode) override;
+        void SetSecureConnectionMode(services::GapPairing::SecureConnectionMode connectionMode) override;
+
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
@@ -104,8 +107,8 @@ namespace hal
 
         const uint8_t ioCapability = IO_CAP_NO_INPUT_NO_OUTPUT;
         const uint8_t bondingMode = BONDING;
-        const uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
-        const uint8_t secureConnectionSupport = 0x01; /* Secure Connections Pairing supported but optional */
+        uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
+        uint8_t secureConnectionSupport = 0x01; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
 
