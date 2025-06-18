@@ -1,6 +1,9 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
+#include "hal_st/middlewares/STM32_WPAN/STM32CubeWBA/ble/stack/include/ble_defs.h"
 #include "services/ble/Gap.hpp"
+#include "services/tracer/GlobalTracer.hpp"
+#include "services/tracer/Tracer.hpp"
 
 namespace hal
 {
@@ -98,14 +101,16 @@ namespace hal
 
     void GapSt::SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode)
     {
-        this->mitmMode = mitmMode; // TODO: this is potentially incorrect, check out the mapping from the enum here.
-        aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(mitmMode), static_cast<uint8_t>(connectionMode), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        this->mitmMode = mitmMode;
+        services::GlobalTracer().Trace() << "SetManInTheMiddleMode " << mitmMode << " casts to " << static_cast<uint8_t>(this->mitmMode);
+        aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(this->mitmMode), static_cast<uint8_t>(this->secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetSecureConnectionMode(services::GapPairing::SecureConnectionMode connectionMode)
     {
-        this->secureConnectionSupport = connectionMode; // TODO: this is potentially incorrect, check out the mapping from the enum here.
-        aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(mitmMode), static_cast<uint8_t>(connectionMode), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        this->secureConnectionSupport = connectionMode;
+        services::GlobalTracer().Trace() << "SetSecureConnectionMode " << connectionMode << " casts to " << static_cast<uint8_t>(this->secureConnectionSupport);
+        aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(this->mitmMode), static_cast<uint8_t>(this->secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
