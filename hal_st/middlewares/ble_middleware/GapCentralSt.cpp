@@ -292,7 +292,7 @@ namespace hal
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
         SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode::disabled);
-        SetSecureConnectionMode(services::GapPairing::SecureConnectionMode::disabledSecurity);
+        SetSecureConnectionMode(services::GapPairing::SecureConnectionMode::disabled);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 

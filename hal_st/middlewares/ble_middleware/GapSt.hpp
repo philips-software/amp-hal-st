@@ -107,8 +107,8 @@ namespace hal
 
         const uint8_t ioCapability = IO_CAP_NO_INPUT_NO_OUTPUT;
         const uint8_t bondingMode = BONDING;
-        services::GapPairing::ManInTheMiddleMode mitmMode = services::GapPairing::ManInTheMiddleMode::optional;
-        services::GapPairing::SecureConnectionMode secureConnectionSupport = services::GapPairing::SecureConnectionMode::optionalSecurity; /* Secure Connections Pairing supported but optional */
+        services::GapPairing::ManInTheMiddleMode mitmMode = services::GapPairing::ManInTheMiddleMode::supported;
+        services::GapPairing::SecureConnectionMode secureConnectionSupport = services::GapPairing::SecureConnectionMode::supported; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
 
