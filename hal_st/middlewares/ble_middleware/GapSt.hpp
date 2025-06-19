@@ -2,11 +2,13 @@
 #define HAL_ST_GAP_ST_HPP
 
 #include "ble/ble.h"
+#include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include <cstdint>
 
 namespace hal
 {
@@ -50,10 +52,10 @@ namespace hal
         // Implementation of GapPairing
         void Pair() override;
 
-        void SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode) override;
-        void SetSecureConnectionMode(services::GapPairing::SecureConnectionMode connectionMode) override;
+        void SetManInTheMiddleMode(ManInTheMiddleMode mitmMode) override;
+        void SetSecureConnectionMode(SecureConnectionMode connectionMode) override;
 
-        void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
+        void SetIoCapabilities(IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
 
@@ -107,14 +109,14 @@ namespace hal
 
         const uint8_t ioCapability = IO_CAP_NO_INPUT_NO_OUTPUT;
         const uint8_t bondingMode = BONDING;
-        services::GapPairing::ManInTheMiddleMode mitmMode = services::GapPairing::ManInTheMiddleMode::supported;
-        services::GapPairing::SecureConnectionMode secureConnectionSupport = services::GapPairing::SecureConnectionMode::supported; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+        uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
+        uint8_t secureConnectionSupport = SECURE_OPTIONAL;
     };
 }
 

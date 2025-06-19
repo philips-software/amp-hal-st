@@ -2,7 +2,6 @@
 #define HAL_ST_TRACING_GAP_CENTRAL_ST_HPP
 
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
-#include "services/ble/Gap.hpp"
 #include "services/tracer/Tracer.hpp"
 
 namespace hal
