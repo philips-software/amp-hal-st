@@ -133,6 +133,16 @@ if (TARGET_MCU IN_LIST AdcDmaMcus OR TARGET_MCU_FAMILY IN_LIST AdcDmaMcuFamilies
     )
 endif()
 
+list(APPEND ActiveTamperMcuFamilies stm32h5xx)
+
+if (TARGET_MCU_FAMILY IN_LIST ActiveTamperMcuFamilies)
+    target_sources(hal_st.stm32fxxx PRIVATE RtcStm.cpp
+                                            RtcStm.hpp
+                                            TamperStm.cpp
+                                            TamperStm.hpp
+    )
+endif()
+
 if (TARGET_MCU_VENDOR STREQUAL st)
     if (HALST_XML_GPIO AND HALST_XML_STM32)
         set(gpio_xml "${CMAKE_SOURCE_DIR}/${HALST_XML_GPIO}")
