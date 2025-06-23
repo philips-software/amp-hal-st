@@ -33,6 +33,12 @@
   <peripheral name="Dac" type="DAC_TypeDef*">
     <item name="DAC"/>
   </peripheral>
+  <peripheral name="Rtc" type="RTC_TypeDef*">
+    <item name="RTC"/>
+  </peripheral>
+  <peripheral name="Tamp" type="RTC_TypeDef*">
+    <item name="TAMP"/>
+    <interrupt/>
+  </peripheral>
   <!-- <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral> -->
-  <!-- <peripheral name="Rtc" type="RTC_TypeDef*"><item name="RTC"/></peripheral> -->
 </peripherals>
