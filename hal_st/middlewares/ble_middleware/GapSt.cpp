@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
+#include "ble_types.h"
 #include "services/ble/Gap.hpp"
 
 namespace hal
@@ -96,21 +97,49 @@ namespace hal
         aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
     }
 
-    void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    void GapSt::SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode)
     {
-        assert(mode == services::GapPairing::SecurityMode::mode1);
-
-        enum class SecureConnection : uint8_t
+        auto selectedMitmMode = this->mitmMode;
+        switch (mitmMode)
         {
-            notSupported = 0,
-            optional = 1,
-            mandatory
-        };
+            case services::GapPairing::ManInTheMiddleMode::disabled:
+                selectedMitmMode = MITM_PROTECTION_NOT_REQUIRED;
+                break;
+            case services::GapPairing::ManInTheMiddleMode::supported:
+                selectedMitmMode = MITM_PROTECTION_NOT_REQUIRED;
+                break;
+            case services::GapPairing::ManInTheMiddleMode::enforced:
+                selectedMitmMode = MITM_PROTECTION_REQUIRED;
+                break;
+            default:
+                std::abort();
+        }
+        this->mitmMode = selectedMitmMode;
 
-        SecureConnection secureConnectionSupport = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
-        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
+        aci_gap_set_authentication_requirement(bondingMode, this->mitmMode, this->secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+    }
 
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+    void GapSt::SetSecureConnectionMode(services::GapPairing::SecureConnectionMode connectionMode)
+    {
+        auto selectedConnectionMode = this->secureConnectionSupport;
+        switch (connectionMode)
+        {
+            case services::GapPairing::SecureConnectionMode::disabled:
+                selectedConnectionMode = SECURE_NOT_SUPPORTED;
+                break;
+            case services::GapPairing::SecureConnectionMode::supported:
+                selectedConnectionMode = SECURE_OPTIONAL;
+                break;
+            case services::GapPairing::SecureConnectionMode::enforced:
+                selectedConnectionMode = SECURE_MANDATORY;
+                break;
+            default:
+                std::abort();
+        }
+
+        this->secureConnectionSupport = selectedConnectionMode;
+
+        aci_gap_set_authentication_requirement(bondingMode, this->mitmMode, this->secureConnectionSupport, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)

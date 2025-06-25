@@ -2,11 +2,13 @@
 #define HAL_ST_GAP_ST_HPP
 
 #include "ble/ble.h"
+#include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include <cstdint>
 
 namespace hal
 {
@@ -49,8 +51,11 @@ namespace hal
 
         // Implementation of GapPairing
         void Pair() override;
-        void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
-        void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
+
+        void SetManInTheMiddleMode(ManInTheMiddleMode mitmMode) override;
+        void SetSecureConnectionMode(SecureConnectionMode connectionMode) override;
+
+        void SetIoCapabilities(IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
 
@@ -60,17 +65,17 @@ namespace hal
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
 
         virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
@@ -104,14 +109,14 @@ namespace hal
 
         const uint8_t ioCapability = IO_CAP_NO_INPUT_NO_OUTPUT;
         const uint8_t bondingMode = BONDING;
-        const uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
-        const uint8_t secureConnectionSupport = 0x01; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+        uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
+        uint8_t secureConnectionSupport = SECURE_OPTIONAL;
     };
 }
 
