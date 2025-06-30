@@ -9,8 +9,6 @@ target_sources(integration_test.runner PRIVATE
     Main.cpp
     StepsGpio.cpp
     StepsUart.cpp
-    Waiting.cpp
-    Waiting.hpp
 )
 
 target_link_libraries(integration_test.runner PRIVATE
