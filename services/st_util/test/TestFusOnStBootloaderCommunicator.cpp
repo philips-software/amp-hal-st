@@ -40,13 +40,12 @@ TEST_F(FusOnStBootloaderCommunicatorTest, get_fus_state)
     EXPECT_CALL(stBootloaderCommunicator, Special(0x54, testing::_, testing::_, testing::_, testing::_)).WillOnce([this](auto subcommand, auto txData, auto& rxData, auto& rxStatus, const auto& onDone)
         {
             this->FillRange(rxData, 0x00, hal::FusWirelessStackUpgrade::State::fusUpgrdOngoing, hal::FusWirelessStackUpgrade::ErrorCode::imgNotFound);
+            this->FillRange(rxStatus, 0x00);
             onDone();
         });
 
     fusOnStBootloaderCommunicator.GetFusState(onDone);
 }
-
-// TEST_F(FusOnStBootloaderCommunicatorTest, get_fus_state_fails)
 
 TEST_F(FusOnStBootloaderCommunicatorTest, firmware_upgrade_passes)
 {

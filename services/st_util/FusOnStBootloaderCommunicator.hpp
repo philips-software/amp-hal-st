@@ -23,7 +23,8 @@ namespace services
         void DeleteWirelessStack(hal::FusWirelessStackUpgrade::OnDone onDone) override;
 
     private:
-        void ProcessReturnedStatus(infra::ByteRange rxData);
+        hal::FusWirelessStackUpgrade::StateWithErrorCode ParseReturnedPacket(infra::ByteRange packet);
+        void OnExtendedSpecialDone(infra::ByteRange range);
 
     private:
         StBootloaderCommunicator& communicator;

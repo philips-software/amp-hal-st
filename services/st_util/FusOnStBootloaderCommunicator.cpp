@@ -1,5 +1,4 @@
 #include "services/st_util/FusOnStBootloaderCommunicator.hpp"
-#include "infra/util/Optional.hpp"
 
 namespace
 {
@@ -22,11 +21,7 @@ namespace services
         this->onDone = onDone;
         communicator.Special(getFusState, emptyPacket, rxData, status, [this]()
             {
-                hal::FusWirelessStackUpgrade::StateWithErrorCode stateWithErrorCode;
-                rxData.pop_front();
-                stateWithErrorCode.state = static_cast<hal::FusWirelessStackUpgrade::State>(rxData.front());
-                rxData.pop_front();
-                stateWithErrorCode.errorCode = static_cast<hal::FusWirelessStackUpgrade::ErrorCode>(rxData.front());
+                auto stateWithErrorCode = ParseReturnedPacket(rxData);
                 this->onDone(infra::MakeOptional(stateWithErrorCode));
             });
     }
@@ -36,7 +31,7 @@ namespace services
         this->onDone = onDone;
         communicator.ExtendedSpecial(firmwareUpgrade, emptyPacket, emptyPacket, status, [this]()
             {
-                ProcessReturnedStatus(status);
+                OnExtendedSpecialDone(status);
             });
     }
 
@@ -45,7 +40,7 @@ namespace services
         this->onDone = onDone;
         communicator.ExtendedSpecial(startWirelessStack, emptyPacket, emptyPacket, status, [this]()
             {
-                ProcessReturnedStatus(status);
+                OnExtendedSpecialDone(status);
             });
     }
 
@@ -54,24 +49,33 @@ namespace services
         this->onDone = onDone;
         communicator.ExtendedSpecial(deleteWirelessStack, emptyPacket, emptyPacket, status, [this]()
             {
-                ProcessReturnedStatus(status);
+                OnExtendedSpecialDone(status);
             });
     }
 
-    void FusOnStBootloaderCommunicator::ProcessReturnedStatus(infra::ByteRange rxData)
+    hal::FusWirelessStackUpgrade::StateWithErrorCode FusOnStBootloaderCommunicator::ParseReturnedPacket(infra::ByteRange packet)
     {
-        infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode> stateWithErrorCode = infra::none;
+        hal::FusWirelessStackUpgrade::StateWithErrorCode stateWithErrorCode;
 
-        auto error = rxData.front();
+        packet.pop_front();
+        stateWithErrorCode.state = static_cast<hal::FusWirelessStackUpgrade::State>(packet.front());
+        packet.pop_front();
+        stateWithErrorCode.errorCode = static_cast<hal::FusWirelessStackUpgrade::ErrorCode>(packet.front());
+
+        return stateWithErrorCode;
+    }
+
+    void FusOnStBootloaderCommunicator::OnExtendedSpecialDone(infra::ByteRange range)
+    {
+        infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode> OptionalStateWithErrorCode = infra::none;
+
+        auto error = range.front();
         if (error)
         {
-            rxData.pop_front();
-            auto state = static_cast<hal::FusWirelessStackUpgrade::State>(rxData.front());
-            rxData.pop_front();
-            auto errorCode = static_cast<hal::FusWirelessStackUpgrade::ErrorCode>(rxData.front());
-            stateWithErrorCode.Emplace(state, errorCode);
+            auto stateWithErrorCode = ParseReturnedPacket(range);
+            OptionalStateWithErrorCode.Emplace(stateWithErrorCode.state, stateWithErrorCode.errorCode);
         }
 
-        this->onDone(stateWithErrorCode);
+        this->onDone(OptionalStateWithErrorCode);
     }
 }
