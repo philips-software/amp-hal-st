@@ -1,23 +1,17 @@
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/stream/ByteOutputStream.hpp"
-#include "infra/util/ByteRange.hpp"
-#include "infra/util/Endian.hpp"
-#include "infra/util/Function.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
 #include "services/st_util/FlashOnStBootloaderCommunicator.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
 #include "services/st_util/test_doubles/StBootloaderCommunicatorMock.hpp"
 #include "gmock/gmock.h"
-#include <algorithm>
-#include <array>
-#include <cstdint>
 #include <gtest/gtest.h>
 
 class FlashOnStBootloaderCommunicatorTest
     : public testing::Test
 {
 public:
-    services::StBootloaderCommunicatorMock stBootloaderCommunicator;
+    testing::StrictMock<services::StBootloaderCommunicatorMock> stBootloaderCommunicator;
     services::FlashHomogeneousOnStBootloaderCommunicator flashOnStBootloaderCommunicator{ 10, 1, stBootloaderCommunicator };
 };
 
@@ -40,7 +34,7 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, erase_some_sectors)
     EXPECT_CALL(stBootloaderCommunicator, ExtendedErase(testing::_, testing::_)).WillRepeatedly([&iterator](auto pages, const auto& onDone)
         {
             ASSERT_TRUE(iterator < 5);
-            EXPECT_EQ(pages.front(), infra::BigEndian<uint16_t>{iterator++});
+            EXPECT_EQ(pages.front(), infra::BigEndian<uint16_t>{ iterator++ });
             onDone();
         });
     flashOnStBootloaderCommunicator.EraseSectors(0, 5, onDone);
@@ -135,4 +129,4 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
     flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
 }
 
-// TODO data received but no commandActions in queue
+//  TODO data received but no commandActions in queue

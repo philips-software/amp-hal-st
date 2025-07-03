@@ -1,6 +1,8 @@
 #ifndef SERVICES_ST_UTIL_FUS_WIRELESS_STACk_UPGRADE_HPP
 #define SERVICES_ST_UTIL_FUS_WIRELESS_STACk_UPGRADE_HPP
 
+#include "infra/util/Function.hpp"
+#include "infra/util/Optional.hpp"
 #include <cstdint>
 
 namespace hal
@@ -44,13 +46,15 @@ namespace hal
             ErrorCode errorCode;
         };
 
+        using OnDone = infra::Function<void(infra::Optional<StateWithErrorCode> stateWithErrorCode)>;
+
     public:
         virtual ~FusWirelessStackUpgrade() = default;
 
-        virtual StateWithErrorCode GetFusState() const = 0;
-        virtual void FirmwareUpgrade() = 0;
-        virtual void StartWirelessStack() = 0;
-        virtual void DeleteWirelessStack() = 0;
+        virtual void GetFusState(OnDone onDone) = 0;
+        virtual void FirmwareUpgrade(OnDone onDone) = 0;
+        virtual void StartWirelessStack(OnDone onDone) = 0;
+        virtual void DeleteWirelessStack(OnDone onDone) = 0;
     };
 }
 
