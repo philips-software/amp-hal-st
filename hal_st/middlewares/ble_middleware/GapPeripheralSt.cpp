@@ -1,5 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
-#include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/event/EventDispatcher.hpp"
 
 namespace
 {
@@ -115,6 +115,13 @@ namespace hal
         }
     }
 
+    void GapPeripheralSt::SetConnectionParameters(const services::GapConnectionParameters& connParam)
+    {
+        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
+            connParam.minConnIntMultiplier, connParam.maxConnIntMultiplier,
+            connParam.slaveLatency, connParam.supervisorTimeoutMs);
+    }
+
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         allowPairing = allow;
@@ -164,16 +171,7 @@ namespace hal
     {
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
 
-        RequestConnectionParameterUpdate();
-
         UpdateState(services::GapState::connected);
-    }
-
-    void GapPeripheralSt::RequestConnectionParameterUpdate()
-    {
-        aci_l2cap_connection_parameter_update_req(connectionContext.connectionHandle,
-            connectionParameters.minConnIntMultiplier, connectionParameters.maxConnIntMultiplier,
-            connectionParameters.slaveLatency, connectionParameters.supervisorTimeoutMs);
     }
 
     void GapPeripheralSt::Initialize(const GapService& gapService)

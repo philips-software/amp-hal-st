@@ -13,11 +13,14 @@ target_link_libraries(hal_st.stm32fxxx PUBLIC
     services.util
     st.hal_driver
     hal_st.cortex
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:hal_st.stm32_wpan>
 )
 
 target_sources(hal_st.stm32fxxx PRIVATE
     AnalogToDigitalPinStm.cpp
     AnalogToDigitalPinStm.hpp
+    AdcTimerTriggeredBase.cpp
+    AdcTimerTriggeredBase.hpp
     BackupRamStm.cpp
     BackupRamStm.hpp
     CanStm.cpp
@@ -58,6 +61,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:FlashInternalHighCycleAreaStm.hpp>
     FlashInternalStm.cpp
     FlashInternalStm.hpp
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.hpp>
     GpioStm.cpp
     GpioStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>
@@ -70,6 +75,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     LowPowerStrategyStm.hpp
     LpTimerStm.cpp
     LpTimerStm.hpp
+    LpTimerPwmStm.cpp
+    LpTimerPwmStm.hpp
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
@@ -123,6 +130,16 @@ if (TARGET_MCU IN_LIST AdcDmaMcus OR TARGET_MCU_FAMILY IN_LIST AdcDmaMcuFamilies
                                             AdcDmaStm.hpp
                                             AdcDmaMultiChannelStm.cpp
                                             AdcDmaMultiChannelStm.hpp
+    )
+endif()
+
+list(APPEND ActiveTamperMcuFamilies stm32h5xx)
+
+if (TARGET_MCU_FAMILY IN_LIST ActiveTamperMcuFamilies)
+    target_sources(hal_st.stm32fxxx PRIVATE RtcStm.cpp
+                                            RtcStm.hpp
+                                            TamperStm.cpp
+                                            TamperStm.hpp
     )
 endif()
 

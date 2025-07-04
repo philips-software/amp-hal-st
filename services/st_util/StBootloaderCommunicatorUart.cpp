@@ -20,8 +20,6 @@ namespace
 
     constexpr uint8_t ack = 0x79;
     constexpr uint8_t nack = 0x1f;
-
-    constexpr auto commandTimeout = std::chrono::seconds(1);
 }
 
 namespace services
@@ -48,8 +46,14 @@ namespace services
         serial.ReceiveData([](auto data) {});
     }
 
+    void StBootloaderCommunicatorUart::Stop()
+    {
+        serial.ReceiveData([](auto data) {});
+    }
+
     void StBootloaderCommunicatorUart::GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(commands.size() >= 14);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(getCommand);
@@ -75,6 +79,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone)
     {
+        really_assert(commandActions.empty());
         AddCommandAction<TransmitWithTwosComplementChecksum>(getVersion);
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceivePredefinedBuffer>(internalRange, 3);
@@ -91,6 +96,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::GetId(const infra::Function<void(uint16_t id)>& onDone)
     {
+        really_assert(commandActions.empty());
         AddCommandAction<TransmitWithTwosComplementChecksum>(getId);
         AddCommandAction<ReceiveAck>();
         AddCommandAction<ReceiveSmallBuffer>(internalRange);
@@ -106,6 +112,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::ReadMemory(uint32_t address, infra::ByteRange& data, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(data.size() <= 256);
         really_assert(data.size() > 0);
 
@@ -125,6 +132,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::Go(uint32_t address, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         this->address = address;
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(go);
@@ -138,6 +146,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::WriteMemory(uint32_t address, infra::ConstByteRange data, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(data.size() <= 256);
         really_assert(data.size() > 0);
         really_assert(data.size() % 4 == 0);
@@ -157,6 +166,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::MassErase(const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         constexpr uint8_t globalEraseSubCommand = 0xff;
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(erase);
@@ -170,6 +180,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::Erase(infra::ConstByteRange pages, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(pages.size() <= 255);
         really_assert(pages.size() > 0);
 
@@ -184,6 +195,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::ExtendedMassErase(MassEraseSubcommand subcommand, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         this->subcommand = static_cast<uint16_t>(subcommand);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
@@ -197,6 +209,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::ExtendedErase(const infra::MemoryRange<infra::BigEndian<uint16_t>> pages, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(pages.size() > 0);
 
         AddCommandAction<TransmitWithTwosComplementChecksum>(extendedErase);
@@ -210,6 +223,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::Special(uint16_t subcommand, infra::ConstByteRange txData, infra::ByteRange& rxData, infra::ByteRange& rxStatus, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(txData.size() <= 128);
 
         this->subcommand = subcommand;
@@ -230,6 +244,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone)
     {
+        really_assert(commandActions.empty());
         really_assert(txData1.size() <= 128);
         really_assert(txData2.size() <= 1024);
 
@@ -252,6 +267,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::InitializeUartBootloader()
     {
+        really_assert(commandActions.empty());
         AddCommandAction<TransmitRaw>(infra::MakeByteRange(uartInitializationData));
         AddCommandAction<ReceiveAck>();
 
@@ -289,7 +305,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::OnCommandExecuted()
     {
-        timeout.Cancel();
+        timeoutTimer.Cancel();
         onCommandExecuted();
     }
 
@@ -328,7 +344,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::OnError(StBootloaderCommunicatorError error)
     {
-        timeout.Cancel();
+        timeoutTimer.Cancel();
         serial.ReceiveData([](auto data) {});
         if (onError != nullptr)
             onError(error);

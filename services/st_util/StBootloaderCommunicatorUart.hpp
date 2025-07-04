@@ -29,6 +29,8 @@ namespace services
         StBootloaderCommunicatorUart(hal::SerialCommunication& serial, const infra::Function<void()>& onInitialized, const infra::Function<void(StBootloaderCommunicatorError error)>& onError);
         virtual ~StBootloaderCommunicatorUart();
 
+        void Stop();
+
         // Implementation of StBootloaderCommunicator
         void GetCommand(infra::ByteRange& commands, const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
         void GetVersion(const infra::Function<void(uint8_t major, uint8_t minor)>& onDone) override;
@@ -44,6 +46,9 @@ namespace services
         void ExtendedSpecial(uint16_t subcommand, infra::ConstByteRange txData1, infra::ConstByteRange txData2, infra::ByteRange& rxData, const infra::Function<void()>& onDone) override;
 
     private:
+        static constexpr auto commandTimeout = std::chrono::seconds(1);
+        static constexpr auto commandEraseTimeout = std::chrono::seconds(60);
+
         void InitializeUartBootloader();
 
         template<class T, class... Args>
