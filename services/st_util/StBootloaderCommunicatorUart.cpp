@@ -305,7 +305,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::OnCommandExecuted()
     {
-        timeoutTimer.Cancel();
+        timeout.Cancel();
         onCommandExecuted();
     }
 
@@ -344,7 +344,7 @@ namespace services
 
     void StBootloaderCommunicatorUart::OnError(StBootloaderCommunicatorError error)
     {
-        timeoutTimer.Cancel();
+        timeout.Cancel();
         serial.ReceiveData([](auto data) {});
         if (onError != nullptr)
             onError(error);
