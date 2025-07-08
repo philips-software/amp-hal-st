@@ -31,7 +31,7 @@ namespace services
         std::array<uint8_t, 3> rxDataContainer;
         infra::ByteRange rxData{ rxDataContainer };
         std::array<uint8_t, 3> statusContainer;
-        infra::ByteRange status{ statusContainer };
+        infra::ByteRange status;
         infra::Function<void(infra::Optional<StateWithErrorCode> stateWithErrorCode)> onDone;
     };
 }

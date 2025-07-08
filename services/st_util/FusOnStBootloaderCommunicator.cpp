@@ -19,6 +19,7 @@ namespace services
     void FusOnStBootloaderCommunicator::GetFusState(hal::FusWirelessStackUpgrade::OnDone onDone)
     {
         this->onDone = onDone;
+        status = infra::MakeByteRange(statusContainer);
         communicator.Special(getFusState, emptyPacket, rxData, status, [this]()
             {
                 auto stateWithErrorCode = ParseReturnedPacket(rxData);
@@ -29,6 +30,7 @@ namespace services
     void FusOnStBootloaderCommunicator::FirmwareUpgrade(hal::FusWirelessStackUpgrade::OnDone onDone)
     {
         this->onDone = onDone;
+        status = infra::MakeByteRange(statusContainer);
         communicator.ExtendedSpecial(firmwareUpgrade, emptyPacket, emptyPacket, status, [this]()
             {
                 OnExtendedSpecialDone(status);
@@ -38,6 +40,7 @@ namespace services
     void FusOnStBootloaderCommunicator::StartWirelessStack(hal::FusWirelessStackUpgrade::OnDone onDone)
     {
         this->onDone = onDone;
+        status = infra::MakeByteRange(statusContainer);
         communicator.ExtendedSpecial(startWirelessStack, emptyPacket, emptyPacket, status, [this]()
             {
                 OnExtendedSpecialDone(status);
@@ -47,6 +50,7 @@ namespace services
     void FusOnStBootloaderCommunicator::DeleteWirelessStack(hal::FusWirelessStackUpgrade::OnDone onDone)
     {
         this->onDone = onDone;
+        status = infra::MakeByteRange(statusContainer);
         communicator.ExtendedSpecial(deleteWirelessStack, emptyPacket, emptyPacket, status, [this]()
             {
                 OnExtendedSpecialDone(status);
