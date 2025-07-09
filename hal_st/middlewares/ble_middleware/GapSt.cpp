@@ -90,7 +90,7 @@ namespace hal
         return aci_gap_is_device_bonded(static_cast<uint8_t>(addressType), address.data()) == BLE_STATUS_SUCCESS;
     }
 
-    void GapSt::Pair()
+    void GapSt::Bond()
     {
         really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
 

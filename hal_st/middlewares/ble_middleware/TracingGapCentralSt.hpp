@@ -28,7 +28,7 @@ namespace hal
         bool IsDeviceBonded(hal::MacAddress address, services::GapDeviceAddressType addressType) const override;
 
         // Implementation of GapPairing
-        void Pair() override;
+        void Bond() override;
 
         void SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode) override;
         void SetSecureConnectionMode(services::GapPairing::SecureConnectionMode connectionMode) override;
