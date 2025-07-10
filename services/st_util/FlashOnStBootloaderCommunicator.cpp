@@ -17,7 +17,8 @@ namespace services
             const auto head = infra::Head(buffer, 256);
             writeTail = infra::DiscardHead(buffer, 256);
             tailAddress = address + head.size();
-            communicator.WriteMemory(address, head, [this]()
+            flashAlign.Align(address, head);
+            writeChunkedBuffer.Emplace(*this, flashAlign, [this]()
                 {
                     WriteBuffer(this->writeTail, this->tailAddress, this->onDone.Clone());
                 });
@@ -59,5 +60,31 @@ namespace services
                     EraseSectors(this->beginIndex + 1, this->endIndex, this->onDone.Clone());
                 });
         }
+    }
+
+    FlashOnStBootloaderCommunicatorBase::WriteChunkedBuffer::WriteChunkedBuffer(FlashOnStBootloaderCommunicatorBase& parent, services::FlashAlign& flashAlign, infra::Function<void()> onChunkedBufferWritten)
+        : parent(parent)
+        , flashAlign(flashAlign)
+        , onChunkedBufferWritten(onChunkedBufferWritten)
+    {
+        services::FlashAlign::Chunk* chunk = flashAlign.First();
+        WriteChunk(chunk);
+    }
+
+    void FlashOnStBootloaderCommunicatorBase::WriteChunkedBuffer::TryWriteNextChunk()
+    {
+        services::FlashAlign::Chunk* chunk = flashAlign.Next();
+        if (chunk == nullptr)
+            onChunkedBufferWritten();
+        else
+            WriteChunk(chunk);
+    }
+
+    void FlashOnStBootloaderCommunicatorBase::WriteChunkedBuffer::WriteChunk(services::FlashAlign::Chunk* chunk)
+    {
+        parent.communicator.WriteMemory(chunk->alignedAddress, chunk->data, [this]()
+            {
+                this->TryWriteNextChunk();
+            });
     }
 }

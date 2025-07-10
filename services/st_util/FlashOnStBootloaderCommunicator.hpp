@@ -4,9 +4,8 @@
 #include "hal/interfaces/FlashHeterogeneous.hpp"
 #include "hal/interfaces/FlashHomogeneous.hpp"
 #include "infra/util/AutoResetFunction.hpp"
-#include "infra/util/Endian.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
-#include <cstdint>
+#include "services/util/FlashAlign.hpp"
 
 namespace services
 {
@@ -20,10 +19,28 @@ namespace services
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone);
 
     private:
+        class WriteChunkedBuffer
+        {
+        public:
+            WriteChunkedBuffer(FlashOnStBootloaderCommunicatorBase& parent, services::FlashAlign& flashAlign, infra::Function<void()> onChunkedBufferWritten);
+
+        private:
+            void TryWriteNextChunk();
+            void WriteChunk(services::FlashAlign::Chunk* chunk);
+
+        private:
+            FlashOnStBootloaderCommunicatorBase& parent;
+            services::FlashAlign& flashAlign;
+            infra::AutoResetFunction<void()> onChunkedBufferWritten;
+        };
+
+    private:
         StBootloaderCommunicator& communicator;
         hal::Flash& flash;
 
+        services::FlashAlign::WithAlignment<sizeof(uint32_t)> flashAlign;
         infra::AutoResetFunction<void()> onDone;
+        infra::Optional<WriteChunkedBuffer> writeChunkedBuffer;
         infra::ConstByteRange writeTail;
         infra::ByteRange readTail;
         uint32_t tailAddress = 0;

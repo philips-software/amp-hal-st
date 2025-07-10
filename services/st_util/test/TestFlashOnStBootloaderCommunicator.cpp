@@ -104,6 +104,27 @@ TEST_F(FlashOnStBootloaderCommunicatorTest, write_small_buffer)
     flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
 }
 
+TEST_F(FlashOnStBootloaderCommunicatorTest, write_four_bytes_aligned)
+{
+    std::array<uint8_t, 3> writeData = { 0, 1, 2 };
+    infra::ByteOutputStream::WithStorage<4> stream;
+
+    EXPECT_CALL(stBootloaderCommunicator, WriteMemory(0x8000000, testing::_, testing::_)).WillOnce([&stream](auto, auto data, const auto& onDone)
+        {
+            EXPECT_EQ(data.size(), 4);
+            stream << data;
+            onDone();
+        });
+
+    infra::VerifyingInvoker<void()> onDone([&stream]()
+        {
+            std::array<uint8_t, 4> writtenData = { 0, 1, 2, 0xff };
+            EXPECT_TRUE(writtenData == stream.Storage());
+        });
+
+    flashOnStBootloaderCommunicator.WriteBuffer(writeData, 0, onDone);
+}
+
 TEST_F(FlashOnStBootloaderCommunicatorTest, write_big_buffer)
 {
     std::array<uint8_t, 500> writeData = { 0 };
