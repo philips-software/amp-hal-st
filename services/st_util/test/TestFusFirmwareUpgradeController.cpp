@@ -120,3 +120,27 @@ TEST_F(FusFirmwareUpgradeControllerTest, trigger_stack_upgrade)
             o.Initialized(fus);
         });
 }
+
+TEST_F(FusFirmwareUpgradeControllerTest, start_wireless_stack)
+{
+    infra::VerifyingFunction<void()> onDone;
+
+    EXPECT_CALL(fus, StartWirelessStack(testing::_)).WillOnce(testing::Invoke([](auto onDone)
+        {
+            onDone(infra::none);
+        }));
+    EXPECT_CALL(stBootloaderCommunicatorInitializer, Initialize());
+    controller.StartWirelessStack(onDone);
+
+    EXPECT_CALL(fus, GetFusState(testing::_)).WillOnce(testing::Invoke([](auto onDone)
+        {
+            hal::FusWirelessStackUpgrade::StateWithErrorCode stateWithErrorCode;
+            stateWithErrorCode.state = hal::FusWirelessStackUpgrade::State::error;
+            stateWithErrorCode.errorCode = hal::FusWirelessStackUpgrade::ErrorCode::stateNotRunning;
+            onDone(infra::MakeOptional(stateWithErrorCode));
+        }));
+    stBootloaderCommunicatorInitializer.NotifyObservers([this](auto& o)
+        {
+            o.Initialized(fus);
+        });
+}

@@ -18,6 +18,22 @@ namespace services
         state.Emplace<StateDeleteWirelessStack>(*this);
     }
 
+    void FusFirmwareUpgradeControllerImpl::Upgrade(infra::Function<void()> onDone)
+    {
+        really_assert(fus != nullptr);
+
+        this->onDone = onDone;
+        state.Emplace<StateUpgradeWirelessStack>(*this);
+    }
+
+    void FusFirmwareUpgradeControllerImpl::StartWirelessStack(infra::Function<void()> onDone)
+    {
+        really_assert(fus != nullptr);
+
+        this->onDone = onDone;
+        state.Emplace<StateStartWirelessStack>(*this);
+    }
+
     void FusFirmwareUpgradeControllerImpl::Initialized(hal::FusWirelessStackUpgrade& fus)
     {
         this->fus = &fus;
@@ -82,6 +98,64 @@ namespace services
     }
 
     void FusFirmwareUpgradeControllerImpl::StateDeleteWirelessStack::WirelessStackDeleted()
+    {
+        controller.onDone();
+        controller.state.Emplace<StateIdle>(controller);
+    }
+
+    FusFirmwareUpgradeControllerImpl::StateUpgradeWirelessStack::StateUpgradeWirelessStack(FusFirmwareUpgradeControllerImpl& controller)
+        : controller(controller)
+    {
+        controller.ActivateFus([this](auto stateWithError)
+            {
+                this->controller.fus->FirmwareUpgrade([this](auto stateWithError)
+                    {
+                        if (stateWithError)
+                            std::abort();
+                        else
+                            this->controller.Subject().Initialize();
+                    });
+            });
+    }
+
+    void FusFirmwareUpgradeControllerImpl::StateUpgradeWirelessStack::Initialized()
+    {
+        controller.ActivateFus([this](auto stateWithError)
+            {
+                WirelessStackUpgraded();
+            });
+    }
+
+    void FusFirmwareUpgradeControllerImpl::StateUpgradeWirelessStack::WirelessStackUpgraded()
+    {
+        controller.onDone();
+        controller.state.Emplace<StateIdle>(controller);
+    }
+
+    FusFirmwareUpgradeControllerImpl::StateStartWirelessStack::StateStartWirelessStack(FusFirmwareUpgradeControllerImpl& controller)
+        : controller(controller)
+    {
+        this->controller.fus->StartWirelessStack([this](auto stateWithError)
+            {
+                if (stateWithError)
+                    std::abort();
+                else
+                    this->controller.Subject().Initialize();
+            });
+    }
+
+    void FusFirmwareUpgradeControllerImpl::StateStartWirelessStack::Initialized()
+    {
+        this->controller.fus->GetFusState([this](auto stateWithError)
+            {
+                if (stateWithError && stateWithError->errorCode == hal::FusWirelessStackUpgrade::ErrorCode::stateNotRunning)
+                    WirelessStackStarted();
+                else
+                    std::abort();
+            });
+    }
+
+    void FusFirmwareUpgradeControllerImpl::StateStartWirelessStack::WirelessStackStarted()
     {
         controller.onDone();
         controller.state.Emplace<StateIdle>(controller);
