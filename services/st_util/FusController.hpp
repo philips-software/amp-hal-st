@@ -1,13 +1,10 @@
 #ifndef SERVICES_ST_UTIL_FUS_FIRMWARE_UPGRADE_CONTROLLER_HPP
 #define SERVICES_ST_UTIL_FUS_FIRMWARE_UPGRADE_CONTROLLER_HPP
 
-#include "hal/interfaces/Flash.hpp"
-#include "infra/util/ByteRange.hpp"
 #include "infra/util/Observer.hpp"
 #include "infra/util/PolymorphicVariant.hpp"
-#include "services/st_util/FusWirelessStackUpgrade.hpp"
-#include "services/st_util/StBootloaderCommunicatorUart.hpp"
-#include <cstdint>
+#include "services/st_util/FirmwareUpgradeService.hpp"
+#include "services/st_util/StBootloaderCommunicator.hpp"
 
 namespace services
 {
@@ -18,7 +15,7 @@ namespace services
     {
     public:
         using infra::Observer<StBootloaderCommunicatorInitializerObserver, StBootloaderCommunicatorInitializer>::Observer;
-        virtual void Initialized(hal::FusWirelessStackUpgrade& fus) = 0;
+        virtual void Initialized(hal::FirmwareUpgradeService& fus) = 0;
     };
 
     class StBootloaderCommunicatorInitializer
@@ -28,31 +25,31 @@ namespace services
         virtual void Initialize() = 0;
     };
 
-    class FusFirmwareUpgradeController
+    class FusController
     {
     public:
-        virtual void DeleteWirelessStack(infra::Function<void()> onDone) = 0;
         virtual void Upgrade(infra::Function<void()> onDone) = 0;
         virtual void StartWirelessStack(infra::Function<void()> onDone) = 0;
+        virtual void DeleteWirelessStack(infra::Function<void()> onDone) = 0;
     };
 
-    class FusFirmwareUpgradeControllerImpl
-        : public FusFirmwareUpgradeController
+    class FusControllerImpl
+        : public FusController
         , public StBootloaderCommunicatorInitializerObserver
     {
     public:
-        FusFirmwareUpgradeControllerImpl(StBootloaderCommunicatorInitializer& stBootloaderCommunicatorInitializer);
+        FusControllerImpl(StBootloaderCommunicatorInitializer& stBootloaderCommunicatorInitializer);
 
-        // Implementation of FusFirmwareUpgradeController
-        void DeleteWirelessStack(infra::Function<void()> onDone) override;
+        // Implementation of FusController
         void Upgrade(infra::Function<void()> onDone) override;
         void StartWirelessStack(infra::Function<void()> onDone) override;
+        void DeleteWirelessStack(infra::Function<void()> onDone) override;
 
         // Implementation of StBootloaderCommunicatorInitializerObserver
-        void Initialized(hal::FusWirelessStackUpgrade& fus) override;
+        void Initialized(hal::FirmwareUpgradeService& fus) override;
 
     private:
-        void ActivateFus(hal::FusWirelessStackUpgrade::OnDone fusActivated);
+        void ActivateFus(hal::FirmwareUpgradeService::OnDone fusActivated);
 
     private:
         class State
@@ -67,34 +64,19 @@ namespace services
             : public State
         {
         public:
-            explicit StateIdle(FusFirmwareUpgradeControllerImpl& controller);
+            explicit StateIdle(FusControllerImpl& controller);
 
             void Initialized() override;
 
         private:
-            FusFirmwareUpgradeControllerImpl& controller;
-        };
-
-        class StateDeleteWirelessStack
-            : public State
-        {
-        public:
-            explicit StateDeleteWirelessStack(FusFirmwareUpgradeControllerImpl& controller);
-
-            void Initialized() override;
-
-        private:
-            void WirelessStackDeleted();
-
-        private:
-            FusFirmwareUpgradeControllerImpl& controller;
+            FusControllerImpl& controller;
         };
 
         class StateUpgradeWirelessStack
             : public State
         {
         public:
-            explicit StateUpgradeWirelessStack(FusFirmwareUpgradeControllerImpl& controller);
+            explicit StateUpgradeWirelessStack(FusControllerImpl& controller);
 
             void Initialized() override;
 
@@ -102,14 +84,14 @@ namespace services
             void WirelessStackUpgraded();
 
         private:
-            FusFirmwareUpgradeControllerImpl& controller;
+            FusControllerImpl& controller;
         };
 
         class StateStartWirelessStack
             : public State
         {
         public:
-            explicit StateStartWirelessStack(FusFirmwareUpgradeControllerImpl& controller);
+            explicit StateStartWirelessStack(FusControllerImpl& controller);
 
             void Initialized() override;
 
@@ -117,14 +99,29 @@ namespace services
             void WirelessStackStarted();
 
         private:
-            FusFirmwareUpgradeControllerImpl& controller;
+            FusControllerImpl& controller;
+        };
+
+        class StateDeleteWirelessStack
+            : public State
+        {
+        public:
+            explicit StateDeleteWirelessStack(FusControllerImpl& controller);
+
+            void Initialized() override;
+
+        private:
+            void WirelessStackDeleted();
+
+        private:
+            FusControllerImpl& controller;
         };
 
     private:
-        infra::PolymorphicVariant<State, StateIdle, StateDeleteWirelessStack, StateUpgradeWirelessStack, StateStartWirelessStack> state;
-        hal::FusWirelessStackUpgrade* fus;
+        infra::PolymorphicVariant<State, StateIdle, StateUpgradeWirelessStack, StateStartWirelessStack, StateDeleteWirelessStack> state;
+        hal::FirmwareUpgradeService* fus;
         infra::Function<void()> onDone;
-        hal::FusWirelessStackUpgrade::OnDone fusActivated;
+        hal::FirmwareUpgradeService::OnDone fusActivated;
     };
 }
 

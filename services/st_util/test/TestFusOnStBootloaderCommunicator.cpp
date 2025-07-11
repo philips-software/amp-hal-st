@@ -1,8 +1,8 @@
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/stream/StdVectorInputStream.hpp"
 #include "infra/util/test_helper/MockCallback.hpp"
+#include "services/st_util/FirmwareUpgradeService.hpp"
 #include "services/st_util/FusOnStBootloaderCommunicator.hpp"
-#include "services/st_util/FusWirelessStackUpgrade.hpp"
 #include "services/st_util/test_doubles/StBootloaderCommunicatorMock.hpp"
 #include "gmock/gmock.h"
 #include <cstdint>
@@ -18,7 +18,7 @@ public:
         stream >> infra::Head(range, stream.Available());
     }
 
-    void FillRange(infra::ByteRange& range, uint8_t firstByte, hal::FusWirelessStackUpgrade::State state, hal::FusWirelessStackUpgrade::ErrorCode error)
+    void FillRange(infra::ByteRange& range, uint8_t firstByte, hal::FirmwareUpgradeService::State state, hal::FirmwareUpgradeService::ErrorCode error)
     {
         infra::StdVectorInputStream::WithStorage stream(infra::inPlace, std::vector<uint8_t>{ { firstByte, static_cast<uint8_t>(state), static_cast<uint8_t>(error) } });
         stream >> range;
@@ -31,25 +31,25 @@ public:
 
 TEST_F(FusOnStBootloaderCommunicatorTest, get_fus_state)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
-            EXPECT_EQ(stateWithErrorCode->state, hal::FusWirelessStackUpgrade::State::fusUpgrdOngoing);
-            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FusWirelessStackUpgrade::ErrorCode::imgNotFound);
+            EXPECT_EQ(stateWithErrorCode->state, hal::FirmwareUpgradeService::State::fusUpgrdOngoing);
+            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FirmwareUpgradeService::ErrorCode::imgNotFound);
         });
 
     EXPECT_CALL(stBootloaderCommunicator, Special(0x54, testing::_, testing::_, testing::_, testing::_)).WillOnce([this](auto subcommand, auto txData, auto& rxData, auto& rxStatus, const auto& onDone)
         {
-            this->FillRange(rxData, 0x00, hal::FusWirelessStackUpgrade::State::fusUpgrdOngoing, hal::FusWirelessStackUpgrade::ErrorCode::imgNotFound);
+            this->FillRange(rxData, 0x00, hal::FirmwareUpgradeService::State::fusUpgrdOngoing, hal::FirmwareUpgradeService::ErrorCode::imgNotFound);
             this->FillRange(rxStatus, 0x00);
             onDone();
         });
 
-    fusOnStBootloaderCommunicator.GetFusState(onDone);
+    fusOnStBootloaderCommunicator.GetState(onDone);
 }
 
 TEST_F(FusOnStBootloaderCommunicatorTest, firmware_upgrade_passes)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
             EXPECT_EQ(stateWithErrorCode, infra::none);
         });
@@ -59,28 +59,28 @@ TEST_F(FusOnStBootloaderCommunicatorTest, firmware_upgrade_passes)
             this->FillRange(rxData, 0x00);
             onDone();
         });
-    fusOnStBootloaderCommunicator.FirmwareUpgrade(onDone);
+    fusOnStBootloaderCommunicator.Upgrade(onDone);
 }
 
 TEST_F(FusOnStBootloaderCommunicatorTest, firmware_upgrade_fails)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
-            EXPECT_EQ(stateWithErrorCode->state, hal::FusWirelessStackUpgrade::State::error);
-            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FusWirelessStackUpgrade::ErrorCode::errUnknown);
+            EXPECT_EQ(stateWithErrorCode->state, hal::FirmwareUpgradeService::State::error);
+            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FirmwareUpgradeService::ErrorCode::errUnknown);
         });
 
     EXPECT_CALL(stBootloaderCommunicator, ExtendedSpecial(0x53, testing::_, testing::_, testing::_, testing::_)).WillOnce([this](auto subcommand, auto txData1, auto txData2, auto& rxData, const auto& onDone)
         {
-            this->FillRange(rxData, 0x01, hal::FusWirelessStackUpgrade::State::error, hal::FusWirelessStackUpgrade::ErrorCode::errUnknown);
+            this->FillRange(rxData, 0x01, hal::FirmwareUpgradeService::State::error, hal::FirmwareUpgradeService::ErrorCode::errUnknown);
             onDone();
         });
-    fusOnStBootloaderCommunicator.FirmwareUpgrade(onDone);
+    fusOnStBootloaderCommunicator.Upgrade(onDone);
 }
 
 TEST_F(FusOnStBootloaderCommunicatorTest, start_wireless_stack_passes)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
             EXPECT_EQ(stateWithErrorCode, infra::none);
         });
@@ -95,15 +95,15 @@ TEST_F(FusOnStBootloaderCommunicatorTest, start_wireless_stack_passes)
 
 TEST_F(FusOnStBootloaderCommunicatorTest, start_wireless_stack_fails)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
-            EXPECT_EQ(stateWithErrorCode->state, hal::FusWirelessStackUpgrade::State::error);
-            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FusWirelessStackUpgrade::ErrorCode::errUnknown);
+            EXPECT_EQ(stateWithErrorCode->state, hal::FirmwareUpgradeService::State::error);
+            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FirmwareUpgradeService::ErrorCode::errUnknown);
         });
 
     EXPECT_CALL(stBootloaderCommunicator, ExtendedSpecial(0x5A, testing::_, testing::_, testing::_, testing::_)).WillOnce([this](auto subcommand, auto txData1, auto txData2, auto& rxData, const auto& onDone)
         {
-            this->FillRange(rxData, 0x01, hal::FusWirelessStackUpgrade::State::error, hal::FusWirelessStackUpgrade::ErrorCode::errUnknown);
+            this->FillRange(rxData, 0x01, hal::FirmwareUpgradeService::State::error, hal::FirmwareUpgradeService::ErrorCode::errUnknown);
             onDone();
         });
     fusOnStBootloaderCommunicator.StartWirelessStack(onDone);
@@ -111,7 +111,7 @@ TEST_F(FusOnStBootloaderCommunicatorTest, start_wireless_stack_fails)
 
 TEST_F(FusOnStBootloaderCommunicatorTest, delete_stack_passes)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
             EXPECT_EQ(stateWithErrorCode, infra::none);
         });
@@ -126,15 +126,15 @@ TEST_F(FusOnStBootloaderCommunicatorTest, delete_stack_passes)
 
 TEST_F(FusOnStBootloaderCommunicatorTest, delete_stack_fails)
 {
-    infra::VerifyingInvoker<void(infra::Optional<hal::FusWirelessStackUpgrade::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
+    infra::VerifyingInvoker<void(infra::Optional<hal::FirmwareUpgradeService::StateWithErrorCode>)> onDone([](auto stateWithErrorCode)
         {
-            EXPECT_EQ(stateWithErrorCode->state, hal::FusWirelessStackUpgrade::State::error);
-            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FusWirelessStackUpgrade::ErrorCode::errUnknown);
+            EXPECT_EQ(stateWithErrorCode->state, hal::FirmwareUpgradeService::State::error);
+            EXPECT_EQ(stateWithErrorCode->errorCode, hal::FirmwareUpgradeService::ErrorCode::errUnknown);
         });
 
     EXPECT_CALL(stBootloaderCommunicator, ExtendedSpecial(0x52, testing::_, testing::_, testing::_, testing::_)).WillOnce([this](auto subcommand, auto txData1, auto txData2, auto& rxData, const auto& onDone)
         {
-            this->FillRange(rxData, 0x01, hal::FusWirelessStackUpgrade::State::error, hal::FusWirelessStackUpgrade::ErrorCode::errUnknown);
+            this->FillRange(rxData, 0x01, hal::FirmwareUpgradeService::State::error, hal::FirmwareUpgradeService::ErrorCode::errUnknown);
             onDone();
         });
     fusOnStBootloaderCommunicator.DeleteWirelessStack(onDone);

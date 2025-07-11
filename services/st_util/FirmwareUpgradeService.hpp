@@ -1,5 +1,5 @@
-#ifndef SERVICES_ST_UTIL_FUS_WIRELESS_STACk_UPGRADE_HPP
-#define SERVICES_ST_UTIL_FUS_WIRELESS_STACk_UPGRADE_HPP
+#ifndef SERVICES_ST_UTIL_FIRMWARE_UPGRADE_SERVICE_HPP
+#define SERVICES_ST_UTIL_FIRMWARE_UPGRADE_SERVICE_HPP
 
 #include "infra/util/Function.hpp"
 #include "infra/util/Optional.hpp"
@@ -7,7 +7,7 @@
 
 namespace hal
 {
-    class FusWirelessStackUpgrade
+    class FirmwareUpgradeService
     {
     public:
         enum class ErrorCode : uint8_t
@@ -49,10 +49,10 @@ namespace hal
         using OnDone = infra::Function<void(infra::Optional<StateWithErrorCode> stateWithErrorCode)>;
 
     public:
-        virtual ~FusWirelessStackUpgrade() = default;
+        virtual ~FirmwareUpgradeService() = default;
 
-        virtual void GetFusState(OnDone onDone) = 0;
-        virtual void FirmwareUpgrade(OnDone onDone) = 0;
+        virtual void GetState(OnDone onDone) = 0;
+        virtual void Upgrade(OnDone onDone) = 0;
         virtual void StartWirelessStack(OnDone onDone) = 0;
         virtual void DeleteWirelessStack(OnDone onDone) = 0;
     };

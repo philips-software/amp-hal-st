@@ -3,7 +3,7 @@ emil_add_test(services.st_util_test)
 
 target_sources(services.st_util_test PRIVATE
     TestFlashOnStBootloaderCommunicator.cpp
-    TestFusFirmwareUpgradeController.cpp
+    TestFusController.cpp
     TestFusOnStBootloaderCommunicator.cpp
     TestStBootloaderCommunicatorUart.cpp
 )

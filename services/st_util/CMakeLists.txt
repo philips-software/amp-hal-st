@@ -6,13 +6,13 @@ target_include_directories(services.st_util PUBLIC
 )
 
 target_sources(services.st_util PRIVATE
+    FirmwareUpgradeService.hpp
     FlashOnStBootloaderCommunicator.cpp
     FlashOnStBootloaderCommunicator.hpp
-    FusFirmwareUpgradeController.cpp
-    FusFirmwareUpgradeController.hpp
+    FusController.cpp
+    FusController.hpp
     FusOnStBootloaderCommunicator.cpp
     FusOnStBootloaderCommunicator.hpp
-    FusWirelessStackUpgrade.hpp
     StBootloaderCommunicator.hpp
     StBootloaderCommunicatorUart.cpp
     StBootloaderCommunicatorUart.hpp

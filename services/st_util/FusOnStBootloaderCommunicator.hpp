@@ -3,7 +3,7 @@
 
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
-#include "services/st_util/FusWirelessStackUpgrade.hpp"
+#include "services/st_util/FirmwareUpgradeService.hpp"
 #include "services/st_util/StBootloaderCommunicator.hpp"
 #include <array>
 #include <cstdint>
@@ -11,25 +11,25 @@
 namespace services
 {
     class FusOnStBootloaderCommunicator
-        : public hal::FusWirelessStackUpgrade
+        : public hal::FirmwareUpgradeService
     {
     public:
         explicit FusOnStBootloaderCommunicator(StBootloaderCommunicator& communicator);
 
-        // Implementation of FusWirelessStackUpgrade
-        void GetFusState(hal::FusWirelessStackUpgrade::OnDone onDone) override;
-        void FirmwareUpgrade(hal::FusWirelessStackUpgrade::OnDone onDone) override;
-        void StartWirelessStack(hal::FusWirelessStackUpgrade::OnDone onDone) override;
-        void DeleteWirelessStack(hal::FusWirelessStackUpgrade::OnDone onDone) override;
+        // Implementation of FirmwareUpgradeService
+        void GetState(hal::FirmwareUpgradeService::OnDone onDone) override;
+        void Upgrade(hal::FirmwareUpgradeService::OnDone onDone) override;
+        void StartWirelessStack(hal::FirmwareUpgradeService::OnDone onDone) override;
+        void DeleteWirelessStack(hal::FirmwareUpgradeService::OnDone onDone) override;
 
     private:
-        hal::FusWirelessStackUpgrade::StateWithErrorCode ParseReturnedPacket(infra::ByteRange packet);
+        hal::FirmwareUpgradeService::StateWithErrorCode ParseReturnedPacket(infra::ByteRange packet);
         void OnExtendedSpecialDone(infra::ByteRange range);
 
     private:
         StBootloaderCommunicator& communicator;
         std::array<uint8_t, 3> rxDataContainer;
-        infra::ByteRange rxData{ rxDataContainer };
+        infra::ByteRange rxData;
         std::array<uint8_t, 3> statusContainer;
         infra::ByteRange status;
         infra::Function<void(infra::Optional<StateWithErrorCode> stateWithErrorCode)> onDone;
