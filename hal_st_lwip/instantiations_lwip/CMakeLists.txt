@@ -1,5 +1,8 @@
 add_library(hal_st.instantiations_lwip STATIC)
-emil_build_for(hal_st.instantiations_lwip TARGET_MCU_FAMILY stm32f4xx TARGET_MCU_FAMILY stm32f7xx PREREQUISITE_BOOL HALST_STANDALONE)
+emil_build_for(hal_st.instantiations_lwip TARGET_MCU_FAMILY stm32f4xx
+                                          TARGET_MCU_FAMILY stm32f7xx
+                                          TARGET_MCU_FAMILY stm32h5xx
+                                          PREREQUISITE_BOOL HALST_STANDALONE)
 
 target_include_directories(hal_st.instantiations_lwip PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../..>"
@@ -15,8 +18,15 @@ target_link_libraries(hal_st.instantiations_lwip PUBLIC
 )
 
 target_sources(hal_st.instantiations_lwip PRIVATE
-    Ethernet.cpp
-    Ethernet.hpp
     EthernetSmiObserver.cpp
     EthernetSmiObserver.hpp
 )
+
+list(APPEND EthernetFxxxFamilies stm32f4xx stm32f7xx)
+
+if (TARGET_MCU_FAMILY IN_LIST EthernetFxxxFamilies)
+    target_sources(hal_st.instantiations_lwip PRIVATE
+        Ethernet.cpp
+        Ethernet.hpp
+    )
+endif()
