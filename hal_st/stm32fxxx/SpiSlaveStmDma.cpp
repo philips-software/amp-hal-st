@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/SpiSlaveStmDma.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
-#include "infra/util/BitLogic.hpp"
+#include "hal/interfaces/Gpio.hpp"
+#include "stm32h563xx.h"
 
 namespace hal
 {
@@ -27,6 +28,26 @@ namespace hal
                   ReceiveDone();
               })
     {
+        slaveSelect.EnableInterrupt([this, &slaveSelect]()
+            {
+                if (HasObserver())
+                {
+#ifdef SPI_NSS_POLARITY_LOW
+                    if (!slaveSelect.Get())
+#else
+                    if (slaveSelect.Get())
+#endif
+                    {
+                        GetObserver().OnSelected();
+                    }
+                    else
+                    {
+                        GetObserver().OnDeselected();
+                    }
+                }
+            },
+            InterruptTrigger::bothEdges);
+
         ResetPeripheralSpi(spiInstance);
         EnableClockSpi(spiInstance);
         Configure();
@@ -80,13 +101,13 @@ namespace hal
         }
         else if (!sendData.empty())
         {
-            rx.StartReceiveDummy(sendData.size());
+            rx.StartReceiveDummy(static_cast<uint16_t>(sendData.size()));
             tx.StartTransmit(sendData);
         }
         else if (!receiveData.empty())
         {
             rx.StartReceive(receiveData);
-            tx.StartTransmitDummy(receiveData.size());
+            tx.StartTransmitDummy(static_cast<uint16_t>(receiveData.size()));
         }
         else
             std::abort();
@@ -165,7 +186,7 @@ namespace hal
 
     void SpiSlaveStmDma::DisableSpi()
     {
-        peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
+        peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
     }
 
     void SpiSlaveStmDma::EnableDma()
