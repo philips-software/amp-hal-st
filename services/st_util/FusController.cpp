@@ -10,7 +10,7 @@ namespace services
         , state(infra::InPlaceType<StateIdle>(), *this)
     {}
 
-    void FusControllerImpl::Upgrade(infra::Function<void()> onDone)
+    void FusControllerImpl::Upgrade(const infra::Function<void()>& onDone)
     {
         really_assert(fus != nullptr);
 
@@ -18,7 +18,7 @@ namespace services
         state.Emplace<StateUpgradeWirelessStack>(*this);
     }
 
-    void FusControllerImpl::StartWirelessStack(infra::Function<void()> onDone)
+    void FusControllerImpl::StartWirelessStack(const infra::Function<void()>& onDone)
     {
         really_assert(fus != nullptr);
 
@@ -26,7 +26,7 @@ namespace services
         state.Emplace<StateStartWirelessStack>(*this);
     }
 
-    void FusControllerImpl::DeleteWirelessStack(infra::Function<void()> onDone)
+    void FusControllerImpl::DeleteWirelessStack(const infra::Function<void()>& onDone)
     {
         really_assert(fus != nullptr);
 

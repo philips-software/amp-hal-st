@@ -28,9 +28,9 @@ namespace services
     class FusController
     {
     public:
-        virtual void Upgrade(infra::Function<void()> onDone) = 0;
-        virtual void StartWirelessStack(infra::Function<void()> onDone) = 0;
-        virtual void DeleteWirelessStack(infra::Function<void()> onDone) = 0;
+        virtual void Upgrade(const infra::Function<void()>& onDone) = 0;
+        virtual void StartWirelessStack(const infra::Function<void()>& onDone) = 0;
+        virtual void DeleteWirelessStack(const infra::Function<void()>& onDone) = 0;
     };
 
     class FusControllerImpl
@@ -41,9 +41,9 @@ namespace services
         FusControllerImpl(StBootloaderCommunicatorInitializer& stBootloaderCommunicatorInitializer);
 
         // Implementation of FusController
-        void Upgrade(infra::Function<void()> onDone) override;
-        void StartWirelessStack(infra::Function<void()> onDone) override;
-        void DeleteWirelessStack(infra::Function<void()> onDone) override;
+        void Upgrade(const infra::Function<void()>& onDone) override;
+        void StartWirelessStack(const infra::Function<void()>& onDone) override;
+        void DeleteWirelessStack(const infra::Function<void()>& onDone) override;
 
         // Implementation of StBootloaderCommunicatorInitializerObserver
         void Initialized(hal::FirmwareUpgradeService& fus) override;
