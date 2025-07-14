@@ -53,7 +53,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     DigitalToAnalogPinStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.hpp>
-    EthernetMacStm.cpp
+    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:EthernetMacStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:EthernetMacH5xxStm.cpp>
     EthernetMacStm.hpp
     EthernetSmiStm.cpp
     EthernetSmiStm.hpp
