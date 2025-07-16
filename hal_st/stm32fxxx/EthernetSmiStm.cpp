@@ -100,15 +100,18 @@ namespace hal
         Delay(std::chrono::milliseconds(1));
         sequencer.Execute([this]()
             {
-                phyRegisterValue = ReadPhyRegister(phyBasicControlRegister);
+                phyControlRegisterValue = ReadPhyRegister(phyBasicControlRegister);
             });
         sequencer.EndDoWhile([this]()
             {
-                return infra::IsBitSet(phyRegisterValue, phyBcrReset);
+                return infra::IsBitSet(phyControlRegisterValue, phyBcrReset);
             });
         sequencer.Execute([this]()
             {
-                WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable));
+                uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
+                autoNego = infra::IsBitSet(status, phyBsrAutoNegotiationAbility);
+                if (autoNego)
+                    WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable));
             });
     }
 
@@ -117,7 +120,8 @@ namespace hal
         sequencer.Execute([this]()
             {
                 uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
-                bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && infra::IsBitSet(status, phyBsrAutoNegotiationComplete);
+                bool autoNegoComplete = autoNego ? infra::IsBitSet(status, phyBsrAutoNegotiationComplete) : true;
+                bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && autoNegoComplete;
 
                 if (newLinkUp != linkUp)
                 {
@@ -125,18 +129,7 @@ namespace hal
 
                     if (linkUp)
                     {
-                        uint16_t linkAbility = ReadPhyRegister(phyAutoNegotiationAdvertisement);
-                        uint16_t linkPartnerAbility = ReadPhyRegister(phyAutoNegotiationLinkPartnerAbility);
-                        LinkSpeed speed;
-                        if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex100MHz))
-                            speed = LinkSpeed::fullDuplex100MHz;
-                        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaHalfDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaHalfDuplex100MHz))
-                            speed = LinkSpeed::halfDuplex100MHz;
-                        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex10MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex10MHz))
-                            speed = LinkSpeed::fullDuplex10MHz;
-                        else
-                            speed = LinkSpeed::halfDuplex10MHz;
-
+                        LinkSpeed speed = autoNego ? GetLinkSpeedNegotiated() : GetLinkSpeedLocal();
                         GetObserver().LinkUp(speed);
                     }
                     else
@@ -145,7 +138,34 @@ namespace hal
             });
     }
 
-    uint16_t EthernetSmiStm::ReadPhyRegister(uint16_t reg)
+    LinkSpeed EthernetSmiStm::GetLinkSpeedNegotiated() const
+    {
+        uint16_t linkAbility = ReadPhyRegister(phyAutoNegotiationAdvertisement);
+        uint16_t linkPartnerAbility = ReadPhyRegister(phyAutoNegotiationLinkPartnerAbility);
+        if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex100MHz))
+            return LinkSpeed::fullDuplex100MHz;
+        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaHalfDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaHalfDuplex100MHz))
+            return LinkSpeed::halfDuplex100MHz;
+        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex10MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex10MHz))
+            return LinkSpeed::fullDuplex10MHz;
+        else
+            return LinkSpeed::halfDuplex10MHz;
+    }
+
+    LinkSpeed EthernetSmiStm::GetLinkSpeedLocal() const
+    {
+        bool duplexMode = infra::IsBitSet(phyControlRegisterValue, phyBcrDuplexMode);
+        if (infra::IsBitSet(phyControlRegisterValue, phyBcrSpeedSelectLsb) && duplexMode)
+            return LinkSpeed::fullDuplex100MHz;
+        else if (infra::IsBitSet(phyControlRegisterValue, phyBcrSpeedSelectLsb) && !duplexMode)
+            return LinkSpeed::halfDuplex100MHz;
+        else if (!infra::IsBitSet(phyControlRegisterValue, phyBcrSpeedSelectLsb) && duplexMode)
+            return LinkSpeed::fullDuplex10MHz;
+        else
+            return LinkSpeed::halfDuplex10MHz;
+    }
+
+    uint16_t EthernetSmiStm::ReadPhyRegister(uint16_t reg) const
     {
 #if defined(STM32H5)
         peripheralEthernet[0]->MACMDIOAR = (peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_CR) | ((static_cast<uint32_t>(phyAddress) << 21) & ETH_MACMDIOAR_PA) | ((static_cast<uint32_t>(reg) << 16) & ETH_MACMDIOAR_RDA) | ETH_MACMDIOAR_MOC_RD | ETH_MACMDIOAR_MB;
