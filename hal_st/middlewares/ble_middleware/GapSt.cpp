@@ -101,16 +101,14 @@ namespace hal
     {
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
-        enum class SecureConnection : uint8_t
+        enum class SecureConnectionMode : uint8_t
         {
-            notSupported = 0,
-            optional = 1,
-            mandatory
+            supported = 1,
+            enforced = 2
         };
 
-        SecureConnection secureConnectionSupport = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
-        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
-
+        SecureConnectionMode selectedSecureConnectionMode = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnectionMode::enforced : SecureConnectionMode::supported;
+        uint8_t mitmMode = this->isMitmRequired ? 1 : 0;
         aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
@@ -122,18 +120,23 @@ namespace hal
         {
             case services::GapPairing::IoCapabilities::display:
                 status = aci_gap_set_io_capability(0);
+                isMitmRequired = true;
                 break;
             case services::GapPairing::IoCapabilities::displayYesNo:
                 status = aci_gap_set_io_capability(1);
+                isMitmRequired = true;
                 break;
             case services::GapPairing::IoCapabilities::keyboard:
                 status = aci_gap_set_io_capability(2);
+                isMitmRequired = true;
                 break;
             case services::GapPairing::IoCapabilities::none:
                 status = aci_gap_set_io_capability(3);
+                isMitmRequired = false;
                 break;
             case services::GapPairing::IoCapabilities::keyboardDisplay:
                 status = aci_gap_set_io_capability(4);
+                isMitmRequired = true;
                 break;
         }
 

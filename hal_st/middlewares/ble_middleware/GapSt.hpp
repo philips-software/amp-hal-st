@@ -51,7 +51,7 @@ namespace hal
 
         // Implementation of GapPairing
         void Pair() override;
-void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
+        void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
         void SetIoCapabilities(IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
@@ -114,6 +114,7 @@ void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairi
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
         uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
         uint8_t secureConnectionSupport = SECURE_OPTIONAL;
+        bool isMitmRequired = false;
     };
 }
 
