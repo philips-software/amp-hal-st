@@ -1,6 +1,7 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
 #include "ble_types.h"
+#include "hal_st/middlewares/STM32_WPAN/STM32CubeWB/ble/core/ble_defs.h"
 #include "services/ble/Gap.hpp"
 
 namespace hal
@@ -101,15 +102,9 @@ namespace hal
     {
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
-        enum class SecureConnectionMode : uint8_t
-        {
-            supported = 1,
-            enforced = 2
-        };
+        uint8_t secureConnectionMode = level == services::GapPairing::SecurityLevel::level4 ? SECURE_MANDATORY : SECURE_OPTIONAL;
 
-        SecureConnectionMode selectedSecureConnectionMode = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnectionMode::enforced : SecureConnectionMode::supported;
-        uint8_t mitmMode = this->isMitmRequired ? 1 : 0;
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, this->mitmMode, secureConnectionMode, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
@@ -120,23 +115,23 @@ namespace hal
         {
             case services::GapPairing::IoCapabilities::display:
                 status = aci_gap_set_io_capability(0);
-                isMitmRequired = true;
+                this->mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::displayYesNo:
                 status = aci_gap_set_io_capability(1);
-                isMitmRequired = true;
+                this->mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::keyboard:
                 status = aci_gap_set_io_capability(2);
-                isMitmRequired = true;
+                this->mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::none:
                 status = aci_gap_set_io_capability(3);
-                isMitmRequired = false;
+                this->mitmMode = MITM_PROTECTION_NOT_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::keyboardDisplay:
                 status = aci_gap_set_io_capability(4);
-                isMitmRequired = true;
+                this->mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
         }
 

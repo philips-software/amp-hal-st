@@ -92,8 +92,8 @@ namespace hal
         tracer.Trace() << "TracingGapCentralSt::Pair";
         GapCentralSt::Pair();
     }
-    
- void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+
+    void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
         tracer.Trace() << "TracingGapCentralSt::SetSecurityMode";
         GapCentralSt::SetSecurityMode(mode, level);

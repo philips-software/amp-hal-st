@@ -29,7 +29,6 @@ namespace hal
 
         // Implementation of GapPairing
         void Pair() override;
-
         void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
