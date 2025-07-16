@@ -210,8 +210,6 @@ namespace hal
     {
         auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
 
-        really_assert(gattProcedureEvent.Connection_Handle == connectionHandle);
-
         if (onDiscoveryCompletion)
             onDiscoveryCompletion(); // Does this conflict with other operations? If not, why do we even get a GattComplete for discovery?
         else if (onCharacteristicOperationsDone)
