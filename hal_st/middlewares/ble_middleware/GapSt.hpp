@@ -58,7 +58,6 @@ namespace hal
         GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
-
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
         virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
@@ -104,14 +103,13 @@ namespace hal
 
         const uint8_t ioCapability = IO_CAP_NO_INPUT_NO_OUTPUT;
         const uint8_t bondingMode = BONDING;
-        const uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
-        const uint8_t secureConnectionSupport = 0x01; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
         uint16_t maxAttMtu = defaultMaxAttMtuSize;
+        uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
     };
 }
 
