@@ -1,7 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
-#include "ble_types.h"
-#include "hal_st/middlewares/STM32_WPAN/STM32CubeWB/ble/core/ble_defs.h"
 #include "services/ble/Gap.hpp"
 
 namespace hal
@@ -104,7 +102,7 @@ namespace hal
 
         uint8_t secureConnectionMode = level == services::GapPairing::SecurityLevel::level4 ? SECURE_MANDATORY : SECURE_OPTIONAL;
 
-        aci_gap_set_authentication_requirement(bondingMode, this->mitmMode, secureConnectionMode, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, secureConnectionMode, keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
@@ -115,23 +113,23 @@ namespace hal
         {
             case services::GapPairing::IoCapabilities::display:
                 status = aci_gap_set_io_capability(0);
-                this->mitmMode = MITM_PROTECTION_REQUIRED;
+                mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::displayYesNo:
                 status = aci_gap_set_io_capability(1);
-                this->mitmMode = MITM_PROTECTION_REQUIRED;
+                mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::keyboard:
                 status = aci_gap_set_io_capability(2);
-                this->mitmMode = MITM_PROTECTION_REQUIRED;
+                mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::none:
                 status = aci_gap_set_io_capability(3);
-                this->mitmMode = MITM_PROTECTION_NOT_REQUIRED;
+                mitmMode = MITM_PROTECTION_NOT_REQUIRED;
                 break;
             case services::GapPairing::IoCapabilities::keyboardDisplay:
                 status = aci_gap_set_io_capability(4);
-                this->mitmMode = MITM_PROTECTION_REQUIRED;
+                mitmMode = MITM_PROTECTION_REQUIRED;
                 break;
         }
 

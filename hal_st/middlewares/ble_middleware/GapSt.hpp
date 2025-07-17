@@ -58,6 +58,7 @@ namespace hal
         GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
+        
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
         virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
         virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
