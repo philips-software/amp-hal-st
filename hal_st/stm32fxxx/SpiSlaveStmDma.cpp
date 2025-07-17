@@ -1,7 +1,5 @@
 #include "hal_st/stm32fxxx/SpiSlaveStmDma.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
-#include "hal/interfaces/Gpio.hpp"
-#include "stm32h563xx.h"
 
 namespace hal
 {
