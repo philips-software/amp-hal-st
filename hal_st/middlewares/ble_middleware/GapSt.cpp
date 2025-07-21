@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "ble_defs.h"
 #include "ble_gap_aci.h"
 #include "services/ble/Gap.hpp"
 
