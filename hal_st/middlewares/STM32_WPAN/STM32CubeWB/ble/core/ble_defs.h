@@ -501,9 +501,9 @@
 
 /* Secure Connections Support
  */
-#define SECURE_NOT_SUPPORTED                       0x00
-#define SECURE_OPTIONAL                            0x01
-#define SECURE_MANDATORY                           0x02
+#define SECURE_NOT_SUPPORTED                       0x00U
+#define SECURE_OPTIONAL                            0x01U
+#define SECURE_MANDATORY                           0x02U
 
 /* Connection authorization
  */
