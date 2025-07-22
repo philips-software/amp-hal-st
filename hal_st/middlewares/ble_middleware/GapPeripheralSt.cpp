@@ -1,5 +1,7 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "services/tracer/GlobalTracer.hpp"
+#include "services/tracer/Tracer.hpp"
 
 namespace
 {
@@ -93,12 +95,20 @@ namespace hal
         UpdateResolvingList();
 
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
+
         if (allowPairing)
+        {
+            services::GlobalTracer().Trace() << "ST BLE Peripheral advertising with aci_gap_set_discoverable";
             ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
+        }
         else
+        {
+            services::GlobalTracer().Trace() << "ST BLE Peripheral advertising with aci_gap_set_undirected_connectable";
             ret = aci_gap_set_undirected_connectable(multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, WHITE_LIST_FOR_ALL);
+        }
 
         UpdateAdvertisementData();
+        services::GlobalTracer().Trace() << "ST BLE Peripheral advertisement result: " << ret;
 
         if (ret == BLE_STATUS_SUCCESS)
             UpdateState(services::GapState::advertising);
@@ -129,11 +139,13 @@ namespace hal
 
     void GapPeripheralSt::UpdateResolvingList()
     {
-        aci_gap_configure_whitelist();
+        auto configureWhitelistSuccess = aci_gap_configure_whitelist();
 
         uint8_t numberOfBondedAddress;
         std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
         aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
+
+        services::GlobalTracer().Trace() << "ST BLE Peripheral numberOfBondedAddresses: " << numberOfBondedAddress;
 
         if (numberOfBondedAddress == 0)
         {
