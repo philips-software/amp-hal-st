@@ -87,10 +87,10 @@ namespace hal
         return ret;
     }
 
-    void TracingGapCentralSt::Bond()
+    void TracingGapCentralSt::PairAndBond()
     {
-        tracer.Trace() << "TracingGapCentralSt::Pair";
-        GapCentralSt::Bond();
+        tracer.Trace() << "TracingGapCentralSt::PairAndBond";
+        GapCentralSt::PairAndBond();
     }
 
     void TracingGapCentralSt::SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode)
