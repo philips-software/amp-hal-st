@@ -4,11 +4,9 @@
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/Function.hpp"
 #include "services/ble/Gap.hpp"
-#include "services/tracer/GlobalTracer.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <cstdlib>
 
 namespace hal
 {
