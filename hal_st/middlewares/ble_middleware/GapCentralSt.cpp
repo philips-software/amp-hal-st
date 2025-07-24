@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
+#include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/Function.hpp"
 #include "services/ble/Gap.hpp"
@@ -291,7 +292,7 @@ namespace hal
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
-        SetSecurityMode(services::GapPairing::SecureConnectionMode::notSupported, services::GapPairing::ManInTheMiddleMode::disabled);
+        SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
@@ -300,13 +301,17 @@ namespace hal
         UpdateStateOnConnectionComplete(metaEvent);
         initiatingStateTimer.Cancel();
 
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-            {
-                MtuExchange();
-                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                    {
-                        SetDataLength();
-                    });
-            });
+        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
+        if (status == BLE_STATUS_SUCCESS)
+        {
+            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                {
+                    MtuExchange();
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                        {
+                            SetDataLength();
+                        });
+                });
+        }
     }
 }

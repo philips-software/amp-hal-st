@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "services/ble/Gap.hpp"
 
 namespace
 {
@@ -93,10 +94,17 @@ namespace hal
         UpdateResolvingList();
 
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
+
         if (allowPairing)
+        {
+            StartedAdvertising("aci_gap_set_discoverable");
             ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
+        }
         else
+        {
+            StartedAdvertising("aci_gap_set_undirected_connectable");
             ret = aci_gap_set_undirected_connectable(multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, WHITE_LIST_FOR_ALL);
+        }
 
         UpdateAdvertisementData();
 
@@ -129,11 +137,13 @@ namespace hal
 
     void GapPeripheralSt::UpdateResolvingList()
     {
-        aci_gap_configure_whitelist();
+        auto configureWhitelistSuccess = aci_gap_configure_whitelist();
 
         uint8_t numberOfBondedAddress;
         std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
         aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
+
+        ReceivedNumberOfBondedAddresses(numberOfBondedAddress);
 
         if (numberOfBondedAddress == 0)
         {
@@ -183,7 +193,7 @@ namespace hal
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
-        SetSecurityMode(services::GapPairing::SecureConnectionMode::notSupported, services::GapPairing::ManInTheMiddleMode::disabled);
+        SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
 
         hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);

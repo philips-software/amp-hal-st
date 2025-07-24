@@ -22,6 +22,8 @@ namespace hal
         void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
         void HandleBondLostEvent(evt_blecore_aci* vendorEvent) override;
         void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
+        void StartedAdvertising(infra::BoundedConstString functionName) override;
+        void ReceivedNumberOfBondedAddresses(uint8_t numberOfBondedAddresses) override;
 
     private:
         services::Tracer& tracer;
