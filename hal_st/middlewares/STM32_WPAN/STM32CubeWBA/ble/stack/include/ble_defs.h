@@ -258,13 +258,6 @@
 #define AUTHORIZATION_NOT_REQUIRED                 0x00U
 #define AUTHORIZATION_REQUIRED                     0x01U
 
-/* Secure Connections Support
- * (ACI_GAP_SET_AUTHENTICATION_REQUIREMENT)
- */
-#define SECURE_NOT_SUPPORTED                       0x00U
-#define SECURE_OPTIONAL                            0x01U
-#define SECURE_MANDATORY                           0x02U
-
 /* Connection authorization response
  * (ACI_GAP_AUTHORIZATION_RESP)
  */
