@@ -99,6 +99,9 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecureConnectionMode secureConnectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
     {
+        // MITM mode 'notSupported' is not a valid value for the ST BLE Stack
+        really_assert(mitmMode != services::GapPairing::ManInTheMiddleMode::notSupported);
+
         aci_gap_set_authentication_requirement(bondingMode, static_cast<uint8_t>(mitmMode), static_cast<uint8_t>(secureConnectionMode), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
