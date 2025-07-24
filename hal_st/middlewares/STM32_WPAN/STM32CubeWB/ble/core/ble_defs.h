@@ -499,12 +499,6 @@
 #define AUTHORIZATION_NOT_REQUIRED                 0x00U
 #define AUTHORIZATION_REQUIRED                     0x01U
 
-/* Secure Connections Support
- */
-#define SECURE_NOT_SUPPORTED                       0x00
-#define SECURE_OPTIONAL                            0x01
-#define SECURE_MANDATORY                           0x02
-
 /* Connection authorization
  */
 #define CONNECTION_AUTHORIZED                      0x01U

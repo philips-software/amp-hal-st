@@ -195,8 +195,7 @@ namespace hal
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
-        SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode::disabled);
-        SetSecureConnectionMode(services::GapPairing::SecureConnectionMode::disabled);
+        SetSecurityMode(services::GapPairing::SecureConnectionMode::notSupported, services::GapPairing::ManInTheMiddleMode::disabled);
 
         hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);

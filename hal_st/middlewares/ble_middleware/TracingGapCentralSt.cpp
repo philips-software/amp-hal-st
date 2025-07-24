@@ -93,16 +93,10 @@ namespace hal
         GapCentralSt::PairAndBond();
     }
 
-    void TracingGapCentralSt::SetManInTheMiddleMode(services::GapPairing::ManInTheMiddleMode mitmMode)
+    void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecureConnectionMode secureConnectionMode, services::GapPairing::ManInTheMiddleMode mitmMode)
     {
-        tracer.Trace() << "TracingGapCentralSt::SetManInTheMiddleMode";
-        GapCentralSt::SetManInTheMiddleMode(mitmMode);
-    }
-
-    void TracingGapCentralSt::SetSecureConnectionMode(services::GapPairing::SecureConnectionMode connectionMode)
-    {
-        tracer.Trace() << "TracingGapCentralSt::SetSecureConnectionMode";
-        GapCentralSt::SetSecureConnectionMode(connectionMode);
+        tracer.Trace() << "TracingGapCentralSt::SetSecurityMode";
+        GapCentralSt::SetSecurityMode(secureConnectionMode, mitmMode);
     }
 
     void TracingGapCentralSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
