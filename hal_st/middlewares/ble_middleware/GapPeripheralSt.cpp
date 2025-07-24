@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "services/ble/Gap.hpp"
 #include "services/tracer/GlobalTracer.hpp"
 #include "services/tracer/Tracer.hpp"
 
@@ -195,7 +196,7 @@ namespace hal
         aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
 
         SetIoCapabilities(services::GapPairing::IoCapabilities::none);
-        SetSecurityMode(services::GapPairing::SecureConnectionMode::notSupported, services::GapPairing::ManInTheMiddleMode::disabled);
+        SetSecurityMode(services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1);
 
         hci_le_write_suggested_default_data_length(services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
