@@ -122,6 +122,11 @@ namespace hal
         return infra::MakeOptional(identityAddress);
     }
 
+    void GapCentralSt::PairAndBond()
+    {
+        GapSt::PairAndBond();
+    }
+
     void GapCentralSt::AllowPairing(bool)
     {}
 
