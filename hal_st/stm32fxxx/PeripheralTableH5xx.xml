@@ -33,6 +33,10 @@
   <peripheral name="Dac" type="DAC_TypeDef*">
     <item name="DAC"/>
   </peripheral>
+  <peripheral name="Ethernet" type="ETH_TypeDef*">
+    <item name="ETH"/>
+    <interrupt/>
+  </peripheral>
   <peripheral name="Rtc" type="RTC_TypeDef*">
     <item name="RTC"/>
   </peripheral>
@@ -40,5 +44,7 @@
     <item name="TAMP"/>
     <interrupt/>
   </peripheral>
-  <!-- <peripheral name="Rng" type="RNG_TypeDef*"><item name="RNG"/></peripheral> -->
+  <peripheral name="Rng" type="RNG_TypeDef*">
+    <item name="RNG"/>
+  </peripheral>
 </peripherals>
