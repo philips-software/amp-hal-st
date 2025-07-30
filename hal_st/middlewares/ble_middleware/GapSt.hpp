@@ -48,7 +48,7 @@ namespace hal
         bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
 
         // Implementation of GapPairing
-        void Pair() override;
+        void PairAndBond() override;
         void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
@@ -60,17 +60,17 @@ namespace hal
         virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
 
         virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
+        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) {};
+        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) {};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
 
         virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
         virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
+        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) {};
+        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) {};
         virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
 
         void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);

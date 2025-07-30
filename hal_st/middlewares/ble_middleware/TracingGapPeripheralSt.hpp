@@ -24,6 +24,8 @@ namespace hal
         void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
 
     private:
+        void StartedAdvertising(infra::BoundedConstString functionName) override;
+        void ReceivedNumberOfBondedAddresses(uint8_t numberOfBondedAddresses) override;
         services::Tracer& tracer;
     };
 }

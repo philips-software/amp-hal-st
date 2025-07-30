@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "ble_defs.h"
+#include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/Function.hpp"
 #include "services/ble/Gap.hpp"
@@ -119,6 +120,11 @@ namespace hal
         if (aci_gap_resolve_private_addr(address.data(), identityAddress.data()) != BLE_STATUS_SUCCESS)
             return infra::none;
         return infra::MakeOptional(identityAddress);
+    }
+
+    void GapCentralSt::PairAndBond()
+    {
+        GapSt::PairAndBond();
     }
 
     void GapCentralSt::AllowPairing(bool)
@@ -300,13 +306,17 @@ namespace hal
         UpdateStateOnConnectionComplete(metaEvent);
         initiatingStateTimer.Cancel();
 
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-            {
-                MtuExchange();
-                infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                    {
-                        SetDataLength();
-                    });
-            });
+        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
+        if (status == BLE_STATUS_SUCCESS)
+        {
+            infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                {
+                    MtuExchange();
+                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+                        {
+                            SetDataLength();
+                        });
+                });
+        }
     }
 }
