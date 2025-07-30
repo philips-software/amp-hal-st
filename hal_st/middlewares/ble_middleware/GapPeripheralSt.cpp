@@ -137,7 +137,7 @@ namespace hal
 
     void GapPeripheralSt::UpdateResolvingList()
     {
-        auto configureWhitelistSuccess = aci_gap_configure_whitelist();
+        aci_gap_configure_whitelist();
 
         uint8_t numberOfBondedAddress;
         std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
