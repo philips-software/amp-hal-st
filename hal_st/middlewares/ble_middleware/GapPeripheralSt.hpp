@@ -29,8 +29,8 @@ namespace hal
 
     protected:
         // Implementation of GapSt
-        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
 
     private:
         void UpdateAdvertisementData();

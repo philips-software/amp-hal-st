@@ -106,182 +106,160 @@ namespace hal
         switch (event.evt)
         {
             case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-                HandleHciDisconnectEvent(event);
+                HandleHciDisconnectEvent(*reinterpret_cast<const hci_disconnection_complete_event_rp0*>(event.data));
                 break;
             case HCI_LE_META_EVT_CODE:
-                HandleHciLeMetaEvent(event);
+                HandleHciLeMetaEvent(*reinterpret_cast<const evt_le_meta_event*>(event.data));
                 break;
             case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-                HandleHciVendorSpecificDebugEvent(event);
+                HandleHciVendorSpecificDebugEvent(*reinterpret_cast<const evt_blecore_aci*>(event.data));
                 break;
             default:
                 break;
         }
     }
 
-    void GattClientSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
+    void GattClientSt::HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent)
     {
-        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
-
-        switch (metaEvent->subevent)
+        switch (metaEvent.subevent)
         {
             case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-                HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+                HandleHciLeEnhancedConnectionCompleteEvent(*reinterpret_cast<const hci_le_enhanced_connection_complete_event_rp0*>(metaEvent.data));
                 break;
             case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-                HandleHciLeConnectionCompleteEvent(metaEvent);
+                HandleHciLeConnectionCompleteEvent(*reinterpret_cast<const hci_le_connection_complete_event_rp0*>(metaEvent.data));
                 break;
             default:
                 break;
         }
     }
 
-    void GattClientSt::HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket)
+    void GattClientSt::HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event)
     {
-        auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(eventPacket.data);
-
-        switch (vendorEvent->ecode)
+        switch (event.ecode)
         {
             case ACI_ATT_READ_BY_GROUP_TYPE_RESP_VSEVT_CODE:
-                HandleAttReadByGroupTypeResponse(vendorEvent);
+                HandleAttReadByGroupTypeResponse(*reinterpret_cast<const aci_att_read_by_group_type_resp_event_rp0*>(event.data));
                 break;
             case ACI_ATT_READ_BY_TYPE_RESP_VSEVT_CODE:
-                HandleAttReadByTypeResponse(vendorEvent);
+                HandleAttReadByTypeResponse(*reinterpret_cast<const aci_att_read_by_type_resp_event_rp0*>(event.data));
                 break;
             case ACI_ATT_FIND_INFO_RESP_VSEVT_CODE:
-                HandleAttFindInfoResponse(vendorEvent);
+                HandleAttFindInfoResponse(*reinterpret_cast<const aci_att_find_info_resp_event_rp0*>(event.data));
                 break;
             case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
-                HandleGattCompleteResponse(vendorEvent);
+                HandleGattCompleteResponse(*reinterpret_cast<const aci_gatt_proc_complete_event_rp0*>(event.data));
                 break;
             case ACI_GATT_INDICATION_VSEVT_CODE:
-                HandleGattIndicationEvent(vendorEvent);
+                HandleGattIndicationEvent(*reinterpret_cast<const aci_gatt_indication_event_rp0*>(event.data));
                 break;
             case ACI_GATT_NOTIFICATION_VSEVT_CODE:
-                HandleGattNotificationEvent(vendorEvent);
+                HandleGattNotificationEvent(*reinterpret_cast<const aci_gatt_notification_event_rp0*>(event.data));
                 break;
             case ACI_ATT_READ_RESP_VSEVT_CODE:
-                HandleAttReadResponse(vendorEvent);
+                HandleAttReadResponse(*reinterpret_cast<const aci_att_read_resp_event_rp0*>(event.data));
                 break;
             default:
                 break;
         }
     }
 
-    void GattClientSt::HandleAttReadByGroupTypeResponse(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleAttReadByGroupTypeResponse(const aci_att_read_by_group_type_resp_event_rp0& event)
     {
         const uint8_t uuid16 = 6;
-        auto attReadByGroupResponse = *reinterpret_cast<aci_att_read_by_group_type_resp_event_rp0*>(vendorEvent->data);
 
-        infra::ByteRange data(&attReadByGroupResponse.Attribute_Data_List[0], &attReadByGroupResponse.Attribute_Data_List[0] + attReadByGroupResponse.Data_Length);
+        infra::ConstByteRange data(&event.Attribute_Data_List[0], &event.Attribute_Data_List[0] + event.Data_Length);
         infra::ByteInputStream stream(data, infra::softFail);
 
-        really_assert(attReadByGroupResponse.Connection_Handle == connectionHandle);
+        really_assert(event.Connection_Handle == connectionHandle);
 
-        HandleServiceDiscovered(stream, attReadByGroupResponse.Attribute_Data_Length == uuid16);
+        HandleServiceDiscovered(stream, event.Attribute_Data_Length == uuid16);
     }
 
-    void GattClientSt::HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleAttReadByTypeResponse(const aci_att_read_by_type_resp_event_rp0& event)
     {
         const uint8_t uuid16 = 7;
-        auto attReadByTypeResponse = *reinterpret_cast<aci_att_read_by_type_resp_event_rp0*>(vendorEvent->data);
 
-        infra::ByteRange data(&attReadByTypeResponse.Handle_Value_Pair_Data[0], &attReadByTypeResponse.Handle_Value_Pair_Data[0] + attReadByTypeResponse.Data_Length);
+        infra::ConstByteRange data(&event.Handle_Value_Pair_Data[0], &event.Handle_Value_Pair_Data[0] + event.Data_Length);
         infra::ByteInputStream stream(data, infra::softFail);
 
-        really_assert(attReadByTypeResponse.Connection_Handle == connectionHandle);
+        really_assert(event.Connection_Handle == connectionHandle);
 
-        HandleCharacteristicDiscovered(stream, attReadByTypeResponse.Handle_Value_Pair_Length == uuid16);
+        HandleCharacteristicDiscovered(stream, event.Handle_Value_Pair_Length == uuid16);
     }
 
-    void GattClientSt::HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleAttFindInfoResponse(const aci_att_find_info_resp_event_rp0& event)
     {
-        auto attFindInfoResponse = *reinterpret_cast<aci_att_find_info_resp_event_rp0*>(vendorEvent->data);
-
-        infra::ByteRange data(&attFindInfoResponse.Handle_UUID_Pair[0], &attFindInfoResponse.Handle_UUID_Pair[0] + attFindInfoResponse.Event_Data_Length);
+        infra::ConstByteRange data(&event.Handle_UUID_Pair[0], &event.Handle_UUID_Pair[0] + event.Event_Data_Length);
         infra::ByteInputStream stream(data, infra::softFail);
 
-        really_assert(attFindInfoResponse.Connection_Handle == connectionHandle);
+        really_assert(event.Connection_Handle == connectionHandle);
 
-        HandleDescriptorDiscovered(stream, attFindInfoResponse.Format == UUID_TYPE_16);
+        HandleDescriptorDiscovered(stream, event.Format == UUID_TYPE_16);
     }
 
-    void GattClientSt::HandleGattCompleteResponse(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event)
     {
-        auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
-
         if (onDiscoveryCompletion)
             onDiscoveryCompletion(); // Does this conflict with other operations? If not, why do we even get a GattComplete for discovery?
         else if (onCharacteristicOperationsDone)
-            onCharacteristicOperationsDone(gattProcedureEvent.Error_Code);
+            onCharacteristicOperationsDone(event.Error_Code);
     }
 
-    void GattClientSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GattClientSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
     {
-        auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
-
-        if (connectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
-            connectionHandle = connectionCompleteEvent.Connection_Handle;
+        if (event.Status == BLE_STATUS_SUCCESS)
+            connectionHandle = event.Connection_Handle;
     }
 
-    void GattClientSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GattClientSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
-        auto enhancedConnectionCompleteEvent = *reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
-
-        if (enhancedConnectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
-            connectionHandle = enhancedConnectionCompleteEvent.Connection_Handle;
+        if (event.Status == BLE_STATUS_SUCCESS)
+            connectionHandle = event.Connection_Handle;
     }
 
-    void GattClientSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
+    void GattClientSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
-        auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
+        really_assert(event.Connection_Handle == connectionHandle);
 
-        really_assert(disconnectionCompleteEvent.Connection_Handle == connectionHandle);
-
-        if (disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+        if (event.Status == BLE_STATUS_SUCCESS)
             connectionHandle = GattClientSt::invalidConnection;
     }
 
-    void GattClientSt::HandleAttReadResponse(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleAttReadResponse(const aci_att_read_resp_event_rp0& event)
     {
-        auto attReadResponse = *reinterpret_cast<aci_att_read_resp_event_rp0*>(vendorEvent->data);
+        infra::ConstByteRange data(&event.Attribute_Value[0], &event.Attribute_Value[0] + event.Event_Data_Length);
 
-        infra::ByteRange data(&attReadResponse.Attribute_Value[0], &attReadResponse.Attribute_Value[0] + attReadResponse.Event_Data_Length);
-
-        really_assert(attReadResponse.Connection_Handle == connectionHandle);
+        really_assert(event.Connection_Handle == connectionHandle);
 
         if (onReadResponse)
             onReadResponse(data);
     }
 
-    void GattClientSt::HandleGattIndicationEvent(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event)
     {
-        auto gattIndicationEvent = *reinterpret_cast<aci_gatt_indication_event_rp0*>(vendorEvent->data);
+        infra::ConstByteRange data(&event.Attribute_Value[0], &event.Attribute_Value[0] + event.Attribute_Value_Length);
 
-        infra::ByteRange data(&gattIndicationEvent.Attribute_Value[0], &gattIndicationEvent.Attribute_Value[0] + gattIndicationEvent.Attribute_Value_Length);
+        really_assert(event.Connection_Handle == connectionHandle);
 
-        really_assert(gattIndicationEvent.Connection_Handle == connectionHandle);
-
-        GattClient::NotifyObservers([this, &gattIndicationEvent, &data](auto& observer)
+        GattClient::NotifyObservers([this, &event, &data](auto& observer)
             {
-                observer.IndicationReceived(gattIndicationEvent.Attribute_Handle, data, [this]()
+                observer.IndicationReceived(event.Attribute_Handle, data, [this]()
                     {
                         this->HandleGattConfirmIndication();
                     });
             });
     }
 
-    void GattClientSt::HandleGattNotificationEvent(evt_blecore_aci* vendorEvent)
+    void GattClientSt::HandleGattNotificationEvent(const aci_gatt_notification_event_rp0& event)
     {
-        auto gattNotificationEvent = *reinterpret_cast<aci_gatt_notification_event_rp0*>(vendorEvent->data);
+        infra::ConstByteRange data(&event.Attribute_Value[0], &event.Attribute_Value[0] + event.Attribute_Value_Length);
 
-        infra::ByteRange data(&gattNotificationEvent.Attribute_Value[0], &gattNotificationEvent.Attribute_Value[0] + gattNotificationEvent.Attribute_Value_Length);
+        really_assert(event.Connection_Handle == connectionHandle);
 
-        really_assert(gattNotificationEvent.Connection_Handle == connectionHandle);
-
-        GattClient::NotifyObservers([&gattNotificationEvent, &data](auto& observer)
+        GattClient::NotifyObservers([&event, &data](auto& observer)
             {
-                observer.NotificationReceived(gattNotificationEvent.Attribute_Handle, data);
+                observer.NotificationReceived(event.Attribute_Handle, data);
             });
     }
 

@@ -69,35 +69,29 @@ namespace hal
         GattClientSt::DisableIndication(characteristic, onDone);
     }
 
-    void TracingGattClientSt::HandleGattIndicationEvent(evt_blecore_aci* vendorEvent)
+    void TracingGattClientSt::HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event)
     {
-        auto& gattIndicationEvent = *reinterpret_cast<aci_gatt_indication_event_rp0*>(vendorEvent->data);
+        infra::ConstByteRange data(&event.Attribute_Value[0], &event.Attribute_Value[0] + event.Attribute_Value_Length);
 
-        infra::ByteRange data(&gattIndicationEvent.Attribute_Value[0], &gattIndicationEvent.Attribute_Value[0] + gattIndicationEvent.Attribute_Value_Length);
+        tracer.Trace() << "TracingGattClientSt::Indication received, handle: " << infra::hex << event.Attribute_Handle << ", data: " << infra::AsHex(data);
 
-        tracer.Trace() << "TracingGattClientSt::Indication received, handle: " << infra::hex << gattIndicationEvent.Attribute_Handle << ", data: " << infra::AsHex(data);
-
-        GattClientSt::HandleGattIndicationEvent(vendorEvent);
+        GattClientSt::HandleGattIndicationEvent(event);
     }
 
-    void TracingGattClientSt::HandleGattNotificationEvent(evt_blecore_aci* vendorEvent)
+    void TracingGattClientSt::HandleGattNotificationEvent(const aci_gatt_notification_event_rp0& event)
     {
-        auto& gattNotificationEvent = *reinterpret_cast<aci_gatt_notification_event_rp0*>(vendorEvent->data);
+        infra::ConstByteRange data(&event.Attribute_Value[0], &event.Attribute_Value[0] + event.Attribute_Value_Length);
 
-        infra::ByteRange data(&gattNotificationEvent.Attribute_Value[0], &gattNotificationEvent.Attribute_Value[0] + gattNotificationEvent.Attribute_Value_Length);
+        tracer.Trace() << "TracingGattClientSt::Notification received, handle: " << infra::hex << event.Attribute_Handle << ", data: " << infra::AsHex(data);
 
-        tracer.Trace() << "TracingGattClientSt::Notification received, handle: " << infra::hex << gattNotificationEvent.Attribute_Handle << ", data: " << infra::AsHex(data);
-
-        GattClientSt::HandleGattNotificationEvent(vendorEvent);
+        GattClientSt::HandleGattNotificationEvent(event);
     }
 
-    void TracingGattClientSt::HandleGattCompleteResponse(evt_blecore_aci* vendorEvent)
+    void TracingGattClientSt::HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event)
     {
-        auto gattProcedureEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
+        tracer.Trace() << "TracingGattClientSt::GATT complete response, handle: 0x" << infra::hex << event.Connection_Handle << ", status: 0x" << event.Error_Code;
 
-        tracer.Trace() << "TracingGattClientSt::GATT complete response, handle: 0x" << infra::hex << gattProcedureEvent.Connection_Handle << ", status: 0x" << gattProcedureEvent.Error_Code;
-
-        GattClientSt::HandleGattCompleteResponse(vendorEvent);
+        GattClientSt::HandleGattCompleteResponse(event);
     }
 
     void TracingGattClientSt::HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16)

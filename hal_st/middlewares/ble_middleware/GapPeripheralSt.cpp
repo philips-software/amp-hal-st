@@ -171,15 +171,15 @@ namespace hal
         aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
-    void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
+    void GapPeripheralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
-        GapSt::HandleHciDisconnectEvent(eventPacket);
+        GapSt::HandleHciDisconnectEvent(event);
         UpdateState(services::GapState::standby);
     }
 
-    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
-        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(event);
 
         UpdateState(services::GapState::connected);
     }

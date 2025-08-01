@@ -130,9 +130,9 @@ namespace hal
     void GapCentralSt::AllowPairing(bool)
     {}
 
-    void GapCentralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
+    void GapCentralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
-        GapSt::HandleHciDisconnectEvent(eventPacket);
+        GapSt::HandleHciDisconnectEvent(event);
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
             {
@@ -140,32 +140,28 @@ namespace hal
             });
     }
 
-    void GapCentralSt::HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLeAdvertisingReportEvent(const hci_le_advertising_report_event_rp0& event)
     {
-        GapSt::HandleHciLeAdvertisingReportEvent(metaEvent);
+        GapSt::HandleHciLeAdvertisingReportEvent(event);
 
-        auto advertisingEvent = *reinterpret_cast<hci_le_advertising_report_event_rp0*>(metaEvent->data);
-
-        for (uint8_t i = 0; i < advertisingEvent.Num_Reports; i++)
-            HandleAdvertisingReport(advertisingEvent.Advertising_Report[i]);
+        for (uint8_t i = 0; i != event.Num_Reports; ++i)
+            HandleAdvertisingReport(event.Advertising_Report[i]);
     }
 
-    void GapCentralSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
     {
-        HandleConnectionCompleteCommon(metaEvent);
-        GapSt::HandleHciLeConnectionCompleteEvent(metaEvent);
+        HandleConnectionCompleteCommon(event.Status);
+        GapSt::HandleHciLeConnectionCompleteEvent(event);
     }
 
-    void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
-        HandleConnectionCompleteCommon(metaEvent);
-        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+        HandleConnectionCompleteCommon(event.Status);
+        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(event);
     }
 
-    void GapCentralSt::UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent)
+    void GapCentralSt::UpdateStateOnConnectionComplete(uint8_t status)
     {
-        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
-
         services::GapState state = status == BLE_STATUS_SUCCESS ? services::GapState::connected : services::GapState::standby;
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([state](services::GapCentralObserver& observer)
@@ -174,35 +170,31 @@ namespace hal
             });
     }
 
-    void GapCentralSt::HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent)
+    void GapCentralSt::HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event)
     {
-        GapSt::HandleGapProcedureCompleteEvent(vendorEvent);
+        GapSt::HandleGapProcedureCompleteEvent(event);
 
-        auto gapProcedureEvent = *reinterpret_cast<aci_gap_proc_complete_event_rp0*>(vendorEvent->data);
+        really_assert(event.Status == BLE_STATUS_SUCCESS);
 
-        really_assert(gapProcedureEvent.Status == BLE_STATUS_SUCCESS);
-
-        if (gapProcedureEvent.Procedure_Code == GAP_LIMITED_DISCOVERY_PROC || gapProcedureEvent.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC)
+        if (event.Procedure_Code == GAP_LIMITED_DISCOVERY_PROC || event.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC)
             HandleGapDiscoveryProcedureEvent();
-        else if (gapProcedureEvent.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
+        else if (event.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
             HandleGapDirectConnectionProcedureCompleteEvent();
     }
 
-    void GapCentralSt::HandleGattCompleteEvent(evt_blecore_aci* vendorEvent)
+    void GapCentralSt::HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event)
     {
-        GapSt::HandleGattCompleteEvent(vendorEvent);
+        GapSt::HandleGattCompleteEvent(event);
 
-        auto gattCompleteEvent = *reinterpret_cast<aci_gatt_proc_complete_event_rp0*>(vendorEvent->data);
-
-        if (gattCompleteEvent.Error_Code == BLE_STATUS_SUCCESS)
-            really_assert(gattCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+        if (event.Error_Code == BLE_STATUS_SUCCESS)
+            really_assert(event.Connection_Handle == connectionContext.connectionHandle);
     }
 
-    void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent)
+    void GapCentralSt::HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event)
     {
-        GapSt::HandleL2capConnectionUpdateRequestEvent(vendorEvent);
+        GapSt::HandleL2capConnectionUpdateRequestEvent(event);
 
-        auto identifier = reinterpret_cast<aci_l2cap_connection_update_req_event_rp0*>(vendorEvent->data)->Identifier;
+        auto identifier = event.Identifier;
 
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, identifier]()
             {
@@ -214,15 +206,13 @@ namespace hal
             });
     }
 
-    void GapCentralSt::HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event)
     {
-        GapSt::HandleHciLeDataLengthChangeEvent(metaEvent);
+        GapSt::HandleHciLeDataLengthChangeEvent(event);
 
-        auto dataLengthChangeEvent = *reinterpret_cast<hci_le_data_length_change_event_rp0*>(metaEvent->data);
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
 
-        really_assert(dataLengthChangeEvent.Connection_Handle == connectionContext.connectionHandle);
-
-        if (!IsTxDataLengthConfigured(dataLengthChangeEvent))
+        if (!IsTxDataLengthConfigured(event))
         {
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
                 {
@@ -231,13 +221,11 @@ namespace hal
         }
     }
 
-    void GapCentralSt::HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event)
     {
-        GapSt::HandleHciLePhyUpdateCompleteEvent(metaEvent);
+        GapSt::HandleHciLePhyUpdateCompleteEvent(event);
 
-        auto phyUpdateCompleteEvent = *reinterpret_cast<hci_le_phy_update_complete_event_rp0*>(metaEvent->data);
-
-        really_assert(phyUpdateCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
     }
 
     void GapCentralSt::HandleGapDiscoveryProcedureEvent()
@@ -301,12 +289,11 @@ namespace hal
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
-    void GapCentralSt::HandleConnectionCompleteCommon(evt_le_meta_event* metaEvent)
+    void GapCentralSt::HandleConnectionCompleteCommon(uint8_t status)
     {
-        UpdateStateOnConnectionComplete(metaEvent);
+        UpdateStateOnConnectionComplete(status);
         initiatingStateTimer.Cancel();
 
-        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
         if (status == BLE_STATUS_SUCCESS)
         {
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
