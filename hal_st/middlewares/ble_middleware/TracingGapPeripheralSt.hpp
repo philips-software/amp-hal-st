@@ -14,14 +14,14 @@ namespace hal
 
     protected:
         // Implementation of GapPeripheralSt
-        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleBondLostEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
+        void HandleHciLeConnectionUpdateCompleteEvent(const hci_le_connection_update_complete_event_rp0& event) override;
+        void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) override;
+        void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
+        void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event) override;
+        void HandleBondLostEvent() override;
+        void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event) override;
 
     private:
         services::Tracer& tracer;

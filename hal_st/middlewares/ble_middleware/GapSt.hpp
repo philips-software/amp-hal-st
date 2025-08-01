@@ -57,21 +57,21 @@ namespace hal
     protected:
         GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
+        virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
 
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent){};
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
+        virtual void HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event);
+        virtual void HandleHciLeAdvertisingReportEvent(const hci_le_advertising_report_event_rp0& event) {};
+        virtual void HandleHciLeConnectionUpdateCompleteEvent(const hci_le_connection_update_complete_event_rp0& event) {};
+        virtual void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) {};
+        virtual void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) {};
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event);
 
-        virtual void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleBondLostEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent){};
-        virtual void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event);
+        virtual void HandleBondLostEvent();
+        virtual void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) {};
+        virtual void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) {};
+        virtual void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) {};
+        virtual void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
 
@@ -79,10 +79,10 @@ namespace hal
         // Implementation of HciEventSink
         void HciEvent(hci_event_pckt& event) override;
 
-        void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
+        void HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent);
+        void HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event);
 
-        void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, uint8_t* peerAddress);
+        void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
 
     protected:
