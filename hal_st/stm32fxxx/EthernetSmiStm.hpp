@@ -25,7 +25,9 @@ namespace hal
         void SetMiiClockRange();
         void ResetPhy();
         void DetectLink();
-        uint16_t ReadPhyRegister(uint16_t reg);
+        LinkSpeed GetLinkSpeedNegotiated() const;
+        LinkSpeed GetLinkSpeedLocal() const;
+        uint16_t ReadPhyRegister(uint16_t reg) const;
         void WritePhyRegister(uint16_t reg, uint16_t value);
         void Delay(infra::Duration duration);
 
@@ -42,10 +44,11 @@ namespace hal
         uint16_t phyAddress;
 
         infra::Sequencer sequencer;
-        uint32_t phyRegisterValue;
+        uint32_t phyControlRegisterValue;
         infra::TimerSingleShot delayTimer;
         infra::Duration delay;
 
+        bool autoNegotiation = false;
         bool linkUp = false;
 
         static const uint16_t phyBasicControlRegister = 0;
@@ -56,10 +59,11 @@ namespace hal
         static const uint16_t phyBcrDuplexMode = 8;
         static const uint16_t phyBcrRestartAutoNegotiation = 9;
         static const uint16_t phyBcrAutoNegotiationEnable = 12;
-        static const uint16_t phyBcrSpeedSelect = 13;
+        static const uint16_t phyBcrSpeedSelectLsb = 13;
         static const uint16_t phyBcrReset = 15;
 
         static const uint16_t phyBsrLinkUp = 2;
+        static const uint16_t phyBsrAutoNegotiationAbility = 3;
         static const uint16_t phyBsrAutoNegotiationComplete = 5;
 
         static const uint16_t phyAnlpaHalfDuplex10MHz = 5;

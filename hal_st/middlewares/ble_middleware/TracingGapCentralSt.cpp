@@ -87,13 +87,13 @@ namespace hal
         return ret;
     }
 
-    void TracingGapCentralSt::Pair()
+    void TracingGapCentralSt::PairAndBond()
     {
-        tracer.Trace() << "TracingGapCentralSt::Pair";
-        GapCentralSt::Pair();
+        tracer.Trace() << "TracingGapCentralSt::PairAndBond";
+        GapCentralSt::PairAndBond();
     }
 
-    void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    void TracingGapCentralSt::SetSecurityMode(SecurityMode mode, SecurityLevel level)
     {
         tracer.Trace() << "TracingGapCentralSt::SetSecurityMode";
         GapCentralSt::SetSecurityMode(mode, level);

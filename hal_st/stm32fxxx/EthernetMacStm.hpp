@@ -48,6 +48,8 @@ namespace hal
             uint32_t receiveDescriptorReceiveIndex = 0;
             uint32_t receivedFrameBuffers = 0;
             uint8_t receivedFramesAllocated = 0;
+
+            friend EthernetMacStm;
         };
 
         class SendDescriptors
@@ -66,6 +68,8 @@ namespace hal
             uint32_t sendDescriptorIndexFirst = 0;
             uint32_t sendDescriptorIndex = 0;
             bool sendFirst = true;
+
+            friend EthernetMacStm;
         };
 
     private:

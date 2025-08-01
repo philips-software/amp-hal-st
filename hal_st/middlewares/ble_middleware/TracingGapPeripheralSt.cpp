@@ -1,4 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/TracingGapPeripheralSt.hpp"
+#include "infra/util/BoundedString.hpp"
+#include <cstdint>
 
 namespace hal
 {
@@ -65,5 +67,15 @@ namespace hal
     {
         tracer.Trace() << "GapPeripheralSt::HandleMtuExchangeResponseEvent Server_RX_MTU = " << event.Server_RX_MTU;
         GapPeripheralSt::HandleMtuExchangeResponseEvent(event);
+    }
+
+    void TracingGapPeripheralSt::StartedAdvertising(infra::BoundedConstString functionName)
+    {
+        tracer.Trace() << "ST BLE Peripheral advertising with " << functionName;
+    }
+
+    void TracingGapPeripheralSt::ReceivedNumberOfBondedAddresses(uint8_t numberOfBondedAddresses)
+    {
+        tracer.Trace() << "ST BLE Peripheral numberOfBondedAddresses: " << numberOfBondedAddresses;
     }
 }

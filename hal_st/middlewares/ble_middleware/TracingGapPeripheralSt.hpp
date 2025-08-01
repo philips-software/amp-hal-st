@@ -24,6 +24,8 @@ namespace hal
         void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event) override;
 
     private:
+        void StartedAdvertising(infra::BoundedConstString functionName) override;
+        void ReceivedNumberOfBondedAddresses(uint8_t numberOfBondedAddresses) override;
         services::Tracer& tracer;
     };
 }
