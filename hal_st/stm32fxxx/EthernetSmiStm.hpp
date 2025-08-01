@@ -48,7 +48,7 @@ namespace hal
         infra::TimerSingleShot delayTimer;
         infra::Duration delay;
 
-        bool autoNego = false;
+        bool autoNegotiation = false;
         bool linkUp = false;
 
         static const uint16_t phyBasicControlRegister = 0;

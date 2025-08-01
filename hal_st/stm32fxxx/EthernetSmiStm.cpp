@@ -109,8 +109,8 @@ namespace hal
         sequencer.Execute([this]()
             {
                 uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
-                autoNego = infra::IsBitSet(status, phyBsrAutoNegotiationAbility);
-                if (autoNego)
+                autoNegotiation = infra::IsBitSet(status, phyBsrAutoNegotiationAbility);
+                if (autoNegotiation)
                     WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable));
             });
     }
@@ -120,8 +120,8 @@ namespace hal
         sequencer.Execute([this]()
             {
                 uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
-                bool autoNegoComplete = autoNego ? infra::IsBitSet(status, phyBsrAutoNegotiationComplete) : true;
-                bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && autoNegoComplete;
+                bool autoNegotiationComplete = autoNegotiation ? infra::IsBitSet(status, phyBsrAutoNegotiationComplete) : true;
+                bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && autoNegotiationComplete;
 
                 if (newLinkUp != linkUp)
                 {
@@ -129,7 +129,7 @@ namespace hal
 
                     if (linkUp)
                     {
-                        LinkSpeed speed = autoNego ? GetLinkSpeedNegotiated() : GetLinkSpeedLocal();
+                        LinkSpeed speed = autoNegotiation ? GetLinkSpeedNegotiated() : GetLinkSpeedLocal();
                         GetObserver().LinkUp(speed);
                     }
                     else
