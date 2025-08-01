@@ -294,7 +294,6 @@ namespace hal
         UpdateStateOnConnectionComplete(status);
         initiatingStateTimer.Cancel();
 
-        auto status = reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data)->Status;
         if (status == BLE_STATUS_SUCCESS)
         {
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
