@@ -150,43 +150,35 @@ namespace hal
         std::abort();
     }
 
-    void GapSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
+    void GapSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
-        auto disconnectionCompleteEvent = *reinterpret_cast<hci_disconnection_complete_event_rp0*>(eventPacket.data);
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
 
-        really_assert(disconnectionCompleteEvent.Connection_Handle == connectionContext.connectionHandle);
-
-        if (disconnectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
+        if (event.Status == BLE_STATUS_SUCCESS)
             connectionContext.connectionHandle = GapSt::invalidConnection;
     }
 
-    void GapSt::HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
     {
-        auto connectionCompleteEvent = *reinterpret_cast<hci_le_connection_complete_event_rp0*>(metaEvent->data);
-
-        if (connectionCompleteEvent.Status == BLE_STATUS_SUCCESS)
-            SetConnectionContext(connectionCompleteEvent.Connection_Handle, static_cast<services::GapDeviceAddressType>(connectionCompleteEvent.Peer_Address_Type), &connectionCompleteEvent.Peer_Address[0]);
+        if (event.Status == BLE_STATUS_SUCCESS)
+            SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
     }
 
-    void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
-        auto connectionCompleteEvt = *reinterpret_cast<hci_le_enhanced_connection_complete_event_rp0*>(metaEvent->data);
-
-        if (connectionCompleteEvt.Status == BLE_STATUS_SUCCESS)
-            SetConnectionContext(connectionCompleteEvt.Connection_Handle, static_cast<services::GapDeviceAddressType>(connectionCompleteEvt.Peer_Address_Type), &connectionCompleteEvt.Peer_Address[0]);
+        if (event.Status == BLE_STATUS_SUCCESS)
+            SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
     }
 
-    void GapSt::HandleBondLostEvent(evt_blecore_aci* vendorEvent)
+    void GapSt::HandleBondLostEvent()
     {
         aci_gap_allow_rebond(connectionContext.connectionHandle);
     }
 
-    void GapSt::HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent)
+    void GapSt::HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event)
     {
-        auto attExchangeMtuResponse = *reinterpret_cast<aci_att_exchange_mtu_resp_event_rp0*>(vendorEvent->data);
-
-        really_assert(attExchangeMtuResponse.Connection_Handle == connectionContext.connectionHandle);
-        maxAttMtu = attExchangeMtuResponse.Server_RX_MTU;
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
+        maxAttMtu = event.Server_RX_MTU;
 
         AttMtuExchange::NotifyObservers([](auto& observer)
             {
@@ -194,11 +186,9 @@ namespace hal
             });
     }
 
-    void GapSt::HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent)
+    void GapSt::HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event)
     {
-        auto pairingComplete = reinterpret_cast<aci_gap_pairing_complete_event_rp0*>(vendorEvent->data);
-
-        really_assert(pairingComplete->Connection_Handle == connectionContext.connectionHandle);
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
 
         if (IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
         {
@@ -208,15 +198,15 @@ namespace hal
             UpdateNrBonds();
         }
 
-        if (pairingComplete->Status == SMP_PAIRING_STATUS_SUCCESS)
+        if (event.Status == SMP_PAIRING_STATUS_SUCCESS)
             GapPairing::NotifyObservers([](auto& observer)
                 {
                     observer.PairingSuccessfullyCompleted();
                 });
         else
-            GapPairing::NotifyObservers([&pairingComplete](auto& observer)
+            GapPairing::NotifyObservers([&event](auto& observer)
                 {
-                    observer.PairingFailed(ParserPairingFailure(pairingComplete->Status, pairingComplete->Reason));
+                    observer.PairingFailed(ParserPairingFailure(event.Status, event.Reason));
                 });
     }
 
@@ -233,78 +223,74 @@ namespace hal
         switch (event.evt)
         {
             case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
-                HandleHciDisconnectEvent(event);
+                HandleHciDisconnectEvent(*reinterpret_cast<const hci_disconnection_complete_event_rp0*>(event.data));
                 break;
             case HCI_LE_META_EVT_CODE:
-                HandleHciLeMetaEvent(event);
+                HandleHciLeMetaEvent(*reinterpret_cast<const evt_le_meta_event*>(event.data));
                 break;
             case HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE:
-                HandleHciVendorSpecificDebugEvent(event);
+                HandleHciVendorSpecificDebugEvent(*reinterpret_cast<const evt_blecore_aci*>(event.data));
                 break;
             default:
                 break;
         }
     }
 
-    void GapSt::HandleHciLeMetaEvent(hci_event_pckt& eventPacket)
+    void GapSt::HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent)
     {
-        auto metaEvent = reinterpret_cast<evt_le_meta_event*>(eventPacket.data);
-
-        switch (metaEvent->subevent)
+        switch (metaEvent.subevent)
         {
             case HCI_LE_CONNECTION_COMPLETE_SUBEVT_CODE:
-                HandleHciLeConnectionCompleteEvent(metaEvent);
+                HandleHciLeConnectionCompleteEvent(*reinterpret_cast<const hci_le_connection_complete_event_rp0*>(metaEvent.data));
                 break;
             case HCI_LE_ADVERTISING_REPORT_SUBEVT_CODE:
-                HandleHciLeAdvertisingReportEvent(metaEvent);
+                HandleHciLeAdvertisingReportEvent(*reinterpret_cast<const hci_le_advertising_report_event_rp0*>(metaEvent.data));
                 break;
             case HCI_LE_CONNECTION_UPDATE_COMPLETE_SUBEVT_CODE:
-                HandleHciLeConnectionUpdateCompleteEvent(metaEvent);
+                HandleHciLeConnectionUpdateCompleteEvent(*reinterpret_cast<const hci_le_connection_update_complete_event_rp0*>(metaEvent.data));
                 break;
             case HCI_LE_DATA_LENGTH_CHANGE_SUBEVT_CODE:
-                HandleHciLeDataLengthChangeEvent(metaEvent);
+                HandleHciLeDataLengthChangeEvent(*reinterpret_cast<const hci_le_data_length_change_event_rp0*>(metaEvent.data));
                 break;
             case HCI_LE_PHY_UPDATE_COMPLETE_SUBEVT_CODE:
-                HandleHciLePhyUpdateCompleteEvent(metaEvent);
+                HandleHciLePhyUpdateCompleteEvent(*reinterpret_cast<const hci_le_phy_update_complete_event_rp0*>(metaEvent.data));
                 break;
             case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
-                HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+                HandleHciLeEnhancedConnectionCompleteEvent(*reinterpret_cast<const hci_le_enhanced_connection_complete_event_rp0*>(metaEvent.data));
                 break;
             default:
                 break;
         }
     }
 
-    void GapSt::HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket)
+    void GapSt::HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event)
     {
-        auto vendorEvent = reinterpret_cast<evt_blecore_aci*>(eventPacket.data);
-
-        switch (vendorEvent->ecode)
+        switch (event.ecode)
         {
             case ACI_GAP_PAIRING_COMPLETE_VSEVT_CODE:
-                HandlePairingCompleteEvent(vendorEvent);
+                HandlePairingCompleteEvent(*reinterpret_cast<const aci_gap_pairing_complete_event_rp0*>(event.data));
                 break;
             case ACI_GAP_BOND_LOST_VSEVT_CODE:
-                HandleBondLostEvent(vendorEvent);
+                HandleBondLostEvent();
                 break;
             case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
-                HandleGapProcedureCompleteEvent(vendorEvent);
+                HandleGapProcedureCompleteEvent(*reinterpret_cast<const aci_gap_proc_complete_event_rp0*>(event.data));
                 break;
             case ACI_GATT_PROC_COMPLETE_VSEVT_CODE:
-                HandleGattCompleteEvent(vendorEvent);
+                HandleGattCompleteEvent(*reinterpret_cast<const aci_gatt_proc_complete_event_rp0*>(event.data));
                 break;
             case ACI_L2CAP_CONNECTION_UPDATE_REQ_VSEVT_CODE:
-                HandleL2capConnectionUpdateRequestEvent(vendorEvent);
+                HandleL2capConnectionUpdateRequestEvent(*reinterpret_cast<const aci_l2cap_connection_update_req_event_rp0*>(event.data));
                 break;
             case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
-                HandleMtuExchangeResponseEvent(vendorEvent);
+                HandleMtuExchangeResponseEvent(*reinterpret_cast<const aci_att_exchange_mtu_resp_event_rp0*>(event.data));
                 break;
             default:
                 break;
         }
     }
 
-    void GapSt::SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, uint8_t* peerAddress)
+    void GapSt::SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress)
     {
         maxAttMtu = defaultMaxAttMtuSize;
         connectionContext.connectionHandle = connectionHandle;
