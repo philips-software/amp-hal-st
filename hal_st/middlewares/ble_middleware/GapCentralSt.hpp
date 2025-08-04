@@ -25,18 +25,19 @@ namespace hal
         infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapPairing
+        void PairAndBond() override;
         void AllowPairing(bool allow) override;
 
     protected:
-        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        void HandleHciLeAdvertisingReportEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleGattCompleteEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
+        void HandleHciLeAdvertisingReportEvent(const hci_le_advertising_report_event_rp0& event) override;
+        void HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
+        void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) override;
+        void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) override;
+        void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) override;
+        void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) override;
+        void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) override;
 
     private:
         void HandleGapDiscoveryProcedureEvent();
@@ -45,8 +46,8 @@ namespace hal
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetDataLength();
         void Initialize(const GapService& gapService);
-        void UpdateStateOnConnectionComplete(evt_le_meta_event* metaEvent);
-        void HandleConnectionCompleteCommon(evt_le_meta_event* metaEvent);
+        void UpdateStateOnConnectionComplete(uint8_t status);
+        void HandleConnectionCompleteCommon(uint8_t status);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;

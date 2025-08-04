@@ -36,22 +36,22 @@ namespace hal
         void HciEvent(hci_event_pckt& event) override;
 
     protected:
-        virtual void HandleHciDisconnectEvent(hci_event_pckt& eventPacket);
-        virtual void HandleHciLeMetaEvent(hci_event_pckt& eventPacket);
-        virtual void HandleHciVendorSpecificDebugEvent(hci_event_pckt& eventPacket);
+        virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
+        virtual void HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent);
+        virtual void HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event);
 
-        virtual void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent);
-        virtual void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent);
+        virtual void HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event);
+        virtual void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event);
 
-        virtual void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent);
-        virtual void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent);
+        virtual void HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event);
+        virtual void HandleGattNotificationEvent(const aci_gatt_notification_event_rp0& event);
         virtual void HandleGattConfirmIndication();
-        virtual void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent);
+        virtual void HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event);
 
-        virtual void HandleAttReadResponse(evt_blecore_aci* vendorEvent);
-        virtual void HandleAttReadByGroupTypeResponse(evt_blecore_aci* vendorEvent);
-        virtual void HandleAttReadByTypeResponse(evt_blecore_aci* vendorEvent);
-        virtual void HandleAttFindInfoResponse(evt_blecore_aci* vendorEvent);
+        virtual void HandleAttReadResponse(const aci_att_read_resp_event_rp0& event);
+        virtual void HandleAttReadByGroupTypeResponse(const aci_att_read_by_group_type_resp_event_rp0& event);
+        virtual void HandleAttReadByTypeResponse(const aci_att_read_by_type_resp_event_rp0& event);
+        virtual void HandleAttFindInfoResponse(const aci_att_find_info_resp_event_rp0& event);
 
         virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);

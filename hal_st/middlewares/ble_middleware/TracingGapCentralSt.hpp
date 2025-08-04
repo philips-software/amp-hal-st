@@ -28,24 +28,24 @@ namespace hal
         bool IsDeviceBonded(hal::MacAddress address, services::GapDeviceAddressType addressType) const override;
 
         // Implementation of GapPairing
-        void Pair() override;
         void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
+        void PairAndBond() override;
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
 
     protected:
         // Implementation of GapCentralSt
-        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        void HandleHciLeConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeConnectionUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeDataLengthChangeEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLePhyUpdateCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
-        void HandleGapProcedureCompleteEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleL2capConnectionUpdateRequestEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleMtuExchangeResponseEvent(evt_blecore_aci* vendorEvent) override;
-        void HandlePairingCompleteEvent(evt_blecore_aci* vendorEvent) override;
+        void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
+        void HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event) override;
+        void HandleHciLeConnectionUpdateCompleteEvent(const hci_le_connection_update_complete_event_rp0& event) override;
+        void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) override;
+        void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
+        void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) override;
+        void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) override;
+        void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event) override;
+        void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event) override;
 
     private:
         services::Tracer& tracer;
