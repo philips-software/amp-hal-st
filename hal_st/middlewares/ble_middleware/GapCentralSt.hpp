@@ -27,6 +27,7 @@ namespace hal
         // Implementation of GapPairing
         void PairAndBond() override;
         void AllowPairing(bool allow) override;
+        void SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level) override;
 
     protected:
         void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;

@@ -288,6 +288,31 @@ namespace hal
             });
     }
 
+    void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    {
+        assert(mode == services::GapPairing::SecurityMode::mode1);
+
+        enum class SecureConnection : uint8_t
+        {
+            notSupported = 0,
+            optional = 1,
+            mandatory
+        };
+
+        SecureConnection secureConnectionSupport;
+
+        if (level == services::GapPairing::SecurityLevel::level1)
+            secureConnectionSupport = SecureConnection::notSupported;
+        else if (level == services::GapPairing::SecurityLevel::level4)
+            secureConnectionSupport = SecureConnection::mandatory;
+        else
+            secureConnectionSupport = SecureConnection::optional;
+
+        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
+
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+    }
+
     void GapCentralSt::Initialize(const GapService& gapService)
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
