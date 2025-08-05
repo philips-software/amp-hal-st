@@ -93,7 +93,7 @@ namespace hal
         GapCentralSt::PairAndBond();
     }
 
-    void TracingGapCentralSt::SetSecurityMode(SecurityMode mode, SecurityLevel level)
+    void TracingGapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
         tracer.Trace() << "TracingGapCentralSt::SetSecurityMode";
         GapCentralSt::SetSecurityMode(mode, level);

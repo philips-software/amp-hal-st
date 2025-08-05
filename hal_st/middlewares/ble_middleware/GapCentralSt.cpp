@@ -276,7 +276,7 @@ namespace hal
             });
     }
 
-    void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
+    void GapCentralSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
