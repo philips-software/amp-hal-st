@@ -39,6 +39,7 @@ namespace hal
 
         // Implementation of AttMtuExchange
         uint16_t EffectiveMaxAttMtuSize() const override;
+        void MtuExchange() override;
 
         // Implementation of GapBonding
         void RemoveAllBonds() override;
