@@ -287,14 +287,12 @@ namespace hal
             mandatory
         };
 
-        SecureConnection secureConnectionSupport;
+        SecureConnection secureConnectionSupport = SecureConnection::optional;
 
         if (level == services::GapPairing::SecurityLevel::level1)
             secureConnectionSupport = SecureConnection::notSupported;
         else if (level == services::GapPairing::SecurityLevel::level4)
             secureConnectionSupport = SecureConnection::mandatory;
-        else
-            secureConnectionSupport = SecureConnection::optional;
 
         uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
 
