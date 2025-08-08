@@ -29,6 +29,8 @@ namespace hal
         void AllowPairing(bool allow) override;
 
     protected:
+        [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
+
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
         void HandleHciLeAdvertisingReportEvent(const hci_le_advertising_report_event_rp0& event) override;
         void HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event) override;

@@ -55,6 +55,13 @@ namespace hal
         void NumericComparisonConfirm(bool accept) override;
 
     protected:
+        enum class SecureConnection : uint8_t
+        {
+            notSupported = 0,
+            optional = 1,
+            mandatory
+        };
+
         GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
@@ -72,6 +79,8 @@ namespace hal
         virtual void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) {};
         virtual void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) {};
         virtual void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event);
+
+        [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
 
         void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
 
