@@ -172,7 +172,7 @@ namespace hal
                 dataReceived(buffer.range());
         }
 
-        if (sending)
+        if (sending && ((uartArray[uartIndex]->CR1 & USART_CR1_TXEIE) != 0))
         {
 #if defined(USART_ISR_TXE)
             while (!sendData.empty() && (uartArray[uartIndex]->ISR & USART_ISR_TXE))
