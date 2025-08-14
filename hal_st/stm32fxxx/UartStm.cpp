@@ -111,6 +111,8 @@ namespace hal
         sendData = data;
         sending = true;
 
+        __DMB();
+
         uartArray[uartIndex]->CR1 |= USART_CR1_TXEIE;
     }
 
