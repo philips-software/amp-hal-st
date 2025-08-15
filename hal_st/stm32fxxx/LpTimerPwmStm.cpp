@@ -104,12 +104,14 @@ namespace hal
 
     void LpPwmChannelGpio::Start()
     {
-        HAL_LPTIM_PWM_Start(&handle, GetLpTimerChannel(channelIndex));
+        auto result = HAL_LPTIM_PWM_Start(&handle, GetLpTimerChannel(channelIndex));
+        assert(result == HAL_OK);
     }
 
     void LpPwmChannelGpio::Stop()
     {
-        HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
+        auto result = HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
+        assert(result == HAL_OK);
     }
 }
 

@@ -117,12 +117,14 @@ namespace hal
 
     void PwmChannelGpio::Start()
     {
-        HAL_TIM_PWM_Start(&handle, GetTimerChannel(channelIndex));
+        auto result = HAL_TIM_PWM_Start(&handle, GetTimerChannel(channelIndex));
+        assert(result == HAL_OK);
     }
 
     void PwmChannelGpio::Stop()
     {
-        HAL_TIM_PWM_Stop(&handle, GetTimerChannel(channelIndex));
+        auto result = HAL_TIM_PWM_Stop(&handle, GetTimerChannel(channelIndex));
+        assert(result == HAL_OK);
     }
 }
 
