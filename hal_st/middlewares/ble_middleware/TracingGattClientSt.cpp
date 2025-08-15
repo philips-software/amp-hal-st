@@ -33,16 +33,16 @@ namespace hal
         GattClientSt::Read(characteristic, onResponse, onDone);
     }
 
-    void TracingGattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
         GattClientSt::Write(characteristic, data, onDone);
     }
 
-    void TracingGattClientSt::WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data)
+    void TracingGattClientSt::WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::WriteWithoutResponse, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
-        GattClientSt::WriteWithoutResponse(characteristic, data);
+        GattClientSt::WriteWithoutResponse(characteristic, data, onDone);
     }
 
     void TracingGattClientSt::EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
