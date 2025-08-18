@@ -68,13 +68,13 @@ namespace hal
 
     void GattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+        this->onCharacteristicOperationsDone = [onDone](uint8_t result)
         {
-            onDone(static_cast<services::OperationStatus>(result));
+            onDone(result == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error);
         };
 
         if (auto status = aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin()); status != BLE_STATUS_SUCCESS)
-            this->onCharacteristicOperationsDone(status == BLE_STATUS_INSUFFICIENT_RESOURCES ? static_cast<uint8_t>(services::OperationStatus::retry) : static_cast<uint8_t>(services::OperationStatus::error));
+            onDone(status == BLE_STATUS_INSUFFICIENT_RESOURCES ? services::OperationStatus::retry : services::OperationStatus::error);
     }
 
     void GattClientSt::WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
