@@ -27,9 +27,9 @@ namespace hal
         void DisableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
 
     protected:
-        void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent) override;
+        void HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event) override;
+        void HandleGattNotificationEvent(const aci_gatt_notification_event_rp0& event) override;
+        void HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event) override;
         void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16) override;
 
     private:

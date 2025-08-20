@@ -53,7 +53,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     DigitalToAnalogPinStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:DmaStm.hpp>
-    EthernetMacStm.cpp
+    $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>>:EthernetMacStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:EthernetMacH5xxStm.cpp>
     EthernetMacStm.hpp
     EthernetSmiStm.cpp
     EthernetSmiStm.hpp
@@ -130,6 +131,16 @@ if (TARGET_MCU IN_LIST AdcDmaMcus OR TARGET_MCU_FAMILY IN_LIST AdcDmaMcuFamilies
                                             AdcDmaStm.hpp
                                             AdcDmaMultiChannelStm.cpp
                                             AdcDmaMultiChannelStm.hpp
+    )
+endif()
+
+list(APPEND ActiveTamperMcuFamilies stm32h5xx)
+
+if (TARGET_MCU_FAMILY IN_LIST ActiveTamperMcuFamilies)
+    target_sources(hal_st.stm32fxxx PRIVATE RtcStm.cpp
+                                            RtcStm.hpp
+                                            TamperStm.cpp
+                                            TamperStm.hpp
     )
 endif()
 

@@ -21,8 +21,10 @@ namespace hal
         , ethernetRmiiTxD1(ethernetRmiiTxD1, hal::PinConfigTypeStm::ethernet, 0)
         , phyAddress(phyAddress)
     {
+#if !defined(STM32H5)
         __HAL_RCC_SYSCFG_CLK_ENABLE();
         SYSCFG->PMC |= SYSCFG_PMC_MII_RMII_SEL; // Select RMII Mode
+#endif
 
         EnableClockEthernet(0);
 
@@ -59,6 +61,20 @@ namespace hal
     {
         uint32_t hclk = HAL_RCC_GetHCLKFreq();
 
+#if defined(STM32H5)
+        if (hclk >= 20000000 && hclk < 35000000)
+            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV16;
+        else if (hclk >= 35000000 && hclk < 60000000)
+            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV26;
+        else if (hclk >= 60000000 && hclk < 100000000)
+            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV42;
+        else if (hclk >= 100000000 && hclk < 150000000)
+            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV62;
+        else if (hclk >= 150000000 && hclk <= 250000000)
+            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV102;
+        else
+            std::abort();
+#else
         if (hclk >= 20000000 && hclk < 35000000)
             peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div16;
         else if (hclk >= 35000000 && hclk < 60000000)
@@ -71,6 +87,7 @@ namespace hal
             peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div102;
         else
             std::abort();
+#endif
     }
 
     void EthernetSmiStm::ResetPhy()
@@ -83,15 +100,18 @@ namespace hal
         Delay(std::chrono::milliseconds(1));
         sequencer.Execute([this]()
             {
-                phyRegisterValue = ReadPhyRegister(phyBasicControlRegister);
+                phyControlRegisterValue = ReadPhyRegister(phyBasicControlRegister);
             });
         sequencer.EndDoWhile([this]()
             {
-                return infra::IsBitSet(phyRegisterValue, phyBcrReset);
+                return infra::IsBitSet(phyControlRegisterValue, phyBcrReset);
             });
         sequencer.Execute([this]()
             {
-                WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable));
+                uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
+                autoNegotiation = infra::IsBitSet(status, phyBsrAutoNegotiationAbility);
+                if (autoNegotiation)
+                    WritePhyRegister(phyBasicControlRegister, infra::Bit<uint16_t>(phyBcrAutoNegotiationEnable));
             });
     }
 
@@ -100,7 +120,8 @@ namespace hal
         sequencer.Execute([this]()
             {
                 uint16_t status = ReadPhyRegister(phyBasicStatusRegister);
-                bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && infra::IsBitSet(status, phyBsrAutoNegotiationComplete);
+                bool autoNegotiationComplete = autoNegotiation ? infra::IsBitSet(status, phyBsrAutoNegotiationComplete) : true;
+                bool newLinkUp = infra::IsBitSet(status, phyBsrLinkUp) && autoNegotiationComplete;
 
                 if (newLinkUp != linkUp)
                 {
@@ -108,18 +129,7 @@ namespace hal
 
                     if (linkUp)
                     {
-                        uint16_t linkAbility = ReadPhyRegister(phyAutoNegotiationAdvertisement);
-                        uint16_t linkPartnerAbility = ReadPhyRegister(phyAutoNegotiationLinkPartnerAbility);
-                        LinkSpeed speed;
-                        if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex100MHz))
-                            speed = LinkSpeed::fullDuplex100MHz;
-                        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaHalfDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaHalfDuplex100MHz))
-                            speed = LinkSpeed::halfDuplex100MHz;
-                        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex10MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex10MHz))
-                            speed = LinkSpeed::fullDuplex10MHz;
-                        else
-                            speed = LinkSpeed::halfDuplex10MHz;
-
+                        LinkSpeed speed = autoNegotiation ? GetLinkSpeedNegotiated() : GetLinkSpeedLocal();
                         GetObserver().LinkUp(speed);
                     }
                     else
@@ -128,23 +138,71 @@ namespace hal
             });
     }
 
-    uint16_t EthernetSmiStm::ReadPhyRegister(uint16_t reg)
+    LinkSpeed EthernetSmiStm::GetLinkSpeedNegotiated() const
     {
+        uint16_t linkAbility = ReadPhyRegister(phyAutoNegotiationAdvertisement);
+        uint16_t linkPartnerAbility = ReadPhyRegister(phyAutoNegotiationLinkPartnerAbility);
+        if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex100MHz))
+            return LinkSpeed::fullDuplex100MHz;
+        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaHalfDuplex100MHz) && infra::IsBitSet(linkAbility, phyAnlpaHalfDuplex100MHz))
+            return LinkSpeed::halfDuplex100MHz;
+        else if (infra::IsBitSet(linkPartnerAbility, phyAnlpaFullDuplex10MHz) && infra::IsBitSet(linkAbility, phyAnlpaFullDuplex10MHz))
+            return LinkSpeed::fullDuplex10MHz;
+        else
+            return LinkSpeed::halfDuplex10MHz;
+    }
+
+    LinkSpeed EthernetSmiStm::GetLinkSpeedLocal() const
+    {
+        bool duplexMode = infra::IsBitSet(phyControlRegisterValue, phyBcrDuplexMode);
+        if (infra::IsBitSet(phyControlRegisterValue, phyBcrSpeedSelectLsb) && duplexMode)
+            return LinkSpeed::fullDuplex100MHz;
+        else if (infra::IsBitSet(phyControlRegisterValue, phyBcrSpeedSelectLsb) && !duplexMode)
+            return LinkSpeed::halfDuplex100MHz;
+        else if (!infra::IsBitSet(phyControlRegisterValue, phyBcrSpeedSelectLsb) && duplexMode)
+            return LinkSpeed::fullDuplex10MHz;
+        else
+            return LinkSpeed::halfDuplex10MHz;
+    }
+
+    uint16_t EthernetSmiStm::ReadPhyRegister(uint16_t reg) const
+    {
+#if defined(STM32H5)
+        peripheralEthernet[0]->MACMDIOAR = (peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_CR) | ((static_cast<uint32_t>(phyAddress) << 21) & ETH_MACMDIOAR_PA) | ((static_cast<uint32_t>(reg) << 16) & ETH_MACMDIOAR_RDA) | ETH_MACMDIOAR_MOC_RD | ETH_MACMDIOAR_MB;
+
+        while ((peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_MB) != 0)
+        {
+        }
+
+        return static_cast<uint16_t>(peripheralEthernet[0]->MACMDIODR);
+#else
         peripheralEthernet[0]->MACMIIAR = (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_CR) | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA) | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR) | ETH_MACMIIAR_MB;
 
         while (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_MB != 0)
-        {}
+        {
+        }
 
         return peripheralEthernet[0]->MACMIIDR;
+#endif
     }
 
     void EthernetSmiStm::WritePhyRegister(uint16_t reg, uint16_t value)
     {
+#if defined(STM32H5)
+        peripheralEthernet[0]->MACMDIODR = value;
+        peripheralEthernet[0]->MACMDIOAR = (peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_CR) | ((static_cast<uint32_t>(phyAddress) << 21) & ETH_MACMDIOAR_PA) | ((static_cast<uint32_t>(reg) << 16) & ETH_MACMDIOAR_RDA) | ETH_MACMDIOAR_MOC_WR | ETH_MACMDIOAR_MB;
+
+        while ((peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_MB) != 0)
+        {
+        }
+#else
         peripheralEthernet[0]->MACMIIDR = value;
         peripheralEthernet[0]->MACMIIAR = (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_CR) | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA) | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR) | ETH_MACMIIAR_MW | ETH_MACMIIAR_MB;
 
         while (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_MB != 0)
-        {}
+        {
+        }
+#endif
     }
 
     void EthernetSmiStm::Delay(infra::Duration duration)
