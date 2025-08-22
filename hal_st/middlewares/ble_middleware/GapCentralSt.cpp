@@ -287,8 +287,7 @@ namespace hal
         return SecureConnection::optional;
     }
 
-    //
-    uint8_t GapSt::GetMITMSupport(services::GapPairing::SecurityLevel level) const
+    uint8_t GapCentralSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
     {
         return (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
     }

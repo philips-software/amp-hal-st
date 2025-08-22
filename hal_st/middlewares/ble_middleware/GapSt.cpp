@@ -102,7 +102,7 @@ namespace hal
         return (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
     }
 
-    uint8_t GapSt::GetMITMSupport(services::GapPairing::SecurityLevel level) const
+    uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
     {
         return 0;
     }
@@ -112,7 +112,7 @@ namespace hal
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
-        uint8_t mitmMode = GetMITMSupport(level);
+        uint8_t mitmMode = SecurityLevelToMITM(level);
 
         aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
