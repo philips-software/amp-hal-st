@@ -1,6 +1,6 @@
 #include "hal_st/stm32fxxx/LpTimerPwmStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "hal_st/stm32fxxx/TimerStm.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include <array>
 #include <cstdint>
 
@@ -10,7 +10,8 @@ namespace
 {
     constexpr std::array channelPinConfigsLp{
         hal::PinConfigTypeStm::lpTimerChannel1,
-        hal::PinConfigTypeStm::lpTimerChannel2};
+        hal::PinConfigTypeStm::lpTimerChannel2
+    };
 
     hal::PinConfigTypeStm GetChannelPinConfig(std::size_t index)
     {
@@ -81,13 +82,9 @@ namespace hal
 
     void LpPwmChannelGpio::ConfigChannelInit()
     {
-        LPTIM_OC_ConfigTypeDef sConfig = {0};
-
-        sConfig.OCPolarity = LPTIM_OCPOLARITY_HIGH;
-        if (HAL_LPTIM_OC_ConfigChannel(&handle, &sConfig, GetLpTimerChannel(channelIndex)) != HAL_OK)
-        {
-            std::abort();
-        }
+        LPTIM_OC_ConfigTypeDef sConfig = { .OCPolarity = LPTIM_OCPOLARITY_HIGH };
+        auto result = HAL_LPTIM_OC_ConfigChannel(&handle, &sConfig, GetLpTimerChannel(channelIndex));
+        assert(result == HAL_OK);
     }
 
     void LpPwmChannelGpio::SetDuty(uint8_t dutyPercent)
@@ -104,12 +101,14 @@ namespace hal
 
     void LpPwmChannelGpio::Start()
     {
-        HAL_LPTIM_PWM_Start(&handle, GetLpTimerChannel(channelIndex));
+        auto result = HAL_LPTIM_PWM_Start(&handle, GetLpTimerChannel(channelIndex));
+        really_assert(result == HAL_OK);
     }
 
     void LpPwmChannelGpio::Stop()
     {
-        HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
+        auto result = HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
+        really_assert(result == HAL_OK);
     }
 }
 

@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/TimerPwmStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/TimerStm.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include <array>
 #include <cstdint>
 
@@ -117,12 +118,14 @@ namespace hal
 
     void PwmChannelGpio::Start()
     {
-        HAL_TIM_PWM_Start(&handle, GetTimerChannel(channelIndex));
+        auto result = HAL_TIM_PWM_Start(&handle, GetTimerChannel(channelIndex));
+        really_assert(result == HAL_OK);
     }
 
     void PwmChannelGpio::Stop()
     {
-        HAL_TIM_PWM_Stop(&handle, GetTimerChannel(channelIndex));
+        auto result = HAL_TIM_PWM_Stop(&handle, GetTimerChannel(channelIndex));
+        really_assert(result == HAL_OK);
     }
 }
 
