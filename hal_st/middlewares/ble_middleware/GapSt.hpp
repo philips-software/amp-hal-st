@@ -81,6 +81,7 @@ namespace hal
         virtual void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
+        [[nodiscard]] virtual uint8_t GetMITMSupport(services::GapPairing::SecurityLevel level) const;
 
         void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
 

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 
 namespace hal
 {
@@ -284,6 +285,12 @@ namespace hal
             return SecureConnection::mandatory;
 
         return SecureConnection::optional;
+    }
+
+    //
+    uint8_t GapSt::GetMITMSupport(services::GapPairing::SecurityLevel level) const
+    {
+        return (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
     }
 
     void GapCentralSt::Initialize(const GapService& gapService)
