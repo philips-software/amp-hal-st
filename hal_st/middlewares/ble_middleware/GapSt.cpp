@@ -1,7 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
 #include "services/ble/Gap.hpp"
-#include <cstdint>
 
 namespace hal
 {
