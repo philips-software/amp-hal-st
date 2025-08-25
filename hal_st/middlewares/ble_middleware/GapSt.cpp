@@ -119,6 +119,8 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        really_assert(caps == IoCapabilities::none);
+
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)

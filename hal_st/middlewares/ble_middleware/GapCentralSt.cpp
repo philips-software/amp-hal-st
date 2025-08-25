@@ -287,11 +287,6 @@ namespace hal
         return SecureConnection::optional;
     }
 
-    uint8_t GapCentralSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
-    {
-        return (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
-    }
-
     void GapCentralSt::Initialize(const GapService& gapService)
     {
         uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
