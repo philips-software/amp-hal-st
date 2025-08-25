@@ -14,7 +14,12 @@ namespace hal
         : infra::TickOnInterruptTimerService(id, tickDuration)
     {
         Register(SysTick_IRQn);
-        SysTick->LOAD = SystemCoreClock / (1000000000 / std::chrono::duration_cast<std::chrono::nanoseconds>(tickDuration).count()) - 1ul;
+        Reset();
+    }
+
+    void SystemTickTimerService::Reset()
+    {
+        SysTick->LOAD = SystemCoreClock / (1000000000 / std::chrono::duration_cast<std::chrono::nanoseconds>(TickOnInterruptTimerService::Resolution()).count()) - 1UL;
         SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;
         SysTick->VAL = 0;
     }
