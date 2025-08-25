@@ -66,19 +66,26 @@ namespace hal
         aci_gatt_read_char_value(connectionHandle, characteristic.CharacteristicValueHandle());
     }
 
-    void GattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+        this->onCharacteristicOperationsDone = [onDone](uint8_t result)
         {
-            onDone(result);
+            onDone(result == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error);
         };
 
-        aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+        if (auto status = aci_gatt_write_char_value(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin()); status != BLE_STATUS_SUCCESS)
+            onDone(status == BLE_STATUS_INSUFFICIENT_RESOURCES ? services::OperationStatus::retry : services::OperationStatus::error);
     }
 
-    void GattClientSt::WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data)
+    void GattClientSt::WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+        auto var = aci_gatt_write_without_resp(connectionHandle, characteristic.CharacteristicValueHandle(), data.size(), data.cbegin());
+        if (var == BLE_STATUS_SUCCESS)
+            onDone(services::OperationStatus::success);
+        else if (var == BLE_STATUS_INSUFFICIENT_RESOURCES)
+            onDone(services::OperationStatus::retry);
+        else
+            onDone(services::OperationStatus::error);
     }
 
     void GattClientSt::EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
