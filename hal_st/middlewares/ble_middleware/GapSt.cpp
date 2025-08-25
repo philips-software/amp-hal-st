@@ -1,7 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "ble_gap_aci.h"
 #include "services/ble/Gap.hpp"
-#include <cstdint>
 
 namespace hal
 {
@@ -102,18 +101,25 @@ namespace hal
         return (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
     }
 
+    uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
+    {
+        return 0;
+    }
+
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
-        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
+        uint8_t mitmMode = SecurityLevelToMITM(level);
 
         aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        really_assert(caps == IoCapabilities::none);
+
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
