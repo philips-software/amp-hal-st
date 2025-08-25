@@ -17,8 +17,9 @@ namespace hal
     {
         HSEM->C1IER |= 1 << static_cast<uint32_t>(semaphore);
 
-        while (HSEM->RLR[static_cast<uint32_t>(semaphore)] != (HSEM_R_LOCK | HSEM_CR_COREID_CURRENT))
-        {}
+        while (!IsLockedByCurrentCore(semaphore))
+        {
+        }
     }
 
     void SynchronousHardwareSemaphoreMasterStm::Release(hal::Semaphore semaphore) const
@@ -27,6 +28,11 @@ namespace hal
         HSEM->C1ICR = mask;
         HSEM->R[static_cast<uint32_t>(semaphore)] = HSEM_CR_COREID_CURRENT;
         HSEM->C1IER &= ~mask;
+    }
+
+    volatile bool SynchronousHardwareSemaphoreMasterStm::IsLockedByCurrentCore(hal::Semaphore semaphore) const
+    {
+        return (HSEM->RLR[static_cast<uint32_t>(semaphore)] == (HSEM_R_LOCK | HSEM_CR_COREID_CURRENT));
     }
 
     SynchronousHardwareSemaphoreStm::SynchronousHardwareSemaphoreStm(SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMaster, Semaphore semaphore)

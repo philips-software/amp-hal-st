@@ -16,6 +16,16 @@ namespace hal
         void GenerateRandomData(infra::ByteRange result) override;
 
     private:
+        class ConditionalHsi48Enable
+        {
+        public:
+            ConditionalHsi48Enable(hal::SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMasterStm);
+            ~ConditionalHsi48Enable();
+
+        private:
+            bool allowEnable;
+        };
+
         infra::DelayedProxyCreator<hal::SynchronousRandomDataGenerator, void()> hwRngCreator;
         hal::SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMasterStm;
     };
