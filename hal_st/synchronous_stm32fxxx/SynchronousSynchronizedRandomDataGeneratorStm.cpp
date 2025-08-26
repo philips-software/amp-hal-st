@@ -1,4 +1,5 @@
 #include "hal_st/synchronous_stm32fxxx/SynchronousSynchronizedRandomDataGeneratorStm.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "stm32wbxx.h"
 
 namespace hal
@@ -11,29 +12,36 @@ namespace hal
     void SynchronousSynchronizedRandomDataGeneratorStm::GenerateRandomData(infra::ByteRange result)
     {
         auto semaphore = hal::SynchronousHardwareSemaphoreStm(synchronousHardwareSemaphoreMasterStm, hal::Semaphore::randomNumberGenerator);
-        ConditionalHsi48Enable conditionalHsi48Enable(synchronousHardwareSemaphoreMasterStm);
+        Hsi48Enabler hsi48Enabler(synchronousHardwareSemaphoreMasterStm);
 
         hwRngCreator.Emplace();
         hwRngCreator->GenerateRandomData(result);
         hwRngCreator.Destroy();
     }
 
-    SynchronousSynchronizedRandomDataGeneratorStm::ConditionalHsi48Enable::ConditionalHsi48Enable(hal::SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMasterStm)
+    SynchronousSynchronizedRandomDataGeneratorStm::Hsi48Enabler::Hsi48Enabler(hal::SynchronousHardwareSemaphoreMasterStm& synchronousHardwareSemaphoreMasterStm)
     {
-        allowEnable = !synchronousHardwareSemaphoreMasterStm.IsLockedByCurrentCore(hal::Semaphore::recoveryAndIndependentClockConfiguration);
-        if (allowEnable)
+        bool clockConfigurationLocked = synchronousHardwareSemaphoreMasterStm.IsLockedByCurrentCore(hal::Semaphore::recoveryAndIndependentClockConfiguration);
+
+        if (clockConfigurationLocked)
+        {
+            // HSI48 should already be enabled when the clock configuration is locked. Don't manage its lifecycle.
+            really_assert(LL_RCC_HSI48_IsReady());
+        }
+        else
         {
             LL_RCC_HSI48_Enable();
-        }
+            while (!LL_RCC_HSI48_IsReady())
+            {
+            }
 
-        while (!LL_RCC_HSI48_IsReady())
-        {
+            disableHsi48OnFinalization = true;
         }
     }
 
-    SynchronousSynchronizedRandomDataGeneratorStm::ConditionalHsi48Enable::~ConditionalHsi48Enable()
+    SynchronousSynchronizedRandomDataGeneratorStm::Hsi48Enabler::~Hsi48Enabler()
     {
-        if (allowEnable)
+        if (disableHsi48OnFinalization)
             LL_RCC_HSI48_Disable();
     }
 }
