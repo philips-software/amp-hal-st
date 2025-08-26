@@ -32,8 +32,7 @@ namespace hal
         {
             LL_RCC_HSI48_Enable();
             while (!LL_RCC_HSI48_IsReady())
-            {
-            }
+            {}
 
             disableHsi48OnFinalization = true;
         }
