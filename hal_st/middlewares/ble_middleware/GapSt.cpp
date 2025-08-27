@@ -166,14 +166,22 @@ namespace hal
         really_assert(status == BLE_STATUS_SUCCESS);
     }
 
-    void GapSt::SetOutOfBandData(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, OutOfBandDataType dataType, infra::ConstByteRange outOfBandData)
+    void GapSt::SetOutOfBandData(const services::GapOutOfBandData& outOfBandData)
     {
-        really_assert(outOfBandData.size() == 16);
-        really_assert(securityLevel == services::GapPairing::SecurityLevel::level4 && dataType != OutOfBandDataType::temporaryKey);
+        really_assert(securityLevel == services::GapPairing::SecurityLevel::level4 && outOfBandData.temporaryKey.size() == 0);
 
-        uint8_t peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
+        enum OobDataType
+        {
+            random = 1,
+            confirm
+        };
 
-        auto result = aci_gap_set_oob_data(OOB_DEVICE_TYPE_REMOTE, peerAddress, macAddress.data(), toOobType.at(static_cast<uint8_t>(dataType)), static_cast<uint8_t>(outOfBandData.size()), outOfBandData.begin());
+        uint8_t peerAddress = outOfBandData.addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
+
+        auto result = aci_gap_set_oob_data(OOB_DEVICE_TYPE_REMOTE, peerAddress, outOfBandData.macAddress.data(), static_cast<uint8_t>(OobDataType::random), static_cast<uint8_t>(outOfBandData.randomData.size()), outOfBandData.randomData.begin());
+        really_assert(result == BLE_STATUS_SUCCESS);
+
+        result = aci_gap_set_oob_data(OOB_DEVICE_TYPE_REMOTE, peerAddress, outOfBandData.macAddress.data(), static_cast<uint8_t>(OobDataType::confirm), static_cast<uint8_t>(outOfBandData.confirmData.size()), outOfBandData.confirmData.begin());
         really_assert(result == BLE_STATUS_SUCCESS);
     }
 
@@ -268,7 +276,7 @@ namespace hal
         really_assert(status == BLE_STATUS_SUCCESS && dataSize == confirmData.size());
 
         auto addressTypeConverted = addressType == GAP_PUBLIC_ADDR ? services::GapDeviceAddressType::publicAddress : services::GapDeviceAddressType::randomAddress;
-        services::GapPairingObserver::OutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(temporaryKey), infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
+        services::GapOutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(temporaryKey), infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
 
         infra::Subject<services::GapPairingObserver>::NotifyObservers([outOfBandData](auto& observer)
             {

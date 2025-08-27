@@ -67,7 +67,7 @@ namespace hal
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
         void GenerateOutOfBandData() override;
-        void SetOutOfBandData(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, OutOfBandDataType dataType, infra::ConstByteRange outOfBandData) override;
+        void SetOutOfBandData(const services::GapOutOfBandData& outOfBandData) override;
 
     protected:
         enum class SecureConnection : uint8_t
