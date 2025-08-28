@@ -26,7 +26,6 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
-        void GenerateOutOfBandData() override;
 
     protected:
         // Implementation of GapSt

@@ -1,12 +1,11 @@
 # Pair BLE using OOB (Out Of Band)
 
 ## Scope
+This document explains how to pair devices over BLE using Out Of Band (OOB) on the STM32WBA65 MCU. It outlines scenarios for pairing between Central and Peripheral devices, as well as pairing with an Android device.
 
-The intention of this document is to explain how to pair a device on BLE using Out Of Band in the MCU STM32WBA65. This document will limit in a connection between a Central and a Peripheral using both this platform and also between a Peripheral and an Android mobile phone.
+## Pairing between two embedded sides
 
-## Platform connection
-
-In this case, the Central and Peripheral are using the Connectivity Platform with the OOB implementation. It's selected by the proper hal::GapSt::Security in the hal::GapCentralSt parameter. For OOB, it's necessary to select the Security Level 4.
+In this case, the Central and Peripheral are both using the OOB implementation. It's selected by the proper hal::GapSt::Security in the hal::GapCentralSt parameter. For OOB, it's necessary to select the Security Level 4.
 
 ### Privacy disabled
 
@@ -36,15 +35,15 @@ This configuration works the same way as when privacy is disabled.
 
 In this configuration, since the Peripheral has an RPA (Resolvable Private Address) for it's advertising when privacy is enabled, the process is different. The key could be generated at the beginning and exchange before the connection, but the Central just set the OOB data after the Connection and before Pairing phase. After Connection, Central knows the Peripheral's Identity and is able to pair.
  
-## Android connection
+## Pairing with an Android device 
 
-This case is to cover the situation where a Peripheral using the Connectivity Platform wants to connect and pair with an Android mobile. The core of this connection is the NDEF: it is important to use the correct information in the Tag to be recognized by the Android. There is a script to generate the NDEF data in the format Android is expecting.
+This case is to cover the situation where a Peripheral wants to connect and pair with an Android device. The core of this connection is the NDEF: it is important to use the correct information in the Tag to be recognized by the Android. There is a script to generate the NDEF data in the format Android is expecting.
  
-### Privacy disable
+### Privacy disabled
 
 Connection Handover Record is required, otherwise only a few Android will act on tap. The TK (Temporary Key) is required in BLE OOB record. During the tests, when the TK was not provided, Android asked for a PIN.
 
-### Privacy enable
+### Privacy enabled
 
 To use a Peripheral with privacy enabled to connect to Android device, the only difference from the configuration above is the address added to the NDEF. In this case, the address has to be the RPA, which the Peripheral is using to advertise.
 

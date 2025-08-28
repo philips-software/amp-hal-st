@@ -25,9 +25,7 @@ namespace hal
         infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapPairing
-        void PairAndBond() override;
         void AllowPairing(bool allow) override;
-        void GenerateOutOfBandData() override;
 
     protected:
         [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
