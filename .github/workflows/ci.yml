@@ -145,7 +145,7 @@ jobs:
       packages: read
     services:
       flex:
-        image: ghcr.io/philips-software/amp-postmaster-flex:pr-5
+        image: ghcr.io/philips-software/amp-postmaster-flex:latest
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
