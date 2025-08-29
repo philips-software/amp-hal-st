@@ -88,7 +88,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: hal_st
-          path: build/host/hal_st-*-Windows.tar.gz
+          path: build/host/hal_st-*-win64.tar.gz
           if-no-files-found: error
   embedded_build:
     name: Embedded Build
@@ -166,8 +166,8 @@ jobs:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: hal_st
-      - run: tar -zxvf hal_st-*-Windows.tar.gz
-      - run: mkdir install && mv hal_st-*-Windows/* install/
+      - run: tar -zxvf hal_st-*-win64.tar.gz
+      - run: mkdir install && mv hal_st-*-win64/* install/
       - run: ls install/bin
       - run: install/bin/integration_test.runner.exe run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
       - run: docker logs "${{ job.services.flex.id }}"
