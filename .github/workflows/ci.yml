@@ -148,17 +148,17 @@ jobs:
     needs: [embedded_build, host_build_clang_msvc]
     permissions:
       packages: read
-    services:
-      flex:
-        image: ghcr.io/philips-software/amp-postmaster-flex:latest
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        ports:
-          - 1234:1234/tcp
-          - 1235:1235/tcp
-        env:
-          POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
+    # services:
+    #   flex:
+    #     image: ghcr.io/philips-software/amp-postmaster-flex:latest
+    #     credentials:
+    #       username: ${{ github.actor }}
+    #       password: ${{ secrets.GITHUB_TOKEN }}
+    #     ports:
+    #       - 1234:1234/tcp
+    #       - 1235:1235/tcp
+    #     env:
+    #       POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
