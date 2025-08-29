@@ -76,7 +76,7 @@ if (HALST_STANDALONE)
     emil_folderize_all_targets()
 endif()
 
-if (HALST_STANDALONE AND NOT CMAKE_CROSSCOMPILING)
+if (HALST_STANDALONE AND EMIL_HOST_BUILD)
     function(generate_export_targets name)
         install(EXPORT halst${name}Targets
             FILE halst${name}Targets.cmake
