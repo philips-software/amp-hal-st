@@ -338,7 +338,7 @@
     },
     {
       "name": "Windows-RelWithDebInfo-WithPackage",
-      "configuration": "RelWithDebinfo",
+      "configuration": "RelWithDebInfo",
       "configurePreset": "Windows",
       "targets": [ "all", "package" ]
     }
