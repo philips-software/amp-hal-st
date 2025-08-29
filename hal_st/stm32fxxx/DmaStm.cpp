@@ -584,8 +584,9 @@ namespace hal
                 ;
         }
         streamRegister->CCR |= DMA_CCR_RESET;
-#endif
-#if defined(DMA_SxCR_EN)
+#elif defined(DMA_CCR_EN)
+        streamRegister->CCR &= ~DMA_CCR_EN;
+#else
         streamRegister->CR &= ~DMA_SxCR_EN;
 #endif
     }

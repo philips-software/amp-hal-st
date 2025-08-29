@@ -18,18 +18,18 @@ namespace hal
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
 
         // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
-        void Write(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
-        void WriteWithoutResponse(const services::GattClientCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
-        void EnableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableNotification(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void EnableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableIndication(const services::GattClientCharacteristicOperationsObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void Read(const services::GattClientObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
+        void Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
+        void WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data) override;
+        void EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
 
     protected:
-        void HandleGattIndicationEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleGattNotificationEvent(evt_blecore_aci* vendorEvent) override;
-        void HandleGattCompleteResponse(evt_blecore_aci* vendorEvent) override;
+        void HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event) override;
+        void HandleGattNotificationEvent(const aci_gatt_notification_event_rp0& event) override;
+        void HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event) override;
         void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16) override;
 
     private:

@@ -29,8 +29,8 @@ namespace hal
 
     protected:
         // Implementation of GapSt
-        void HandleHciDisconnectEvent(hci_event_pckt& eventPacket) override;
-        void HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent) override;
+        void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
+        void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
 
     private:
         void UpdateAdvertisementData();
@@ -45,6 +45,9 @@ namespace hal
 
         infra::BoundedVector<uint8_t>::WithMaxSize<maxAdvertisementDataSize> advertisementData;
         infra::BoundedVector<uint8_t>::WithMaxSize<maxScanResponseDataSize> scanResponseData;
+
+        virtual void StartedAdvertising(infra::BoundedConstString functionName) {};
+        virtual void ReceivedNumberOfBondedAddresses(uint8_t numberOfBondedAddresses) {};
 
         const Whitelist_Identity_Entry_t dummyPeer{ 0x01, { 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF } };
     };

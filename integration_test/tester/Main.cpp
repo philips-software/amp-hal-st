@@ -37,10 +37,10 @@ int main()
     static infra::Creator<services::EchoOnSesame, main_::ForwardingEchoToTested, void()> forwarderCreator{
         [](infra::Optional<main_::ForwardingEchoToTested>& value)
         {
-            value.Emplace(echo.echo, dma, tracerInfrastructure.tracer);
+            value.Emplace(echo.echo.echo, dma, tracerInfrastructure.tracer);
         }
     };
-    static main_::Tester tester(echo.echo, forwarderCreator, dma);
+    static main_::Tester tester(echo.echo.echo, forwarderCreator, dma);
 
     services::GlobalTracer().Trace() << "Starting tester!";
 

@@ -22,7 +22,7 @@ int main()
 
     static hal::DmaStm dma;
     static main_::EchoFromTester echo(dma);
-    static main_::Tested tested(echo.echo, dma);
+    static main_::Tested tested(echo.echo.echo, dma);
 
     services::GlobalTracer().Trace() << "Starting tested!";
 

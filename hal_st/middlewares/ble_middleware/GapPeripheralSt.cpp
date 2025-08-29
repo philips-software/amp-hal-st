@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "services/ble/Gap.hpp"
 
 namespace
 {
@@ -93,10 +94,17 @@ namespace hal
         UpdateResolvingList();
 
         tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
+
         if (allowPairing)
+        {
+            StartedAdvertising("aci_gap_set_discoverable");
             ret = aci_gap_set_discoverable(advTypeSt, multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, NO_WHITE_LIST_USE, 0, NULL, 0, NULL, 0, 0);
+        }
         else
+        {
+            StartedAdvertising("aci_gap_set_undirected_connectable");
             ret = aci_gap_set_undirected_connectable(multiplier, multiplier, GAP_RESOLVABLE_PRIVATE_ADDR, WHITE_LIST_FOR_ALL);
+        }
 
         UpdateAdvertisementData();
 
@@ -135,6 +143,8 @@ namespace hal
         std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
         aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
 
+        ReceivedNumberOfBondedAddresses(numberOfBondedAddress);
+
         if (numberOfBondedAddress == 0)
         {
             aci_gap_add_devices_to_resolving_list(1, &dummyPeer, 1);
@@ -161,15 +171,15 @@ namespace hal
         aci_gap_add_devices_to_resolving_list(0, nullptr, 1);
     }
 
-    void GapPeripheralSt::HandleHciDisconnectEvent(hci_event_pckt& eventPacket)
+    void GapPeripheralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
-        GapSt::HandleHciDisconnectEvent(eventPacket);
+        GapSt::HandleHciDisconnectEvent(event);
         UpdateState(services::GapState::standby);
     }
 
-    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(evt_le_meta_event* metaEvent)
+    void GapPeripheralSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
-        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(metaEvent);
+        GapSt::HandleHciLeEnhancedConnectionCompleteEvent(event);
 
         UpdateState(services::GapState::connected);
     }
