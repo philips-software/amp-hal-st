@@ -139,7 +139,7 @@ jobs:
 
   integration_test:
     name: Integration test
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, philips-code-hub, ubuntu-latest]
     needs: [embedded_build, host_build_test_ubuntu]
     permissions:
       packages: read
