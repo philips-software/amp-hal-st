@@ -136,6 +136,11 @@ jobs:
           configurePreset: ${{ matrix.target }}
           buildPreset: ${{ matrix.target }}-${{ matrix.configuration }}
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ matrix.target == "stm32f767" && matrix.gcc == "10.3-2021.10" }}
+        with:
+          name: hal_st_tester
+          path: build/stm32f767/integration_test/tester/RelWithDebInfo/integration_test.tester.bin
 
   integration_test:
     name: Integration test
@@ -154,11 +159,12 @@ jobs:
           - 1235:1235/tcp
         env:
           POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
+          POSTMASTER_FIRMWARE: build/stm32f767/integration_test/tester/RelWithDebInfo/integration_test.tester.bin
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: hal_st
       - run: tar -zxvf hal_st-*.tar.gz
