@@ -33,7 +33,7 @@ namespace hal
         GattClientSt::Read(characteristic, onResponse, onDone);
     }
 
-    void TracingGattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
+    void TracingGattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
         GattClientSt::Write(characteristic, data, onDone);
