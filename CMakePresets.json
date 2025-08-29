@@ -335,6 +335,12 @@
       "name": "Windows-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "Windows"
+    },
+    {
+      "name": "Windows-RelWithDebInfo-WithPackage",
+      "configuration": "RelWithDebinfo",
+      "configurePreset": "Windows",
+      "targets": [ "all", "package" ]
     }
   ],
   "testPresets": [
