@@ -38,10 +38,10 @@ In this configuration, since the Peripheral has an RPA (Resolvable Private Addre
 ## Pairing with an Android device 
 
 This case is to cover the situation where a Peripheral wants to connect and pair with an Android device. The core of this connection is the NDEF: it is important to use the correct information in the Tag to be recognized by the Android. There is a script to generate the NDEF data in the format Android is expecting.
- 
+
 ### Privacy disabled
 
-Connection Handover Record is required, otherwise only a few Android will act on tap. The TK (Temporary Key) is required in BLE OOB record. During the tests, when the TK was not provided, Android asked for a PIN.
+A Connection Handover Record is required, otherwise only a few Android devices will respond to a tap. The TK (Temporary Key) is required in the BLE OOB record. During the tests, when the TK was not provided, Android asked for a PIN. The TK that is to be provided in the BLE OOB record must equal the OOB random data. 
 
 ### Privacy enabled
 
