@@ -58,7 +58,7 @@ namespace hal
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());
 
         const std::array<uint8_t, 8> events = { { 0x9F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
-        hci_le_set_event_mask(events.data()); 
+        hci_le_set_event_mask(events.data());
 
         SVCCTL_Init();
     }
@@ -169,7 +169,7 @@ namespace hal
 
     void GapSt::SetOutOfBandData(const services::GapOutOfBandData& outOfBandData)
     {
-        really_assert(securityLevel == services::GapPairing::SecurityLevel::level4 && outOfBandData.temporaryKey.size() == 0);
+        really_assert(securityLevel == services::GapPairing::SecurityLevel::level4);
 
         enum OobDataType
         {
@@ -261,7 +261,6 @@ namespace hal
         uint8_t addressType = 0;
         hal::MacAddress address{};
         uint8_t dataSize = 0;
-        std::array<uint8_t, 16> temporaryKey{};
         std::array<uint8_t, 16> randomData{};
         std::array<uint8_t, 16> confirmData{};
 
@@ -269,15 +268,13 @@ namespace hal
         aci_gap_set_oob_data(0x00, 0x00, nullptr, 0x00, 0x00, nullptr);
 
         /* OOB data recovery */
-        auto status = aci_gap_get_oob_data(0x00, &addressType, address.data(), &dataSize, temporaryKey.data());
-        really_assert(status == BLE_STATUS_SUCCESS && dataSize == temporaryKey.size());
-        status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
+        auto status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
         really_assert(status == BLE_STATUS_SUCCESS && dataSize == randomData.size());
         status = aci_gap_get_oob_data(0x02, &addressType, address.data(), &dataSize, confirmData.data());
         really_assert(status == BLE_STATUS_SUCCESS && dataSize == confirmData.size());
 
         auto addressTypeConverted = addressType == GAP_PUBLIC_ADDR ? services::GapDeviceAddressType::publicAddress : services::GapDeviceAddressType::randomAddress;
-        services::GapOutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(temporaryKey), infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
+        services::GapOutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
 
         infra::Subject<services::GapPairingObserver>::NotifyObservers([outOfBandData](auto& observer)
             {
