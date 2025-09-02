@@ -37,7 +37,7 @@ namespace hal
         void UpdateState(services::GapState newstate);
         void UpdateResolvingList();
         void ClearResolvingList();
-        void Initialize(const GapService& gapService);
+        void Initialize(const Configuration& configuration);
 
     private:
         services::GapState state = services::GapState::standby;

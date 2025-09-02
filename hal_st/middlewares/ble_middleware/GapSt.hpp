@@ -2,6 +2,7 @@
 #define HAL_ST_GAP_ST_HPP
 
 #include "ble/ble.h"
+#include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
 #include "services/ble/BondStorageSynchronizer.hpp"
@@ -29,12 +30,24 @@ namespace hal
             std::array<uint8_t, 16> encryption;
         };
 
+        struct Security
+        {
+            services::GapPairing::IoCapabilities ioCapabilities;
+            services::GapPairing::SecurityMode securityMode;
+            services::GapPairing::SecurityLevel securityLevel;
+        };
+
+        static constexpr Security justWorks{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1 };
+        static constexpr Security outOfBand{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level4 };
+
         struct Configuration
         {
             const MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
+            const Security& security;
             uint8_t txPowerLevel;
+            bool privacy;
         };
 
         // Implementation of AttMtuExchange
@@ -53,6 +66,8 @@ namespace hal
         void SetIoCapabilities(services::GapPairing::IoCapabilities caps) override;
         void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
+        void GenerateOutOfBandData() override;
+        void SetOutOfBandData(const services::GapOutOfBandData& outOfBandData) override;
 
     protected:
         enum class SecureConnection : uint8_t
@@ -72,6 +87,7 @@ namespace hal
         virtual void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) {};
         virtual void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) {};
         virtual void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event);
+        virtual void HandleHciLeReadLocalP256PublicKeyCompleteEvent(const hci_le_read_local_p256_public_key_complete_event_rp0& event);
 
         virtual void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event);
         virtual void HandleBondLostEvent();
@@ -82,7 +98,7 @@ namespace hal
 
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
 
-        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType);
+        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
 
     private:
         // Implementation of HciEventSink
@@ -90,6 +106,7 @@ namespace hal
 
         void HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent);
         void HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event);
+        void HandleOobDataGeneration();
 
         void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
@@ -103,6 +120,8 @@ namespace hal
         };
 
         ConnectionContext connectionContext;
+        uint8_t ownAddressType;
+        services::GapPairing::SecurityLevel securityLevel;
 
         const uint16_t invalidConnection = 0xffff;
 
@@ -113,7 +132,6 @@ namespace hal
 
         const uint8_t ioCapability = IO_CAP_NO_INPUT_NO_OUTPUT;
         const uint8_t bondingMode = BONDING;
-        const uint8_t mitmMode = MITM_PROTECTION_NOT_REQUIRED;
         const uint8_t secureConnectionSupport = 0x01; /* Secure Connections Pairing supported but optional */
         const uint8_t keypressNotificationSupport = KEYPRESS_SUPPORTED;
         static constexpr uint8_t maxNumberOfBonds = 10;
