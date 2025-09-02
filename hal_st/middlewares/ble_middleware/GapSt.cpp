@@ -118,7 +118,7 @@ namespace hal
 
     uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
     {
-        return 0;
+        return (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? MITM_PROTECTION_REQUIRED : MITM_PROTECTION_NOT_REQUIRED;
     }
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
