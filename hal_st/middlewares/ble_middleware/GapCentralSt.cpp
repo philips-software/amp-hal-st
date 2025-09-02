@@ -51,9 +51,12 @@ namespace hal
     {
         Initialize(configuration);
 
-        infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+        infra::EventDispatcher::Instance().Schedule([this]
             {
-                observer.StateChanged(services::GapState::standby);
+                infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
+                    {
+                        observer.StateChanged(services::GapState::standby);
+                    });
             });
     }
 
