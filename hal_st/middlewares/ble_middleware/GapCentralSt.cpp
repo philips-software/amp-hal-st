@@ -246,12 +246,6 @@ namespace hal
                 });
     }
 
-    void GapCentralSt::MtuExchange() const
-    {
-        auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
-        assert(status == BLE_STATUS_SUCCESS);
-    }
-
     void GapCentralSt::SetDataLength()
     {
         auto status = hci_le_set_data_length(this->connectionContext.connectionHandle, services::GapConnectionParameters::connectionInitialMaxTxOctets, services::GapConnectionParameters::connectionInitialMaxTxTime);
@@ -307,11 +301,7 @@ namespace hal
         {
             infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
                 {
-                    MtuExchange();
-                    infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-                        {
-                            SetDataLength();
-                        });
+                    SetDataLength();
                 });
         }
     }

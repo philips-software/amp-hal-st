@@ -67,6 +67,12 @@ namespace hal
         return maxAttMtu;
     }
 
+    void GapSt::MtuExchange()
+    {
+        auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+        assert(status == BLE_STATUS_SUCCESS);
+    }
+
     void GapSt::RemoveAllBonds()
     {
         bondStorageSynchronizer.RemoveAllBonds();
