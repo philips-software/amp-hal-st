@@ -27,6 +27,7 @@ namespace hal
 
         void WaitLock(hal::Semaphore semaphore) const;
         void Release(hal::Semaphore semaphore) const;
+        bool IsLockedByCurrentCore(hal::Semaphore semaphore) const;
     };
 
     class SynchronousHardwareSemaphoreStm

@@ -1,7 +1,9 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "ble_defs.h"
 #include "ble_gap_aci.h"
+#include "ble_types.h"
+#include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "services/ble/Gap.hpp"
-#include <cstdint>
 
 namespace hal
 {
@@ -34,11 +36,13 @@ namespace hal
 
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : HciEventSink(hciEventSource)
+        , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
+        , securityLevel(configuration.security.securityLevel)
         , bondStorageSynchronizer(bondStorageSynchronizer)
     {
         connectionContext.connectionHandle = GapSt::invalidConnection;
 
-        // HCI Reset to synchronise BLE Stack
+        // HCI Reset to synchronize BLE Stack
         hci_reset();
 
         // Write Identity root key used to derive LTK and CSRK
@@ -51,6 +55,9 @@ namespace hal
         aci_gatt_init();
 
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());
+
+        const std::array<uint8_t, 8> events = { { 0x9F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+        hci_le_set_event_mask(events.data());
 
         SVCCTL_Init();
     }
@@ -86,6 +93,7 @@ namespace hal
     {
         uint8_t numberOfBondedAddress = 0;
         std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
+
         aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
 
         return numberOfBondedAddress;
@@ -103,25 +111,30 @@ namespace hal
         aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
     }
 
+    GapSt::SecureConnection GapSt::SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const
+    {
+        return (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
+    }
+
+    uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
+    {
+        return 0;
+    }
+
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
-        enum class SecureConnection : uint8_t
-        {
-            notSupported = 0,
-            optional = 1,
-            mandatory
-        };
-
-        SecureConnection secureConnectionSupport = (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
-        uint8_t mitmMode = (level == services::GapPairing::SecurityLevel::level3 || level == services::GapPairing::SecurityLevel::level4) ? 1 : 0;
+        SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
+        uint8_t mitmMode = SecurityLevelToMITM(level);
 
         aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        really_assert(caps == IoCapabilities::none);
+
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
@@ -141,6 +154,9 @@ namespace hal
             case services::GapPairing::IoCapabilities::keyboardDisplay:
                 status = aci_gap_set_io_capability(4);
                 break;
+            default:
+                std::abort();
+                break;
         }
 
         assert(status == BLE_STATUS_SUCCESS);
@@ -154,6 +170,33 @@ namespace hal
     void GapSt::NumericComparisonConfirm(bool accept)
     {
         std::abort();
+    }
+
+    void GapSt::GenerateOutOfBandData()
+    {
+        really_assert(securityLevel == services::GapPairing::SecurityLevel::level4);
+
+        auto status = hci_le_read_local_p256_public_key();
+        really_assert(status == BLE_STATUS_SUCCESS);
+    }
+
+    void GapSt::SetOutOfBandData(const services::GapOutOfBandData& outOfBandData)
+    {
+        really_assert(securityLevel == services::GapPairing::SecurityLevel::level4);
+
+        enum OobDataType
+        {
+            random = 1,
+            confirm
+        };
+
+        uint8_t peerAddress = outOfBandData.addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
+
+        auto result = aci_gap_set_oob_data(OOB_DEVICE_TYPE_REMOTE, peerAddress, outOfBandData.macAddress.data(), static_cast<uint8_t>(OobDataType::random), static_cast<uint8_t>(outOfBandData.randomData.size()), outOfBandData.randomData.begin());
+        really_assert(result == BLE_STATUS_SUCCESS);
+
+        result = aci_gap_set_oob_data(OOB_DEVICE_TYPE_REMOTE, peerAddress, outOfBandData.macAddress.data(), static_cast<uint8_t>(OobDataType::confirm), static_cast<uint8_t>(outOfBandData.confirmData.size()), outOfBandData.confirmData.begin());
+        really_assert(result == BLE_STATUS_SUCCESS);
     }
 
     void GapSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
@@ -216,7 +259,43 @@ namespace hal
                 });
     }
 
-    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType)
+    void GapSt::HandleHciLeReadLocalP256PublicKeyCompleteEvent(const hci_le_read_local_p256_public_key_complete_event_rp0& event)
+    {
+        really_assert(event.Status == BLE_STATUS_SUCCESS);
+
+        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
+            {
+                HandleOobDataGeneration();
+            });
+    }
+
+    void GapSt::HandleOobDataGeneration()
+    {
+        uint8_t addressType = 0;
+        hal::MacAddress address{};
+        uint8_t dataSize = 0;
+        std::array<uint8_t, 16> randomData{};
+        std::array<uint8_t, 16> confirmData{};
+
+        /* OOB data generation */
+        aci_gap_set_oob_data(0x00, 0x00, nullptr, 0x00, 0x00, nullptr);
+
+        /* OOB data recovery */
+        auto status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
+        really_assert(status == BLE_STATUS_SUCCESS && dataSize == randomData.size());
+        status = aci_gap_get_oob_data(0x02, &addressType, address.data(), &dataSize, confirmData.data());
+        really_assert(status == BLE_STATUS_SUCCESS && dataSize == confirmData.size());
+
+        auto addressTypeConverted = addressType == GAP_PUBLIC_ADDR ? services::GapDeviceAddressType::publicAddress : services::GapDeviceAddressType::randomAddress;
+        services::GapOutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
+
+        infra::Subject<services::GapPairingObserver>::NotifyObservers([outOfBandData](auto& observer)
+            {
+                observer.OutOfBandDataGenerated(outOfBandData);
+            });
+    }
+
+    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
     {
         uint8_t offset = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
         uint8_t length = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_LEN : CONFIG_DATA_RANDOM_ADDRESS_LEN;
@@ -263,6 +342,9 @@ namespace hal
                 break;
             case HCI_LE_ENHANCED_CONNECTION_COMPLETE_SUBEVT_CODE:
                 HandleHciLeEnhancedConnectionCompleteEvent(*reinterpret_cast<const hci_le_enhanced_connection_complete_event_rp0*>(metaEvent.data));
+                break;
+            case HCI_LE_READ_LOCAL_P256_PUBLIC_KEY_COMPLETE_SUBEVT_CODE:
+                HandleHciLeReadLocalP256PublicKeyCompleteEvent(*reinterpret_cast<const hci_le_read_local_p256_public_key_complete_event_rp0*>(metaEvent.data));
                 break;
             default:
                 break;

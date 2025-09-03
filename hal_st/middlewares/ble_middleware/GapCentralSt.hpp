@@ -25,10 +25,11 @@ namespace hal
         infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapPairing
-        void PairAndBond() override;
         void AllowPairing(bool allow) override;
 
     protected:
+        [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
+
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
         void HandleHciLeAdvertisingReportEvent(const hci_le_advertising_report_event_rp0& event) override;
         void HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event) override;
@@ -48,6 +49,8 @@ namespace hal
         void Initialize(const GapService& gapService);
         void UpdateStateOnConnectionComplete(uint8_t status);
         void HandleConnectionCompleteCommon(uint8_t status);
+        void HandleOobDataGeneration();
+        void Initialize(const Configuration& configuration);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
