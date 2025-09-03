@@ -133,7 +133,10 @@ namespace hal
                         GetObserver().LinkUp(speed);
                     }
                     else
+                    {
                         GetObserver().LinkDown();
+                        SetMiiClockRange();
+                    }
                 }
             });
     }
