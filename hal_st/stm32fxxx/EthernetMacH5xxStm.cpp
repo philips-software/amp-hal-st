@@ -21,16 +21,6 @@ namespace hal
         , receiveDescriptors(*this)
         , sendDescriptors(*this)
     {
-        EnableClockEthernet(0);
-
-        __HAL_RCC_SBS_CLK_ENABLE();
-
-        MODIFY_REG(peripheralEthernet[0]->MACCR, ETH_MACCR_MASK, 0);
-
-        // Select RMII Mode
-        MODIFY_REG(SBS->PMCR, SBS_PMCR_ETH_SEL_PHY, (uint32_t)(SBS_ETH_RMII));
-        // Dummy read to sync with ETH
-        (void)SBS->PMCR;
 
         // Ethernet Software reset
         // Set the SWR bit: resets all MAC subsystem internal registers and logic
