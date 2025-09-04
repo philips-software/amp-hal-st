@@ -24,6 +24,10 @@ namespace hal
 #if !defined(STM32H5)
         __HAL_RCC_SYSCFG_CLK_ENABLE();
         SYSCFG->PMC |= SYSCFG_PMC_MII_RMII_SEL; // Select RMII Mode
+#else
+        __HAL_RCC_SBS_CLK_ENABLE();
+        SBS->PMCR |= SBS_ETH_RMII; // Select RMII Mode
+        (void)SBS->PMCR;           // Dummy read to sync with ETH
 #endif
 
         EnableClockEthernet(0);
@@ -133,7 +137,10 @@ namespace hal
                         GetObserver().LinkUp(speed);
                     }
                     else
+                    {
                         GetObserver().LinkDown();
+                        SetMiiClockRange();
+                    }
                 }
             });
     }

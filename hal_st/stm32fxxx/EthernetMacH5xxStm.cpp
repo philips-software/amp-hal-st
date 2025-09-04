@@ -6,7 +6,6 @@
 namespace
 {
     constexpr uint32_t ETH_SEGMENT_SIZE_DEFAULT = 0x218U;
-    constexpr uint32_t ETH_MACCR_MASK = 0xFFFB7F7CU;
 }
 
 namespace hal
@@ -21,25 +20,6 @@ namespace hal
         , receiveDescriptors(*this)
         , sendDescriptors(*this)
     {
-        EnableClockEthernet(0);
-
-        __HAL_RCC_SBS_CLK_ENABLE();
-
-        MODIFY_REG(peripheralEthernet[0]->MACCR, ETH_MACCR_MASK, 0);
-
-        // Select RMII Mode
-        MODIFY_REG(SBS->PMCR, SBS_PMCR_ETH_SEL_PHY, (uint32_t)(SBS_ETH_RMII));
-        // Dummy read to sync with ETH
-        (void)SBS->PMCR;
-
-        // Ethernet Software reset
-        // Set the SWR bit: resets all MAC subsystem internal registers and logic
-        // After reset all the registers holds their respective reset values
-        peripheralEthernet[0]->DMAMR |= ETH_DMAMR_SWR;
-        while ((peripheralEthernet[0]->DMAMR & ETH_DMAMR_SWR) != 0)
-        {
-        }
-
         // Set Channel Tx descriptor list address register
         peripheralEthernet[0]->DMACTDLAR = reinterpret_cast<uint32_t>(&sendDescriptors.descriptors[0]);
         // Set tail pointer to first element
@@ -87,16 +67,14 @@ namespace hal
         // Set the Flush Transmit FIFO bit
         peripheralEthernet[0]->MTLTQOMR |= ETH_MTLTQOMR_FTQ;
 
-        // Enable the MAC transmission
-        peripheralEthernet[0]->MACCR |= ETH_MACCR_TE;
-
         // Enable interrupts
         peripheralEthernet[0]->DMACIER |= ETH_DMACIER_TIE | ETH_DMACIER_RIE | ETH_DMACIER_RSE | ETH_DMACIER_FBEE | ETH_DMACIER_AIE | ETH_DMACIER_NIE;
     }
 
     EthernetMacStm::~EthernetMacStm()
     {
-        MODIFY_REG(peripheralEthernet[0]->MACCR, ETH_MACCR_MASK, 0);
+        ResetDma();
+        peripheralEthernet[0]->MACCR = 0;
     }
 
     void EthernetMacStm::SendBuffer(infra::ConstByteRange data, bool last)
