@@ -12,10 +12,10 @@ namespace hal
     public:
         TracingGattServerSt(hal::HciEventSource& hciEventSource, services::Tracer& tracer);
 
-        // From services::GattServer
+        // Implementation of services::GattServer
         void AddService(services::GattServerService& service) override;
 
-        // From services::GattCharacteristicClientOperations
+        // Implementation of services::GattServerCharacteristicOperations
         UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
 
     protected:
