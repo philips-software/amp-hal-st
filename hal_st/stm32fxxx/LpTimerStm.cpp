@@ -17,12 +17,24 @@ namespace hal
         handle.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
         handle.Init.Clock.Prescaler = timing.prescaler;
         handle.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
-        handle.Init.Period = timing.period;
+#if defined(STM32WB)
+        // STM32WB doesn't have Period and RepetitionCounter in Init structure
         handle.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
         handle.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
         handle.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
-        handle.Init.RepetitionCounter = timing.repetitionCounter;
         handle.Init.UpdateMode = timing.updateMode;
+        handle.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
+        
+        // Store timing for later use in Start functions
+        currentPeriod = timing.period;
+#else
+        handle.Init.Period = timing.period;
+        handle.Init.RepetitionCounter = timing.repetitionCounter;
+        handle.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
+        handle.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
+        handle.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
+        handle.Init.UpdateMode = timing.updateMode;
+#endif
 
         auto result = HAL_LPTIM_Init(&handle);
         assert(result == HAL_OK);
@@ -41,7 +53,11 @@ namespace hal
 
     void FreeRunningLowPowerTimerStm::Start()
     {
+#if defined(STM32WB)
+        auto result = HAL_LPTIM_Counter_Start(&handle, currentPeriod);
+#else
         auto result = HAL_LPTIM_Counter_Start(&handle);
+#endif
         assert(result == HAL_OK);
     }
 
@@ -64,7 +80,11 @@ namespace hal
     {
         this->onIrq = onIrq;
         this->type = type;
+#if defined(STM32WB)
+        auto result = HAL_LPTIM_Counter_Start_IT(&handle, currentPeriod);
+#else
         auto result = HAL_LPTIM_Counter_Start_IT(&handle);
+#endif
         assert(result == HAL_OK);
     }
 
@@ -76,7 +96,11 @@ namespace hal
 
     void LowPowerTimerWithInterruptStm::OnInterrupt()
     {
+#if defined(STM32WB)
+        bool updateEvent = __HAL_LPTIM_GET_FLAG(&handle, LPTIM_FLAG_ARRM);
+#else
         bool updateEvent = __HAL_LPTIM_GET_FLAG(&handle, LPTIM_FLAG_UPDATE);
+#endif
 
         // let HAL handle clearing all flags
         HAL_LPTIM_IRQHandler(&handle);
