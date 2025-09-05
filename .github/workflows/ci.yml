@@ -170,7 +170,8 @@ jobs:
         with:
           name: hal_st_windows
       - run: tar -zxvf hal_st-4.0.0-win64.tar.gz
-      - run: mkdir install && mv hal_st-*-win64/* install/
+      - run: mkdir install
+      - run: mv hal_st-*-win64/* install/
       - run: ls install/bin
       - run: install/bin/integration_test.runner.exe run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
       - run: docker logs "${{ job.services.flex.id }}"
