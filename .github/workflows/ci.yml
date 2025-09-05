@@ -155,7 +155,6 @@ jobs:
     #    env:
     #      POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
     steps:
-      - run: traceroute ${{ vars.ENV_POSTMASTER_IP }}
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           persist-credentials: false
