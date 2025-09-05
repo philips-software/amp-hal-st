@@ -155,7 +155,6 @@ jobs:
     #    env:
     #      POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
     steps:
-      - run: ping ${{ vars.ENV_POSTMASTER_IP }}
       - run: traceroute ${{ vars.ENV_POSTMASTER_IP }}
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
@@ -163,8 +162,17 @@ jobs:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: hal_st
-      - run: tar -zxvf hal_st-*.tar.gz
-      - run: mkdir install && mv hal_st-*/* install/
+      - name: Start flex container
+        run: docker run -d --name flex_container -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:latest ${{ vars.ENV_POSTMASTER_IP }}
+      - run: docker logs flex_container
+      - run: tar -zxvf hal_st-*-Linux.tar.gz
+      - run: mkdir install
+      - run: mv hal_st-*-Linux/* install/
       - run: ls install/bin
       - run: install/bin/integration_test.runner run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
       - run: docker logs "${{ job.services.flex.id }}"
+      - if: always()
+        run: docker logs flex_container
+      - name: Remove flex container
+        if: always()
+        run: docker rm -f flex_container
