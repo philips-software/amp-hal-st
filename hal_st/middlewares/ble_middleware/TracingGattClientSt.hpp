@@ -20,7 +20,7 @@ namespace hal
         // Implementation of services::GattClientCharacteristicOperations
         void Read(const services::GattClientObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
         void Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
-        void WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data) override;
+        void WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
         void DisableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
         void EnableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
