@@ -102,6 +102,17 @@
         </xsl:otherwise>
       </xsl:choose>
 
+      <xsl:attribute name="type">
+        <xsl:choose>
+          <xsl:when test="@type != ''">
+            <xsl:value-of select="@type"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="concat(../@name, @name)"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:attribute>
+
       <xsl:apply-templates/>
     </pin>
   </xsl:template>
