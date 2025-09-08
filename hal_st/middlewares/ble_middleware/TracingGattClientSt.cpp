@@ -27,46 +27,46 @@ namespace hal
         GattClientSt::StartDescriptorDiscovery(handle, endHandle);
     }
 
-    void TracingGattClientSt::Read(const services::GattClientObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::Read, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle();
-        GattClientSt::Read(characteristic, onResponse, onDone);
+        tracer.Trace() << "TracingGattClientSt::Read, Value Handle: " << infra::hex << handle;
+        GattClientSt::Read(handle, onResponse, onDone);
     }
 
-    void TracingGattClientSt::Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
-        GattClientSt::Write(characteristic, data, onDone);
+        tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
+        GattClientSt::Write(handle, data, onDone);
     }
 
-    void TracingGattClientSt::WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data)
+    void TracingGattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data)
     {
-        tracer.Trace() << "TracingGattClientSt::WriteWithoutResponse, Value Handle: " << infra::hex << characteristic.CharacteristicValueHandle() << ", data: " << infra::AsHex(data);
-        GattClientSt::WriteWithoutResponse(characteristic, data);
+        tracer.Trace() << "TracingGattClientSt::WriteWithoutResponse, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
+        GattClientSt::WriteWithoutResponse(handle, data);
     }
 
-    void TracingGattClientSt::EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::EnableNotification, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
-        GattClientSt::EnableNotification(characteristic, onDone);
+        tracer.Trace() << "TracingGattClientSt::EnableNotification, Handle: " << infra::hex << (handle + 1);
+        GattClientSt::EnableNotification(handle, onDone);
     }
 
-    void TracingGattClientSt::DisableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::DisableNotification, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
-        GattClientSt::DisableNotification(characteristic, onDone);
+        tracer.Trace() << "TracingGattClientSt::DisableNotification, Handle: " << infra::hex << (handle + 1);
+        GattClientSt::DisableNotification(handle, onDone);
     }
 
-    void TracingGattClientSt::EnableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::EnableIndication, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
-        GattClientSt::EnableIndication(characteristic, onDone);
+        tracer.Trace() << "TracingGattClientSt::EnableIndication, Handle: " << infra::hex << (handle + 1);
+        GattClientSt::EnableIndication(handle, onDone);
     }
 
-    void TracingGattClientSt::DisableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::DisableIndication, Handle: " << infra::hex << (characteristic.CharacteristicValueHandle() + 1);
-        GattClientSt::DisableIndication(characteristic, onDone);
+        tracer.Trace() << "TracingGattClientSt::DisableIndication, Handle: " << infra::hex << (handle + 1);
+        GattClientSt::DisableIndication(handle, onDone);
     }
 
     void TracingGattClientSt::HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event)

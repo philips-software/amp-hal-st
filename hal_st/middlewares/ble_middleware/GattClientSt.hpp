@@ -18,19 +18,17 @@ namespace hal
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
 
-        // Implementation of services::GattClientDiscovery
+        // Implementation of services::GattClient
         void StartServiceDiscovery() override;
         void StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
-
-        // Implementation of services::GattClientCharacteristicOperations
-        void Read(const services::GattClientObserver& characteristic, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
-        void Write(const services::GattClientObserver& characteristic, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
-        void WriteWithoutResponse(const services::GattClientObserver& characteristic, infra::ConstByteRange data) override;
-        void EnableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableNotification(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void EnableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableIndication(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone) override;
+        void Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
+        void Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
+        void WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data) override;
+        void EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
+        void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -60,17 +58,17 @@ namespace hal
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
 
-        void WriteCharacteristicDescriptor(const services::GattClientObserver& characteristic, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
+        void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
 
         template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
-        void WriteCharacteristicDescriptor(const services::GattClientObserver& characteristic, const infra::Function<void(uint8_t)>& onDone)
+        void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
         {
             this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
             {
                 onDone(result);
             };
 
-            WriteCharacteristicDescriptor(characteristic, p, v);
+            WriteCharacteristicDescriptor(handle, p, v);
         }
 
     protected:
