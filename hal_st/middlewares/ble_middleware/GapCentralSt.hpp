@@ -25,7 +25,6 @@ namespace hal
         infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapPairing
-        void PairAndBond() override;
         void AllowPairing(bool allow) override;
 
     protected:
@@ -47,10 +46,11 @@ namespace hal
 
         void HandleAdvertisingReport(const Advertising_Report_t& advertisingReport);
         void SetDataLength();
-        void MtuExchange() const;
         void Initialize(const GapService& gapService);
         void UpdateStateOnConnectionComplete(uint8_t status);
         void HandleConnectionCompleteCommon(uint8_t status);
+        void HandleOobDataGeneration();
+        void Initialize(const Configuration& configuration);
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;

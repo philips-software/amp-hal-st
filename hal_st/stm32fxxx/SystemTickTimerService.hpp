@@ -18,6 +18,7 @@ namespace hal
     public:
         SystemTickTimerService(infra::Duration tickDuration = std::chrono::milliseconds(1), uint32_t id = infra::systemTimerServiceId);
 
+        void Reset();
         infra::TimePoint Now() const override;
 
     protected:
