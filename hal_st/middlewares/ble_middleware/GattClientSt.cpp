@@ -76,9 +76,15 @@ namespace hal
         aci_gatt_write_char_value(connectionHandle, handle, data.size(), data.cbegin());
     }
 
-    void GattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data)
+    void GattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        aci_gatt_write_without_resp(connectionHandle, handle, data.size(), data.cbegin());
+        auto var = aci_gatt_write_without_resp(connectionHandle, handle, data.size(), data.cbegin());
+        if (var == BLE_STATUS_SUCCESS)
+            onDone(services::OperationStatus::success);
+        else if (var == BLE_STATUS_INSUFFICIENT_RESOURCES)
+            onDone(services::OperationStatus::retry);
+        else
+            onDone(services::OperationStatus::error);
     }
 
     void GattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)

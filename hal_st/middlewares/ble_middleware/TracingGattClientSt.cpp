@@ -39,10 +39,10 @@ namespace hal
         GattClientSt::Write(handle, data, onDone);
     }
 
-    void TracingGattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data)
+    void TracingGattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::WriteWithoutResponse, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
-        GattClientSt::WriteWithoutResponse(handle, data);
+        GattClientSt::WriteWithoutResponse(handle, data, onDone);
     }
 
     void TracingGattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
