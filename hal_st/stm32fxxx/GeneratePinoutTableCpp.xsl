@@ -39,7 +39,7 @@ namespace hal
 
 </xsl:text>
   </xsl:template>
-  
+
   <xsl:template match="pin" mode="list-pins">
     <xsl:if test="count(*) != 0">
       <xsl:text><![CDATA[    constexpr std::array<const GpioStm::PinPosition, ]]></xsl:text>
@@ -64,7 +64,7 @@ namespace hal
 </xsl:text>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="gpio_pin">
     <xsl:if test="position() mod 4 = 1">
       <xsl:text>       </xsl:text>
@@ -92,8 +92,7 @@ namespace hal
       <xsl:text>        {
 </xsl:text>
       <xsl:text>            PinConfigTypeStm::</xsl:text>
-      <xsl:value-of select="concat(translate(substring(../@name, 1, 1), $uppercase, $lowercase), substring(../@name, 2))"/>
-      <xsl:value-of select="@name"/>
+      <xsl:value-of select="concat(translate(substring(@type, 1, 1), $uppercase, $lowercase), substring(@type, 2))"/>
       <xsl:text>,
 </xsl:text>
       <xsl:text>            pinoutTable</xsl:text>
