@@ -18,62 +18,72 @@ namespace hal
 
     void GattClientSt::StartServiceDiscovery()
     {
-        onDiscoveryCompletion = [this]()
+        onDiscoveryCompletion = [this](services::OperationStatus status)
         {
-            infra::Subject<services::GattClientObserver>::NotifyObservers([](auto& observer)
+            infra::Subject<services::GattClientObserver>::NotifyObservers([status](auto& observer)
                 {
-                    observer.ServiceDiscoveryComplete();
+                    observer.ServiceDiscoveryComplete(status);
                 });
         };
 
-        aci_gatt_disc_all_primary_services(connectionHandle);
+        auto ret = aci_gatt_disc_all_primary_services(connectionHandle);
+        if (ret != BLE_STATUS_SUCCESS)
+            onDiscoveryCompletion(services::OperationStatus::error);
     }
 
     void GattClientSt::StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
-        onDiscoveryCompletion = [this]()
+        onDiscoveryCompletion = [this](services::OperationStatus status)
         {
-            infra::Subject<services::GattClientObserver>::NotifyObservers([](auto& observer)
+            infra::Subject<services::GattClientObserver>::NotifyObservers([status](auto& observer)
                 {
-                    observer.CharacteristicDiscoveryComplete();
+                    observer.CharacteristicDiscoveryComplete(status);
                 });
         };
 
-        aci_gatt_disc_all_char_of_service(connectionHandle, handle, endHandle);
+        auto ret = aci_gatt_disc_all_char_of_service(connectionHandle, handle, endHandle);
+        if (ret != BLE_STATUS_SUCCESS)
+            onDiscoveryCompletion(services::OperationStatus::error);
     }
 
     void GattClientSt::StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
-        onDiscoveryCompletion = [this]()
+        onDiscoveryCompletion = [this](services::OperationStatus status)
         {
-            infra::Subject<services::GattClientObserver>::NotifyObservers([](auto& observer)
+            infra::Subject<services::GattClientObserver>::NotifyObservers([status](auto& observer)
                 {
-                    observer.DescriptorDiscoveryComplete();
+                    observer.DescriptorDiscoveryComplete(status);
                 });
         };
 
-        aci_gatt_disc_all_char_desc(connectionHandle, handle, endHandle);
+        auto ret = aci_gatt_disc_all_char_desc(connectionHandle, handle, endHandle);
+        if (ret != BLE_STATUS_SUCCESS)
+            onDiscoveryCompletion(services::OperationStatus::error);
     }
 
-    void GattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         this->onReadResponse = onResponse;
-        this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+        this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
         {
             onDone(result);
         };
 
-        aci_gatt_read_char_value(connectionHandle, handle);
+        auto ret = aci_gatt_read_char_value(connectionHandle, handle);
+        if (ret != BLE_STATUS_SUCCESS)
+            this->onCharacteristicOperationsDone(services::OperationStatus::error);
     }
 
-    void GattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+        this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
         {
             onDone(result);
         };
 
-        aci_gatt_write_char_value(connectionHandle, handle, data.size(), data.cbegin());
+        auto ret = aci_gatt_write_char_value(connectionHandle, handle, data.size(), data.cbegin());
+        if (ret != BLE_STATUS_SUCCESS)
+            this->onCharacteristicOperationsDone(services::OperationStatus::error);
     }
 
     void GattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
@@ -87,22 +97,22 @@ namespace hal
             onDone(services::OperationStatus::error);
     }
 
-    void GattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification>(handle, onDone);
     }
 
-    void GattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(handle, onDone);
     }
 
-    void GattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication>(handle, onDone);
     }
 
-    void GattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void GattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(handle, onDone);
     }
@@ -206,10 +216,10 @@ namespace hal
 
     void GattClientSt::HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event)
     {
-        if (onDiscoveryCompletion)
-            onDiscoveryCompletion(); // Does this conflict with other operations? If not, why do we even get a GattComplete for discovery?
-        else if (onCharacteristicOperationsDone)
-            onCharacteristicOperationsDone(event.Error_Code);
+        if (this->onDiscoveryCompletion)
+            this->onDiscoveryCompletion(event.Error_Code == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error); // Does this conflict with other operations? If not, why do we even get a GattComplete for discovery?
+        else if (this->onCharacteristicOperationsDone)
+            this->onCharacteristicOperationsDone(event.Error_Code == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error);
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
@@ -343,10 +353,12 @@ namespace hal
         }
     }
 
-    void GattClientSt::WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const
+    void GattClientSt::WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue)
     {
         const uint16_t offsetCccd = 1;
 
-        aci_gatt_write_char_desc(connectionHandle, handle + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        auto ret = aci_gatt_write_char_desc(connectionHandle, handle + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
+        if (onCharacteristicOperationsDone && ret != BLE_STATUS_SUCCESS)
+            onCharacteristicOperationsDone(services::OperationStatus::error);
     }
 }
