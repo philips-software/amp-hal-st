@@ -171,7 +171,7 @@ jobs:
           name: hal_st_tester
       - run: ls
       - name: Start flex container
-        run: docker run -d --name flex_container -v ${pwd}:/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:latest ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
+        run: docker run -d --name flex_container -v volume:/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:latest ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
       - run: docker logs flex_container
       - run: docker inspect flex_container
       - run: tar -zxvf hal_st-*-Linux.tar.gz
