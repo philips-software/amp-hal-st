@@ -174,8 +174,8 @@ jobs:
         run: docker run -d --name flex_container -v $(pwd):/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:latest ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
       - run: docker logs flex_container
       - run: docker inspect flex_container
-      - run: timeout 90 sh -c "while [[ $(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0][
-"State"]["Health"]["Status"])') != "healthy" ]] ; do echo no ; sleep 1; done"
+      - run: while [[ $(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])') != "healthy" ]] ; do echo no ; sleep 1; done
+        timeout-minutes: 2
       - run: tar -zxvf hal_st-*-Linux.tar.gz
       - run: mkdir install
       - run: mv hal_st-*-Linux/* install/
