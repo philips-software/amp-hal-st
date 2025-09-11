@@ -26,7 +26,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        3625d29e70a9bfbd68fc4ab2dbc5e7f7763c37aa # unreleased
+        GIT_TAG        9d3718fe966a1b4308b1f7ee4deb572958733cf9 # unreleased
     )
     FetchContent_MakeAvailable(emil)
 
