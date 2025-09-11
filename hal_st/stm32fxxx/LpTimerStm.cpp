@@ -18,14 +18,12 @@ namespace hal
         handle.Init.Clock.Prescaler = timing.prescaler;
         handle.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
 #if defined(STM32WB)
-        // STM32WB doesn't have Period and RepetitionCounter in Init structure
         handle.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
         handle.Init.Input1Source = LPTIM_INPUT1SOURCE_GPIO;
         handle.Init.Input2Source = LPTIM_INPUT2SOURCE_GPIO;
         handle.Init.UpdateMode = timing.updateMode;
         handle.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
-        
-        // Store timing for later use in Start functions
+
         currentPeriod = timing.period;
 #else
         handle.Init.Period = timing.period;

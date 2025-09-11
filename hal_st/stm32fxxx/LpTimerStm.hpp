@@ -30,7 +30,7 @@ namespace hal
         LPTIM_HandleTypeDef handle{};
         const uint8_t timerIndex;
 #if defined(STM32WB)
-        uint32_t currentPeriod{0}; // STM32WB needs to store period separately
+        uint32_t currentPeriod{ 0 };
 #endif
 
     public:
