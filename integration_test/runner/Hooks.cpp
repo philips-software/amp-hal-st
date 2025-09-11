@@ -21,10 +21,14 @@ HOOK_BEFORE_ALL()
 
     try
     {
+        services::GlobalTracer().Trace() << "Opening ECHO connection to: " << target;
+
         context.SetShared(application::OpenEcho(target, context.Get<services::ConnectionFactoryWithNameResolver>()));
         //auto tracingEcho = application::OpenTracingEcho(target, context.Get<services::ConnectionFactoryWithNameResolver>(), services::GlobalTracer());
         //context.SetShared(tracingEcho.first);
         //context.SetShared(tracingEcho.second);
+
+        services::GlobalTracer().Trace() << "Established ECHO connection";
     }
     catch (std::exception& e)
     {
