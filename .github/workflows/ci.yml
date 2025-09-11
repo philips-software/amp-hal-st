@@ -136,6 +136,11 @@ jobs:
           configurePreset: ${{ matrix.target }}
           buildPreset: ${{ matrix.target }}-${{ matrix.configuration }}
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ contains(matrix.target, 'stm32f767') && contains(matrix.gcc, '10.3-2021.10') }}
+        with:
+          name: hal_st_tester
+          path: build/stm32f767/integration_test/tester/RelWithDebInfo/integration_test.tester.bin
 
   integration_test:
     name: Integration test
@@ -161,8 +166,12 @@ jobs:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: hal_st
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: hal_st_tester
+      - run: ls
       - name: Start flex container
-        run: docker run -d --name flex_container -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:latest ${{ vars.ENV_POSTMASTER_IP }}
+        run: docker run -d --name flex_container -v ${pwd}:/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:latest ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
       - run: docker logs flex_container
       - run: docker inspect flex_container
       - run: tar -zxvf hal_st-*-Linux.tar.gz
