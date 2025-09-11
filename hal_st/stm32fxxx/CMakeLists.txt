@@ -195,7 +195,13 @@ if (TARGET_MCU_VENDOR STREQUAL st)
         message(FATAL_ERROR "Unknown TARGET_MCU \"${TARGET_MCU}\". Please configure HALST_XML_GPIO and HALST_XML_STM32.")
     endif()
 
-    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl PinoutTableItems.xml
+    if (HALST_XML_PINOUT_TABLE_ITEMS)
+        set(pinout_table_items "${CMAKE_SOURCE_DIR}/${HALST_XML_PINOUT_TABLE_ITEMS}")
+    else()
+        set(pinout_table_items "${CMAKE_CURRENT_SOURCE_DIR}/PinoutTableItems.xml")
+    endif()
+
+    generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefaultStructure.xml GeneratePinoutTableStructure.xsl ${pinout_table_items}
         --stringparam gpio-document ${gpio_xml} --stringparam mcu-document ${mcu_xml})
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.cpp GeneratePinoutTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PinoutTableDefault.hpp GeneratePinoutTableHpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PinoutTableDefaultStructure.xml")
