@@ -26,4 +26,8 @@
   <peripheral name="Timer" type="TIM_TypeDef*" prefix="TIM">
     <item name="TIM1_8WB5"/>
   </peripheral>
+  <peripheral name="LpTimer" type="LPTIM_TypeDef*" prefix="LPTIM">
+    <item name="LPTIM"/>
+    <interrupt/>
+  </peripheral>
 </peripherals>

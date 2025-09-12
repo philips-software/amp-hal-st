@@ -76,8 +76,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     LowPowerStrategyStm.hpp
     LpTimerStm.cpp
     LpTimerStm.hpp
-    LpTimerPwmStm.cpp
-    LpTimerPwmStm.hpp
+    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:LpTimerPwmStm.cpp>
+    $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:LpTimerPwmStm.hpp>
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
