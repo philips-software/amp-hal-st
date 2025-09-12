@@ -1,5 +1,6 @@
 add_executable(integration_test.flasher)
 emil_build_for(integration_test.flasher HOST All)
+emil_install(integration_test.flasher EXPORT halstIntegrationTestTargets DESTINATION bin)
 
 target_sources(integration_test.flasher PRIVATE
     Main.cpp
