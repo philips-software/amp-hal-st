@@ -188,7 +188,7 @@ jobs:
       - run: mkdir install
       - run: mv hal_st-*-Linux/* install/
       - run: ls install/bin
-      - run: install/bin/integration_test.flasher ${{ vars.ENV_POSTMASTER_IP }} integration_test.tested.bin
+      - run: install/bin/integration_test.flasher tcp://localhost:1234/target/echo/programmer integration_test.tested.bin
       - run: install/bin/integration_test.runner run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
       - if: always()
         run: docker logs flex_container
