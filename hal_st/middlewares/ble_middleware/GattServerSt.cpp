@@ -76,6 +76,34 @@ namespace hal
             return UpdateStatus::error;
     }
 
+    void GattServerSt::AddDescriptor(const services::GattServerCharacteristicOperationsObserver& characteristic, const services::AttAttribute::Uuid& uuid, infra::ConstByteRange data)
+    {
+        constexpr uint8_t encryptionKeySize = 0x10;
+        constexpr uint8_t attributePermissions = ATTR_PERMISSION_NONE;
+        constexpr uint8_t attributeAccess = ATTR_ACCESS_READ_ONLY;
+        constexpr uint8_t notifyEvent = GATT_DONT_NOTIFY_EVENTS;
+        constexpr uint8_t variableLength = 0;
+
+        uint16_t descriptorHandle;
+
+        auto result = aci_gatt_add_char_desc(characteristic.ServiceHandle(),
+            characteristic.CharacteristicHandle(),
+            UuidToType(uuid),
+            ConvertUuid<Char_Desc_Uuid_t>(uuid),
+            data.size(),
+            data.size(),
+            data.begin(),
+            attributePermissions,
+            attributeAccess,
+            notifyEvent,
+            encryptionKeySize,
+            variableLength,
+            &descriptorHandle);
+
+        if (result != BLE_STATUS_SUCCESS)
+            ReportError(result);
+    }
+
     void GattServerSt::HciEvent(hci_event_pckt& event)
     {
         if (event.evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE)
