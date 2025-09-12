@@ -128,8 +128,10 @@ int main(int argc, char** argv)
         static main_::NetworkAdapter network;
         static hal::FileSystemGeneric fileSystem;
 
-        auto firmware = firmwareArgument ? fileSystem.ReadBinaryFile(args::get(firmwareArgument)) : std::vector<uint8_t>{};
+        auto firmware = fileSystem.ReadBinaryFile(args::get(firmwareArgument));
         auto [echo, echoTracer] = application::OpenTracingEcho(args::get(targetArgument), network.ConnectionFactoryWithNameResolver(), tracer.tracer);
+
+        tracer.tracer.Trace() << "Flashing " << args::get(firmwareArgument);
 
         FlashTracer flashTracer(*echoTracer);
         FirmwareSender sender(firmware, *echo);
@@ -138,6 +140,8 @@ int main(int argc, char** argv)
             {
                 return sender.Done();
             });
+
+        tracer.tracer.Trace() << "Flashing done";
     }
     catch (const args::Help&)
     {
