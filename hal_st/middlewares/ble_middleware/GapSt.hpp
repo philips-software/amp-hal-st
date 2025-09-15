@@ -38,6 +38,7 @@ namespace hal
         };
 
         static constexpr Security justWorks{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level1 };
+        static constexpr Security encrypted{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level2 };
         static constexpr Security outOfBand{ services::GapPairing::IoCapabilities::none, services::GapPairing::SecurityMode::mode1, services::GapPairing::SecurityLevel::level4 };
 
         struct Configuration
