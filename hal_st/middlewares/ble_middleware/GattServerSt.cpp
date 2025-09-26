@@ -33,6 +33,11 @@ namespace
     {
         return infra::enum_cast(permissions);
     }
+
+    uint8_t ConvertDescriptorAccess(services::GattServerDescriptor::AccessFlags access)
+    {
+        return infra::enum_cast(access);
+    }
 }
 
 namespace hal
@@ -46,23 +51,18 @@ namespace hal
         constexpr uint8_t gattPrimaryService = 0x01;
         uint8_t attributeCount = service.GetAttributeCount();
 
-        services::GlobalTracer().Trace() << "GattServerSt::AddService: attributeCount=" << attributeCount;
-
         auto result = aci_gatt_add_service(UuidToType(service.Type()), ConvertUuid<Service_UUID_t>(service.Type()),
             gattPrimaryService, attributeCount, &service.Handle());
 
         if (result != BLE_STATUS_SUCCESS)
             ReportError(result);
 
-        services::GlobalTracer().Trace() << "GattServerSt::AddService: Adding characteristics...";
         for (auto& characteristic : service.Characteristics())
         {
             AddCharacteristic(characteristic);
 
             for (auto& descriptor : characteristic.Descriptors())
-            {
                 AddCharacteristicDescriptor(characteristic, descriptor);
-            }
         }
 
         services.push_front(service);
@@ -107,9 +107,9 @@ namespace hal
 
     void GattServerSt::AddCharacteristic(services::GattServerCharacteristic& characteristic)
     {
-        constexpr uint8_t encryptionKeySize = 0x10;
-        constexpr uint8_t notifyAttributeWrite = 0x01;
-        constexpr uint8_t variableLength = 0x01;
+        constexpr uint8_t encryptionKeySize = 10;
+        constexpr uint8_t notifyAttributeWrite = GATT_NOTIFY_ATTRIBUTE_WRITE;
+        constexpr uint8_t variableLength = CHAR_VALUE_LEN_VARIABLE;
 
         auto result = aci_gatt_add_char(characteristic.ServiceHandle(),
             UuidToType(characteristic.Type()),
@@ -128,45 +128,30 @@ namespace hal
             ReportError(result);
     }
 
-    void GattServerSt::AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, const services::GattServerCharacteristicDescriptor& descriptor)
+    void GattServerSt::AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor)
     {
-        services::GlobalTracer().Trace() << "GattServerSt::AddCharacteristicDescriptor: Adding  descriptor UUID=0x"
-                                         << infra::hex << (descriptor.Uuid().Is<services::AttAttribute::Uuid16>() ? descriptor.Uuid().Get<services::AttAttribute::Uuid16>() : 0)
-                                         << ", size=" << descriptor.Data().size()
-                                         << ", data=0x" << infra::AsHex(descriptor.Data());
-
         constexpr uint8_t encryptionKeySize = 7;
         constexpr uint8_t attributePermissions = ATTR_PERMISSION_NONE;
-        constexpr uint8_t attributeAccess = ATTR_ACCESS_READ_ONLY;
         constexpr uint8_t notifyEvent = GATT_DONT_NOTIFY_EVENTS;
-        constexpr uint8_t variableLength = 0;
-
-        uint16_t descriptorHandle;
+        constexpr uint8_t variableLength = CHAR_VALUE_LEN_CONSTANT;
 
         auto result = aci_gatt_add_char_desc(characteristic.ServiceHandle(),
             characteristic.CharacteristicHandle(),
-            UuidToType(descriptor.Uuid()),
-            ConvertUuid<Char_Desc_Uuid_t>(descriptor.Uuid()),
+            UuidToType(descriptor.Type()),
+            ConvertUuid<Char_Desc_Uuid_t>(descriptor.Type()),
             descriptor.Data().size(),
             descriptor.Data().size(),
             descriptor.Data().begin(),
             attributePermissions,
-            attributeAccess,
+            ConvertDescriptorAccess(descriptor.Access()),
             notifyEvent,
             encryptionKeySize,
             variableLength,
-            &descriptorHandle);
+            &descriptor.Handle());
 
         if (result != BLE_STATUS_SUCCESS)
         {
-            services::GlobalTracer().Trace() << "GattServerSt::AddDescriptor: Failed with result=0x"
-                                             << infra::hex << static_cast<uint32_t>(result);
             ReportError(result);
-        }
-        else
-        {
-            services::GlobalTracer().Trace() << "GattServerSt::AddDescriptor: Success, handle=0x"
-                                             << infra::hex << descriptorHandle;
         }
     }
 

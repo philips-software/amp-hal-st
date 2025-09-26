@@ -26,7 +26,7 @@ namespace hal
 
     protected:
         virtual void AddCharacteristic(services::GattServerCharacteristic& characteristic);
-        virtual void AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, const services::GattServerCharacteristicDescriptor& descriptor);
+        virtual void AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor);
         virtual void HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event);
         virtual void ReportError(tBleStatus status) const;
 
