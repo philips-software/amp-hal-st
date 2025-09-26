@@ -16,13 +16,13 @@ namespace hal
         void StartServiceDiscovery() override;
         void StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
-        void Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
-        void Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
+        void Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone) override;
-        void EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
-        void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
 
     protected:
         void HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event) override;
