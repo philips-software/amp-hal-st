@@ -1,5 +1,4 @@
 #include "hal_st/middlewares/ble_middleware/GattServerSt.hpp"
-#include "services/tracer/GlobalTracer.hpp"
 
 namespace
 {
@@ -107,7 +106,7 @@ namespace hal
 
     void GattServerSt::AddCharacteristic(services::GattServerCharacteristic& characteristic)
     {
-        constexpr uint8_t encryptionKeySize = 10;
+        constexpr uint8_t encryptionKeySize = 0x10;
         constexpr uint8_t notifyAttributeWrite = GATT_NOTIFY_ATTRIBUTE_WRITE;
         constexpr uint8_t variableLength = CHAR_VALUE_LEN_VARIABLE;
 
@@ -130,7 +129,7 @@ namespace hal
 
     void GattServerSt::AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor)
     {
-        constexpr uint8_t encryptionKeySize = 7;
+        constexpr uint8_t encryptionKeySize = 0x10;
         constexpr uint8_t attributePermissions = ATTR_PERMISSION_NONE;
         constexpr uint8_t notifyEvent = GATT_DONT_NOTIFY_EVENTS;
         constexpr uint8_t variableLength = CHAR_VALUE_LEN_CONSTANT;
