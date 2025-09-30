@@ -149,9 +149,7 @@ namespace hal
             &descriptor.Handle());
 
         if (result != BLE_STATUS_SUCCESS)
-        {
             ReportError(result);
-        }
     }
 
     void GattServerSt::HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event)
