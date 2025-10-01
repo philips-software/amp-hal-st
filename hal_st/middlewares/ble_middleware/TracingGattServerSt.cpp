@@ -27,6 +27,13 @@ namespace hal
         tracer.Trace() << "GattServerSt::AddCharacteristic [" << characteristic.Handle() << "] " << characteristic.Type();
     }
 
+    void TracingGattServerSt::AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor)
+    {
+        GattServerSt::AddCharacteristicDescriptor(characteristic, descriptor);
+
+        tracer.Trace() << "GattServerSt::AddCharacteristicDescriptor [" << descriptor.Handle() << "] " << characteristic.Type();
+    }
+
     void TracingGattServerSt::HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event)
     {
         infra::ByteRange data{ event.Attr_Data, event.Attr_Data + event.Attr_Data_Length };
