@@ -67,7 +67,7 @@ jobs:
   host_build_clang_msvc:
     name: Windows Host Build from Devcontainer
     runs-on: [ubuntu-latest]
-    container: ghcr.io/philips-software/amp-devcontainer-cpp:v5.6.0@sha256:884732270a353e8446f813e649f2918ac53ce446a6c0dd4f7f84a6d58fb26bce # v5.6.0
+    container: ghcr.io/philips-software/amp-devcontainer-cpp:v6.4.1@sha256:f4474b473cb270a06a60c89ea87193faf7e05f4e2c42dee5ff5af13b971ac029 # v6.4.1
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
