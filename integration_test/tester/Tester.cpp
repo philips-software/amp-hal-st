@@ -25,7 +25,7 @@ namespace main_
 
     Tester::Tester(services::Echo& echo, application::Tester::EchoToTestedCreator& echoToTestedCreator, hal::DmaStm& dma)
         : dma(dma)
-        , flashTestedCreator([this](infra::Optional<FlashTested>& value, services::Echo& echo, const infra::Function<void(infra::BoundedConstString result)>& onDone)
+        , flashTestedCreator([this](std::optional<FlashTested>& value, services::Echo& echo, const infra::Function<void(infra::BoundedConstString result)>& onDone)
               {
                   value.Emplace(echo, this->dma, onDone);
               })

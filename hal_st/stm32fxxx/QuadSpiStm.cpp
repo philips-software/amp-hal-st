@@ -107,7 +107,7 @@ namespace hal
     {
         QSPI_CommandTypeDef command;
 
-        command.Instruction = header.instruction.ValueOr(0);
+        command.Instruction = header.instruction.value_or(0);
         command.Address = VectorToAddress(header.address);
         command.AddressSize = ((header.address.size() - 1) & 0x03) << 12;
         command.AlternateBytes = VectorToAddress(header.alternate);

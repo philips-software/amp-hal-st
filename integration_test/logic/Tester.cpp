@@ -16,9 +16,9 @@ namespace application
         {
             case testing::TestedMode::reset:
                 resetTested.Set(false);
-                flash = infra::none;
+                flash.reset();
                 Peripherals::Reset();
-                echoToTested = infra::none;
+                echoToTested.reset();
                 testerObserverProxy.RequestSend([this]()
                     {
                         testerObserverProxy.TestedModeSet({});

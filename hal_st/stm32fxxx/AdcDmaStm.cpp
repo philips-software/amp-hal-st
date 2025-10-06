@@ -7,14 +7,14 @@ namespace hal
         : adc(adc)
         , buffer(buffer)
         , dmaStream(receiveStream, &adc.Handle().Instance->DR, sizeof(uint16_t), [this]()
-            {
-                TransferDone();
-            })
+              {
+                  TransferDone();
+              })
         , analogPin(pin)
 #ifdef TIM2
-        , timer(2, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
+        , timer(2, timing, { TimerBaseStm::CounterMode::up, std::make_optional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #else
-        , timer(3, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
+        , timer(3, timing, { TimerBaseStm::CounterMode::up, std::make_optional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
 #endif
     {
         ADC_ChannelConfTypeDef channelConfig{};

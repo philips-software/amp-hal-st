@@ -35,7 +35,7 @@ int main()
     static hal::DmaStm dma;
     static main_::EchoFromCloud echo(dma, tracerInfrastructure.tracer);
     static infra::Creator<services::EchoOnSesame, main_::ForwardingEchoToTested, void()> forwarderCreator{
-        [](infra::Optional<main_::ForwardingEchoToTested>& value)
+        [](std::optional<main_::ForwardingEchoToTested>& value)
         {
             value.Emplace(echo.echo.echo, dma, tracerInfrastructure.tracer);
         }

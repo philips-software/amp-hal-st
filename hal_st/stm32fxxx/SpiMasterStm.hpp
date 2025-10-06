@@ -44,7 +44,7 @@ namespace hal
         infra::AutoResetFunction<void()> onDone;
         ChipSelectConfigurator* chipSelectConfigurator = nullptr;
         CommunicationConfigurator* communicationConfigurator = nullptr;
-        infra::Optional<ImmediateInterruptHandler> spiInterruptRegistration;
+        std::optional<ImmediateInterruptHandler> spiInterruptRegistration;
         infra::ConstByteRange sendData;
         infra::ByteRange receiveData;
         bool sending;
