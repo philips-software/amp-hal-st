@@ -167,7 +167,7 @@ namespace hal
         EnableClockLpuart(aUartIndex - 1);
 
         if (flowControl != HwFlowControl::hwControlDisable)
-            this->uartRts.Emplace(uartRts, PinConfigTypeStm::lpuartRts, aUartIndex);
+            this->uartRts.emplace(uartRts, PinConfigTypeStm::lpuartRts, aUartIndex);
 
         UartStmHalInit(flowControl, baudrate);
     }
