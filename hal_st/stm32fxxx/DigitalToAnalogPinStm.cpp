@@ -24,7 +24,7 @@ namespace hal
     }
 
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, External)
-        : pin{ infra::inPlace, pin }
+        : pin{ std::in_place, pin }
         , dac{ dac }
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
         , internallyConnected{ false }
@@ -33,7 +33,7 @@ namespace hal
     }
 
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac, Both)
-        : pin{ infra::inPlace, pin }
+        : pin{ std::in_place, pin }
         , dac{ dac }
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
         , internallyConnected{ true }
@@ -43,7 +43,7 @@ namespace hal
     }
 #else
     DigitalToAnalogPinImplStm::DigitalToAnalogPinImplStm(hal::GpioPinStm& pin, hal::DacStm& dac)
-        : pin{ infra::inPlace, pin }
+        : pin{ std::in_place, pin }
         , dac(dac)
         , channel{ pin.DacChannel(dac.index + 1) == 1 ? DAC_CHANNEL_1 : DAC_CHANNEL_2 }
     {

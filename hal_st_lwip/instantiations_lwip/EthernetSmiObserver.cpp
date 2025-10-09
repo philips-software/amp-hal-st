@@ -6,7 +6,7 @@ namespace main_
         : hal::EthernetSmiObserver(ethernetSmi)
         , lightweightIpOverEthernetFactory(lightweightIpOverEthernetFactory)
         , ethernetRmiiRefClk(ethernetRmiiRefClk)
-        , ethernetRmiiRefClkPeripheral(infra::inPlace, ethernetRmiiRefClk, hal::PinConfigTypeStm::ethernet, 0)
+        , ethernetRmiiRefClkPeripheral(std::in_place, ethernetRmiiRefClk, hal::PinConfigTypeStm::ethernet, 0)
     {}
 
     EthernetSmiObserver::~EthernetSmiObserver()
@@ -17,9 +17,9 @@ namespace main_
 
     void EthernetSmiObserver::LinkUp(hal::LinkSpeed linkSpeed)
     {
-        ethernetMac.Emplace(Subject(), linkSpeed, lightweightIpOverEthernetFactory.MacAddress());
+        ethernetMac.emplace(Subject(), linkSpeed, lightweightIpOverEthernetFactory.MacAddress());
 #if STM32F767xx
-        ethernetStm32f767Workaround.Emplace(*ethernetMac, ethernetRmiiRefClk, ethernetRmiiRefClkPeripheral);
+        ethernetStm32f767Workaround.emplace(*ethernetMac, ethernetRmiiRefClk, ethernetRmiiRefClkPeripheral);
         lightweightIpOverEthernetFactory.Create(*ethernetStm32f767Workaround);
 #else
         lightweightIpOverEthernetFactory.Create(*ethernetMac);
@@ -30,8 +30,8 @@ namespace main_
     {
         lightweightIpOverEthernetFactory.Destroy();
 #if STM32F767xx
-        ethernetStm32f767Workaround = infra::none;
+        ethernetStm32f767Workaround.reset();
 #endif
-        ethernetMac = infra::none;
+        ethernetMac.reset();
     }
 }

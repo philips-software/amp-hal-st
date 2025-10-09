@@ -30,11 +30,11 @@ namespace application
 
     private:
         EchoToTestedCreator& echoToTestedCreator;
-        infra::Optional<infra::ProxyCreator<EchoToTestedCreator&>> echoToTested;
+        std::optional<infra::ProxyCreator<EchoToTestedCreator&>> echoToTested;
         hal::OutputPin resetTested;
         testing::TesterObserverProxy testerObserverProxy;
         FlashTestedCreator& flashTestedCreator;
-        infra::Optional<infra::ProxyCreator<FlashTestedCreator&>> flash;
+        std::optional<infra::ProxyCreator<FlashTestedCreator&>> flash;
         infra::BoundedConstString result;
     };
 

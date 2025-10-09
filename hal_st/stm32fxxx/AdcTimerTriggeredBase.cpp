@@ -127,7 +127,7 @@ namespace hal
 {
     AdcTimerTriggeredBase::AdcTimerTriggeredBase(AdcStm& adc, uint8_t oneBasedTimerIndex, TimerBaseStm::Timing timing)
         : adc(adc)
-        , timer(oneBasedTimerIndex, timing, { TimerBaseStm::CounterMode::up, infra::MakeOptional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
+        , timer(oneBasedTimerIndex, timing, { TimerBaseStm::CounterMode::up, std::make_optional<TimerBaseStm::Trigger>({ TimerBaseStm::Trigger::TriggerOutput::update, false }) })
         , timerIndex(oneBasedTimerIndex - 1)
     {}
 

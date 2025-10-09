@@ -64,7 +64,7 @@ namespace hal
         if (irq)
             InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
 
-        other.irq = infra::none;
+        other.irq.reset();
     }
 
     InterruptHandler& InterruptHandler::operator=(InterruptHandler&& other)
@@ -77,7 +77,7 @@ namespace hal
         if (irq)
             InterruptTable::Instance().TakeOverHandler(*irq, *this, other);
 
-        other.irq = infra::none;
+        other.irq.reset();
 
         return *this;
     }
@@ -99,7 +99,7 @@ namespace hal
         if (irq)
             InterruptTable::Instance().DeregisterHandler(*irq, *this);
 
-        irq = infra::none;
+        irq.reset();
     }
 
     IRQn_Type InterruptHandler::Irq() const

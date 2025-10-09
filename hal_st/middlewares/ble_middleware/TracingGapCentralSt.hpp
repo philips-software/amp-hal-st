@@ -18,7 +18,7 @@ namespace hal
         void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;
         void StopDeviceDiscovery() override;
-        infra::Optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
+        std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
 
         // Implementation of GapBonding
         void RemoveAllBonds() override;

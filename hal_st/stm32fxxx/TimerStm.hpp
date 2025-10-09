@@ -44,7 +44,7 @@ namespace hal
         struct Config
         {
             CounterMode counterMode;
-            infra::Optional<Trigger> trigger;
+            std::optional<Trigger> trigger;
         };
 
     protected:
