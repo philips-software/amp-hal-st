@@ -32,6 +32,11 @@ namespace
     {
         return infra::enum_cast(permissions);
     }
+
+    uint8_t ConvertDescriptorAccess(services::GattServerDescriptor::AccessFlags access)
+    {
+        return infra::enum_cast(access);
+    }
 }
 
 namespace hal
@@ -43,15 +48,21 @@ namespace hal
     void GattServerSt::AddService(services::GattServerService& service)
     {
         constexpr uint8_t gattPrimaryService = 0x01;
+        uint8_t attributeCount = service.GetAttributeCount();
 
         auto result = aci_gatt_add_service(UuidToType(service.Type()), ConvertUuid<Service_UUID_t>(service.Type()),
-            gattPrimaryService, service.GetAttributeCount(), &service.Handle());
+            gattPrimaryService, attributeCount, &service.Handle());
 
         if (result != BLE_STATUS_SUCCESS)
             ReportError(result);
 
         for (auto& characteristic : service.Characteristics())
+        {
             AddCharacteristic(characteristic);
+
+            for (auto& descriptor : characteristic.Descriptors())
+                AddCharacteristicDescriptor(characteristic, descriptor);
+        }
 
         services.push_front(service);
     }
@@ -96,8 +107,8 @@ namespace hal
     void GattServerSt::AddCharacteristic(services::GattServerCharacteristic& characteristic)
     {
         constexpr uint8_t encryptionKeySize = 0x10;
-        constexpr uint8_t notifyAttributeWrite = 0x01;
-        constexpr uint8_t variableLength = 0x01;
+        constexpr uint8_t notifyAttributeWrite = GATT_NOTIFY_ATTRIBUTE_WRITE;
+        constexpr uint8_t variableLength = CHAR_VALUE_LEN_VARIABLE;
 
         auto result = aci_gatt_add_char(characteristic.ServiceHandle(),
             UuidToType(characteristic.Type()),
@@ -113,6 +124,31 @@ namespace hal
         if (result == BLE_STATUS_SUCCESS)
             characteristic.Attach(*this);
         else
+            ReportError(result);
+    }
+
+    void GattServerSt::AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor)
+    {
+        constexpr uint8_t encryptionKeySize = 0x10;
+        constexpr uint8_t attributePermissions = ATTR_PERMISSION_NONE;
+        constexpr uint8_t notifyEvent = GATT_DONT_NOTIFY_EVENTS;
+        constexpr uint8_t variableLength = CHAR_VALUE_LEN_CONSTANT;
+
+        auto result = aci_gatt_add_char_desc(characteristic.ServiceHandle(),
+            characteristic.CharacteristicHandle(),
+            UuidToType(descriptor.Type()),
+            ConvertUuid<Char_Desc_Uuid_t>(descriptor.Type()),
+            descriptor.Data().size(),
+            descriptor.Data().size(),
+            descriptor.Data().begin(),
+            attributePermissions,
+            ConvertDescriptorAccess(descriptor.Access()),
+            notifyEvent,
+            encryptionKeySize,
+            variableLength,
+            &descriptor.Handle());
+
+        if (result != BLE_STATUS_SUCCESS)
             ReportError(result);
     }
 
