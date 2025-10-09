@@ -20,6 +20,7 @@ namespace hal
 
     protected:
         void AddCharacteristic(services::GattServerCharacteristic& characteristic) override;
+        void AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor) override;
         void HandleGattAttributeModified(aci_gatt_attribute_modified_event_rp0& event) override;
         void ReportError(tBleStatus status) const override;
 
