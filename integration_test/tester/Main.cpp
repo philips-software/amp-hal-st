@@ -37,7 +37,7 @@ int main()
     static infra::Creator<services::EchoOnSesame, main_::ForwardingEchoToTested, void()> forwarderCreator{
         [](std::optional<main_::ForwardingEchoToTested>& value)
         {
-            value.Emplace(echo.echo.echo, dma, tracerInfrastructure.tracer);
+            value.emplace(echo.echo.echo, dma, tracerInfrastructure.tracer);
         }
     };
     static main_::Tester tester(echo.echo.echo, forwarderCreator, dma);

@@ -27,7 +27,7 @@ namespace application
                 break;
             case testing::TestedMode::programming:
                 assert(!resetTested.GetOutputLatch());
-                flash.Emplace(flashTestedCreator, Rpc(), [this](infra::BoundedConstString result)
+                flash.emplace(flashTestedCreator, Rpc(), [this](infra::BoundedConstString result)
                     {
                         this->result = result;
                         testerObserverProxy.RequestSend([this]()
@@ -40,7 +40,7 @@ namespace application
                 break;
             case testing::TestedMode::active:
                 assert(!resetTested.GetOutputLatch());
-                echoToTested.Emplace(echoToTestedCreator);
+                echoToTested.emplace(echoToTestedCreator);
                 resetTested.Set(true);
                 testerObserverProxy.RequestSend([this]()
                     {

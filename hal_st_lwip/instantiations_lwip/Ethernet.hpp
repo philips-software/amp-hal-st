@@ -66,7 +66,7 @@ namespace main_
         infra::CreatorBase<services::Stoppable, void(services::LightweightIp& lightweightIp)>* connectedCreator = nullptr;
         infra::Creator<services::Stoppable, Connected, void(services::LightweightIp& lightweightIp)> connected{ [this](std::optional<Connected>& value, services::LightweightIp& lightweightIp)
             {
-                value.Emplace(lightweightIp, hostName, connectedCreator);
+                value.emplace(lightweightIp, hostName, connectedCreator);
             } };
     };
 
