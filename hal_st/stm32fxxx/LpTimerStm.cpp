@@ -44,6 +44,11 @@ namespace hal
         DisableClockLpTimer(timerIndex);
     }
 
+    uint16_t LowPowerTimerBaseStm::Counter() const
+    {
+        return static_cast<uint16_t>(HAL_LPTIM_ReadCounter(&handle));
+    }
+
     FreeRunningLowPowerTimerStm::FreeRunningLowPowerTimerStm(uint8_t oneBasedIndex, Timing timing)
         : LowPowerTimerBaseStm{ oneBasedIndex, timing }
     {
@@ -90,6 +95,11 @@ namespace hal
     {
         auto result = HAL_LPTIM_Counter_Stop_IT(&handle);
         assert(result == HAL_OK);
+    }
+
+    void LowPowerTimerWithInterruptStm::SetPeriod(uint16_t period)
+    {
+        __HAL_LPTIM_AUTORELOAD_SET(&handle, period);
     }
 
     void LowPowerTimerWithInterruptStm::OnInterrupt()

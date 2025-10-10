@@ -23,6 +23,8 @@ namespace hal
             uint32_t updateMode{ repetitionCounter == 0 ? LPTIM_UPDATE_IMMEDIATE : LPTIM_UPDATE_ENDOFPERIOD };
         };
 
+        uint16_t Counter() const;
+
     protected:
         LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
         ~LowPowerTimerBaseStm();
@@ -32,12 +34,6 @@ namespace hal
 #if defined(STM32WB)
         uint32_t currentPeriod{ 0 };
 #endif
-
-    public:
-        auto& Handle()
-        {
-            return handle;
-        }
     };
 
     class FreeRunningLowPowerTimerStm
@@ -59,6 +55,8 @@ namespace hal
         void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate);
         void Stop();
 
+        void SetPeriod(uint16_t period);
+
     private:
         ImmediateInterruptHandler interruptHandler;
         infra::Function<void()> onIrq;
@@ -68,6 +66,7 @@ namespace hal
         void OnInterrupt();
         void ScheduleInterrupt();
     };
+
 }
 
 #endif
