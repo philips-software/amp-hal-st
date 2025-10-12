@@ -23,17 +23,28 @@ namespace hal
             uint32_t updateMode{ repetitionCounter == 0 ? LPTIM_UPDATE_IMMEDIATE : LPTIM_UPDATE_ENDOFPERIOD };
         };
 
+        virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) = 0;
+        virtual void Stop() = 0;
         uint16_t Counter() const;
 
     protected:
         LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
         ~LowPowerTimerBaseStm();
 
+        infra::Function<void()> onIrq;
+        InterruptType type;
         LPTIM_HandleTypeDef handle{};
         const uint8_t timerIndex;
 #if defined(STM32WB)
         uint32_t currentPeriod{ 0 };
 #endif
+        void OnInterrupt();
+        virtual bool HasPendingInterrupt() const = 0;
+        void ScheduleInterrupt();
+
+    private:
+        ImmediateInterruptHandler interruptHandler;
+        std::atomic_bool scheduled{};
     };
 
     class FreeRunningLowPowerTimerStm
@@ -42,8 +53,13 @@ namespace hal
     public:
         FreeRunningLowPowerTimerStm(uint8_t aTimerIndex, Timing timing);
 
-        void Start();
-        void Stop();
+        virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
+        virtual void Stop() override;
+
+        void SetPeriod(uint16_t periodTicks);
+
+    private:
+        bool HasPendingInterrupt() const override;
     };
 
     class LowPowerTimerWithInterruptStm
@@ -52,19 +68,11 @@ namespace hal
     public:
         LowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
 
-        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate);
-        void Stop();
-
-        void SetPeriod(uint16_t period);
+        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
+        void Stop() override;
 
     private:
-        ImmediateInterruptHandler interruptHandler;
-        infra::Function<void()> onIrq;
-        InterruptType type;
-        std::atomic_bool scheduled{};
-
-        void OnInterrupt();
-        void ScheduleInterrupt();
+        bool HasPendingInterrupt() const override;
     };
 
 }
