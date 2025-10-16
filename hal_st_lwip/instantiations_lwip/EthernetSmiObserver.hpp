@@ -14,7 +14,7 @@ namespace main_
         , private hal::EthernetMacObserver
     {
     public:
-        EthernetStm32f767Workaround(hal::EthernetMac& subject, hal::GpioPinStm& ethernetRmiiRefClk, infra::Optional<hal::PeripheralPinStm>& ethernetRmiiRefClkPeripheral)
+        EthernetStm32f767Workaround(hal::EthernetMac& subject, hal::GpioPinStm& ethernetRmiiRefClk, std::optional<hal::PeripheralPinStm>& ethernetRmiiRefClkPeripheral)
             : hal::EthernetMacObserver(subject)
             , ethernetRmiiRefClk(ethernetRmiiRefClk)
             , ethernetRmiiRefClkPeripheral(ethernetRmiiRefClkPeripheral)
@@ -54,8 +54,8 @@ namespace main_
 
         void ReceivedErrorFrame(uint32_t usedBuffers, uint32_t frameSize) override
         {
-            ethernetRmiiRefClkPeripheral = infra::none;
-            ethernetRmiiRefClkPeripheral.Emplace(ethernetRmiiRefClk, hal::PinConfigTypeStm::ethernet, 0);
+            ethernetRmiiRefClkPeripheral.reset();
+            ethernetRmiiRefClkPeripheral.emplace(ethernetRmiiRefClk, hal::PinConfigTypeStm::ethernet, 0);
             GetObserver().ReceivedErrorFrame(usedBuffers, frameSize);
         }
 
@@ -66,7 +66,7 @@ namespace main_
 
     private:
         hal::GpioPinStm& ethernetRmiiRefClk;
-        infra::Optional<hal::PeripheralPinStm>& ethernetRmiiRefClkPeripheral;
+        std::optional<hal::PeripheralPinStm>& ethernetRmiiRefClkPeripheral;
     };
 #endif
 
@@ -83,12 +83,12 @@ namespace main_
     private:
         services::LightweightIpOverEthernetFactory& lightweightIpOverEthernetFactory;
         hal::GpioPinStm& ethernetRmiiRefClk;
-        infra::Optional<hal::PeripheralPinStm> ethernetRmiiRefClkPeripheral;
+        std::optional<hal::PeripheralPinStm> ethernetRmiiRefClkPeripheral;
 
 #ifdef STM32F767xx
-        infra::Optional<EthernetStm32f767Workaround> ethernetStm32f767Workaround;
+        std::optional<EthernetStm32f767Workaround> ethernetStm32f767Workaround;
 #endif
-        infra::Optional<hal::EthernetMacStm> ethernetMac;
+        std::optional<hal::EthernetMacStm> ethernetMac;
     };
 }
 

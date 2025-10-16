@@ -24,6 +24,7 @@ namespace hal
         static constexpr struct Internal{} internal{};
         static constexpr struct External{} external{};
         static constexpr struct Both{} both{};
+
         // clang-format on
 
         enum struct Channel : uint32_t
@@ -44,7 +45,7 @@ namespace hal
     private:
         void Configure();
 
-        infra::Optional<AnalogPinStm> pin;
+        std::optional<AnalogPinStm> pin;
         DacStm& dac;
         uint32_t channel;
 
