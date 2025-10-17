@@ -69,7 +69,7 @@ namespace hal
         virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
         virtual void Stop() override;
 
-        void SetPeriod(uint16_t periodTicks);
+        void ArmRelativeCompare(uint16_t ticks);
 
     private:
         bool HasTimerEvent() const override;

@@ -141,12 +141,10 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    void FreeRunningLowPowerTimerStm::SetPeriod(uint16_t periodTicks)
+    void FreeRunningLowPowerTimerStm::ArmRelativeCompare(uint16_t ticks)
     {
-        assert(periodTicks != 0);
-
         uint16_t currentCounter = static_cast<uint16_t>(HAL_LPTIM_ReadCounter(&handle));
-        uint16_t compareValue = currentCounter + periodTicks;
+        uint16_t compareValue = currentCounter + ticks;
 
         __HAL_LPTIM_COMPARE_SET(&handle, compareValue);
     }
