@@ -23,12 +23,12 @@ namespace hal
             uint32_t updateMode{ repetitionCounter == 0 ? LPTIM_UPDATE_IMMEDIATE : LPTIM_UPDATE_ENDOFPERIOD };
         };
 
+        LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
         virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) = 0;
         virtual void Stop() = 0;
         uint16_t Counter() const;
 
     protected:
-        LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
         ~LowPowerTimerBaseStm();
 
         infra::Function<void()> onIrq;
@@ -39,7 +39,7 @@ namespace hal
         uint32_t currentPeriod{ 0 };
 #endif
         void OnInterrupt();
-        virtual bool HasPendingInterrupt() const = 0;
+        virtual bool HasTimerEvent() const = 0;
         void ScheduleInterrupt();
 
     private:
@@ -47,11 +47,24 @@ namespace hal
         std::atomic_bool scheduled{};
     };
 
+    class PeriodicLowPowerTimerStm
+        : public LowPowerTimerBaseStm
+    {
+    public:
+        using LowPowerTimerBaseStm::LowPowerTimerBaseStm;
+
+        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
+        void Stop() override;
+
+    private:
+        bool HasTimerEvent() const override;
+    };
+
     class FreeRunningLowPowerTimerStm
         : public LowPowerTimerBaseStm
     {
     public:
-        FreeRunningLowPowerTimerStm(uint8_t aTimerIndex, Timing timing);
+        using LowPowerTimerBaseStm::LowPowerTimerBaseStm;
 
         virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
         virtual void Stop() override;
@@ -59,20 +72,7 @@ namespace hal
         void SetPeriod(uint16_t periodTicks);
 
     private:
-        bool HasPendingInterrupt() const override;
-    };
-
-    class LowPowerTimerWithInterruptStm
-        : public LowPowerTimerBaseStm
-    {
-    public:
-        LowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
-
-        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
-        void Stop() override;
-
-    private:
-        bool HasPendingInterrupt() const override;
+        bool HasTimerEvent() const override;
     };
 
 }
