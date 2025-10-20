@@ -88,6 +88,28 @@ namespace hal
             channel.Stop();
     }
 
+    TimerPwmLazy::TimerPwmLazy(infra::BoundedDeque<PwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, TimerBaseStm::Timing timing)
+        : TimerPwmBaseStm(oneBasedIndex, timing)
+        , channelStorage(channelStorage)
+        , oneBasedIndex(oneBasedIndex)
+    {}
+
+    void TimerPwmLazy::ConfigureChannel(uint8_t channelOneBasedIndex, GpioPinStm& pin)
+    {
+        channelStorage.emplace_back(oneBasedIndex, channelOneBasedIndex, timer.Handle(), pin);
+        channels = channelStorage.contiguous_range(channelStorage.begin());
+    }
+
+    PwmChannelGpio& TimerPwmLazy::Channel(uint8_t channelOneBasedIndex)
+    {
+        for (auto& channel : channelStorage)
+        {
+            if (channel.channelIndex == channelOneBasedIndex - 1)
+                return channel;
+        }
+        std::abort();
+    }
+
     PwmChannelGpio::PwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, TIM_HandleTypeDef& handle, GpioPinStm& pin)
         : timerIndex(timerOneBasedIndex - 1)
         , channelIndex(channelOneBasedIndex - 1)
