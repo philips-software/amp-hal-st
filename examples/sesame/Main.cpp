@@ -141,8 +141,9 @@ int main()
     auto keyMaterial{ application::ParseProto<sesame_security::SymmetricKeyFile>(key_material::symmetricKey) };
     static main_::EchoOnSesameSecuredSymmetricKey::WithMessageSize<256> echo{ bufferedUart, serializerFactory, services::ConvertKeyMaterial(keyMaterial), randomDataGenerator };
 #elif SECURE_DIFFIE_HELLMAN
+    static services::EchoPolicyDiffieHellman::KeyMaterial keyMaterial{ key_material::deviceCertificate, key_material::deviceCertificatePrivateKey, key_material::rootCaCertificate };
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::DiffieHellmanKeyEstablishment>::AndProxies<leds_and_button::ButtonProxy, sesame_security::DiffieHellmanKeyEstablishment> serializerFactory;
-    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedUart, serializerFactory, key_material::deviceCertificate, key_material::deviceCertificatePrivateKey, key_material::rootCaCertificate, randomDataGenerator };
+    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256> echo{ bufferedUart, serializerFactory, keyMaterial, randomDataGenerator };
 #else
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
     static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedUart, serializerFactory };

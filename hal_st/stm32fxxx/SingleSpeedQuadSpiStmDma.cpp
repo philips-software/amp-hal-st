@@ -18,12 +18,12 @@ namespace hal
         continuedSession = nextAction == SpiAction::continueSession;
 
         if (!sendData.empty())
-            quadSpi.SendData(QuadSpi::Header{ infra::none, {}, {}, 0 }, sendData, QuadSpi::Lines::SingleSpeed(), [this]()
+            quadSpi.SendData(QuadSpi::Header{ std::nullopt, {}, {}, 0 }, sendData, QuadSpi::Lines::SingleSpeed(), [this]()
                 {
                     Done();
                 });
         else
-            quadSpi.ReceiveData(QuadSpi::Header{ infra::none, {}, {}, 0 }, receiveData, QuadSpi::Lines::SingleSpeed(), [this]()
+            quadSpi.ReceiveData(QuadSpi::Header{ std::nullopt, {}, {}, 0 }, receiveData, QuadSpi::Lines::SingleSpeed(), [this]()
                 {
                     Done();
                 });

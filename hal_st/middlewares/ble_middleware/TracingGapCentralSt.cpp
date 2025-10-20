@@ -45,7 +45,7 @@ namespace hal
         GapCentralSt::StopDeviceDiscovery();
     }
 
-    infra::Optional<hal::MacAddress> TracingGapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
+    std::optional<hal::MacAddress> TracingGapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
     {
         auto resolvedMac = GapCentralSt::ResolvePrivateAddress(address);
         tracer.Trace() << "TracingGapCentralSt::ResolvePrivateAddress, MAC address: " << infra::AsMacAddress(address);
