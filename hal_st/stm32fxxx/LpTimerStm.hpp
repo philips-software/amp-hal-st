@@ -5,6 +5,8 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
+#include "infra/util/Optional.hpp"
+#include "infra/util/VariadicTemplates.hpp"
 #include <atomic>
 #include DEVICE_HEADER
 
@@ -23,6 +25,13 @@ namespace hal
             uint32_t updateMode{ repetitionCounter == 0 ? LPTIM_UPDATE_IMMEDIATE : LPTIM_UPDATE_ENDOFPERIOD };
         };
 
+        uint16_t Counter() const;
+
+        auto& Handle()
+        {
+            return handle;
+        }
+
     protected:
         LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
         ~LowPowerTimerBaseStm();
@@ -32,12 +41,6 @@ namespace hal
 #if defined(STM32WB)
         uint32_t currentPeriod{ 0 };
 #endif
-
-    public:
-        auto& Handle()
-        {
-            return handle;
-        }
     };
 
     class FreeRunningLowPowerTimerStm
@@ -50,24 +53,50 @@ namespace hal
         void Stop();
     };
 
-    class LowPowerTimerWithInterruptStm
+    class LowPowerTimerWithInterruptBaseStm
         : public LowPowerTimerBaseStm
     {
     public:
-        LowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
-
         void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate);
         void Stop();
+
+    protected:
+        struct LpTimerInterrupt
+        {
+            uint32_t enableMask;
+            uint32_t flagMask;
+        };
+
+        LowPowerTimerWithInterruptBaseStm(uint8_t aTimerIndex, Timing timing, LpTimerInterrupt lpTimerInterrupt);
 
     private:
         ImmediateInterruptHandler interruptHandler;
         infra::Function<void()> onIrq;
-        InterruptType type;
+        InterruptType type = InterruptType::immediate;
+        LpTimerInterrupt lpTimerInterrupt;
         std::atomic_bool scheduled{};
 
         void OnInterrupt();
         void ScheduleInterrupt();
     };
+
+    class LowPowerPeriodicTimerWithInterruptStm
+        : public LowPowerTimerWithInterruptBaseStm
+    {
+    public:
+        LowPowerPeriodicTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
+    };
+
+#if defined(STM32WB)
+    class FreeRunningLowPowerTimerWithInterruptStm
+        : public LowPowerTimerWithInterruptBaseStm
+    {
+    public:
+        FreeRunningLowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
+
+        void ArmRelativeCompare(uint16_t ticks);
+    };
+#endif
 }
 
 #endif
