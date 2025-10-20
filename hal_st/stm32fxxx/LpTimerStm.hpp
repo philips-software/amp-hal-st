@@ -5,6 +5,8 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
+#include "infra/util/Optional.hpp"
+#include "infra/util/VariadicTemplates.hpp"
 #include <atomic>
 #include DEVICE_HEADER
 
@@ -23,58 +25,78 @@ namespace hal
             uint32_t updateMode{ repetitionCounter == 0 ? LPTIM_UPDATE_IMMEDIATE : LPTIM_UPDATE_ENDOFPERIOD };
         };
 
-        LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
-        virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) = 0;
-        virtual void Stop() = 0;
         uint16_t Counter() const;
 
+        auto& Handle()
+        {
+            return handle;
+        }
+
     protected:
+        LowPowerTimerBaseStm(uint8_t oneBasedIndex, Timing timing);
         ~LowPowerTimerBaseStm();
 
-        infra::Function<void()> onIrq;
-        InterruptType type;
         LPTIM_HandleTypeDef handle{};
         const uint8_t timerIndex;
 #if defined(STM32WB)
         uint32_t currentPeriod{ 0 };
 #endif
-        void OnInterrupt();
-        virtual bool HasTimerEvent() const = 0;
-        void ScheduleInterrupt();
-
-    private:
-        ImmediateInterruptHandler interruptHandler;
-        std::atomic_bool scheduled{};
-    };
-
-    class PeriodicLowPowerTimerStm
-        : public LowPowerTimerBaseStm
-    {
-    public:
-        using LowPowerTimerBaseStm::LowPowerTimerBaseStm;
-
-        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
-        void Stop() override;
-
-    private:
-        bool HasTimerEvent() const override;
     };
 
     class FreeRunningLowPowerTimerStm
         : public LowPowerTimerBaseStm
     {
     public:
-        using LowPowerTimerBaseStm::LowPowerTimerBaseStm;
+        FreeRunningLowPowerTimerStm(uint8_t aTimerIndex, Timing timing);
 
-        virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
-        virtual void Stop() override;
-
-        void ArmRelativeCompare(uint16_t ticks);
-
-    private:
-        bool HasTimerEvent() const override;
+        void Start();
+        void Stop();
     };
 
+    class LowPowerTimerWithInterruptBaseStm
+        : public LowPowerTimerBaseStm
+    {
+    public:
+        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate);
+        void Stop();
+
+    protected:
+        struct LpTimerInterrupt
+        {
+            uint32_t enableMask;
+            uint32_t flagMask;
+        };
+
+        LowPowerTimerWithInterruptBaseStm(uint8_t aTimerIndex, Timing timing, LpTimerInterrupt lpTimerInterrupt);
+
+    private:
+        ImmediateInterruptHandler interruptHandler;
+        infra::Function<void()> onIrq;
+        InterruptType type = InterruptType::immediate;
+        LpTimerInterrupt lpTimerInterrupt;
+        std::atomic_bool scheduled{};
+
+        void OnInterrupt();
+        void ScheduleInterrupt();
+    };
+
+    class LowPowerPeriodicTimerWithInterruptStm
+        : public LowPowerTimerWithInterruptBaseStm
+    {
+    public:
+        LowPowerPeriodicTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
+    };
+
+#if defined(STM32WB)
+    class FreeRunningLowPowerTimerWithInterruptStm
+        : public LowPowerTimerWithInterruptBaseStm
+    {
+    public:
+        FreeRunningLowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
+
+        void ArmRelativeCompare(uint16_t ticks);
+    };
+#endif
 }
 
 #endif
