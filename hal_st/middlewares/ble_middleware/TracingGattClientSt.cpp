@@ -27,13 +27,13 @@ namespace hal
         GattClientSt::StartDescriptorDiscovery(handle, endHandle);
     }
 
-    void TracingGattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::Read, Value Handle: " << infra::hex << handle;
         GattClientSt::Read(handle, onResponse, onDone);
     }
 
-    void TracingGattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
         GattClientSt::Write(handle, data, onDone);
@@ -45,25 +45,25 @@ namespace hal
         GattClientSt::WriteWithoutResponse(handle, data, onDone);
     }
 
-    void TracingGattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::EnableNotification, Handle: " << infra::hex << (handle + 1);
         GattClientSt::EnableNotification(handle, onDone);
     }
 
-    void TracingGattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::DisableNotification, Handle: " << infra::hex << (handle + 1);
         GattClientSt::DisableNotification(handle, onDone);
     }
 
-    void TracingGattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::EnableIndication, Handle: " << infra::hex << (handle + 1);
         GattClientSt::EnableIndication(handle, onDone);
     }
 
-    void TracingGattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+    void TracingGattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::DisableIndication, Handle: " << infra::hex << (handle + 1);
         GattClientSt::DisableIndication(handle, onDone);
