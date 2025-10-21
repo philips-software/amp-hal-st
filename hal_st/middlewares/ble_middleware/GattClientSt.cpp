@@ -358,7 +358,7 @@ namespace hal
         const uint16_t offsetCccd = 1;
 
         auto ret = aci_gatt_write_char_desc(connectionHandle, handle + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
-        if (onCharacteristicOperationsDone && ret != BLE_STATUS_SUCCESS)
+        if (ret != BLE_STATUS_SUCCESS)
             onCharacteristicOperationsDone(services::OperationStatus::error);
     }
 }
