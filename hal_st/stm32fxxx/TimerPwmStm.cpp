@@ -72,12 +72,21 @@ namespace hal
         return channels[channelOneBasedIndex - 1];
     }
 
-    void TimerPwmBaseStm::Start()
+    void TimerPwmBaseStm::StartTimer()
+    {
+        timer.Start();
+    }
+
+    void TimerPwmBaseStm::StartChannels()
     {
         for (auto& channel : channels)
             channel.Start();
+    }
 
-        timer.Start();
+    void TimerPwmBaseStm::Start()
+    {
+        StartChannels();
+        StartTimer();
     }
 
     void TimerPwmBaseStm::Stop()
