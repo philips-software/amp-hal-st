@@ -130,6 +130,7 @@ namespace hal
         if ((peripheralI2c[instance]->ISR & I2C_ISR_NACKF) != 0)
         {
             peripheralI2c[instance]->CR1 &= ~(I2C_CR1_TXIE | I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE);
+            peripheralI2c[instance]->ICR = I2C_ICR_NACKCF;
 
             infra::EventDispatcher::Instance().Schedule([this]()
                 {
