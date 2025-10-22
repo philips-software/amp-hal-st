@@ -9,15 +9,10 @@
 
 namespace hal
 {
-    class I2cStm
-        : public hal::I2cMaster
+    namespace detail
     {
-    public:
-        struct Config
+        struct I2cConfig
         {
-            constexpr Config()
-            {}
-
 #if defined(I2C_TIMINGR_PRESC)
             uint32_t timing = 0x00304d4d;
 #endif
@@ -25,8 +20,15 @@ namespace hal
             uint32_t clockSpeed = 400000;
 #endif
         };
+    }
 
-        I2cStm(uint8_t oneBasedI2cIndex, hal::GpioPinStm& scl, hal::GpioPinStm& sda, const Config& config = Config());
+    class I2cStm
+        : public hal::I2cMaster
+    {
+    public:
+        using Config = detail::I2cConfig;
+
+        I2cStm(uint8_t oneBasedI2cIndex, hal::GpioPinStm& scl, hal::GpioPinStm& sda, const Config& config = {});
         ~I2cStm();
 
         void SendData(I2cAddress address, infra::ConstByteRange data, Action nextAction, infra::Function<void(Result, uint32_t numberOfBytesSent)> onSent) override;
