@@ -190,11 +190,13 @@ namespace hal
             if (onSent != nullptr)
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
+                        sent = 0;
                         onSent(hal::Result::complete, sent);
                     });
             else
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
+                        received = 0;
                         onReceived(hal::Result::complete);
                     });
         }
