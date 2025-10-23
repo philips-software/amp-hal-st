@@ -29,7 +29,7 @@ namespace main_
               {
                   value.emplace(echo, this->dma, onDone);
               })
-        , tester(echo, nResetTested, echoToTestedCreator, flashTestedCreator)
+        , tester(echo, nResetTested, boot0Tested, echoToTestedCreator, flashTestedCreator)
         , uartDuplexDmaTester{ tester, testing::Peripheral::uartDuplexDma, dma }
     {}
 }

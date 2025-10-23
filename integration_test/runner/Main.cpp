@@ -1,4 +1,3 @@
-
 #include "cucumber_cpp/library/Application.hpp"
 
 int main(int argc, char** argv)

@@ -53,14 +53,17 @@ namespace main_
 
         infra::Function<void(infra::BoundedConstString result)> onDone;
 
-        hal::GpioPinStm boot0TestedPin{ hal::Port::A, 5 };
-        hal::OutputPin boot0Tested{ boot0TestedPin, true };
-
         hal::GpioPinStm tx{ hal::Port::G, 14 };
         hal::GpioPinStm rx{ hal::Port::G, 9 };
         hal::DmaStm::TransmitStream transmitStream;
         hal::DmaStm::ReceiveStream receiveStream;
-        hal::UartStmDuplexDma::WithRxBuffer<256> uart{ transmitStream, receiveStream, 6, tx, rx };
+        hal::UartStmDuplexDma::WithRxBuffer<256> uart{ transmitStream, receiveStream, 6, tx, rx, []()
+                    {
+                        hal::UartStmDuplexDma::Config config;
+                        config.baudrate = 57600;
+                        config.parity = USART_PARITY_EVEN;
+                        return config;
+                    }() };
 
         std::array<uint32_t, 12> sectorSizes{ { 32 * 1024,
             32 * 1024,
@@ -94,7 +97,8 @@ namespace main_
         Tester(services::Echo& echo, application::Tester::EchoToTestedCreator& echoToTestedCreator, hal::DmaStm& dma);
 
         hal::DmaStm& dma;
-        hal::GpioPinStm nResetTested{ hal::Port::E, 6, hal::Drive::OpenDrain };
+        hal::GpioPinStm nResetTested{ hal::Port::E, 6 };
+        hal::GpioPinStm boot0Tested{ hal::Port::A, 5 };
         infra::Creator<void, FlashTested, void(services::Echo&, const infra::Function<void(infra::BoundedConstString result)>& onDone)> flashTestedCreator;
         application::Tester tester;
         application::Peripheral<main_::GpioTester> gpioTester{ tester, testing::Peripheral::gpio };

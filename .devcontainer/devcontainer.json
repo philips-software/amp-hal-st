@@ -2,5 +2,15 @@
   "build": {
     "context": "..",
     "dockerfile": "Dockerfile"
+  },
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "runArgs": ["--add-host=host.docker.internal:host-gateway", "--privileged"],
+  "postCreateCommand": "git submodule update --init --recursive",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-vscode.vscode-serial-monitor"]
+    }
   }
 }
