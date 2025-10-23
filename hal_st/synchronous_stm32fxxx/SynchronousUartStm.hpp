@@ -51,8 +51,8 @@ namespace hal
         uint8_t uartIndex;
         PeripheralPinStm uartTx;
         PeripheralPinStm uartRx;
-        infra::Optional<PeripheralPinStm> uartRts;
-        infra::Optional<PeripheralPinStm> uartCts;
+        std::optional<PeripheralPinStm> uartRts;
+        std::optional<PeripheralPinStm> uartCts;
         TimeKeeper& timeKeeper;
         infra::ByteRange readBuffer;
         std::atomic<uint8_t*> contentsBegin;
@@ -88,7 +88,7 @@ namespace hal
 
         USART_TypeDef* const uartBase;
         PeripheralPinStm uartTx;
-        infra::Optional<PeripheralPinStm> uartRts;
+        std::optional<PeripheralPinStm> uartRts;
     };
 }
 

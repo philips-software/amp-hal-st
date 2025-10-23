@@ -48,25 +48,25 @@ namespace main_
                 : llmnrResponder(lightweightIp, lightweightIp, lightweightIp, hostName)
             {
                 if (connectedCreator != nullptr)
-                    connected.Emplace(*connectedCreator, lightweightIp);
+                    connected.emplace(*connectedCreator, lightweightIp);
             }
 
             void Stop(const infra::Function<void()>& onDone) override
             {
-                if (connected != infra::none)
+                if (connected != std::nullopt)
                     (*connected)->Stop(onDone);
                 else
                     onDone;
             }
 
             services::LlmnrResponder llmnrResponder;
-            infra::Optional<infra::ProxyCreator<services::Stoppable, void(services::LightweightIp& lightweightIp)>> connected;
+            std::optional<infra::ProxyCreator<services::Stoppable, void(services::LightweightIp& lightweightIp)>> connected;
         };
 
         infra::CreatorBase<services::Stoppable, void(services::LightweightIp& lightweightIp)>* connectedCreator = nullptr;
-        infra::Creator<services::Stoppable, Connected, void(services::LightweightIp& lightweightIp)> connected{ [this](infra::Optional<Connected>& value, services::LightweightIp& lightweightIp)
+        infra::Creator<services::Stoppable, Connected, void(services::LightweightIp& lightweightIp)> connected{ [this](std::optional<Connected>& value, services::LightweightIp& lightweightIp)
             {
-                value.Emplace(lightweightIp, hostName, connectedCreator);
+                value.emplace(lightweightIp, hostName, connectedCreator);
             } };
     };
 
@@ -79,7 +79,8 @@ namespace main_
               {
                   SYSCFG->CMPCR |= SYSCFG_CMPCR_CMP_PD;
                   while ((SYSCFG->CMPCR & SYSCFG_CMPCR_READY) == 0)
-                  {}
+                  {
+                  }
               })
         , mdio(pins[0].first, pins[0].second)
         , mdc(pins[1].first, pins[1].second)
@@ -105,7 +106,8 @@ namespace main_
               {
                   SYSCFG->CMPCR |= SYSCFG_CMPCR_CMP_PD;
                   while ((SYSCFG->CMPCR & SYSCFG_CMPCR_READY) == 0)
-                  {}
+                  {
+                  }
               })
         , mdio(pins[0].first, pins[0].second)
         , mdc(pins[1].first, pins[1].second)

@@ -99,7 +99,7 @@ namespace services
 
         protected:
             infra::ByteRange& data;
-            infra::Optional<std::size_t> nBytesTotal;
+            std::optional<std::size_t> nBytesTotal;
             std::size_t nBytesReceived = 0;
         };
 

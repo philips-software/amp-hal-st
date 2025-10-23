@@ -19,9 +19,9 @@ namespace application
             case testing::TestedMode::reset:
                 boot0Tested.SetAsInput();
                 resetTested.Set(false);
-                flash = infra::none;
+                flash.reset();
                 Peripherals::Reset();
-                echoToTested = infra::none;
+                echoToTested.reset();
                 testerObserverProxy.RequestSend([this]()
                     {
                         testerObserverProxy.TestedModeSet({});
@@ -37,7 +37,7 @@ namespace application
                         testedResetDelay.Start(std::chrono::milliseconds(100), [this]()
                             {
                                 resetTested.SetAsInput();
-                                flash.Emplace(flashTestedCreator, Rpc(), [this](infra::BoundedConstString result)
+                                flash.emplace(flashTestedCreator, Rpc(), [this](infra::BoundedConstString result)
                                     {
                                         this->result = result;
                                         testerObserverProxy.RequestSend([this]()
@@ -51,7 +51,7 @@ namespace application
                 break;
             case testing::TestedMode::active:
                 assert(!resetTested.GetOutputLatch());
-                echoToTested.Emplace(echoToTestedCreator);
+                echoToTested.emplace(echoToTestedCreator);
                 resetTested.Set(true);
                 testedResetDelay.Start(std::chrono::milliseconds(1), [this]()
                     {

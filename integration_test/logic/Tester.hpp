@@ -30,12 +30,12 @@ namespace application
 
     private:
         EchoToTestedCreator& echoToTestedCreator;
-        infra::Optional<infra::ProxyCreator<EchoToTestedCreator&>> echoToTested;
+        std::optional<infra::ProxyCreator<EchoToTestedCreator&>> echoToTested;
         hal::TriStatePin resetTested;
         hal::TriStatePin boot0Tested;
         testing::TesterObserverProxy testerObserverProxy;
         FlashTestedCreator& flashTestedCreator;
-        infra::Optional<infra::ProxyCreator<FlashTestedCreator&>> flash;
+        std::optional<infra::ProxyCreator<FlashTestedCreator&>> flash;
         infra::BoundedConstString result;
         infra::TimerSingleShot testedResetDelay;
     };
