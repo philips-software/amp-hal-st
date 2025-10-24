@@ -33,6 +33,8 @@ namespace hal
 
         void SendData(I2cAddress address, infra::ConstByteRange data, Action nextAction, infra::Function<void(Result, uint32_t numberOfBytesSent)> onSent) override;
         void ReceiveData(I2cAddress address, infra::ByteRange data, Action nextAction, infra::Function<void(Result)> onReceived) override;
+        void SetErrorPolicy(I2cErrorPolicy& policy) override;
+        void ResetErrorPolicy() override;
 
     protected:
         virtual void DeviceNotFound();
@@ -45,6 +47,7 @@ namespace hal
 #if defined(I2C_ISR_TXE)
         void ReadReceivedData();
 #endif
+        void Clear();
 
     private:
         uint8_t instance;
@@ -55,6 +58,8 @@ namespace hal
         DispatchedInterruptHandler erInterruptHandler;
 
         I2C_HandleTypeDef i2cHandle;
+
+        I2cErrorPolicy* errorPolicy{ nullptr };
 
         Action nextAction;
 #if defined(STM32F2) || defined(STM32F4)

@@ -109,19 +109,44 @@ namespace hal
 #endif
     }
 
+    void I2cStm::SetErrorPolicy(I2cErrorPolicy& policy)
+    {
+        errorPolicy = &policy;
+    }
+
+    void I2cStm::ResetErrorPolicy()
+    {
+        errorPolicy = nullptr;
+    }
+
     void I2cStm::DeviceNotFound()
     {
-        std::abort();
+        Clear();
+
+        if (errorPolicy)
+            errorPolicy->DeviceNotFound();
+        else
+            std::abort();
     }
 
     void I2cStm::BusError()
     {
-        std::abort();
+        Clear();
+
+        if (errorPolicy)
+            errorPolicy->BusError();
+        else
+            std::abort();
     }
 
     void I2cStm::ArbitrationLost()
     {
-        std::abort();
+        Clear();
+
+        if (errorPolicy)
+            errorPolicy->ArbitrationLost();
+        else
+            std::abort();
     }
 
     void I2cStm::EventInterrupt()
@@ -386,4 +411,12 @@ namespace hal
         }
     }
 #endif
+
+    void I2cStm::Clear()
+    {
+        sendData.clear();
+        receiveData.clear();
+        onSent = nullptr;
+        onReceived = nullptr;
+    }
 }
