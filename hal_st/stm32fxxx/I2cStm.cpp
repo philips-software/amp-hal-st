@@ -141,7 +141,7 @@ namespace hal
                         sendData.clear();
                         onSent(hal::Result::partialComplete, sent - 1);
                     }
-                    else
+                    else if (!receiveData.empty())
                     {
                         receiveData.clear();
                         onReceived(hal::Result::partialComplete);
@@ -190,10 +190,9 @@ namespace hal
             if (onSent != nullptr)
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
-                        sent = 0;
-                        onSent(hal::Result::complete, sent);
+                        onSent(hal::Result::complete, std::exchange(sent, 0));
                     });
-            else
+            else if (onReceived != nullptr)
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
                         received = 0;
