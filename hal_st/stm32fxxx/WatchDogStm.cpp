@@ -3,7 +3,8 @@
 namespace hal
 {
     WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, const Config& config)
-        : onExpired(onExpired)
+        : maxMissedFeeds(config.maxMissedFeeds)
+        , onExpired(onExpired)
         , interruptRegistration(WWDG_IRQn, [this]()
               {
                   Interrupt();
@@ -42,12 +43,13 @@ namespace hal
     void WatchDogStm::Interrupt()
     {
         WatchDogRefresh();
-        if (++delay == 41) // 41 * 36ms = 1.5s
+
+        if (++missedFeedCount == maxMissedFeeds)
             onExpired();
     }
 
     void WatchDogStm::Feed()
     {
-        delay = 0;
+        missedFeedCount = 0;
     }
 }
