@@ -4,7 +4,9 @@
 #include "hal/interfaces/PulseWidthModulation.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/TimerStm.hpp"
+#include "infra/util/BoundedDeque.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include "infra/util/WithStorage.hpp"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -36,8 +38,11 @@ namespace hal
     public:
         TimerPwmBaseStm(uint8_t oneBasedIndex, TimerBaseStm::Timing timing);
 
-        PwmChannelGpio& Channel(uint8_t channelOneBasedIndex);
+        virtual PwmChannelGpio& Channel(uint8_t channelOneBasedIndex);
 
+        // Timer and configured channels can either be started independently from each other by invoking StartTimer() and StartChannels(), or together by invoking Start()
+        void StartTimer();
+        void StartChannels();
         void Start();
         void Stop();
 
@@ -47,11 +52,11 @@ namespace hal
     };
 
     template<std::size_t Channels>
-    class TimerPwmWithChannels
+    class TimerPwmWithAscendingChannels
         : public TimerPwmBaseStm
     {
     public:
-        TimerPwmWithChannels(uint8_t oneBasedIndex, TimerBaseStm::Timing timing, infra::MemoryRange<GpioPinStm> pins)
+        TimerPwmWithAscendingChannels(uint8_t oneBasedIndex, TimerBaseStm::Timing timing, infra::MemoryRange<GpioPinStm> pins)
             : TimerPwmBaseStm(oneBasedIndex, timing)
             , channelStorage(CreateArray<Channels, PwmChannelGpio>(oneBasedIndex, timer.Handle(), pins))
         {
@@ -60,6 +65,23 @@ namespace hal
 
     private:
         std::array<PwmChannelGpio, Channels> channelStorage;
+    };
+
+    class TimerPwmLazy
+        : public TimerPwmBaseStm
+    {
+    public:
+        template<std::size_t Channels>
+        using WithChannels = infra::WithStorage<TimerPwmLazy, infra::BoundedDeque<PwmChannelGpio>::WithMaxSize<Channels>>;
+
+        TimerPwmLazy(infra::BoundedDeque<PwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, TimerBaseStm::Timing timing);
+
+        void ConfigureChannel(uint8_t channelOneBasedIndex, GpioPinStm& pin);
+        PwmChannelGpio& Channel(uint8_t channelOneBasedIndex) override;
+
+    private:
+        infra::BoundedDeque<PwmChannelGpio>& channelStorage;
+        uint8_t oneBasedIndex;
     };
 
     class PwmChannelGpio
@@ -74,6 +96,8 @@ namespace hal
         void Stop() override;
 
     private:
+        friend class TimerPwmLazy;
+
         uint8_t timerIndex;
         uint8_t channelIndex;
         TIM_HandleTypeDef& handle;
