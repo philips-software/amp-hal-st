@@ -151,9 +151,17 @@ namespace hal
 
     void FreeRunningLowPowerTimerWithInterruptStm::ArmRelativeCompare(uint16_t ticks)
     {
-        uint16_t compareValue = Counter() + ticks;
+        __HAL_LPTIM_DISABLE_IT(&handle, LPTIM_IT_CMPM);
+        __HAL_LPTIM_CLEAR_FLAG(&handle, LPTIM_FLAG_CMPM | LPTIM_FLAG_CMPOK);
 
+        uint16_t compareValue = Counter() + ticks;
         __HAL_LPTIM_COMPARE_SET(&handle, compareValue);
+
+        while (!__HAL_LPTIM_GET_FLAG(&handle, LPTIM_FLAG_CMPOK))
+            ;
+
+        __HAL_LPTIM_CLEAR_FLAG(&handle, LPTIM_FLAG_CMPOK);
+        __HAL_LPTIM_ENABLE_IT(&handle, LPTIM_IT_CMPM);
     }
 #endif
 }
