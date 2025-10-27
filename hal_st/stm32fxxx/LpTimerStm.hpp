@@ -80,7 +80,7 @@ namespace hal
         LowPowerPeriodicTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
 
         void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
-        void Stop();
+        void Stop() override;
     };
 
 #if defined(STM32WB)
@@ -91,7 +91,7 @@ namespace hal
         FreeRunningLowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
 
         void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
-        void Stop();
+        void Stop() override;
 
         void ArmRelativeCompare(uint16_t ticks);
     };
