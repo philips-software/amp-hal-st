@@ -81,7 +81,7 @@ namespace hal
             dummyToReceive = sendData.size();
 
         really_assert(!spiInterruptRegistration);
-        spiInterruptRegistration.Emplace(peripheralSpiIrq[spiInstance], [this]()
+        spiInterruptRegistration.emplace(peripheralSpiIrq[spiInstance], [this]()
             {
                 HandleInterrupt();
             });
@@ -194,7 +194,7 @@ namespace hal
 
         if (!sending && !receiving && dummyToSend == 0 && dummyToReceive == 0)
         {
-            spiInterruptRegistration = infra::none;
+            spiInterruptRegistration.reset();
             if (chipSelectConfigurator && !continuedSession)
                 chipSelectConfigurator->EndSession();
             infra::EventDispatcher::Instance().Schedule([this]()

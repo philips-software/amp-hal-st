@@ -38,7 +38,7 @@ namespace hal
         void ClearPending();
 
     private:
-        infra::Optional<IRQn_Type> irq;
+        std::optional<IRQn_Type> irq;
     };
 
     class InterruptTable

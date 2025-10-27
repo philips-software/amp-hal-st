@@ -22,13 +22,13 @@ namespace hal
         void StartServiceDiscovery() override;
         void StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
         void StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle) override;
-        void Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(uint8_t)>& onDone) override;
-        void Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(uint8_t)>& onDone) override;
+        void Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone) override;
-        void EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
-        void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
-        void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone) override;
+        void EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -58,12 +58,12 @@ namespace hal
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
 
-        void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue) const;
+        void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue);
 
         template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
-        void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(uint8_t)>& onDone)
+        void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
         {
-            this->onCharacteristicOperationsDone = [this, onDone](uint8_t result)
+            this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
             {
                 onDone(result);
             };
@@ -85,9 +85,9 @@ namespace hal
 
         static constexpr uint16_t invalidConnection = 0xffff;
 
-        infra::AutoResetFunction<void()> onDiscoveryCompletion;
+        infra::AutoResetFunction<void(services::OperationStatus status)> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
-        infra::AutoResetFunction<void(uint8_t), sizeof(void*) + sizeof(infra::Function<void()>)> onCharacteristicOperationsDone;
+        infra::AutoResetFunction<void(services::OperationStatus), sizeof(void*) + sizeof(infra::Function<void(services::OperationStatus)>)> onCharacteristicOperationsDone;
     };
 }
 
