@@ -116,8 +116,7 @@ namespace hal
 #else
         : LowPowerTimerWithInterruptBaseStm{ aTimerIndex, timing, LPTIM_FLAG_UPDATE }
 #endif
-    {
-    }
+    {}
 
     void LowPowerPeriodicTimerWithInterruptStm::Start(const infra::Function<void()>& onIrq, InterruptType type)
     {
@@ -141,8 +140,7 @@ namespace hal
 #if defined(STM32WB)
     FreeRunningLowPowerTimerWithInterruptStm::FreeRunningLowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing)
         : LowPowerTimerWithInterruptBaseStm{ aTimerIndex, timing, LPTIM_FLAG_CMPM }
-    {
-    }
+    {}
 
     void FreeRunningLowPowerTimerWithInterruptStm::Start(const infra::Function<void()>& onIrq, InterruptType type)
     {
