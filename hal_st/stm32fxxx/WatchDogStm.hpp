@@ -21,22 +21,25 @@ namespace hal
             // WWDG Counter refresh is allowed between the following limits :
             // min time (mS) = 1000 * (Counter _ Window) / WWDG clock           --> 0
             // max time (mS) = 1000 * (Counter _ 0x40) / WWDG clock             --> 36 ms
+            // expire time (mS) =  max time (mS) * maxMissedFeeds               --> 41 * 36ms = 1.5s
             uint32_t prescaler{ WWDG_PRESCALER_8 };
             infra::Duration feedTimerInterval{ std::chrono::milliseconds(25) };
+            uint32_t maxMissedFeeds{ 41 };
         };
 
         WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
 
         void WatchDogRefresh();
-        void Interrupt();
 
     private:
+        void Interrupt();
         void Feed();
 
         ImmediateInterruptHandler interruptRegistration;
         infra::TimerRepeating feedingTimer;
         WWDG_HandleTypeDef handle;
-        std::atomic<uint32_t> delay{ 0 };
+        std::atomic<uint32_t> missedFeedCount{ 0 };
+        const uint32_t maxMissedFeeds{ 0 };
         infra::Function<void()> onExpired;
     };
 }
