@@ -57,23 +57,16 @@ namespace hal
         : public LowPowerTimerBaseStm
     {
     public:
-        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate);
-        void Stop();
+        virtual void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) = 0;
+        virtual void Stop() = 0;
 
     protected:
-        struct LpTimerInterrupt
-        {
-            uint32_t enableMask;
-            uint32_t flagMask;
-        };
+        LowPowerTimerWithInterruptBaseStm(uint8_t aTimerIndex, Timing timing, uint32_t interruptFlagMask);
 
-        LowPowerTimerWithInterruptBaseStm(uint8_t aTimerIndex, Timing timing, LpTimerInterrupt lpTimerInterrupt);
-
-    private:
         ImmediateInterruptHandler interruptHandler;
         infra::Function<void()> onIrq;
         InterruptType type = InterruptType::immediate;
-        LpTimerInterrupt lpTimerInterrupt;
+        uint32_t interruptFlagMask;
         std::atomic_bool scheduled{};
 
         void OnInterrupt();
@@ -85,6 +78,9 @@ namespace hal
     {
     public:
         LowPowerPeriodicTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
+
+        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
+        void Stop();
     };
 
 #if defined(STM32WB)
@@ -93,6 +89,9 @@ namespace hal
     {
     public:
         FreeRunningLowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing);
+
+        void Start(const infra::Function<void()>& onIrq, InterruptType type = InterruptType::immediate) override;
+        void Stop();
 
         void ArmRelativeCompare(uint16_t ticks);
     };
