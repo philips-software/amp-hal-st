@@ -40,11 +40,9 @@ namespace hal
 
         virtual PwmChannelGpio& Channel(uint8_t channelOneBasedIndex);
 
-        // Start the timer only
+        // Timer and configured channels can either be started independently from each other by invoking StartTimer() and StartChannels(), or together by invoking Start()
         void StartTimer();
-        // Start all configured channels only
         void StartChannels();
-        // Start the timer and all configured channels
         void Start();
         void Stop();
 
