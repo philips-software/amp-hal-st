@@ -51,8 +51,7 @@ namespace hal
 
     FreeRunningLowPowerTimerStm::FreeRunningLowPowerTimerStm(uint8_t oneBasedIndex, Timing timing)
         : LowPowerTimerBaseStm{ oneBasedIndex, timing }
-    {
-    }
+    {}
 
     void FreeRunningLowPowerTimerStm::Start()
     {
