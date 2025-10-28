@@ -40,7 +40,7 @@ namespace hal
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) || \
     defined(STM32F401xC) || defined(STM32F401xE) || defined(STM32F411xE) || defined(STM32F446xx) || \
     defined(STM32F469xx) || defined(STM32F479xx) ||                                                 \
-    defined(STM32F0) || defined(STM32F3) || defined(STM32F7)
+    defined(STM32F0) || defined(STM32F3) || defined(STM32F7) || defined(STM32H5)
         HAL_I2CEx_AnalogFilter_Config(&i2cHandle, I2C_ANALOGFILTER_ENABLE);
 #endif
     }
@@ -109,19 +109,44 @@ namespace hal
 #endif
     }
 
+    void I2cStm::SetErrorPolicy(I2cErrorPolicy& policy)
+    {
+        errorPolicy = &policy;
+    }
+
+    void I2cStm::ResetErrorPolicy()
+    {
+        errorPolicy = nullptr;
+    }
+
     void I2cStm::DeviceNotFound()
     {
-        std::abort();
+        Clear();
+
+        if (errorPolicy)
+            errorPolicy->DeviceNotFound();
+        else
+            std::abort();
     }
 
     void I2cStm::BusError()
     {
-        std::abort();
+        Clear();
+
+        if (errorPolicy)
+            errorPolicy->BusError();
+        else
+            std::abort();
     }
 
     void I2cStm::ArbitrationLost()
     {
-        std::abort();
+        Clear();
+
+        if (errorPolicy)
+            errorPolicy->ArbitrationLost();
+        else
+            std::abort();
     }
 
     void I2cStm::EventInterrupt()
@@ -130,6 +155,7 @@ namespace hal
         if ((peripheralI2c[instance]->ISR & I2C_ISR_NACKF) != 0)
         {
             peripheralI2c[instance]->CR1 &= ~(I2C_CR1_TXIE | I2C_CR1_RXIE | I2C_CR1_TCIE | I2C_CR1_NACKIE | I2C_CR1_ERRIE);
+            peripheralI2c[instance]->ICR = I2C_ICR_NACKCF;
 
             infra::EventDispatcher::Instance().Schedule([this]()
                 {
@@ -140,7 +166,7 @@ namespace hal
                         sendData.clear();
                         onSent(hal::Result::partialComplete, sent - 1);
                     }
-                    else
+                    else if (!receiveData.empty())
                     {
                         receiveData.clear();
                         onReceived(hal::Result::partialComplete);
@@ -189,11 +215,12 @@ namespace hal
             if (onSent != nullptr)
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
-                        onSent(hal::Result::complete, sent);
+                        onSent(hal::Result::complete, std::exchange(sent, 0));
                     });
-            else
+            else if (onReceived != nullptr)
                 infra::EventDispatcher::Instance().Schedule([this]()
                     {
+                        received = 0;
                         onReceived(hal::Result::complete);
                     });
         }
@@ -384,4 +411,12 @@ namespace hal
         }
     }
 #endif
+
+    void I2cStm::Clear()
+    {
+        sendData.clear();
+        receiveData.clear();
+        onSent = nullptr;
+        onReceived = nullptr;
+    }
 }
