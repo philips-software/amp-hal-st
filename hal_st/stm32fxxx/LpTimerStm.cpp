@@ -92,9 +92,7 @@ namespace hal
         if (flag)
         {
             if (type == InterruptType::immediate)
-            {
                 onIrq();
-            }
             else
                 ScheduleInterrupt();
         }
