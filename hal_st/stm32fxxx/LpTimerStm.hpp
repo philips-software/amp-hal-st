@@ -61,10 +61,10 @@ namespace hal
     protected:
         LowPowerTimerWithInterruptBaseStm(uint8_t aTimerIndex, Timing timing, uint32_t interruptFlagMask);
 
+        uint32_t interruptFlagMask;
         ImmediateInterruptHandler interruptHandler;
         infra::Function<void()> onIrq;
         InterruptType type = InterruptType::immediate;
-        uint32_t interruptFlagMask;
         std::atomic_bool scheduled{};
 
         void OnInterrupt();

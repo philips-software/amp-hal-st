@@ -46,7 +46,7 @@ namespace hal
 
     uint16_t LowPowerTimerBaseStm::Counter() const
     {
-        return static_cast<uint16_t>(handle.Instance->CNT);
+        return peripheralLpTimer[timerIndex]->CNT;
     }
 
     FreeRunningLowPowerTimerStm::FreeRunningLowPowerTimerStm(uint8_t oneBasedIndex, Timing timing)
