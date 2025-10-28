@@ -5,8 +5,6 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
-#include "infra/util/Optional.hpp"
-#include "infra/util/VariadicTemplates.hpp"
 #include <atomic>
 #include DEVICE_HEADER
 

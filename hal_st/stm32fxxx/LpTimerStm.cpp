@@ -79,8 +79,7 @@ namespace hal
                 OnInterrupt();
             }
         }
-    {
-    }
+    {}
 
     void LowPowerTimerWithInterruptBaseStm::OnInterrupt()
     {
