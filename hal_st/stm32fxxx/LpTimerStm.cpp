@@ -44,10 +44,14 @@ namespace hal
         DisableClockLpTimer(timerIndex);
     }
 
+    uint16_t LowPowerTimerBaseStm::Counter() const
+    {
+        return peripheralLpTimer[timerIndex]->CNT;
+    }
+
     FreeRunningLowPowerTimerStm::FreeRunningLowPowerTimerStm(uint8_t oneBasedIndex, Timing timing)
         : LowPowerTimerBaseStm{ oneBasedIndex, timing }
-    {
-    }
+    {}
 
     void FreeRunningLowPowerTimerStm::Start()
     {
@@ -65,56 +69,34 @@ namespace hal
         assert(result == HAL_OK);
     }
 
-    LowPowerTimerWithInterruptStm::LowPowerTimerWithInterruptStm(uint8_t oneBasedIndex, Timing timing)
-        : LowPowerTimerBaseStm(oneBasedIndex, timing)
-        , interruptHandler{ peripheralLpTimerIrq[timerIndex], [this]
+    LowPowerTimerWithInterruptBaseStm::LowPowerTimerWithInterruptBaseStm(uint8_t aTimerIndex, Timing timing, uint32_t interruptFlagMask)
+        : LowPowerTimerBaseStm(aTimerIndex, timing)
+        , interruptFlagMask(interruptFlagMask)
+        , interruptHandler{
+            peripheralLpTimerIrq[timerIndex], [this]
             {
                 OnInterrupt();
-            } }
-    {
-    }
+            }
+        }
+    {}
 
-    void LowPowerTimerWithInterruptStm::Start(const infra::Function<void()>& onIrq, InterruptType type)
+    void LowPowerTimerWithInterruptBaseStm::OnInterrupt()
     {
-        this->onIrq = onIrq;
-        this->type = type;
-#if defined(STM32WB)
-        auto result = HAL_LPTIM_Counter_Start_IT(&handle, currentPeriod);
-#else
-        auto result = HAL_LPTIM_Counter_Start_IT(&handle);
-#endif
-        assert(result == HAL_OK);
-    }
-
-    void LowPowerTimerWithInterruptStm::Stop()
-    {
-        auto result = HAL_LPTIM_Counter_Stop_IT(&handle);
-        assert(result == HAL_OK);
-    }
-
-    void LowPowerTimerWithInterruptStm::OnInterrupt()
-    {
-#if defined(STM32WB)
-        bool updateEvent = __HAL_LPTIM_GET_FLAG(&handle, LPTIM_FLAG_ARRM);
-#else
-        bool updateEvent = __HAL_LPTIM_GET_FLAG(&handle, LPTIM_FLAG_UPDATE);
-#endif
+        bool flag = __HAL_LPTIM_GET_FLAG(&handle, interruptFlagMask);
 
         // let HAL handle clearing all flags
         HAL_LPTIM_IRQHandler(&handle);
 
-        if (updateEvent)
+        if (flag)
         {
             if (type == InterruptType::immediate)
-            {
                 onIrq();
-            }
             else
                 ScheduleInterrupt();
         }
     }
 
-    void LowPowerTimerWithInterruptStm::ScheduleInterrupt()
+    void LowPowerTimerWithInterruptBaseStm::ScheduleInterrupt()
     {
         if (!scheduled.exchange(true))
             infra::EventDispatcher::Instance().Schedule([this]
@@ -123,6 +105,75 @@ namespace hal
                     onIrq();
                 });
     }
+
+    LowPowerPeriodicTimerWithInterruptStm::LowPowerPeriodicTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing)
+#if defined(STM32WB)
+        : LowPowerTimerWithInterruptBaseStm{ aTimerIndex, timing, LPTIM_FLAG_ARRM }
+#else
+        : LowPowerTimerWithInterruptBaseStm{ aTimerIndex, timing, LPTIM_FLAG_UPDATE }
+#endif
+    {}
+
+    void LowPowerPeriodicTimerWithInterruptStm::Start(const infra::Function<void()>& onIrq, InterruptType type)
+    {
+        this->onIrq = onIrq;
+        this->type = type;
+
+#if defined(STM32WB)
+        auto result = HAL_LPTIM_Counter_Start_IT(&handle, currentPeriod);
+#else
+        auto result = HAL_LPTIM_Counter_Start_IT(&handle);
+#endif
+        assert(result == HAL_OK);
+    }
+
+    void LowPowerPeriodicTimerWithInterruptStm::Stop()
+    {
+        auto result = HAL_LPTIM_Counter_Stop_IT(&handle);
+        assert(result == HAL_OK);
+    }
+
+#if defined(STM32WB)
+    FreeRunningLowPowerTimerWithInterruptStm::FreeRunningLowPowerTimerWithInterruptStm(uint8_t aTimerIndex, Timing timing)
+        : LowPowerTimerWithInterruptBaseStm{ aTimerIndex, timing, LPTIM_FLAG_CMPM }
+    {}
+
+    void FreeRunningLowPowerTimerWithInterruptStm::Start(const infra::Function<void()>& onIrq, InterruptType type)
+    {
+        this->onIrq = onIrq;
+        this->type = type;
+
+#if defined(STM32WB)
+        auto result = HAL_LPTIM_Counter_Start(&handle, currentPeriod);
+#else
+        auto result = HAL_LPTIM_Counter_Start(&handle);
+#endif
+        assert(result == HAL_OK);
+    }
+
+    void FreeRunningLowPowerTimerWithInterruptStm::Stop()
+    {
+        __HAL_LPTIM_DISABLE_IT(&handle, LPTIM_FLAG_CMPM);
+
+        auto result = HAL_LPTIM_Counter_Stop(&handle);
+        assert(result == HAL_OK);
+    }
+
+    void FreeRunningLowPowerTimerWithInterruptStm::ArmRelativeCompare(uint16_t ticks)
+    {
+        __HAL_LPTIM_DISABLE_IT(&handle, LPTIM_IT_CMPM);
+        __HAL_LPTIM_CLEAR_FLAG(&handle, LPTIM_FLAG_CMPM | LPTIM_FLAG_CMPOK);
+
+        uint16_t compareValue = Counter() + ticks;
+        __HAL_LPTIM_COMPARE_SET(&handle, compareValue);
+
+        while (!__HAL_LPTIM_GET_FLAG(&handle, LPTIM_FLAG_CMPOK))
+            ;
+
+        __HAL_LPTIM_CLEAR_FLAG(&handle, LPTIM_FLAG_CMPOK);
+        __HAL_LPTIM_ENABLE_IT(&handle, LPTIM_IT_CMPM);
+    }
+#endif
 }
 
 #endif
