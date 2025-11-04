@@ -66,14 +66,14 @@ namespace hal
         std::array<LpPwmChannelGpio, Channels> channelStorage;
     };
 
-    class LpTimerPwmDelayed
+    class LpTimerPwm
         : public LpTimerPwmBaseStm
     {
     public:
         template<std::size_t Channels>
-        using WithChannels = infra::WithStorage<LpTimerPwmDelayed, infra::BoundedDeque<LpPwmChannelGpio>::WithMaxSize<Channels>>;
+        using WithChannels = infra::WithStorage<LpTimerPwm, infra::BoundedDeque<LpPwmChannelGpio>::WithMaxSize<Channels>>;
 
-        LpTimerPwmDelayed(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing);
+        LpTimerPwm(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing);
 
         void ConfigureChannel(uint8_t channelOneBasedIndex, GpioPinStm& pin);
         LpPwmChannelGpio& Channel(uint8_t channelOneBasedIndex) override;
@@ -98,7 +98,7 @@ namespace hal
         void ConfigurePolarity(uint32_t polarity);
 
     private:
-        friend LpTimerPwmDelayed;
+        friend LpTimerPwm;
 
         uint8_t timerIndex;
         uint8_t channelIndex;
