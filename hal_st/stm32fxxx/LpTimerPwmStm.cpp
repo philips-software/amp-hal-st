@@ -103,19 +103,19 @@ namespace hal
         channels = channelStorage.contiguous_range(channelStorage.begin());
     }
 
-    LpPwmChannelGpio::LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin)
+    LpPwmChannelGpio::LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin, uint32_t polarity)
         : timerIndex(timerOneBasedIndex - 1)
         , channelIndex(channelOneBasedIndex - 1)
         , handle(handle)
         , pin(pin, GetChannelPinConfig(channelIndex), timerOneBasedIndex)
         , ccr(GetCCRegister(handle.Instance, channelIndex))
     {
-        ConfigChannelInit();
+        ConfigurePolarity(polarity);
     }
 
-    void LpPwmChannelGpio::ConfigChannelInit()
+    void LpPwmChannelGpio::ConfigurePolarity(uint32_t polarity)
     {
-        LPTIM_OC_ConfigTypeDef sConfig = { .OCPolarity = LPTIM_OCPOLARITY_HIGH };
+        LPTIM_OC_ConfigTypeDef sConfig = { .OCPolarity = polarity };
         auto result = HAL_LPTIM_OC_ConfigChannel(&handle, &sConfig, GetLpTimerChannel(channelIndex));
         assert(result == HAL_OK);
     }

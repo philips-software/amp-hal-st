@@ -87,12 +87,15 @@ namespace hal
         : public PulseWidthModulation
     {
     public:
-        LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin);
+        LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin, uint32_t polarity = LPTIM_OCPOLARITY_HIGH);
 
+        // interface of PulseWidthModulation
         void SetDuty(uint8_t dutyPercent) override;
         void SetPulse(uint32_t pulseOn, uint32_t period) override;
         void Start() override;
         void Stop() override;
+
+        void ConfigurePolarity(uint32_t polarity);
 
     private:
         friend LpTimerPwmDelayed;
@@ -102,8 +105,6 @@ namespace hal
         LPTIM_HandleTypeDef& handle;
         PeripheralPinStm pin;
         volatile std::uint32_t* ccr;
-
-        void ConfigChannelInit();
     };
 }
 
