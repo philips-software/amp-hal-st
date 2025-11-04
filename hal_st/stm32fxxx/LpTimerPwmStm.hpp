@@ -4,6 +4,7 @@
 #include "hal/interfaces/PulseWidthModulation.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/LpTimerStm.hpp"
+#include "infra/util/BoundedDeque.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <array>
 #include <cstddef>
@@ -19,7 +20,7 @@ namespace hal
         template<typename T, std::size_t... Is>
         constexpr std::array<T, sizeof...(Is)> CreateArray(uint8_t timerOneBasedIndex, LPTIM_HandleTypeDef& handle, infra::MemoryRange<GpioPinStm> pins, std::index_sequence<Is...>)
         {
-            return {{(Is, T{timerOneBasedIndex, Is + 1, handle, pins[Is]})...}};
+            return { { (Is, T{ timerOneBasedIndex, Is + 1, handle, pins[Is] })... } };
         }
     }
 
@@ -36,8 +37,11 @@ namespace hal
     public:
         LpTimerPwmBaseStm(uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing);
 
-        LpPwmChannelGpio& Channel(uint8_t channelOneBasedIndex);
+        virtual LpPwmChannelGpio& Channel(uint8_t channelOneBasedIndex);
 
+        // Timer and configured channels can either be started independently from each other by invoking StartTimer() and StartChannels(), or together by invoking Start()
+        void StartTimer();
+        void StartChannels();
         void Start();
         void Stop();
 
@@ -62,6 +66,23 @@ namespace hal
         std::array<LpPwmChannelGpio, Channels> channelStorage;
     };
 
+    class LpTimerPwmDelayed
+        : public LpTimerPwmBaseStm
+    {
+    public:
+        template<std::size_t Channels>
+        using WithChannels = infra::WithStorage<LpTimerPwmDelayed, infra::BoundedDeque<LpPwmChannelGpio>::WithMaxSize<Channels>>;
+
+        LpTimerPwmDelayed(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing);
+
+        void ConfigureChannel(uint8_t channelOneBasedIndex, GpioPinStm& pin);
+        LpPwmChannelGpio& Channel(uint8_t channelOneBasedIndex) override;
+
+    private:
+        infra::BoundedDeque<LpPwmChannelGpio>& channelStorage;
+        uint8_t oneBasedIndex;
+    };
+
     class LpPwmChannelGpio
         : public PulseWidthModulation
     {
@@ -74,6 +95,8 @@ namespace hal
         void Stop() override;
 
     private:
+        friend LpTimerPwmDelayed;
+
         uint8_t timerIndex;
         uint8_t channelIndex;
         LPTIM_HandleTypeDef& handle;

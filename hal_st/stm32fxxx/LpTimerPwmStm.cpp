@@ -54,12 +54,21 @@ namespace hal
         return channels[channelOneBasedIndex - 1];
     }
 
-    void LpTimerPwmBaseStm::Start()
+    void LpTimerPwmBaseStm::StartTimer()
+    {
+        timer.Start();
+    }
+
+    void LpTimerPwmBaseStm::StartChannels()
     {
         for (auto& channel : channels)
             channel.Start();
+    }
 
-        timer.Start();
+    void LpTimerPwmBaseStm::Start()
+    {
+        StartChannels();
+        StartTimer();
     }
 
     void LpTimerPwmBaseStm::Stop()
@@ -68,6 +77,28 @@ namespace hal
 
         for (auto& channel : channels)
             channel.Stop();
+    }
+
+    LpTimerPwmDelayed::LpTimerPwmDelayed(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing)
+        : LpTimerPwmBaseStm(oneBasedIndex, timing)
+        , channelStorage(channelStorage)
+        , oneBasedIndex(oneBasedIndex)
+    {}
+
+    LpPwmChannelGpio& LpTimerPwmDelayed::Channel(uint8_t channelOneBasedIndex)
+    {
+        for (auto& channel : channelStorage)
+        {
+            if (channel.channelIndex == channelOneBasedIndex - 1)
+                return channel;
+        }
+        std::abort();
+    }
+
+    void LpTimerPwmDelayed::ConfigureChannel(uint8_t channelOneBasedIndex, GpioPinStm& pin)
+    {
+        channelStorage.emplace_back(oneBasedIndex, channelOneBasedIndex, timer.Handle(), pin);
+        channels = channelStorage.contiguous_range(channelStorage.begin());
     }
 
     LpPwmChannelGpio::LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin)
