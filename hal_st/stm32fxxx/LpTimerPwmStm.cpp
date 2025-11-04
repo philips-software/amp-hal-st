@@ -47,7 +47,9 @@ namespace hal
 {
     LpTimerPwmBaseStm::LpTimerPwmBaseStm(uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing)
         : timer(oneBasedIndex, timing)
-    {}
+    {
+        LL_LPTIM_SetWaveform(timer.Handle().Instance, LL_LPTIM_OUTPUT_WAVEFORM_PWM);
+    }
 
     LpPwmChannelGpio& LpTimerPwmBaseStm::Channel(uint8_t channelOneBasedIndex)
     {
@@ -132,14 +134,12 @@ namespace hal
 
     void LpPwmChannelGpio::Start()
     {
-        auto result = HAL_LPTIM_PWM_Start(&handle, GetLpTimerChannel(channelIndex));
-        really_assert(result == HAL_OK);
+        LL_LPTIM_CC_EnableChannel(handle.Instance, GetLpTimerChannel(channelIndex));
     }
 
     void LpPwmChannelGpio::Stop()
     {
-        auto result = HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
-        really_assert(result == HAL_OK);
+        LL_LPTIM_CC_DisableChannel(handle.Instance, GetLpTimerChannel(channelIndex));
     }
 }
 
