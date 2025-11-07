@@ -89,7 +89,7 @@ namespace hal
     public:
         LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin, uint32_t polarity = LPTIM_OCPOLARITY_HIGH);
 
-        // interface of PulseWidthModulation
+        // Implementation of PulseWidthModulation
         void SetDuty(uint8_t dutyPercent) override;
         void SetPulse(uint32_t pulseOn, uint32_t period) override;
         void Start() override;
