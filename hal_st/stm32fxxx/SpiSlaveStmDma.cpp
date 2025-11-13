@@ -71,11 +71,11 @@ namespace hal
                     if (slaveSelectGpio.Get())
 #endif
                     {
-                        GetObserver().OnSelected();
+                        GetObserver().OnSelectedOnInterrupt();
                     }
                     else
                     {
-                        GetObserver().OnDeselected();
+                        GetObserver().OnDeselectedOnInterrupt();
                     }
                 }
             },
