@@ -1,6 +1,5 @@
 #include "hal_st/stm32fxxx/LpTimerPwmStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "infra/util/ReallyAssert.hpp"
 #include <array>
 #include <cstdint>
 
@@ -75,10 +74,10 @@ namespace hal
 
     void LpTimerPwmBaseStm::Stop()
     {
-        timer.Stop();
-
         for (auto& channel : channels)
             channel.Stop();
+
+        timer.Stop();
     }
 
     LpTimerPwm::LpTimerPwm(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing)
@@ -128,6 +127,7 @@ namespace hal
 
     void LpPwmChannelGpio::SetPulse(uint32_t pulseOn, uint32_t period)
     {
+        assert(LL_LPTIM_IsEnabled(handle.Instance));
         *ccr = pulseOn;
         handle.Instance->ARR = period;
     }
