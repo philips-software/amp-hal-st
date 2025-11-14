@@ -185,16 +185,21 @@ namespace hal
     {
         for (auto& descriptor : descriptors)
         {
-            descriptor.DESC0 = 0;
-            descriptor.DESC1 = 0;
-            descriptor.DESC2 = 0;
-            descriptor.DESC3 = 0;
+            memset(&descriptor, 0, sizeof(descriptor));
         }
 
         infra::EventDispatcher::Instance().Schedule([this]()
             {
                 // This is scheduled so that the observer is instantiated
                 RequestReceiveBuffers();
+
+                assert(receivedFramesAllocated > 0);
+                // Set DMA Rx buffer size
+                MODIFY_REG(peripheralEthernet[0]->DMACRCR, ETH_DMACRCR_RBSZ, ((descriptors[0].BackupAddr1) << 1));
+                // Enable the MAC reception
+                peripheralEthernet[0]->MACCR |= ETH_MACCR_RE;
+                // Start Receive
+                peripheralEthernet[0]->DMACRCR |= ETH_DMACRCR_SR;
             });
     }
 
@@ -230,11 +235,6 @@ namespace hal
         while (receivedFramesAllocated != descriptors.size())
             if (!RequestReceiveBuffer())
                 break;
-
-        // Enable the MAC reception
-        peripheralEthernet[0]->MACCR |= ETH_MACCR_RE;
-        // Start Receive
-        peripheralEthernet[0]->DMACRCR |= ETH_DMACRCR_SR;
     }
 
     bool EthernetMacStm::ReceiveDescriptors::RequestReceiveBuffer()
@@ -248,6 +248,9 @@ namespace hal
         descriptors[receiveDescriptorAllocatedIndex].DESC0 = reinterpret_cast<uint32_t>(buffer.begin());
         descriptors[receiveDescriptorAllocatedIndex].BackupAddr0 = reinterpret_cast<uint32_t>(buffer.begin());
         descriptors[receiveDescriptorAllocatedIndex].DESC3 = ETH_DMARXNDESCRF_OWN | ETH_DMARXNDESCRF_IOC | ETH_DMARXNDESCRF_BUF1V;
+
+        // Store receive buffer size
+        descriptors[receiveDescriptorAllocatedIndex].BackupAddr1 = buffer.size();
 
         // DMB instruction to avoid race condition
         __DMB();
@@ -268,10 +271,7 @@ namespace hal
     {
         for (auto& descriptor : descriptors)
         {
-            descriptor.DESC0 = 0;
-            descriptor.DESC1 = 0;
-            descriptor.DESC2 = 0;
-            descriptor.DESC3 = 0;
+            memset(&descriptor, 0, sizeof(descriptor));
         }
     }
 
