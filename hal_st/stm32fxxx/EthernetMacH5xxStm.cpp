@@ -3,11 +3,6 @@
 #include "infra/util/BitLogic.hpp"
 #include DEVICE_HEADER
 
-namespace
-{
-    constexpr uint32_t ETH_SEGMENT_SIZE_DEFAULT = 0x218U;
-}
-
 namespace hal
 {
     EthernetMacStm::EthernetMacStm(EthernetSmi& ethernetSmi, LinkSpeed linkSpeed, std::array<uint8_t, 6> macAddress)
@@ -45,10 +40,12 @@ namespace hal
 
         // Set Transmit Store and Forward
         peripheralEthernet[0]->MTLTQOMR |= ETH_MTLTQOMR_TSF;
+        // Set Receive Store and Forward
+        peripheralEthernet[0]->MTLRQOMR |= ETH_MTLRQOMR_RSF;
 
         // Set default DMA settings like in HAL_ETH see ETH_MACDMAConfig()
         peripheralEthernet[0]->DMASBMR |= ETH_DMASBMR_AAL;
-        peripheralEthernet[0]->DMACCR |= ETH_SEGMENT_SIZE_DEFAULT | ETH_DMACCR_DSL_64BIT;
+        peripheralEthernet[0]->DMACCR |= ETH_DMACCR_DSL_64BIT;
         peripheralEthernet[0]->DMACTCR |= ETH_DMACTCR_TPBL_32PBL;
         peripheralEthernet[0]->DMACRCR |= ETH_DMACRCR_RPBL_32PBL;
 
@@ -190,16 +187,21 @@ namespace hal
     {
         for (auto& descriptor : descriptors)
         {
-            descriptor.DESC0 = 0;
-            descriptor.DESC1 = 0;
-            descriptor.DESC2 = 0;
-            descriptor.DESC3 = 0;
+            memset(&descriptor, 0, sizeof(descriptor));
         }
 
         infra::EventDispatcher::Instance().Schedule([this]()
             {
                 // This is scheduled so that the observer is instantiated
                 RequestReceiveBuffers();
+
+                assert(receivedFramesAllocated > 0);
+                // Set DMA Rx buffer size
+                MODIFY_REG(peripheralEthernet[0]->DMACRCR, ETH_DMACRCR_RBSZ, ((descriptors[0].BackupAddr1) << 1));
+                // Enable the MAC reception
+                peripheralEthernet[0]->MACCR |= ETH_MACCR_RE;
+                // Start Receive
+                peripheralEthernet[0]->DMACRCR |= ETH_DMACRCR_SR;
             });
     }
 
@@ -207,10 +209,23 @@ namespace hal
     {
         while (receivedFramesAllocated != 0 && (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_OWN) == 0)
         {
-            bool receiveDone = (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_OWN) == 0 && (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_LD) != 0;
-            uint16_t frameSize = (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_PL);
-            bool errorFrame = (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_ES) != 0 && (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_LD) != 0;
-            descriptors[receiveDescriptorReceiveIndex].DESC0 = 0; // Buffer address
+            const uint32_t desc3 = descriptors[receiveDescriptorReceiveIndex].DESC3;
+            if ((descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_CTXT) != 0)
+            {
+                // Context descriptor, skip
+                --receivedFramesAllocated;
+                ++receiveDescriptorReceiveIndex;
+                if (receiveDescriptorReceiveIndex == descriptors.size())
+                    receiveDescriptorReceiveIndex = 0;
+
+                RequestReceiveBuffer();
+                continue;
+            }
+
+            bool receiveDone = (desc3 & ETH_DMARXNDESCWBF_LD) != 0;
+            uint16_t frameSize = (desc3 & ETH_DMARXNDESCWBF_PL);
+            bool errorFrame = (desc3 & ETH_DMARXNDESCWBF_ES) != 0 && (desc3 & ETH_DMARXNDESCWBF_LD) != 0;
+
             ++receivedFrameBuffers;
             --receivedFramesAllocated;
             ++receiveDescriptorReceiveIndex;
@@ -235,11 +250,6 @@ namespace hal
         while (receivedFramesAllocated != descriptors.size())
             if (!RequestReceiveBuffer())
                 break;
-
-        // Enable the MAC reception
-        peripheralEthernet[0]->MACCR |= ETH_MACCR_RE;
-        // Start Receive
-        peripheralEthernet[0]->DMACRCR |= ETH_DMACRCR_SR;
     }
 
     bool EthernetMacStm::ReceiveDescriptors::RequestReceiveBuffer()
@@ -253,6 +263,9 @@ namespace hal
         descriptors[receiveDescriptorAllocatedIndex].DESC0 = reinterpret_cast<uint32_t>(buffer.begin());
         descriptors[receiveDescriptorAllocatedIndex].BackupAddr0 = reinterpret_cast<uint32_t>(buffer.begin());
         descriptors[receiveDescriptorAllocatedIndex].DESC3 = ETH_DMARXNDESCRF_OWN | ETH_DMARXNDESCRF_IOC | ETH_DMARXNDESCRF_BUF1V;
+
+        // Store receive buffer size
+        descriptors[receiveDescriptorAllocatedIndex].BackupAddr1 = buffer.size();
 
         // DMB instruction to avoid race condition
         __DMB();
@@ -273,10 +286,7 @@ namespace hal
     {
         for (auto& descriptor : descriptors)
         {
-            descriptor.DESC0 = 0;
-            descriptor.DESC1 = 0;
-            descriptor.DESC2 = 0;
-            descriptor.DESC3 = 0;
+            memset(&descriptor, 0, sizeof(descriptor));
         }
     }
 
@@ -285,23 +295,19 @@ namespace hal
         assert((descriptors[sendDescriptorIndex].DESC3 & ETH_DMATXNDESCRF_OWN) == 0);
         descriptors[sendDescriptorIndex].DESC0 = reinterpret_cast<uint32_t>(data.begin());
         descriptors[sendDescriptorIndex].DESC1 = 0;
-        descriptors[sendDescriptorIndex].DESC2 = data.size() | ETH_DMATXNDESCRF_IOC;
+        descriptors[sendDescriptorIndex].DESC2 = data.size();
         if (last)
             descriptors[sendDescriptorIndex].DESC2 |= ETH_DMATXNDESCRF_IOC; // Set IOC bit on last
-        MODIFY_REG(descriptors[sendDescriptorIndex].DESC3, ETH_DMATXNDESCRF_B2L, 0);
+
+        descriptors[sendDescriptorIndex].DESC3 = 0;
 
         if (sendFirst)
             descriptors[sendDescriptorIndex].DESC3 |= ETH_DMATXNDESCRF_FD;
-        else
-            descriptors[sendDescriptorIndex].DESC3 &= ~ETH_DMATXNDESCRF_FD;
 
         if (last)
             descriptors[sendDescriptorIndex].DESC3 |= ETH_DMATXNDESCRF_LD;
-        else
-            descriptors[sendDescriptorIndex].DESC3 &= ~ETH_DMATXNDESCRF_LD;
 
-        // Clear status bits
-        descriptors[sendDescriptorIndex].DESC3 &= ~(ETH_DMATXNDESCWBF_DB | ETH_DMATXNDESCWBF_UF | ETH_DMATXNDESCWBF_ED | ETH_DMATXNDESCWBF_CC | ETH_DMATXNDESCWBF_EC | ETH_DMATXNDESCWBF_LCO | ETH_DMATXNDESCWBF_NC | ETH_DMATXNDESCWBF_LCA | ETH_DMATXNDESCWBF_PCE | ETH_DMATXNDESCWBF_FF | ETH_DMATXNDESCWBF_JT | ETH_DMATXNDESCWBF_ES | ETH_DMATXNDESCWBF_IHE);
+        // IP Header checksum and payload checksum calculation and insertion are enabled, and pseudo header checksum is calculated in hardware.
         descriptors[sendDescriptorIndex].DESC3 |= ETH_DMATXNDESCRF_CIC_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
 
         __DMB();
@@ -321,8 +327,9 @@ namespace hal
         if (sendDescriptorIndex == descriptors.size())
             sendDescriptorIndex = 0;
 
-        // Start transmission -> issue a poll command to Tx DMA by writing address of next immediate free descriptor
-        peripheralEthernet[0]->DMACTDTPR = reinterpret_cast<uint32_t>(&descriptors[sendDescriptorIndex]);
+        if (last)
+            // Start transmission -> issue a poll command to Tx DMA by writing address of next immediate free descriptor
+            peripheralEthernet[0]->DMACTDTPR = reinterpret_cast<uint32_t>(&descriptors[sendDescriptorIndex]);
     }
 
     void EthernetMacStm::SendDescriptors::SentFrame()
@@ -333,7 +340,6 @@ namespace hal
         assert(sentDone);
         if (sentDone)
         {
-            descriptors[previousDescriptor].DESC3 &= ~ETH_DMATXNDESCRF_LD;
             ethernetMac.GetObserver().SentFrame();
         }
     }
