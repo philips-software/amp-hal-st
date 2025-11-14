@@ -70,13 +70,9 @@ namespace hal
 #else
                     if (slaveSelectGpio.Get())
 #endif
-                    {
                         GetObserver().OnSelectedOnInterrupt();
-                    }
                     else
-                    {
                         GetObserver().OnDeselectedOnInterrupt();
-                    }
                 }
             },
             hal::InterruptTrigger::bothEdges, hal::InterruptType::immediate);
