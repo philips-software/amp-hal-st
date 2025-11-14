@@ -16,10 +16,11 @@ namespace hal
         SpiSlaveStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect);
         ~SpiSlaveStmDma();
 
+        // Implementation of SpiSlave
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, const infra::Function<void()>& onDone) override;
         bool CancelTransmission() override;
 
-        // ChipSelectSubject interface
+        // Implementation of ChipSelectSubject
         void EnableChipSelectInterrupt() override;
         void DisableChipSelectInterrupt() override;
 
