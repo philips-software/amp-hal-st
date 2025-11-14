@@ -207,10 +207,23 @@ namespace hal
     {
         while (receivedFramesAllocated != 0 && (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_OWN) == 0)
         {
-            bool receiveDone = (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_OWN) == 0 && (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_LD) != 0;
-            uint16_t frameSize = (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_PL);
-            bool errorFrame = (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_ES) != 0 && (descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_LD) != 0;
-            descriptors[receiveDescriptorReceiveIndex].DESC0 = 0; // Buffer address
+            const uint32_t desc3 = descriptors[receiveDescriptorReceiveIndex].DESC3;
+            if ((descriptors[receiveDescriptorReceiveIndex].DESC3 & ETH_DMARXNDESCWBF_CTXT) != 0)
+            {
+                // Context descriptor, skip
+                --receivedFramesAllocated;
+                ++receiveDescriptorReceiveIndex;
+                if (receiveDescriptorReceiveIndex == descriptors.size())
+                    receiveDescriptorReceiveIndex = 0;
+
+                RequestReceiveBuffer();
+                continue;
+            }
+
+            bool receiveDone = (desc3 & ETH_DMARXNDESCWBF_LD) != 0;
+            uint16_t frameSize = (desc3 & ETH_DMARXNDESCWBF_PL);
+            bool errorFrame = (desc3 & ETH_DMARXNDESCWBF_ES) != 0 && (desc3 & ETH_DMARXNDESCWBF_LD) != 0;
+
             ++receivedFrameBuffers;
             --receivedFramesAllocated;
             ++receiveDescriptorReceiveIndex;
@@ -280,23 +293,19 @@ namespace hal
         assert((descriptors[sendDescriptorIndex].DESC3 & ETH_DMATXNDESCRF_OWN) == 0);
         descriptors[sendDescriptorIndex].DESC0 = reinterpret_cast<uint32_t>(data.begin());
         descriptors[sendDescriptorIndex].DESC1 = 0;
-        descriptors[sendDescriptorIndex].DESC2 = data.size() | ETH_DMATXNDESCRF_IOC;
+        descriptors[sendDescriptorIndex].DESC2 = data.size();
         if (last)
             descriptors[sendDescriptorIndex].DESC2 |= ETH_DMATXNDESCRF_IOC; // Set IOC bit on last
-        MODIFY_REG(descriptors[sendDescriptorIndex].DESC3, ETH_DMATXNDESCRF_B2L, 0);
+
+        descriptors[sendDescriptorIndex].DESC3 = 0;
 
         if (sendFirst)
             descriptors[sendDescriptorIndex].DESC3 |= ETH_DMATXNDESCRF_FD;
-        else
-            descriptors[sendDescriptorIndex].DESC3 &= ~ETH_DMATXNDESCRF_FD;
 
         if (last)
             descriptors[sendDescriptorIndex].DESC3 |= ETH_DMATXNDESCRF_LD;
-        else
-            descriptors[sendDescriptorIndex].DESC3 &= ~ETH_DMATXNDESCRF_LD;
 
-        // Clear status bits
-        descriptors[sendDescriptorIndex].DESC3 &= ~(ETH_DMATXNDESCWBF_DB | ETH_DMATXNDESCWBF_UF | ETH_DMATXNDESCWBF_ED | ETH_DMATXNDESCWBF_CC | ETH_DMATXNDESCWBF_EC | ETH_DMATXNDESCWBF_LCO | ETH_DMATXNDESCWBF_NC | ETH_DMATXNDESCWBF_LCA | ETH_DMATXNDESCWBF_PCE | ETH_DMATXNDESCWBF_FF | ETH_DMATXNDESCWBF_JT | ETH_DMATXNDESCWBF_ES | ETH_DMATXNDESCWBF_IHE);
+        // IP Header checksum and payload checksum calculation and insertion are enabled, and pseudo header checksum is calculated in hardware.
         descriptors[sendDescriptorIndex].DESC3 |= ETH_DMATXNDESCRF_CIC_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
 
         __DMB();
@@ -316,8 +325,9 @@ namespace hal
         if (sendDescriptorIndex == descriptors.size())
             sendDescriptorIndex = 0;
 
-        // Start transmission -> issue a poll command to Tx DMA by writing address of next immediate free descriptor
-        peripheralEthernet[0]->DMACTDTPR = reinterpret_cast<uint32_t>(&descriptors[sendDescriptorIndex]);
+        if (last)
+            // Start transmission -> issue a poll command to Tx DMA by writing address of next immediate free descriptor
+            peripheralEthernet[0]->DMACTDTPR = reinterpret_cast<uint32_t>(&descriptors[sendDescriptorIndex]);
     }
 
     void EthernetMacStm::SendDescriptors::SentFrame()
@@ -328,7 +338,6 @@ namespace hal
         assert(sentDone);
         if (sentDone)
         {
-            descriptors[previousDescriptor].DESC3 &= ~ETH_DMATXNDESCRF_LD;
             ethernetMac.GetObserver().SentFrame();
         }
     }
