@@ -40,6 +40,8 @@ namespace hal
 
         // Set Transmit Store and Forward
         peripheralEthernet[0]->MTLTQOMR |= ETH_MTLTQOMR_TSF;
+        // Set Receive Store and Forward
+        peripheralEthernet[0]->MTLRQOMR |= ETH_MTLRQOMR_RSF;
 
         // Set default DMA settings like in HAL_ETH see ETH_MACDMAConfig()
         peripheralEthernet[0]->DMASBMR |= ETH_DMASBMR_AAL;
