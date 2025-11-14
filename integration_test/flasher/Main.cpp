@@ -4,6 +4,7 @@
 #include "generated/echo/TracingTesting.pb.hpp"
 #include "hal/generic/FileSystemGeneric.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
+#include "infra/timer/Waiting.hpp"
 #include "integration_test/logic/Flash.hpp"
 #include "services/network_instantiations/EchoInstantiation.hpp"
 #include "services/network_instantiations/NetworkAdapter.hpp"
@@ -27,30 +28,45 @@ namespace
 }
 
 class FirmwareSender
+    : private testing::TesterObserver
 {
 public:
     FirmwareSender(const std::vector<uint8_t>& firmware, services::Echo& echo)
-        : firmware(firmware)
+        : testing::TesterObserver(echo)
+        , firmware(firmware)
         , flash(echo, infra::MakeRange(stm32f767SectorSizes))
         , tester(echo)
     {
         tester.RequestSend([this]()
             {
                 tester.SetTestedMode(testing::TestedMode::reset);
-                tester.RequestSend([this]()
-                    {
-                        tester.SetTestedMode(testing::TestedMode::programming);
+            });
 
-                        services::GlobalTracer().Trace() << "Erasing chip...";
-                        flash.EraseAll([this]()
-                            {
-                                services::GlobalTracer().Trace() << "Writing firmware...";
-                                flash.WriteBuffer(infra::MakeRange(this->firmware), 0, [this]()
-                                    {
-                                        services::GlobalTracer().Trace() << "Uploading done";
-                                        done = true;
-                                    });
-                            });
+        infra::WaitFor([this]()
+            {
+                return modeSet;
+            },
+            infra::Duration::max());
+        modeSet = false;
+
+        tester.RequestSend([this]()
+            {
+                tester.SetTestedMode(testing::TestedMode::programming);
+            });
+        infra::WaitFor([this]()
+            {
+                return modeSet;
+            },
+            infra::Duration::max());
+
+        services::GlobalTracer().Trace() << "Erasing chip...";
+        flash.EraseAll([this]()
+            {
+                services::GlobalTracer().Trace() << "Writing firmware...";
+                flash.WriteBuffer(infra::MakeRange(this->firmware), 0, [this]()
+                    {
+                        services::GlobalTracer().Trace() << "Uploading done";
+                        done = true;
                     });
             });
     }
@@ -61,10 +77,18 @@ public:
     }
 
 private:
+    void TestedModeSet(infra::BoundedConstString message) override
+    {
+        modeSet = true;
+        MethodDone();
+    }
+
+private:
     std::vector<uint8_t> firmware;
     application::FlashProxy flash;
     testing::TesterProxy tester;
     bool done = false;
+    bool modeSet = false;
 
     infra::TimerSingleShot timeoutTimer{ std::chrono::minutes(2), [this]()
         {
@@ -104,8 +128,10 @@ int main(int argc, char** argv)
         static main_::NetworkAdapter network;
         static hal::FileSystemGeneric fileSystem;
 
-        auto firmware = firmwareArgument ? fileSystem.ReadBinaryFile(args::get(firmwareArgument)) : std::vector<uint8_t>{};
+        auto firmware = fileSystem.ReadBinaryFile(args::get(firmwareArgument));
         auto [echo, echoTracer] = application::OpenTracingEcho(args::get(targetArgument), network.ConnectionFactoryWithNameResolver(), tracer.tracer);
+
+        tracer.tracer.Trace() << "Flashing " << args::get(firmwareArgument);
 
         FlashTracer flashTracer(*echoTracer);
         FirmwareSender sender(firmware, *echo);
@@ -114,6 +140,8 @@ int main(int argc, char** argv)
             {
                 return sender.Done();
             });
+
+        tracer.tracer.Trace() << "Flashing done";
     }
     catch (const args::Help&)
     {
