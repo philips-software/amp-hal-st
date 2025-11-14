@@ -165,7 +165,7 @@ namespace hal
 
     void SpiSlaveStmDma::DisableSpi()
     {
-        peripheralSpi[spiInstance]->CR1 |= SPI_CR1_SPE;
+        peripheralSpi[spiInstance]->CR1 &= ~SPI_CR1_SPE;
     }
 
     void SpiSlaveStmDma::EnableDma()
