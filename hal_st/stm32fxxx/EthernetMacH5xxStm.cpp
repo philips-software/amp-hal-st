@@ -3,11 +3,6 @@
 #include "infra/util/BitLogic.hpp"
 #include DEVICE_HEADER
 
-namespace
-{
-    constexpr uint32_t ETH_SEGMENT_SIZE_DEFAULT = 0x218U;
-}
-
 namespace hal
 {
     EthernetMacStm::EthernetMacStm(EthernetSmi& ethernetSmi, LinkSpeed linkSpeed, std::array<uint8_t, 6> macAddress)
@@ -48,7 +43,7 @@ namespace hal
 
         // Set default DMA settings like in HAL_ETH see ETH_MACDMAConfig()
         peripheralEthernet[0]->DMASBMR |= ETH_DMASBMR_AAL;
-        peripheralEthernet[0]->DMACCR |= ETH_SEGMENT_SIZE_DEFAULT | ETH_DMACCR_DSL_64BIT;
+        peripheralEthernet[0]->DMACCR |= ETH_DMACCR_DSL_64BIT;
         peripheralEthernet[0]->DMACTCR |= ETH_DMACTCR_TPBL_32PBL;
         peripheralEthernet[0]->DMACRCR |= ETH_DMACRCR_RPBL_32PBL;
 
