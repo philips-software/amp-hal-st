@@ -65,14 +65,12 @@ namespace hal
             {
                 if (HasObserver())
                 {
-#ifdef SPI_NSS_POLARITY_LOW
-                    if (!slaveSelectGpio.Get())
-#else
-                    if (slaveSelectGpio.Get())
-#endif
-                        GetObserver().OnSelectedOnInterrupt();
-                    else
+                    bool polarity = peripheralSpi[spiInstance]->CR1 & SPI_CR1_SSI;
+
+                    if (slaveSelectGpio.Get() ^ polarity)
                         GetObserver().OnDeselectedOnInterrupt();
+                    else
+                        GetObserver().OnSelectedOnInterrupt();
                 }
             },
             hal::InterruptTrigger::bothEdges, hal::InterruptType::immediate);
