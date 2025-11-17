@@ -67,7 +67,7 @@ namespace hal
                 {
                     bool polarity = peripheralSpi[spiInstance]->CR1 & SPI_CR1_SSI;
 
-                    if (slaveSelectGpio.Get() ^ polarity)
+                    if (slaveSelectGpio.Get() != polarity)
                         GetObserver().OnDeselectedOnInterrupt();
                     else
                         GetObserver().OnSelectedOnInterrupt();
