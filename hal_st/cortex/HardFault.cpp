@@ -93,6 +93,8 @@ namespace
             tracer.Trace() << " PSR : 0x" << infra::hex << infra::Width(8, '0') << psr; // Program Status Register
             tracer.Trace() << "FSR/FAR:";
             tracer.Trace() << " HFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->HFSR;
+            if (SCB->HFSR & SCB_HFSR_DEBUGEVT_Msk)
+                tracer.Trace() << "  (DEBUGEVT active)"; // This is typically forced by a call to std::abort()
             tracer.Trace() << " CFSR: 0x" << infra::hex << infra::Width(8, '0') << cfsr;
             tracer.Trace() << " DFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->DFSR;
             tracer.Trace() << " AFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->AFSR;
