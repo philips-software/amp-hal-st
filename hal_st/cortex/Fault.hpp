@@ -6,7 +6,8 @@
 
 namespace hal::fault
 {
-    void SetInterruptStack(const uint32_t* faultStack, uint32_t lrValue);
+    void SetInterruptContext(const uint32_t* faultStack, uint32_t lrValue);
+    void DumpInterruptStackAndAbort(infra::BoundedConstString fault);
 
     using TracerProvider = infra::Function<services::Tracer&()>;
 

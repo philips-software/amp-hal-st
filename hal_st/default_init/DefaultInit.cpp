@@ -41,7 +41,7 @@ extern "C"
 
     [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
     {
-        hal::fault::SetInterruptStack(stack, lr);
+        hal::fault::SetInterruptContext(stack, lr);
         hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
     }
 
