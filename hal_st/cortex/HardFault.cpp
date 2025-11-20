@@ -4,56 +4,49 @@
 
 namespace
 {
+    extern "C" uint32_t link_code_location;
+    extern "C" uint32_t link_code_end;
+    extern "C" uint32_t _estack;
+
     struct FaultContext
     {
         const uint32_t* faultStack;
         uint32_t lrValue;
     } faultContext;
-}
 
-extern "C"
-{
-    [[gnu::naked]] void Default_Handler_Forwarded()
+    static hal::hard_fault::TracerProvider tracerProvider = nullptr;
+
+    void FeedWatchdog()
     {
-        asm volatile(
-            "tst   lr, #4           \n"
-            "ite   eq               \n"
-            "mrseq r0, msp          \n"
-            "mrsne r0, psp          \n"
-            "mov r1, lr             \n"
-            "b DefaultHandlerImpl   \n");
+        WWDG->CR |= WWDG_CR_T;
     }
 
-    [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
+    void PrintBacktrace(const uint32_t* faultStack, services::Tracer& tracer)
     {
-        faultContext = { stack, lr };
-        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
-        faultContext = { nullptr, 0 };
-    }
-}
+        FeedWatchdog();
 
-namespace hal::hard_fault
-{
-    void DefaultHandler(const uint32_t* faultStack, uint32_t lr_value);
+        tracer.Trace() << infra::endl
+                       << "Backtrace:";
 
-    static TracerProvider tracerProvider = nullptr;
+        // We skip the fault stack itself (values are printed separately), the call stack only comes after that
+        const auto* startAddress = faultStack + 8;
 
-    DefaultHandler::DefaultHandler(TracerProvider tracerProvider)
-        : hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
-              {
-                  hal::hard_fault::DefaultHandler(faultContext.faultStack, faultContext.lrValue);
-              })
-    {
-        if (tracerProvider)
-            RegisterTracerProvider(std::move(tracerProvider));
-    }
+        // Note: This is not a true backtrace (also called callstack), but one that works well enough.
+        // Ideally the stack is smartly unwound using debug information. Instead we just print all values
+        // in the stack that look like code addresses. The result will still contain the backtrace, but also
+        // some spurious values in between.
+        for (const uint32_t* stackPointer = startAddress; stackPointer != &_estack; ++stackPointer)
+        {
+            if (*stackPointer >= reinterpret_cast<uint32_t>(&link_code_location) && *stackPointer < reinterpret_cast<uint32_t>(&link_code_end))
+                tracer.Continue() << " 0x" << infra::hex << infra::Width(8, '0') << (*stackPointer & 0xfffffffe);
 
-    void RegisterTracerProvider(TracerProvider provider)
-    {
-        tracerProvider = std::move(provider);
+            FeedWatchdog();
+        }
+
+        tracer.Trace() << ""; // new line
     }
 
-    void DefaultHandler(const uint32_t* faultStack, uint32_t lr_value)
+    void handleHardFault(const uint32_t* faultStack, uint32_t lr_value)
     {
         // Copying variables onto the stack so that it can be inspected in the debugger
 
@@ -85,7 +78,10 @@ namespace hal::hard_fault
         {
             auto& tracer = tracerProvider();
 
-            tracer.Trace() << "*** Hardfault! ***";
+            tracer.Trace() << "*** Hard fault! ***";
+
+            PrintBacktrace(faultStack, tracer);
+
             tracer.Trace() << "Stack frame";
             tracer.Trace() << " R0  : 0x" << infra::hex << infra::Width(8, '0') << r0; // Usuaully contains the parameter values
             tracer.Trace() << " R1  : 0x" << infra::hex << infra::Width(8, '0') << r1; // Usuaully contains the parameter values
@@ -106,8 +102,46 @@ namespace hal::hard_fault
                 tracer.Trace() << " BFAR: 0x" << infra::hex << infra::Width(8, '0') << BusFaultAddress;
             tracer.Trace() << "Misc";
             tracer.Trace() << " LR/EXC_RETURN= 0x" << infra::hex << infra::Width(8, '0') << lr_value;
+            tracer.Trace() << infra::endl;
         }
 
         std::abort();
     }
+}
+
+extern "C"
+{
+    [[gnu::naked]] void Default_Handler_Forwarded()
+    {
+        asm volatile(
+            "tst   lr, #4           \n"
+            "ite   eq               \n"
+            "mrseq r0, msp          \n"
+            "mrsne r0, psp          \n"
+            "mov r1, lr             \n"
+            "b DefaultHandlerImpl   \n");
+    }
+
+    [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
+    {
+        faultContext = { stack, lr };
+        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
+        faultContext = { nullptr, 0 };
+    }
+}
+
+namespace hal::hard_fault
+{
+    void DefaultHandler(const uint32_t* faultStack, uint32_t lr_value);
+
+    DefaultHandler::DefaultHandler(TracerProvider tracerProvider)
+        : hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
+              {
+                  handleHardFault(faultContext.faultStack, faultContext.lrValue);
+              })
+    {
+        if (tracerProvider)
+            ::tracerProvider = std::move(tracerProvider);
+    }
+
 }

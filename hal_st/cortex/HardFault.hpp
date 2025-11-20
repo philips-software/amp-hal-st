@@ -8,8 +8,6 @@ namespace hal::hard_fault
 {
     using TracerProvider = infra::Function<services::Tracer&()>;
 
-    void RegisterTracerProvider(TracerProvider provider);
-
     class DefaultHandler
     {
     public:
