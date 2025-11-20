@@ -192,10 +192,18 @@ namespace hal
                 if (nextAction == Action::stop)
                     peripheralI2c[instance]->CR2 = I2C_CR2_STOP;
                 continuingPrevious = nextAction == Action::continueSession;
-                infra::EventDispatcher::Instance().Schedule([this]()
-                    {
-                        onSent(hal::Result::complete, sent);
-                    });
+
+                if (onSent != nullptr && sent > 0)
+                    infra::EventDispatcher::Instance().Schedule([this]()
+                        {
+                            onSent(hal::Result::complete, std::exchange(sent, 0));
+                        });
+                else if (onReceived != nullptr && received > 0)
+                    infra::EventDispatcher::Instance().Schedule([this]()
+                        {
+                            received = 0;
+                            onReceived(hal::Result::complete);
+                        });
             }
             else if (!receiveData.empty())
                 peripheralI2c[instance]->CR2 = (std::min<uint32_t>(receiveData.size(), 255) << 16) | (receiveData.size() > 255 || nextAction == Action::continueSession ? I2C_CR2_RELOAD : 0);
