@@ -100,6 +100,7 @@ namespace
         tracer.Trace() << " LR/EXC_RETURN= 0x" << infra::hex << infra::Width(8, '0') << interruptContext.lrValue;
         tracer.Trace() << infra::endl;
 
+        // Aborting here so that this function's stack is maintained for debugging.
         std::abort();
     }
 
