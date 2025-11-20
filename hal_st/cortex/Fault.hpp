@@ -4,8 +4,10 @@
 #include "infra/util/Function.hpp"
 #include "services/tracer/Tracer.hpp"
 
-namespace hal::hard_fault
+namespace hal::fault
 {
+    void SetInterruptStack(const uint32_t* faultStack, uint32_t lrValue);
+
     using TracerProvider = infra::Function<services::Tracer&()>;
 
     class DefaultHandler

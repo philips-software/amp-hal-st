@@ -1,4 +1,4 @@
-#include "hal_st/cortex/HardFault.hpp"
+#include "hal_st/cortex/Fault.hpp"
 #include DEVICE_HEADER
 #include "services/tracer/Tracer.hpp"
 
@@ -8,13 +8,13 @@ namespace
     extern "C" uint32_t link_code_end;
     extern "C" uint32_t _estack;
 
-    struct FaultContext
+    struct InterruptStack
     {
         const uint32_t* faultStack;
         uint32_t lrValue;
-    } faultContext;
+    } interruptStack;
 
-    static hal::hard_fault::TracerProvider tracerProvider = nullptr;
+    static hal::fault::TracerProvider tracerProvider = nullptr;
 
     void FeedWatchdog()
     {
@@ -111,36 +111,18 @@ namespace
     }
 }
 
-extern "C"
+namespace hal::fault
 {
-    [[gnu::naked]] void Default_Handler_Forwarded()
+    void SetInterruptStack(const uint32_t* faultStack, uint32_t lrValue)
     {
-        asm volatile(
-            "tst   lr, #4           \n"
-            "ite   eq               \n"
-            "mrseq r0, msp          \n"
-            "mrsne r0, psp          \n"
-            "mov r1, lr             \n"
-            "b DefaultHandlerImpl   \n");
+        interruptStack.faultStack = faultStack;
+        interruptStack.lrValue = lrValue;
     }
-
-    [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
-    {
-        // TODO: This is called for many interrupts, should remain in DefaultInit
-        faultContext = { stack, lr };
-        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
-        faultContext = { nullptr, 0 };
-    }
-}
-
-namespace hal::hard_fault
-{
-    void DefaultHandler(const uint32_t* faultStack, uint32_t lr_value);
 
     DefaultHandler::DefaultHandler(TracerProvider tracerProvider)
         : hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
               {
-                  handleHardFault(faultContext.faultStack, faultContext.lrValue);
+                  handleHardFault(interruptStack.faultStack, interruptStack.lrValue);
               })
     {
         if (tracerProvider)
