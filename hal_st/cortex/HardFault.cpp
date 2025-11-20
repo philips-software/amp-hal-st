@@ -1,7 +1,5 @@
 #include "hal_st/cortex/HardFault.hpp"
 #include DEVICE_HEADER
-#include "hal_st/cortex/HardFault.hpp"
-#include "hal_st/cortex/InterruptCortex.hpp"
 #include "services/tracer/Tracer.hpp"
 
 namespace
@@ -40,12 +38,14 @@ namespace hal::hard_fault
 
     static TracerProvider tracerProvider = nullptr;
 
-    void RegisterDefaultHandler()
+    DefaultHandler::DefaultHandler(TracerProvider tracerProvider)
+        : hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
+              {
+                  hal::hard_fault::DefaultHandler(faultContext.faultStack, faultContext.lrValue);
+              })
     {
-        static hal::ImmediateInterruptHandler hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
-            {
-                hal::hard_fault::DefaultHandler(faultContext.faultStack, faultContext.lrValue);
-            });
+        if (tracerProvider)
+            RegisterTracerProvider(std::move(tracerProvider));
     }
 
     void RegisterTracerProvider(TracerProvider provider)
