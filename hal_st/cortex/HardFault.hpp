@@ -3,10 +3,11 @@
 #include "infra/util/Function.hpp"
 #include "services/tracer/Tracer.hpp"
 
-namespace hal
+namespace hal::hard_fault
 {
-    using HardFaultTracerProvider = infra::Function<services::Tracer&()>;
+    using TracerProvider = infra::Function<services::Tracer&()>;
 
-    void RegisterHardFaultTracerProvider(HardFaultTracerProvider provider);
-    void HardFaultHandler(const uint32_t* faultStack, uint32_t lr_value);
+    void RegisterDefaultHandler();
+    void RegisterTracerProvider(TracerProvider provider);
+
 }

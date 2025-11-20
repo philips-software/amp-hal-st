@@ -1,17 +1,59 @@
 #include "hal_st/cortex/HardFault.hpp"
 #include DEVICE_HEADER
+#include "hal_st/cortex/HardFault.hpp"
+#include "hal_st/cortex/InterruptCortex.hpp"
 #include "services/tracer/Tracer.hpp"
 
-namespace hal
+namespace
 {
-    static HardFaultTracerProvider tracerProvider = nullptr;
+    struct FaultContext
+    {
+        const uint32_t* faultStack;
+        uint32_t lrValue;
+    } faultContext;
+}
 
-    void RegisterHardFaultTracerProvider(HardFaultTracerProvider provider)
+extern "C"
+{
+    [[gnu::naked]] void Default_Handler_Forwarded()
+    {
+        asm volatile(
+            "tst   lr, #4           \n"
+            "ite   eq               \n"
+            "mrseq r0, msp          \n"
+            "mrsne r0, psp          \n"
+            "mov r1, lr             \n"
+            "b DefaultHandlerImpl   \n");
+    }
+
+    [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
+    {
+        faultContext = { stack, lr };
+        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
+        faultContext = { nullptr, 0 };
+    }
+}
+
+namespace hal::hard_fault
+{
+    void DefaultHandler(const uint32_t* faultStack, uint32_t lr_value);
+
+    static TracerProvider tracerProvider = nullptr;
+
+    void RegisterDefaultHandler()
+    {
+        static hal::ImmediateInterruptHandler hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
+            {
+                hal::hard_fault::DefaultHandler(faultContext.faultStack, faultContext.lrValue);
+            });
+    }
+
+    void RegisterTracerProvider(TracerProvider provider)
     {
         tracerProvider = std::move(provider);
     }
 
-    void HardFaultHandler(const uint32_t* faultStack, uint32_t lr_value)
+    void DefaultHandler(const uint32_t* faultStack, uint32_t lr_value)
     {
         // Copying variables onto the stack so that it can be inspected in the debugger
 
