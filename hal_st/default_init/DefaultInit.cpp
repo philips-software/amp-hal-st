@@ -1,4 +1,5 @@
 #include DEVICE_HEADER
+#include "hal_st/cortex/HardFault.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include <errno.h>
 #include <sys/types.h>
@@ -32,9 +33,20 @@ extern "C"
         return HAL_OK;
     }
 
-    [[gnu::weak]] void Default_Handler_Forwarded()
+    [[gnu::naked]] void Default_Handler_Forwarded()
     {
-        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
+        asm volatile(
+            "tst   lr, #4           \n"
+            "ite   eq               \n"
+            "mrseq r0, msp          \n"
+            "mrsne r0, psp          \n"
+            "mov r1, lr             \n"
+            "b DefaultHardFaultHandler   \n");
+    }
+
+    [[gnu::weak]] void DefaultHardFaultHandler(const uint32_t* stack, uint32_t lr)
+    {
+        hal::HardFaultHandler(stack, lr);
     }
 
     [[gnu::weak]] void abort()
