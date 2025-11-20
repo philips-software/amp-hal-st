@@ -1,6 +1,5 @@
 #include "hal_st/stm32fxxx/LpTimerPwmStm.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "infra/util/ReallyAssert.hpp"
 #include <array>
 #include <cstdint>
 
@@ -47,42 +46,75 @@ namespace hal
 {
     LpTimerPwmBaseStm::LpTimerPwmBaseStm(uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing)
         : timer(oneBasedIndex, timing)
-    {}
+    {
+        LL_LPTIM_SetWaveform(timer.Handle().Instance, LL_LPTIM_OUTPUT_WAVEFORM_PWM);
+    }
 
     LpPwmChannelGpio& LpTimerPwmBaseStm::Channel(uint8_t channelOneBasedIndex)
     {
         return channels[channelOneBasedIndex - 1];
     }
 
-    void LpTimerPwmBaseStm::Start()
+    void LpTimerPwmBaseStm::StartTimer()
+    {
+        timer.Start();
+    }
+
+    void LpTimerPwmBaseStm::StartChannels()
     {
         for (auto& channel : channels)
             channel.Start();
+    }
 
-        timer.Start();
+    void LpTimerPwmBaseStm::Start()
+    {
+        StartChannels();
+        StartTimer();
     }
 
     void LpTimerPwmBaseStm::Stop()
     {
-        timer.Stop();
-
         for (auto& channel : channels)
             channel.Stop();
+
+        timer.Stop();
     }
 
-    LpPwmChannelGpio::LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin)
+    LpTimerPwm::LpTimerPwm(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing)
+        : LpTimerPwmBaseStm(oneBasedIndex, timing)
+        , channelStorage(channelStorage)
+        , oneBasedIndex(oneBasedIndex)
+    {}
+
+    LpPwmChannelGpio& LpTimerPwm::Channel(uint8_t channelOneBasedIndex)
+    {
+        for (auto& channel : channelStorage)
+        {
+            if (channel.channelIndex == channelOneBasedIndex - 1)
+                return channel;
+        }
+        std::abort();
+    }
+
+    void LpTimerPwm::ConfigureChannel(uint8_t channelOneBasedIndex, GpioPinStm& pin)
+    {
+        channelStorage.emplace_back(oneBasedIndex, channelOneBasedIndex, timer.Handle(), pin);
+        channels = channelStorage.contiguous_range(channelStorage.begin());
+    }
+
+    LpPwmChannelGpio::LpPwmChannelGpio(uint8_t timerOneBasedIndex, uint8_t channelOneBasedIndex, LPTIM_HandleTypeDef& handle, GpioPinStm& pin, uint32_t polarity)
         : timerIndex(timerOneBasedIndex - 1)
         , channelIndex(channelOneBasedIndex - 1)
         , handle(handle)
         , pin(pin, GetChannelPinConfig(channelIndex), timerOneBasedIndex)
         , ccr(GetCCRegister(handle.Instance, channelIndex))
     {
-        ConfigChannelInit();
+        ConfigurePolarity(polarity);
     }
 
-    void LpPwmChannelGpio::ConfigChannelInit()
+    void LpPwmChannelGpio::ConfigurePolarity(uint32_t polarity)
     {
-        LPTIM_OC_ConfigTypeDef sConfig = { .OCPolarity = LPTIM_OCPOLARITY_HIGH };
+        LPTIM_OC_ConfigTypeDef sConfig = { .OCPolarity = polarity };
         auto result = HAL_LPTIM_OC_ConfigChannel(&handle, &sConfig, GetLpTimerChannel(channelIndex));
         assert(result == HAL_OK);
     }
@@ -95,20 +127,19 @@ namespace hal
 
     void LpPwmChannelGpio::SetPulse(uint32_t pulseOn, uint32_t period)
     {
+        assert(LL_LPTIM_IsEnabled(handle.Instance));
         *ccr = pulseOn;
         handle.Instance->ARR = period;
     }
 
     void LpPwmChannelGpio::Start()
     {
-        auto result = HAL_LPTIM_PWM_Start(&handle, GetLpTimerChannel(channelIndex));
-        really_assert(result == HAL_OK);
+        LL_LPTIM_CC_EnableChannel(handle.Instance, GetLpTimerChannel(channelIndex));
     }
 
     void LpPwmChannelGpio::Stop()
     {
-        auto result = HAL_LPTIM_PWM_Stop(&handle, GetLpTimerChannel(channelIndex));
-        really_assert(result == HAL_OK);
+        LL_LPTIM_CC_DisableChannel(handle.Instance, GetLpTimerChannel(channelIndex));
     }
 }
 
