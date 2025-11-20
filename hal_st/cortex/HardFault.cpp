@@ -126,6 +126,7 @@ extern "C"
 
     [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
     {
+        // TODO: This is called for many interrupts, should remain in DefaultInit
         faultContext = { stack, lr };
         hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
         faultContext = { nullptr, 0 };
