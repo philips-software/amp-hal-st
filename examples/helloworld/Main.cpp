@@ -1,3 +1,4 @@
+#include "build/stm32wba52/_deps/emil-src/infra/util/MemoryRange.hpp"
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/instantiations/FaultTracer.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
@@ -12,6 +13,10 @@
 #include "services/util/DebugLed.hpp"
 #include <array>
 #include <chrono>
+
+extern "C" uint32_t link_code_location;
+extern "C" uint32_t link_code_end;
+extern "C" uint32_t _estack;
 
 #if defined(STM32WBA)
 unsigned int hse_value = 32'000'000;
@@ -30,7 +35,7 @@ int main()
     static services::DebugLed debugLed(ui.ledGreen);
     static hal::DmaStm dmaStm;
 
-    static const auto defaultFaultHandler = hal::fault::DefaultHandler([]() -> services::Tracer&
+    static const auto defaultFaultHandler = hal::fault::DefaultHandler(infra::MakeRange<const uint32_t>(&link_code_location, &link_code_end), &_estack, []() -> services::Tracer&
         {
             return services::GlobalTracer();
         });

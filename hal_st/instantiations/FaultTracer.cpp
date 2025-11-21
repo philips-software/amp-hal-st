@@ -4,22 +4,52 @@
 
 namespace
 {
-    extern "C" uint32_t link_code_location;
-    extern "C" uint32_t link_code_end;
-    extern "C" uint32_t _estack;
-
-    struct InterruptContext
-    {
-        const uint32_t* stack;
-        uint32_t lrValue;
-    } interruptContext;
-
     void FeedWatchdog()
     {
         WWDG->CR |= WWDG_CR_T;
     }
 
-    void PrintBacktrace(const uint32_t* stack, services::Tracer& tracer)
+}
+
+namespace hal::fault
+{
+
+    DefaultHandler::DefaultHandler(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider)
+        : instructionRange(instructionRange)
+        , endOfStack(endOfStack)
+        , tracerProvider(tracerProvider)
+        , hardfaultRegistration(static_cast<IRQn_Type>(-13), [this]()
+              {
+                  if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().tracerProvider)
+                  {
+                      auto& tracer = DefaultHandler::Instance().tracerProvider();
+                      tracer.Trace() << "*** Hard fault! ***";
+                      DumpCurrentInterruptStackAndAbort(tracer);
+                  }
+                  else
+                      std::abort();
+              })
+    {}
+
+    void DefaultHandler::SetInterruptContext(const uint32_t* stack, uint32_t lrValue)
+    {
+        interruptContext.stack = stack;
+        interruptContext.lrValue = lrValue;
+    }
+
+    void DefaultHandler::DumpInterruptStackAndAbort(infra::BoundedConstString fault) const
+    {
+        if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().tracerProvider)
+        {
+            auto& tracer = DefaultHandler::Instance().tracerProvider();
+            tracer.Trace() << "*** Fault: " << fault << " ***";
+            DumpCurrentInterruptStackAndAbort(tracer);
+        }
+        else
+            std::abort();
+    }
+
+    void DefaultHandler::PrintBacktrace(const uint32_t* stack, services::Tracer& tracer) const
     {
         FeedWatchdog();
 
@@ -33,9 +63,9 @@ namespace
         //
         // Technically we should also skip the initial fault stack registers, but it also contains the PC and LR values
         // which other tooling depend on to be useful.
-        for (const uint32_t* stackPointer = stack; stackPointer != &_estack; ++stackPointer)
+        for (const uint32_t* stackPointer = stack; stackPointer != endOfStack; ++stackPointer)
         {
-            if (*stackPointer >= reinterpret_cast<uint32_t>(&link_code_location) && *stackPointer < reinterpret_cast<uint32_t>(&link_code_end))
+            if (instructionRange.contains(stackPointer))
                 tracer.Continue() << " 0x" << infra::hex << infra::Width(8, '0') << (*stackPointer & 0xfffffffe);
 
             FeedWatchdog();
@@ -44,7 +74,7 @@ namespace
         tracer.Trace() << ""; // new line
     }
 
-    [[noreturn]] void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer)
+    [[noreturn]] void DefaultHandler::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
     {
         PrintBacktrace(interruptContext.stack, tracer);
 
@@ -101,42 +131,5 @@ namespace
         // Aborting here so that this function's stack is maintained for debugging.
         std::abort();
     }
-
-}
-
-namespace hal::fault
-{
-    void SetInterruptContext(const uint32_t* stack, uint32_t lrValue)
-    {
-        interruptContext.stack = stack;
-        interruptContext.lrValue = lrValue;
-    }
-
-    void DumpInterruptStackAndAbort(infra::BoundedConstString fault)
-    {
-        if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().getTracerProvider())
-        {
-            auto& tracer = DefaultHandler::Instance().getTracerProvider()();
-            tracer.Trace() << "*** Fault: " << fault << " ***";
-            DumpCurrentInterruptStackAndAbort(tracer);
-        }
-        else
-            std::abort();
-    }
-
-    DefaultHandler::DefaultHandler(TracerProvider tracerProvider)
-        : tracerProvider(tracerProvider)
-        , hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
-              {
-                  if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().tracerProvider)
-                  {
-                      auto& tracer = DefaultHandler::Instance().tracerProvider();
-                      tracer.Trace() << "*** Hard fault! ***";
-                      DumpCurrentInterruptStackAndAbort(tracer);
-                  }
-                  else
-                      std::abort();
-              })
-    {}
 
 }

@@ -3,28 +3,36 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include "services/tracer/Tracer.hpp"
 
 namespace hal::fault
 {
-    void SetInterruptContext(const uint32_t* faultStack, uint32_t lrValue);
-    [[noreturn]] void DumpInterruptStackAndAbort(infra::BoundedConstString fault);
 
     using TracerProvider = infra::Function<services::Tracer&()>;
 
     class DefaultHandler : public infra::InterfaceConnector<DefaultHandler>
     {
     public:
-        explicit DefaultHandler(TracerProvider tracerProvider = nullptr);
-
-        TracerProvider getTracerProvider() const
-        {
-            return tracerProvider;
-        }
+        explicit DefaultHandler(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider = nullptr);
+        void SetInterruptContext(const uint32_t* faultStack, uint32_t lrValue);
+        [[noreturn]] void DumpInterruptStackAndAbort(infra::BoundedConstString fault) const;
 
     private:
+        void PrintBacktrace(const uint32_t* stack, services::Tracer& tracer) const;
+        [[noreturn]] void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const;
+
+        struct InterruptContext
+        {
+            const uint32_t* stack;
+            uint32_t lrValue;
+        };
+
+        infra::MemoryRange<const uint32_t> instructionRange;
+        uint32_t* endOfStack;
         TracerProvider tracerProvider = nullptr;
         hal::ImmediateInterruptHandler hardfaultRegistration;
+        InterruptContext interruptContext;
     };
 
 }
