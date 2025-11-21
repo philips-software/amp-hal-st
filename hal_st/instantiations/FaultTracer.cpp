@@ -11,18 +11,18 @@ namespace
 
 }
 
-namespace hal::fault
+namespace hal
 {
 
-    DefaultHandler::DefaultHandler(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider)
+    DefaultFaultTracer::DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider)
         : instructionRange(instructionRange)
         , endOfStack(endOfStack)
         , tracerProvider(tracerProvider)
         , hardfaultRegistration(static_cast<IRQn_Type>(-13), [this]()
               {
-                  if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().tracerProvider)
+                  if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
                   {
-                      auto& tracer = DefaultHandler::Instance().tracerProvider();
+                      auto& tracer = DefaultFaultTracer::Instance().tracerProvider();
                       tracer.Trace() << "*** Hard fault! ***";
                       DumpCurrentInterruptStackAndAbort(tracer);
                   }
@@ -31,17 +31,17 @@ namespace hal::fault
               })
     {}
 
-    void DefaultHandler::SetInterruptContext(const uint32_t* stack, uint32_t lrValue)
+    void DefaultFaultTracer::SetInterruptContext(const uint32_t* stack, uint32_t lrValue)
     {
         interruptContext.stack = stack;
         interruptContext.lrValue = lrValue;
     }
 
-    void DefaultHandler::DumpInterruptStackAndAbort(infra::BoundedConstString fault) const
+    void DefaultFaultTracer::DumpInterruptStackAndAbort(infra::BoundedConstString fault) const
     {
-        if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().tracerProvider)
+        if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
         {
-            auto& tracer = DefaultHandler::Instance().tracerProvider();
+            auto& tracer = DefaultFaultTracer::Instance().tracerProvider();
             tracer.Trace() << "*** Fault: " << fault << " ***";
             DumpCurrentInterruptStackAndAbort(tracer);
         }
@@ -49,7 +49,7 @@ namespace hal::fault
             std::abort();
     }
 
-    void DefaultHandler::PrintBacktrace(const uint32_t* stack, services::Tracer& tracer) const
+    void DefaultFaultTracer::PrintBacktrace(const uint32_t* stack, services::Tracer& tracer) const
     {
         FeedWatchdog();
 
@@ -74,7 +74,7 @@ namespace hal::fault
         tracer.Trace() << ""; // new line
     }
 
-    [[noreturn]] void DefaultHandler::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
+    [[noreturn]] void DefaultFaultTracer::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
     {
         PrintBacktrace(interruptContext.stack, tracer);
 

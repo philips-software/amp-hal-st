@@ -35,7 +35,7 @@ int main()
     static services::DebugLed debugLed(ui.ledGreen);
     static hal::DmaStm dmaStm;
 
-    static const auto defaultFaultHandler = hal::fault::DefaultHandler(infra::MakeRange<const uint32_t>(&link_code_location, &link_code_end), &_estack, []() -> services::Tracer&
+    static const auto defaultFaultHandler = hal::DefaultFaultTracer(infra::MakeRange<const uint32_t>(&link_code_location, &link_code_end), &_estack, []() -> services::Tracer&
         {
             return services::GlobalTracer();
         });

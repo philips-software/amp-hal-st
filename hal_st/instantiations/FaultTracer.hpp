@@ -6,15 +6,15 @@
 #include "infra/util/MemoryRange.hpp"
 #include "services/tracer/Tracer.hpp"
 
-namespace hal::fault
+namespace hal
 {
 
     using TracerProvider = infra::Function<services::Tracer&()>;
 
-    class DefaultHandler : public infra::InterfaceConnector<DefaultHandler>
+    class DefaultFaultTracer : public infra::InterfaceConnector<DefaultFaultTracer>
     {
     public:
-        explicit DefaultHandler(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider = nullptr);
+        explicit DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider = nullptr);
         void SetInterruptContext(const uint32_t* faultStack, uint32_t lrValue);
         [[noreturn]] void DumpInterruptStackAndAbort(infra::BoundedConstString fault) const;
 
