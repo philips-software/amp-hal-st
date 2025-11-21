@@ -1,4 +1,5 @@
 #include "hal/interfaces/Gpio.hpp"
+#include "hal_st/cortex/Fault.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
@@ -28,6 +29,11 @@ int main()
     static main_::NUCLEO ui;
     static services::DebugLed debugLed(ui.ledGreen);
     static hal::DmaStm dmaStm;
+
+    static const auto defaultFaultHandler = hal::fault::DefaultHandler([]() -> services::Tracer&
+        {
+            return services::GlobalTracer();
+        });
 
 #if defined(STM32F7)
     static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
