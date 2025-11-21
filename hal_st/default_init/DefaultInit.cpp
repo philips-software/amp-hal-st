@@ -1,5 +1,7 @@
 #include DEVICE_HEADER
 #include "hal_st/cortex/InterruptCortex.hpp"
+#include "hal_st/instantiations/FaultTracer.hpp"
+#include <cstdlib>
 #include <errno.h>
 #include <sys/types.h>
 
@@ -26,15 +28,28 @@ extern "C"
         return static_cast<caddr_t>(current_block_address);
     }
 
+    [[gnu::naked]] void Default_Handler_Forwarded()
+    {
+        asm volatile(
+            "tst   lr, #4           \n"
+            "ite   eq               \n"
+            "mrseq r0, msp          \n"
+            "mrsne r0, psp          \n"
+            "mov r1, lr             \n"
+            "b DefaultHandlerImpl   \n");
+    }
+
+    [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
+    {
+        if (hal::DefaultFaultTracer::InstanceSet())
+            hal::DefaultFaultTracer::Instance().SetInterruptContext(stack, lr);
+        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
+    }
+
     // Avoid the SysTick handler from being initialised by HAL_Init
     HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
     {
         return HAL_OK;
-    }
-
-    [[gnu::weak]] void Default_Handler_Forwarded()
-    {
-        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
     }
 
     [[gnu::weak]] void abort()

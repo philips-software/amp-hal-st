@@ -57,7 +57,9 @@ SECTIONS
 
     .text : ALIGN(4)
     {
+        link_code_location = .;
         *(.text .text.*)
+        link_code_end = .;
 
         KEEP(*(.eh_frame*))
 

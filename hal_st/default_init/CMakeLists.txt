@@ -9,6 +9,7 @@ target_include_directories(hal_st.default_init PUBLIC
 target_link_libraries(hal_st.default_init PUBLIC
     st.hal_driver
     hal_st.cortex
+    hal_st.instantiations
 )
 
 # Assembler does not understand -Werror
