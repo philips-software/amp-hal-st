@@ -1,4 +1,4 @@
-#include "hal_st/cortex/Fault.hpp"
+#include "hal_st/instantiations/FaultTracer.hpp"
 #include DEVICE_HEADER
 #include "services/tracer/Tracer.hpp"
 

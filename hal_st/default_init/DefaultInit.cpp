@@ -1,6 +1,6 @@
 #include DEVICE_HEADER
-#include "hal_st/cortex/Fault.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
+#include "hal_st/instantiations/FaultTracer.hpp"
 #include <cstdlib>
 #include <errno.h>
 #include <sys/types.h>

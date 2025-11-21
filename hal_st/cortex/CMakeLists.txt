@@ -14,5 +14,4 @@ target_link_libraries(hal_st.cortex PUBLIC
 target_sources(hal_st.cortex PRIVATE
     InterruptCortex.cpp
     InterruptCortex.hpp
-    Fault.cpp
 )
