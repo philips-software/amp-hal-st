@@ -71,7 +71,7 @@ namespace hal
             FeedWatchdog();
         }
 
-        tracer.Trace() << ""; // new line
+        tracer.Trace() << "";
     }
 
     [[noreturn]] void DefaultFaultTracer::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
