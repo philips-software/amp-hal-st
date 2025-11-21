@@ -14,8 +14,6 @@ namespace
         uint32_t lrValue;
     } interruptContext;
 
-    static hal::fault::TracerProvider tracerProvider = nullptr;
-
     void FeedWatchdog()
     {
         WWDG->CR |= WWDG_CR_T;
@@ -46,7 +44,7 @@ namespace
         tracer.Trace() << ""; // new line
     }
 
-    void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer)
+    [[noreturn]] void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer)
     {
         PrintBacktrace(interruptContext.stack, tracer);
 
@@ -116,9 +114,9 @@ namespace hal::fault
 
     void DumpInterruptStackAndAbort(infra::BoundedConstString fault)
     {
-        if (tracerProvider)
+        if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().getTracerProvider())
         {
-            auto& tracer = tracerProvider();
+            auto& tracer = DefaultHandler::Instance().getTracerProvider()();
             tracer.Trace() << "*** Fault: " << fault << " ***";
             DumpCurrentInterruptStackAndAbort(tracer);
         }
@@ -127,20 +125,18 @@ namespace hal::fault
     }
 
     DefaultHandler::DefaultHandler(TracerProvider tracerProvider)
-        : hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
+        : tracerProvider(tracerProvider)
+        , hardfaultRegistration(static_cast<IRQn_Type>(-13), []()
               {
-                  if (::tracerProvider)
+                  if (DefaultHandler::InstanceSet() && DefaultHandler::Instance().tracerProvider)
                   {
-                      auto& tracer = ::tracerProvider();
+                      auto& tracer = DefaultHandler::Instance().tracerProvider();
                       tracer.Trace() << "*** Hard fault! ***";
                       DumpCurrentInterruptStackAndAbort(tracer);
                   }
                   else
                       std::abort();
               })
-    {
-        if (tracerProvider)
-            ::tracerProvider = std::move(tracerProvider);
-    }
+    {}
 
 }
