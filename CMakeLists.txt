@@ -29,7 +29,7 @@ if (HALST_STANDALONE)
         GIT_TAG        4ca8386c487d72c937c416e336d1ef2c675f5903 # unreleased
     )
     FetchContent_MakeAvailable(emil)
-    add_compile_definitions(PUBLIC EMIL_ENABLE_TRACING=1)
+    add_compile_definitions(EMIL_ENABLE_TRACING=1)
 
     if (EMIL_HOST_BUILD)
         FetchContent_Declare(
