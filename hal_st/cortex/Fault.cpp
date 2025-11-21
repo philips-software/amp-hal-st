@@ -48,20 +48,7 @@ namespace
 
     void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer)
     {
-        // Copying variables onto the stack so that it can be inspected in the debugger
-
-        auto r0 = interruptContext.stack[0];
-        auto r1 = interruptContext.stack[1];
-        auto r2 = interruptContext.stack[2];
-        auto r3 = interruptContext.stack[3];
-        auto r12 = interruptContext.stack[4];
-        auto lr = interruptContext.stack[5];
-        auto pc = interruptContext.stack[6];
-        auto psr = interruptContext.stack[7];
-
-        auto cfsr = SCB->CFSR;
-        auto MemManageFaultAddress = SCB->MMFAR;
-        auto BusFaultAddress = SCB->BFAR;
+        PrintBacktrace(interruptContext.stack, tracer);
 
         /* How to interpret the fault. This is all explained in detail in: https://www.keil.com/appnotes/files/apnt209.pdf
          * Check SCB->HFSR for the cause of the hardfault. Most likely it was one of these scenarios:
@@ -74,8 +61,14 @@ namespace
          *  Looks for which bits are set. Sometimes BFAR or MMFAR points to the fault address.
          */
 
-        PrintBacktrace(interruptContext.stack, tracer);
-
+        auto r0 = interruptContext.stack[0];
+        auto r1 = interruptContext.stack[1];
+        auto r2 = interruptContext.stack[2];
+        auto r3 = interruptContext.stack[3];
+        auto r12 = interruptContext.stack[4];
+        auto lr = interruptContext.stack[5];
+        auto pc = interruptContext.stack[6];
+        auto psr = interruptContext.stack[7];
         tracer.Trace() << "Stack frame";
         tracer.Trace() << " R0  : 0x" << infra::hex << infra::Width(8, '0') << r0; // Usuaully contains the parameter values
         tracer.Trace() << " R1  : 0x" << infra::hex << infra::Width(8, '0') << r1; // Usuaully contains the parameter values
@@ -85,6 +78,12 @@ namespace
         tracer.Trace() << " LR  : 0x" << infra::hex << infra::Width(8, '0') << lr;  // Link Register, where the current function was called from.
         tracer.Trace() << " PC  : 0x" << infra::hex << infra::Width(8, '0') << pc;  // Program Counter, usually where the fault occured.
         tracer.Trace() << " PSR : 0x" << infra::hex << infra::Width(8, '0') << psr; // Program Status Register
+
+#if __CORTEX_M > 0x0U
+        auto cfsr = SCB->CFSR;
+        auto MemManageFaultAddress = SCB->MMFAR;
+        auto BusFaultAddress = SCB->BFAR;
+
         tracer.Trace() << "FSR/FAR:";
         tracer.Trace() << " HFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->HFSR;
         if (SCB->HFSR & SCB_HFSR_DEBUGEVT_Msk)
@@ -99,6 +98,7 @@ namespace
         tracer.Trace() << "Misc";
         tracer.Trace() << " LR/EXC_RETURN= 0x" << infra::hex << infra::Width(8, '0') << interruptContext.lrValue;
         tracer.Trace() << infra::endl;
+#endif
 
         // Aborting here so that this function's stack is maintained for debugging.
         std::abort();
