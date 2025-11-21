@@ -1,4 +1,3 @@
-#include "build/stm32wba52/_deps/emil-src/infra/util/MemoryRange.hpp"
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/instantiations/FaultTracer.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
@@ -6,6 +5,7 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "infra/timer/Timer.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include "services/tracer/GlobalTracer.hpp"
 #include "services/tracer/StreamWriterOnSerialCommunication.hpp"
 #include "services/tracer/Tracer.hpp"
