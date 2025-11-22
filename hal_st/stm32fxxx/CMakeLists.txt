@@ -233,8 +233,6 @@ if (TARGET_MCU_VENDOR STREQUAL st)
         set(peripheral_xml "PeripheralTableFxxx.xml")
     endif()
 
-    message(STATUS "Using peripheral XML file: ${peripheral_xml}")
-
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTableStructure.xml GeneratePeripheralTableStructure.xsl ${peripheral_xml}
         --stringparam mcu-document ${mcu_xml})
     generate_xslt(hal_st.stm32fxxx generated/stm32fxxx/PeripheralTable.cpp GeneratePeripheralTableCpp.xsl "${CMAKE_CURRENT_BINARY_DIR}/generated/stm32fxxx/PeripheralTableStructure.xml")
