@@ -3,7 +3,6 @@
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/EnumCast.hpp"
 #include "infra/util/Function.hpp"
-#include "stm32g071xx.h"
 #include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_TIMER)
