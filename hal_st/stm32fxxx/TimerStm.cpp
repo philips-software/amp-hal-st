@@ -63,7 +63,6 @@ namespace
         IRQn_Type::TIM7_IRQn,
 #endif
 #else
-
         TimerIrqUnsupported,
 #endif
 #if defined(TIM8)
