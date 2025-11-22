@@ -24,7 +24,8 @@ extern "C"
 namespace
 {
 #if defined(STM32G4) || defined(STM32H5)
-    constexpr std::array irqMap{
+    constexpr std::array irqMap
+    {
 #if defined(STM32G4)
 #if defined(ADC1)
         std::make_pair(1, IRQn_Type::ADC1_2_IRQn), // only ADC1 or ADC2 can be configured to use the single interrupt vector
