@@ -3,6 +3,7 @@
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/EnumCast.hpp"
 #include "infra/util/Function.hpp"
+#include "stm32g071xx.h"
 #include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_TIMER)
@@ -17,6 +18,8 @@ namespace
         IRQn_Type::TIM1_UP_TIM16_IRQn,
 #elif defined(STM32F7) || defined(STM32F4)
         IRQn_Type::TIM1_UP_TIM10_IRQn,
+#elif defined(STM32G071xx)
+        IRQn_Type::TIM1_BRK_UP_TRG_COM_IRQn,
 #else
         IRQn_Type::TIM1_UP_IRQn,
 #endif
@@ -46,6 +49,8 @@ namespace
 #if defined(TIM6)
 #if defined(STM32F7) || defined(STM32F4)
         IRQn_Type::TIM6_DAC_IRQn,
+#elif defined(STM32G071xx)
+        IRQn_Type::TIM6_DAC_LPTIM1_IRQn,
 #else
         IRQn_Type::TIM6_IRQn,
 #endif
@@ -53,8 +58,13 @@ namespace
         TimerIrqUnsupported,
 #endif
 #if defined(TIM7)
-        IRQn_Type::TIM7_IRQn,
+#if defined(STM32G071xx)
+        IRQn_Type::TIM7_LPTIM2_IRQn,
 #else
+        IRQn_Type::TIM7_IRQn,
+#endif
+#else
+
         TimerIrqUnsupported,
 #endif
 #if defined(TIM8)

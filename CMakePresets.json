@@ -77,6 +77,19 @@
       }
     },
     {
+      "name": "stm32g071",
+      "displayName": "stm32g071",
+      "description": "Build for stm32g071",
+      "inherits": "stm32",
+      "toolchainFile": "${sourceDir}/build/${presetName}/_deps/emil-src/cmake/toolchain-arm-gcc-m0plus.cmake",
+      "cacheVariables": {
+        "TARGET_CORTEX": "m0+",
+        "TARGET_MCU_FAMILY": "stm32g0xx",
+        "TARGET_MCU": "stm32g071",
+        "TARGET_MCU_VARIANT": "stm32g071gb"
+      }
+    },
+    {
       "name": "stm32g431",
       "displayName": "stm32g431",
       "description": "Build for stm32g431",
@@ -218,7 +231,10 @@
       "name": "host-Debug-WithPackage",
       "configuration": "Debug",
       "configurePreset": "host",
-      "targets": ["all", "package"]
+      "targets": [
+        "all",
+        "package"
+      ]
     },
     {
       "name": "host-RelWithDebInfo",
@@ -234,7 +250,9 @@
       "name": "release-package",
       "configuration": "MinSizeRel",
       "configurePreset": "host-single-MinSizeRel",
-      "targets": ["package"]
+      "targets": [
+        "package"
+      ]
     },
     {
       "name": "stm32wb55-RelWithDebInfo",
@@ -245,6 +263,11 @@
       "name": "stm32g070-RelWithDebInfo",
       "configuration": "RelWithDebInfo",
       "configurePreset": "stm32g070"
+    },
+    {
+      "name": "stm32g071-RelWithDebInfo",
+      "configuration": "RelWithDebInfo",
+      "configurePreset": "stm32g071"
     },
     {
       "name": "stm32g431-RelWithDebInfo",
