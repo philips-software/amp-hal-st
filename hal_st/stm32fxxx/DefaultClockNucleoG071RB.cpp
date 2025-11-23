@@ -1,5 +1,5 @@
 #include DEVICE_HEADER
-#include "hal_st/stm32fxxx/DefaultClockNucleoG071GB.hpp"
+#include "hal_st/stm32fxxx/DefaultClockNucleoG071RB.hpp"
 
 /* The system Clock is configured as follows:
  *    System Clock source            = PLL (HSI)
@@ -12,7 +12,7 @@
  *    VDD(V)                         = 3.3
  *    Main regulator output voltage  = Scale1 mode
  */
-void ConfigureDefaultClockNucleo071GB()
+void ConfigureDefaultClockNucleo071RB()
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
     RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };

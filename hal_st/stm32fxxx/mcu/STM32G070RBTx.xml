@@ -12,8 +12,8 @@
     <IP ConfigFile="CRC-STM32G0xx" InstanceName="CRC" Name="CRC" Version="integtest1_v2_0"/>
     <IP ConfigFile="FATFS-STM32G0xx" InstanceName="FATFS" Name="FATFS" Version="v0.1.0_Cube"/>
     <IP ConfigFile="FREERTOS-STM32G0xx" InstanceName="FREERTOS" Name="FREERTOS" Version="v8.0.0_Cube"/>
-    <!--<IP InstanceName="I2C1" Name="I2C" Version="i2c2_v1_1_Cube"/>-->
-    <!--<IP InstanceName="I2C2" Name="I2C" Version="i2c2_v1_1_Cube"/>-->
+    <IP InstanceName="I2C1" Name="I2C" Version="i2c2_v1_1_Cube"/>
+    <IP InstanceName="I2C2" Name="I2C" Version="i2c2_v1_1_Cube"/>
     <IP ClockEnableMode="__HAL_RCC_SPI1_CLK_ENABLE" ConfigFile="I2S-STM32G0xx" InstanceName="I2S1" Name="I2S" Version="spi2s1_v3_2_Cube"/>
     <IP ClockEnableMode="none" ConfigFile="IRTIM-STM32G0xx" InstanceName="IRTIM" Name="IRTIM" Version="G0xx_irtim_v1_0_Cube"/>
     <IP ClockEnableMode="none" ConfigFile="IWDG-STM32G0xx" InstanceName="IWDG" Name="IWDG" Version="iwdg1_v2_0"/>
@@ -32,8 +32,8 @@
     <IP ConfigFile="TIM-STM32G0xx" InstanceName="TIM17" Name="TIM1_8G0" Version="gptimer2_v3_x_Cube"/>
     <IP InstanceName="USART1" Name="USART" Version="sci3_v2_1_Cube"/>
     <IP InstanceName="USART2" Name="USART" Version="sci3_v2_1_Cube"/>
-    <!--<IP InstanceName="USART3" Name="USART" Version="sci3_v2_1_Cube"/>-->
-    <!--<IP InstanceName="USART4" Name="USART" Version="sci3_v2_1_Cube"/>-->
+    <IP InstanceName="USART3" Name="USART" Version="sci3_v2_1_Cube"/>
+    <IP InstanceName="USART4" Name="USART" Version="sci3_v2_1_Cube"/>
     <IP ConfigFile="WWDG-STM32G0xx" InstanceName="WWDG" Name="WWDG" Version="wwdg1_v2_0"/>
     <IP ConfigFile="GPIO-STM32G0xx" InstanceName="GPIO" Name="GPIO" Version="STM32G07x_gpio_v1_0"/>
     <IP ConfigFile="DMA-STM32G0xx" InstanceName="DMA" Name="DMA" Version="STM32G081_dma1_v1_3"/>

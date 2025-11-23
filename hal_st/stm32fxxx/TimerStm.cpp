@@ -17,7 +17,7 @@ namespace
         IRQn_Type::TIM1_UP_TIM16_IRQn,
 #elif defined(STM32F7) || defined(STM32F4)
         IRQn_Type::TIM1_UP_TIM10_IRQn,
-#elif defined(STM32G071xx)
+#elif defined(STM32G0)
         IRQn_Type::TIM1_BRK_UP_TRG_COM_IRQn,
 #else
         IRQn_Type::TIM1_UP_IRQn,

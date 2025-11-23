@@ -85,8 +85,7 @@
       "cacheVariables": {
         "TARGET_CORTEX": "m0+",
         "TARGET_MCU_FAMILY": "stm32g0xx",
-        "TARGET_MCU": "stm32g071",
-        "TARGET_MCU_VARIANT": "stm32g071gb"
+        "TARGET_MCU": "stm32g071"
       }
     },
     {
@@ -231,7 +230,10 @@
       "name": "host-Debug-WithPackage",
       "configuration": "Debug",
       "configurePreset": "host",
-      "targets": ["all", "package"]
+      "targets": [
+        "all",
+        "package"
+      ]
     },
     {
       "name": "host-RelWithDebInfo",
@@ -247,7 +249,9 @@
       "name": "release-package",
       "configuration": "MinSizeRel",
       "configurePreset": "host-single-MinSizeRel",
-      "targets": ["package"]
+      "targets": [
+        "package"
+      ]
     },
     {
       "name": "stm32wb55-RelWithDebInfo",

@@ -1,0 +1,6 @@
+#ifndef HAL_ST_DEFAULT_CLOCK_NUCLEO_G071RB_HPP
+#define HAL_ST_DEFAULT_CLOCK_NUCLEO_G071RB_HPP
+
+void ConfigureDefaultClockNucleo071RB();
+
+#endif
