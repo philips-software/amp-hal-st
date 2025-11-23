@@ -230,10 +230,7 @@
       "name": "host-Debug-WithPackage",
       "configuration": "Debug",
       "configurePreset": "host",
-      "targets": [
-        "all",
-        "package"
-      ]
+      "targets": ["all", "package"]
     },
     {
       "name": "host-RelWithDebInfo",
