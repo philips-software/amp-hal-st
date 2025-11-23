@@ -19,6 +19,8 @@ namespace
         IRQn_Type::TIM1_UP_TIM10_IRQn,
 #elif defined(STM32G0)
         IRQn_Type::TIM1_BRK_UP_TRG_COM_IRQn,
+#elif defined(STM32G4)
+        IRQn_Type::TIM1_UP_TIM16_IRQn,
 #else
         IRQn_Type::TIM1_UP_IRQn,
 #endif
@@ -46,7 +48,7 @@ namespace
         TimerIrqUnsupported,
 #endif
 #if defined(TIM6)
-#if defined(STM32F7) || defined(STM32F4)
+#if defined(STM32F7) || defined(STM32F4) || defined(STM32G4)
         IRQn_Type::TIM6_DAC_IRQn,
 #elif defined(STM32G071xx)
         IRQn_Type::TIM6_DAC_LPTIM1_IRQn,
@@ -59,6 +61,9 @@ namespace
 #if defined(TIM7)
 #if defined(STM32G071xx)
         IRQn_Type::TIM7_LPTIM2_IRQn,
+#elif defined(STM32G4) && defined(DAC2)
+        // note: interrogating the existance of DAC2 (and/or 4) we can determine if we have to use TIM7_DAC_IRQn or TIM7_IRQn
+        IRQn_Type::TIM7_DAC_IRQn,
 #else
         IRQn_Type::TIM7_IRQn,
 #endif
@@ -129,12 +134,16 @@ namespace
         TimerIrqUnsupported,
 #endif
 #if defined(TIM15)
+#if defined(STM32G4)
+        IRQn_Type::TIM1_BRK_TIM15_IRQn,
+#else
         IRQn_Type::TIM15_IRQn,
+#endif
 #else
         TimerIrqUnsupported,
 #endif
 #if defined(TIM16)
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4)
         IRQn_Type::TIM1_UP_TIM16_IRQn,
 #else
         IRQn_Type::TIM16_IRQn,
@@ -143,7 +152,7 @@ namespace
         TimerIrqUnsupported,
 #endif
 #if defined(TIM17)
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32G4)
         IRQn_Type::TIM1_TRG_COM_TIM17_IRQn,
 #else
         IRQn_Type::TIM17_IRQn,
