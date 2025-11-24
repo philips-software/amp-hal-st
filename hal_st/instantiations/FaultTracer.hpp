@@ -28,8 +28,8 @@ namespace hal
             uint32_t lrValue;
         };
 
-        infra::MemoryRange<const uint32_t> instructionRange;
-        uint32_t* endOfStack;
+        const infra::MemoryRange<const uint32_t> instructionRange;
+        const uint32_t* endOfStack;
         TracerProvider tracerProvider = nullptr;
         hal::ImmediateInterruptHandler hardfaultRegistration;
         InterruptContext interruptContext;

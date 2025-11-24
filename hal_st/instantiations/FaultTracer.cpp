@@ -67,7 +67,7 @@ namespace hal
         // which other tooling depend on to be useful.
         for (const uint32_t* stackPointer = stack; stackPointer != endOfStack; ++stackPointer)
         {
-            if (instructionRange.contains(stackPointer))
+            if (instructionRange.contains(reinterpret_cast<uint32_t*>(*stackPointer)))
                 tracer.Continue() << " 0x" << infra::hex << infra::Width(8, '0') << (*stackPointer & 0xfffffffe);
 
             FeedWatchdog();
