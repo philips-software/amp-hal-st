@@ -29,7 +29,7 @@ extern "C"
     }
 
 #if __CORTEX_M >= 0x3U // Cortex M0+ does not support this assembly
-    [[gnu::naked]] void Default_Handler_Forwarded()
+    [[gnu::weak]] [[gnu::naked]] void Default_Handler_Forwarded()
     {
         asm volatile(
             "tst   lr, #4           \n"
