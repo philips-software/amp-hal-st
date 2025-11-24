@@ -1,5 +1,6 @@
 #include "hal_st/instantiations/FaultTracer.hpp"
 #include DEVICE_HEADER
+#include "infra/util/ReallyAssert.hpp"
 #include "services/tracer/Tracer.hpp"
 
 namespace
@@ -20,6 +21,7 @@ namespace hal
         , tracerProvider(tracerProvider)
         , hardfaultRegistration(static_cast<IRQn_Type>(-13), [this]()
               {
+                  really_assert(__CORTEX_M >= 0x3U);
                   if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
                   {
                       auto& tracer = DefaultFaultTracer::Instance().tracerProvider();
@@ -107,7 +109,7 @@ namespace hal
         tracer.Trace() << " PC  : 0x" << infra::hex << infra::Width(8, '0') << pc;  // Program Counter, usually where the fault occured.
         tracer.Trace() << " PSR : 0x" << infra::hex << infra::Width(8, '0') << psr; // Program Status Register
 
-#if __CORTEX_M > 0x0U
+#if __CORTEX_M >= 0x3U
         auto cfsr = SCB->CFSR;
         auto MemManageFaultAddress = SCB->MMFAR;
         auto BusFaultAddress = SCB->BFAR;

@@ -35,10 +35,12 @@ int main()
     static services::DebugLed debugLed(ui.ledGreen);
     static hal::DmaStm dmaStm;
 
+#ifndef STM32G0
     static const auto defaultFaultHandler = hal::DefaultFaultTracer(infra::MakeRange<const uint32_t>(&link_code_location, &link_code_end), &_estack, []() -> services::Tracer&
         {
             return services::GlobalTracer();
         });
+#endif
 
 #if defined(STM32F7)
     static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
