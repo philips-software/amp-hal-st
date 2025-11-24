@@ -62,7 +62,7 @@ namespace
 #if defined(STM32G071xx)
         IRQn_Type::TIM7_LPTIM2_IRQn,
 #elif defined(STM32G4) && defined(DAC2)
-        // note: interrogating the existance of DAC2 (and/or 4) we can determine if we have to use TIM7_DAC_IRQn or TIM7_IRQn
+        // note: interrogating the existance of DAC2 (and/or 4) so that we can determine if we have to use TIM7_DAC_IRQn or TIM7_IRQn
         IRQn_Type::TIM7_DAC_IRQn,
 #else
         IRQn_Type::TIM7_IRQn,
