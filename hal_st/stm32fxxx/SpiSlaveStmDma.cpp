@@ -1,5 +1,6 @@
 #include "hal_st/stm32fxxx/SpiSlaveStmDma.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
+#include "infra/util/BitLogic.hpp"
 
 namespace hal
 {
@@ -9,7 +10,6 @@ namespace hal
         , miso(miso, PinConfigTypeStm::spiMiso, oneBasedSpiIndex)
         , mosi(mosi, PinConfigTypeStm::spiMosi, oneBasedSpiIndex)
         , slaveSelect(slaveSelect, PinConfigTypeStm::spiSlaveSelect, oneBasedSpiIndex)
-        , slaveSelectGpio(slaveSelect)
 #if !defined(STM32WBA) && !defined(STM32H5)
         , tx(transmitStream, &peripheralSpi[spiInstance]->DR, 1, [this]()
 #else
@@ -57,28 +57,6 @@ namespace hal
         Configure();
 
         return rxCancelled || txCancelled;
-    }
-
-    void SpiSlaveStmDma::EnableChipSelectInterrupt()
-    {
-        slaveSelectGpio.EnableInterrupt([this]()
-            {
-                if (HasObserver())
-                {
-                    bool polarity = peripheralSpi[spiInstance]->CR1 & SPI_CR1_SSI;
-
-                    if (slaveSelectGpio.Get() != polarity)
-                        GetObserver().OnDeselectedOnInterrupt();
-                    else
-                        GetObserver().OnSelectedOnInterrupt();
-                }
-            },
-            hal::InterruptTrigger::bothEdges, hal::InterruptType::immediate);
-    }
-
-    void SpiSlaveStmDma::DisableChipSelectInterrupt()
-    {
-        slaveSelectGpio.DisableInterrupt();
     }
 
     void SpiSlaveStmDma::SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData)
