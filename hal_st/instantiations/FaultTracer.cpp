@@ -9,13 +9,11 @@ namespace
     {
         WWDG->CR |= WWDG_CR_T;
     }
-
 }
 
 namespace hal
 {
-
-    DefaultFaultTracer::DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider)
+    DefaultFaultTracer::DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, const uint32_t* endOfStack, TracerProvider tracerProvider)
         : instructionRange(instructionRange)
         , endOfStack(endOfStack)
         , tracerProvider(tracerProvider)
@@ -24,7 +22,7 @@ namespace hal
                   really_assert(__CORTEX_M >= 0x3U);
                   if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
                   {
-                      auto& tracer = DefaultFaultTracer::Instance().tracerProvider();
+                      auto& tracer = this->tracerProvider();
                       tracer.Trace() << "*** Hard fault! ***";
                       DumpCurrentInterruptStackAndAbort(tracer);
                   }
@@ -41,9 +39,9 @@ namespace hal
 
     void DefaultFaultTracer::DumpInterruptStackAndAbort(infra::BoundedConstString fault) const
     {
-        if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
+        if (tracerProvider)
         {
-            auto& tracer = DefaultFaultTracer::Instance().tracerProvider();
+            auto& tracer = tracerProvider();
             tracer.Trace() << "*** Fault: " << fault << " ***";
             DumpCurrentInterruptStackAndAbort(tracer);
         }

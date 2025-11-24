@@ -11,10 +11,12 @@ namespace hal
 
     using TracerProvider = infra::Function<services::Tracer&()>;
 
-    class DefaultFaultTracer : public infra::InterfaceConnector<DefaultFaultTracer>
+    class DefaultFaultTracer
+        : public infra::InterfaceConnector<DefaultFaultTracer>
     {
     public:
-        explicit DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, uint32_t* endOfStack, TracerProvider tracerProvider = nullptr);
+        explicit DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, const uint32_t* endOfStack, TracerProvider tracerProvider = nullptr);
+
         void SetInterruptContext(const uint32_t* faultStack, uint32_t lrValue);
         [[noreturn]] void DumpInterruptStackAndAbort(infra::BoundedConstString fault) const;
 
@@ -22,6 +24,7 @@ namespace hal
         void PrintBacktrace(const uint32_t* stack, services::Tracer& tracer) const;
         [[noreturn]] void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const;
 
+    private:
         struct InterruptContext
         {
             const uint32_t* stack;

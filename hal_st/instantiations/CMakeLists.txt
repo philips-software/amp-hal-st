@@ -17,6 +17,7 @@ target_link_libraries(hal_st.instantiations PUBLIC
 target_sources(hal_st.instantiations PRIVATE
     DiscoveryTracerInfrastructure.hpp
     DiscoveryUi.hpp
+    FaultTracer.cpp
     NucleoTracerInfrastructure.hpp
     NucleoUi.hpp
     StmEventInfrastructure.cpp
@@ -25,5 +26,4 @@ target_sources(hal_st.instantiations PRIVATE
     StmTracerInfrastructure.hpp
     TracingResetStm.cpp
     TracingResetStm.hpp
-    FaultTracer.cpp
 )
