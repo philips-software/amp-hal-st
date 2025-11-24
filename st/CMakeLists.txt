@@ -28,6 +28,7 @@ target_compile_definitions(st.hal_driver_stm32g0xx PUBLIC
     STM32G0=1
     DEVICE_HEADER="stm32g0xx.h"
     $<$<STREQUAL:${TARGET_MCU},stm32g070>:STM32G070xx=1>
+    $<$<STREQUAL:${TARGET_MCU},stm32g071>:STM32G071xx=1>
 )
 
 add_hal_driver(st.hal_driver_stm32g4xx STM32G4xx_HAL_Driver CMSIS_STM32G4xx)
