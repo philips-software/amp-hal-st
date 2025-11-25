@@ -129,6 +129,16 @@ namespace hal
     void GapCentralSt::AllowPairing(bool)
     {}
 
+    void GapCentralSt::AuthenticateWithPasskey(uint32_t passkey)
+    {
+        aci_gap_pass_key_resp(connectionContext.connectionHandle, passkey);
+    }
+
+    void GapCentralSt::NumericComparisonConfirm(bool accept)
+    {
+        aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
+    }
+
     void GapCentralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
         GapSt::HandleHciDisconnectEvent(event);

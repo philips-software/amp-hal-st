@@ -26,6 +26,8 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
+        void AuthenticateWithPasskey(uint32_t passkey) override;
+        void NumericComparisonConfirm(bool accept) override;
 
     protected:
         [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
