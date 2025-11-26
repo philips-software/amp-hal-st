@@ -118,7 +118,12 @@ namespace hal
 
     uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
     {
-        return 0;
+        // Level 3 and Level 4 require MITM protection
+        // https://lpccs-docs.renesas.com/Tutorial-DA145x-BLE-Security/ble_security.html#security-modes
+        return (level == services::GapPairing::SecurityLevel::level3 ||
+                   level == services::GapPairing::SecurityLevel::level4)
+                   ? 1
+                   : 0;
     }
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
@@ -133,8 +138,6 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
-        really_assert(caps == IoCapabilities::none);
-
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
@@ -360,6 +363,12 @@ namespace hal
                 break;
             case ACI_GAP_BOND_LOST_VSEVT_CODE:
                 HandleBondLostEvent();
+                break;
+            case ACI_GAP_PASS_KEY_REQ_VSEVT_CODE:
+                HandlePassKeyRequestEvent(*reinterpret_cast<const aci_gap_pass_key_req_event_rp0*>(event.data));
+                break;
+            case ACI_GAP_NUMERIC_COMPARISON_VALUE_VSEVT_CODE:
+                HandleNumericComparisonValueEvent(*reinterpret_cast<const aci_gap_numeric_comparison_value_event_rp0*>(event.data));
                 break;
             case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
                 HandleGapProcedureCompleteEvent(*reinterpret_cast<const aci_gap_proc_complete_event_rp0*>(event.data));

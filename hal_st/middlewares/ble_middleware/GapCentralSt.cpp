@@ -237,6 +237,30 @@ namespace hal
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
     }
 
+    void GapCentralSt::HandlePassKeyRequestEvent(const aci_gap_pass_key_req_event_rp0& event)
+    {
+        GapSt::HandlePassKeyRequestEvent(event);
+
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
+
+        GapPairing::NotifyObservers([](auto& observer)
+            {
+                observer.DisplayPasskey(0, false);
+            });
+    }
+
+    void GapCentralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
+    {
+        GapSt::HandleNumericComparisonValueEvent(event);
+
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
+
+        GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
+            {
+                observer.DisplayPasskey(static_cast<int32_t>(passkey), true);
+            });
+    }
+
     void GapCentralSt::HandleGapDiscoveryProcedureEvent()
     {
         discovering = false;
