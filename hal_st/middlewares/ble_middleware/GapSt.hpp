@@ -127,6 +127,7 @@ namespace hal
         ConnectionContext connectionContext;
         uint8_t ownAddressType;
         services::GapPairing::SecurityLevel securityLevel;
+        services::GapPairing::IoCapabilities ioCapabilities;
 
         const uint16_t invalidConnection = 0xffff;
 

@@ -38,6 +38,7 @@ namespace hal
         : HciEventSink(hciEventSource)
         , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
         , securityLevel(configuration.security.securityLevel)
+        , ioCapabilities(configuration.security.ioCapabilities)
         , bondStorageSynchronizer(bondStorageSynchronizer)
     {
         connectionContext.connectionHandle = GapSt::invalidConnection;
@@ -133,12 +134,14 @@ namespace hal
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
         uint8_t mitmMode = SecurityLevelToMITM(level);
 
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 1, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
         tBleStatus status = BLE_STATUS_FAILED;
+
+        ioCapabilities = caps;
 
         switch (caps)
         {
