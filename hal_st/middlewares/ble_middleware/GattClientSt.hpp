@@ -14,6 +14,8 @@ namespace hal
     class GattClientSt
         : public services::GattClient
         , public hal::HciEventSink
+        , public services::AttMtuExchangeRequester
+
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
@@ -32,6 +34,9 @@ namespace hal
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
+
+        // Implementation of AttMtuExchangeRequester
+        void MtuExchange() override;
 
     protected:
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);

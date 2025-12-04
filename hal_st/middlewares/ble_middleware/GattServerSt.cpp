@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GattServerSt.hpp"
+#include "GattServerSt.hpp"
 
 namespace
 {
@@ -184,5 +185,10 @@ namespace hal
                 aci_gatt_confirm_indication(gattIndicationEvent.Connection_Handle);
             }
         }
+    }
+
+    uint16_t GattServerSt::EffectiveMaxAttMtuSize() const
+    {
+        return maxAttMtu;
     }
 }

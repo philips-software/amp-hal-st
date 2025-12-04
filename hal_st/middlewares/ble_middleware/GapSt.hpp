@@ -12,8 +12,7 @@
 namespace hal
 {
     class GapSt
-        : public services::AttMtuExchange
-        , public services::GapBonding
+        : public services::GapBonding
         , public services::GapPairing
         , private HciEventSink
     {
@@ -50,10 +49,6 @@ namespace hal
             uint8_t txPowerLevel;
             bool privacy;
         };
-
-        // Implementation of AttMtuExchange
-        uint16_t EffectiveMaxAttMtuSize() const override;
-        void MtuExchange() override;
 
         // Implementation of GapBonding
         void RemoveAllBonds() override;
@@ -141,7 +136,6 @@ namespace hal
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
-        uint16_t maxAttMtu = defaultMaxAttMtuSize;
     };
 }
 

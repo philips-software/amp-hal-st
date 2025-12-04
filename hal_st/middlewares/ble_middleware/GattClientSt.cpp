@@ -361,4 +361,10 @@ namespace hal
         if (ret != BLE_STATUS_SUCCESS)
             onCharacteristicOperationsDone(services::OperationStatus::error);
     }
+
+    void GattClientSt::MtuExchange()
+    {
+        auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+        assert(status == BLE_STATUS_SUCCESS);
+    }
 }
