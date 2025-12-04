@@ -11,6 +11,8 @@ namespace hal
         : public services::GattServer
         , public services::GattServerCharacteristicOperations
         , public hal::HciEventSink
+        , public services::AttMtuExchangeReceiver
+
     {
     public:
         explicit GattServerSt(hal::HciEventSource& hciEventSource);
@@ -23,6 +25,9 @@ namespace hal
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
+
+        // Implementation of AttMtuExchangeReceiver
+        uint16_t EffectiveMaxAttMtuSize() const override;
 
     protected:
         virtual void AddCharacteristic(services::GattServerCharacteristic& characteristic);

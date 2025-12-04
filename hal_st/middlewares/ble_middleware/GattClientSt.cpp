@@ -175,6 +175,9 @@ namespace hal
             case ACI_ATT_READ_RESP_VSEVT_CODE:
                 HandleAttReadResponse(*reinterpret_cast<const aci_att_read_resp_event_rp0*>(event.data));
                 break;
+            case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
+                HandleAttExchangeMtuResponse(*reinterpret_cast<const aci_att_exchange_mtu_resp_event_rp0*>(event.data));
+                break;
             default:
                 break;
         }
@@ -360,5 +363,27 @@ namespace hal
         auto ret = aci_gatt_write_char_desc(connectionHandle, handle + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
         if (ret != BLE_STATUS_SUCCESS)
             onCharacteristicOperationsDone(services::OperationStatus::error);
+    }
+
+    void GattClientSt::MtuExchange()
+    {
+        auto status = aci_gatt_exchange_config(connectionHandle);
+        assert(status == BLE_STATUS_SUCCESS);
+    }
+
+    uint16_t GattClientSt::EffectiveMaxAttMtuSize() const
+    {
+        return maxAttMtu;
+    }
+
+    void GattClientSt::HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event)
+    {
+        really_assert(event.Connection_Handle == connectionHandle);
+        maxAttMtu = event.Server_RX_MTU;
+
+        AttMtuExchangeReceiver::NotifyObservers([](auto& observer)
+            {
+                observer.ExchangedMaxAttMtuSize();
+            });
     }
 }
