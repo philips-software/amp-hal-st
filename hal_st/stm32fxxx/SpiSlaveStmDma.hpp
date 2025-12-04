@@ -10,13 +10,19 @@ namespace hal
 {
     class SpiSlaveStmDma
         : public SpiSlave
+        , public ChipSelectSubject
     {
     public:
         SpiSlaveStmDma(hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedSpiIndex, GpioPinStm& clock, GpioPinStm& miso, GpioPinStm& mosi, GpioPinStm& slaveSelect);
         ~SpiSlaveStmDma();
 
+        // Implementation of SpiSlave
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData, const infra::Function<void()>& onDone) override;
         bool CancelTransmission() override;
+
+        // Implementation of ChipSelectSubject
+        void EnableChipSelectInterrupt() override;
+        void DisableChipSelectInterrupt() override;
 
     private:
         void SendAndReceive(infra::ConstByteRange sendData, infra::ByteRange receiveData);
@@ -35,6 +41,8 @@ namespace hal
         PeripheralPinStm miso;
         PeripheralPinStm mosi;
         PeripheralPinStm slaveSelect;
+
+        hal::GpioPinStm& slaveSelectGpio;
 
         infra::AutoResetFunction<void()> onDone;
 
