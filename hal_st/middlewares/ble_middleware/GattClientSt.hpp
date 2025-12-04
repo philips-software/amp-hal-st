@@ -14,8 +14,7 @@ namespace hal
     class GattClientSt
         : public services::GattClient
         , public hal::HciEventSink
-        , public services::AttMtuExchangeRequester
-
+        , public services::AttMtuExchangeReceiver
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
@@ -35,8 +34,11 @@ namespace hal
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
 
-        // Implementation of AttMtuExchangeRequester
+        // Implementation of GattClient
         void MtuExchange() override;
+
+        // Implementation of AttMtuExchangeReceiver
+        uint16_t EffectiveMaxAttMtuSize() const override;
 
     protected:
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
@@ -55,6 +57,7 @@ namespace hal
         virtual void HandleAttReadByGroupTypeResponse(const aci_att_read_by_group_type_resp_event_rp0& event);
         virtual void HandleAttReadByTypeResponse(const aci_att_read_by_type_resp_event_rp0& event);
         virtual void HandleAttFindInfoResponse(const aci_att_find_info_resp_event_rp0& event);
+        virtual void HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
@@ -87,6 +90,7 @@ namespace hal
 
     private:
         uint16_t connectionHandle;
+        uint16_t maxAttMtu{ services::AttMtuExchangeReceiver::defaultMaxAttMtuSize };
 
         static constexpr uint16_t invalidConnection = 0xffff;
 
