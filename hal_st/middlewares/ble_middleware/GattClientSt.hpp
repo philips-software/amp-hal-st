@@ -7,6 +7,7 @@
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/Function.hpp"
+#include "services/ble/Gatt.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal
@@ -90,7 +91,7 @@ namespace hal
 
     private:
         uint16_t connectionHandle;
-        uint16_t maxAttMtu{ services::AttMtuExchangeReceiver::defaultMaxAttMtuSize };
+        uint16_t maxAttMtu{ 23 };
 
         static constexpr uint16_t invalidConnection = 0xffff;
 

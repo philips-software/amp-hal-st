@@ -367,7 +367,7 @@ namespace hal
 
     void GattClientSt::MtuExchange()
     {
-        auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
+        auto status = aci_gatt_exchange_config(connectionHandle);
         assert(status == BLE_STATUS_SUCCESS);
     }
 
@@ -381,7 +381,7 @@ namespace hal
         really_assert(event.Connection_Handle == connectionHandle);
         maxAttMtu = event.Server_RX_MTU;
 
-        infra::Subject<services::AttMtuExchangeReceiverObserver>::NotifyObservers([](auto& observer)
+        AttMtuExchangeReceiver::NotifyObservers([](auto& observer)
             {
                 observer.ExchangedMaxAttMtuSize();
             });
