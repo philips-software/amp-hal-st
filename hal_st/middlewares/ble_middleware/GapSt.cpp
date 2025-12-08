@@ -374,6 +374,7 @@ namespace hal
 
     void GapSt::SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress)
     {
+        maxAttMtu = defaultMaxAttMtuSize;
         connectionContext.connectionHandle = connectionHandle;
         connectionContext.peerAddressType = peerAddressType;
         std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));
