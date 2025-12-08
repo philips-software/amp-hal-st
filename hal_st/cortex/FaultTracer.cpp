@@ -12,6 +12,8 @@ namespace
 
 namespace hal
 {
+    InterruptContext interruptContext{};
+
     DefaultFaultTracer::DefaultFaultTracer(const infra::MemoryRange<const uint32_t>& instructionRange, const uint32_t* endOfStack, TracerProvider tracerProvider)
         : instructionRange(instructionRange)
         , endOfStack(endOfStack)
@@ -69,6 +71,12 @@ namespace hal
 
     [[noreturn]] void DefaultFaultTracer::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
     {
+        if (!interruptContext.stack)
+        {
+            tracer.Trace() << "No interrupt stack available";
+            std::abort();
+        }
+
         PrintBacktrace(hal::interruptContext.stack, tracer);
 
         /* How to interpret the fault. This is all explained in detail in: https://www.keil.com/appnotes/files/apnt209.pdf

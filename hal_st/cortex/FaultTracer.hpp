@@ -15,7 +15,7 @@ namespace hal
         uint32_t lrValue;
     };
 
-    static InterruptContext interruptContext;
+    extern InterruptContext interruptContext;
 
     using TracerProvider = infra::Function<services::Tracer&()>;
 
