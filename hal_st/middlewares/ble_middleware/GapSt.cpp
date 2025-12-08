@@ -62,6 +62,11 @@ namespace hal
         SVCCTL_Init();
     }
 
+    uint16_t GapSt::EffectiveMaxAttMtuSize() const
+    {
+        return maxAttMtu;
+    }
+
     void GapSt::RemoveAllBonds()
     {
         bondStorageSynchronizer.RemoveAllBonds();
@@ -98,11 +103,6 @@ namespace hal
         really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
 
         aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
-    }
-
-    uint16_t GapSt::EffectiveMaxAttMtuSize() const
-    {
-        return maxAttMtu;
     }
 
     GapSt::SecureConnection GapSt::SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const
