@@ -381,7 +381,7 @@ namespace hal
         really_assert(event.Connection_Handle == connectionHandle);
         maxAttMtu = event.Server_RX_MTU;
 
-        AttMtuExchangeReceiver::NotifyObservers([](auto& observer)
+        AttMtuExchange::NotifyObservers([](auto& observer)
             {
                 observer.ExchangedMaxAttMtuSize();
             });

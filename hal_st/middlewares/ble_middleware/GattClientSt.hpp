@@ -15,7 +15,7 @@ namespace hal
     class GattClientSt
         : public services::GattClient
         , public hal::HciEventSink
-        , public services::AttMtuExchangeReceiver
+        , public services::AttMtuExchange
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
@@ -36,7 +36,7 @@ namespace hal
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
 
-        // Implementation of AttMtuExchangeReceiver
+        // Implementation of AttMtuExchange
         uint16_t EffectiveMaxAttMtuSize() const override;
 
     protected:
