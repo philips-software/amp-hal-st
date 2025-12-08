@@ -17,7 +17,8 @@ target_link_libraries(hal_st.instantiations PUBLIC
 target_sources(hal_st.instantiations PRIVATE
     DiscoveryTracerInfrastructure.hpp
     DiscoveryUi.hpp
-    FaultTracer.cpp
+    $<$<NOT:$<STREQUAL:${TARGET_CORTEX},m0+>>:FaultTracer.cpp>
+    $<$<NOT:$<STREQUAL:${TARGET_CORTEX},m0+>>:FaultTracer.hpp>
     NucleoTracerInfrastructure.hpp
     NucleoUi.hpp
     StmEventInfrastructure.cpp

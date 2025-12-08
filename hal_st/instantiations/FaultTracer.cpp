@@ -19,7 +19,7 @@ namespace hal
         , tracerProvider(tracerProvider)
         , hardfaultRegistration(static_cast<IRQn_Type>(-13), [this]()
               {
-                  really_assert(__CORTEX_M >= 0x3U);
+                  static_assert(__CORTEX_M >= 0x3U);
                   if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
                   {
                       auto& tracer = this->tracerProvider();
