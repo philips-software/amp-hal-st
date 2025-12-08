@@ -1,5 +1,5 @@
 #include "hal/interfaces/Gpio.hpp"
-#include "hal_st/instantiations/FaultTracer.hpp"
+#include "hal_st/cortex/FaultTracer.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"

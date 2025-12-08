@@ -1,6 +1,5 @@
-#include "hal_st/instantiations/FaultTracer.hpp"
+#include "hal_st/cortex/FaultTracer.hpp"
 #include DEVICE_HEADER
-#include "infra/util/ReallyAssert.hpp"
 #include "services/tracer/Tracer.hpp"
 
 namespace
@@ -30,12 +29,6 @@ namespace hal
                       std::abort();
               })
     {}
-
-    void DefaultFaultTracer::SetInterruptContext(const uint32_t* stack, uint32_t lrValue)
-    {
-        interruptContext.stack = stack;
-        interruptContext.lrValue = lrValue;
-    }
 
     void DefaultFaultTracer::DumpInterruptStackAndAbort(infra::BoundedConstString fault) const
     {
@@ -76,7 +69,7 @@ namespace hal
 
     [[noreturn]] void DefaultFaultTracer::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
     {
-        PrintBacktrace(interruptContext.stack, tracer);
+        PrintBacktrace(hal::interruptContext.stack, tracer);
 
         /* How to interpret the fault. This is all explained in detail in: https://www.keil.com/appnotes/files/apnt209.pdf
          * Check SCB->HFSR for the cause of the hardfault. Most likely it was one of these scenarios:
@@ -107,7 +100,6 @@ namespace hal
         tracer.Trace() << " PC  : 0x" << infra::hex << infra::Width(8, '0') << pc;  // Program Counter, usually where the fault occured.
         tracer.Trace() << " PSR : 0x" << infra::hex << infra::Width(8, '0') << psr; // Program Status Register
 
-#if __CORTEX_M >= 0x3U
         auto cfsr = SCB->CFSR;
         auto MemManageFaultAddress = SCB->MMFAR;
         auto BusFaultAddress = SCB->BFAR;
@@ -126,7 +118,6 @@ namespace hal
         tracer.Trace() << "Misc";
         tracer.Trace() << " LR/EXC_RETURN= 0x" << infra::hex << infra::Width(8, '0') << interruptContext.lrValue;
         tracer.Trace() << infra::endl;
-#endif
 
         // Aborting here so that this function's stack is maintained for debugging.
         std::abort();

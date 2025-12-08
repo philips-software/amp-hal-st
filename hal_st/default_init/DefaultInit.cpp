@@ -1,6 +1,6 @@
 #include DEVICE_HEADER
+#include "hal_st/cortex/FaultTracer.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
-#include "hal_st/instantiations/FaultTracer.hpp"
 #include <cstdlib>
 #include <errno.h>
 #include <sys/types.h>
@@ -42,8 +42,7 @@ extern "C"
 
     [[gnu::weak]] void DefaultHandlerImpl(const uint32_t* stack, uint32_t lr)
     {
-        if (hal::DefaultFaultTracer::InstanceSet())
-            hal::DefaultFaultTracer::Instance().SetInterruptContext(stack, lr);
+        hal::interruptContext = { stack, lr };
         hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
     }
 #else
