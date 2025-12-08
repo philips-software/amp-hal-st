@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HAL_ST_CORTEX_FAULT_TRACER_HPP
+#define HAL_ST_CORTEX_FAULT_TRACER_HPP
 
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
@@ -39,3 +40,5 @@ namespace hal
     };
 
 }
+
+#endif // HAL_ST_CORTEX_FAULT_TRACER_HPP
