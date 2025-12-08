@@ -31,12 +31,10 @@ namespace hal
         void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void MtuExchange() override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
-
-        // Implementation of GattClient
-        void MtuExchange() override;
 
         // Implementation of AttMtuExchangeReceiver
         uint16_t EffectiveMaxAttMtuSize() const override;
