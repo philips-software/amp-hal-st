@@ -46,6 +46,8 @@ namespace hal
         void ErrorInterrupt();
 #if defined(I2C_ISR_TXE)
         void ReadReceivedData();
+        void ScheduleResult(hal::Result result);
+        void FinishTransferComplete();
 #endif
         void Clear();
 

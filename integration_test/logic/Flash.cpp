@@ -126,6 +126,8 @@ namespace application
         --transferBuffers;
         if (transferBuffers == 0 && readingBuffer.empty())
             onDone();
+
+        MethodDone();
     }
 
     void FlashProxy::WriteDone()
@@ -133,11 +135,14 @@ namespace application
         --transferBuffers;
         if (transferBuffers == 0 && writingBuffer.empty())
             onDone();
+
+        MethodDone();
     }
 
     void FlashProxy::EraseSectorsDone()
     {
         onDone();
+        MethodDone();
     }
 
     void FlashProxy::ReadPartialBuffer(uint32_t address, uint32_t start)
