@@ -46,6 +46,11 @@ extern "C"
             hal::DefaultFaultTracer::Instance().SetInterruptContext(stack, lr);
         hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
     }
+#else
+    [[gnu::weak]] void Default_Handler_Forwarded()
+    {
+        hal::InterruptTable::Instance().Invoke(hal::ActiveInterrupt());
+    }
 #endif
 
     // Avoid the SysTick handler from being initialised by HAL_Init
