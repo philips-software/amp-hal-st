@@ -29,6 +29,8 @@ namespace hal
         // Implementation of AttMtuExchange
         uint16_t EffectiveMaxAttMtuSize() const override;
 
+        uint16_t maxAttMtu = defaultMaxAttMtuSize;
+
     protected:
         virtual void AddCharacteristic(services::GattServerCharacteristic& characteristic);
         virtual void AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor);

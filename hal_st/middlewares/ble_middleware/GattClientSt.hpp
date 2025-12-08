@@ -89,7 +89,6 @@ namespace hal
 
     private:
         uint16_t connectionHandle;
-        uint16_t maxAttMtu{ 23 };
 
         static constexpr uint16_t invalidConnection = 0xffff;
 

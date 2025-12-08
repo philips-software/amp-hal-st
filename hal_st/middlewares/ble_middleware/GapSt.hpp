@@ -14,6 +14,7 @@ namespace hal
     class GapSt
         : public services::GapBonding
         , public services::GapPairing
+        , public services::AttMtuExchange
         , private HciEventSink
     {
     public:
@@ -65,6 +66,9 @@ namespace hal
         void NumericComparisonConfirm(bool accept) override;
         void GenerateOutOfBandData() override;
         void SetOutOfBandData(const services::GapOutOfBandData& outOfBandData) override;
+
+        // Implementation of AttMtuExchange
+        uint16_t EffectiveMaxAttMtuSize() const override;
 
     protected:
         enum class SecureConnection : uint8_t
@@ -136,6 +140,7 @@ namespace hal
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
+        uint16_t maxAttMtu = services::AttMtuExchange::defaultMaxAttMtuSize;
     };
 }
 

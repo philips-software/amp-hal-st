@@ -100,6 +100,11 @@ namespace hal
         aci_gap_send_pairing_req(connectionContext.connectionHandle, NO_BONDING);
     }
 
+    uint16_t GapSt::EffectiveMaxAttMtuSize() const
+    {
+        return maxAttMtu;
+    }
+
     GapSt::SecureConnection GapSt::SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const
     {
         return (level == services::GapPairing::SecurityLevel::level4) ? SecureConnection::mandatory : SecureConnection::optional;
@@ -218,7 +223,7 @@ namespace hal
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
         maxAttMtu = event.Server_RX_MTU;
 
-        AttMtuExchange::NotifyObservers([](auto& observer)
+        services::AttMtuExchange::NotifyObservers([](auto& observer)
             {
                 observer.ExchangedMaxAttMtuSize();
             });
