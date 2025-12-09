@@ -15,10 +15,10 @@ jobs:
     name: Host Build & Test (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
-      - uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
+      - uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
         with:
           key: ${{ github.job }}-ubuntu-latest
       - uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
@@ -46,10 +46,10 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
-      - uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
+      - uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
         with:
           key: ${{ github.job }}-${{ matrix.os }}
       - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
@@ -67,9 +67,9 @@ jobs:
   host_build_clang_msvc:
     name: Windows Host Build from Devcontainer
     runs-on: [ubuntu-latest]
-    container: ghcr.io/philips-software/amp-devcontainer-cpp:v6.5.2@sha256:0a4edfc361a8e8b2be6b6e4e06f65bb984aae65c792442a29fdbc85fcc0a466b # v6.5.2
+    container: ghcr.io/philips-software/amp-devcontainer-cpp:v6.6.1@sha256:9ba2d20db24a646edd6ea7a8a075e76239ce63d1542cc823242e680901e792f9 # v6.6.1
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-winsdk
         with:
@@ -77,7 +77,7 @@ jobs:
           key: cache-winsdk-10.0.26100-14.43.17.13
       - if: ${{ steps.cache-winsdk.outputs.cache-hit != 'true' }}
         run: xwin --accept-license --sdk-version "10.0.26100" --crt-version "14.43.17.13" splat --preserve-ms-arch-notation --include-debug-libs && mv .xwin-cache/splat/ /winsdk
-      - uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
+      - uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
         with:
           key: ${{ github.job }}
       - uses: lukka/run-cmake@af1be47fd7c933593f687731bc6fdbee024d3ff4 # v10.8
@@ -99,6 +99,7 @@ jobs:
             "stm32wba52",
             "stm32wba65",
             "stm32g070",
+            "stm32g071",
             "stm32g431",
             "stm32f407",
             "stm32f429",
@@ -115,15 +116,15 @@ jobs:
             configuration: "RelWithDebInfo"
             target: "stm32f767"
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
       - name: Install GNU Arm Embedded Toolchain ${{ matrix.gcc }}
-        uses: carlosperate/arm-none-eabi-gcc-action@a532c97fbfff58385beb2247ae1464dc4cc71724 # v1.10.1
+        uses: carlosperate/arm-none-eabi-gcc-action@4c88c61a77a39a33a7722d24a4e8b2c573f766c9 # v1.11.1
         with:
           release: ${{ matrix.gcc }}
       - run: sudo apt-get update && sudo apt-get install ninja-build xsltproc
-      - uses: hendrikmuhs/ccache-action@bfa03e1de4d7f7c3e80ad9109feedd05c4f5a716 # v1.2.19
+      - uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
         with:
           key: ${{ matrix.gcc }}-${{ matrix.configuration }}-${{ matrix.target }}
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
