@@ -93,6 +93,7 @@ namespace hal
 
         virtual void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event);
         virtual void HandleBondLostEvent();
+        virtual void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) {};
         virtual void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) {};
         virtual void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) {};
         virtual void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) {};
