@@ -38,7 +38,6 @@ namespace hal
         : HciEventSink(hciEventSource)
         , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
         , securityLevel(configuration.security.securityLevel)
-        , ioCapabilities(configuration.security.ioCapabilities)
         , bondStorageSynchronizer(bondStorageSynchronizer)
     {
         connectionContext.connectionHandle = GapSt::invalidConnection;
@@ -120,7 +119,6 @@ namespace hal
     uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
     {
         // Level 3 and Level 4 require MITM protection
-        // https://lpccs-docs.renesas.com/Tutorial-DA145x-BLE-Security/ble_security.html#security-modes
         return (level == services::GapPairing::SecurityLevel::level3 ||
                    level == services::GapPairing::SecurityLevel::level4)
                    ? 1
@@ -140,8 +138,6 @@ namespace hal
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
         tBleStatus status = BLE_STATUS_FAILED;
-
-        ioCapabilities = caps;
 
         switch (caps)
         {
@@ -366,9 +362,6 @@ namespace hal
                 break;
             case ACI_GAP_BOND_LOST_VSEVT_CODE:
                 HandleBondLostEvent();
-                break;
-            case ACI_GAP_PASS_KEY_REQ_VSEVT_CODE:
-                HandlePassKeyRequestEvent(*reinterpret_cast<const aci_gap_pass_key_req_event_rp0*>(event.data));
                 break;
             case ACI_GAP_NUMERIC_COMPARISON_VALUE_VSEVT_CODE:
                 HandleNumericComparisonValueEvent(*reinterpret_cast<const aci_gap_numeric_comparison_value_event_rp0*>(event.data));

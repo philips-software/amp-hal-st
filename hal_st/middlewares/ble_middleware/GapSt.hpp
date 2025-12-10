@@ -93,7 +93,6 @@ namespace hal
 
         virtual void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event);
         virtual void HandleBondLostEvent();
-        virtual void HandlePassKeyRequestEvent(const aci_gap_pass_key_req_event_rp0& event) {};
         virtual void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) {};
         virtual void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) {};
         virtual void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) {};
@@ -127,7 +126,6 @@ namespace hal
         ConnectionContext connectionContext;
         uint8_t ownAddressType;
         services::GapPairing::SecurityLevel securityLevel;
-        services::GapPairing::IoCapabilities ioCapabilities;
 
         const uint16_t invalidConnection = 0xffff;
 

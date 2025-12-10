@@ -129,11 +129,6 @@ namespace hal
     void GapCentralSt::AllowPairing(bool)
     {}
 
-    void GapCentralSt::AuthenticateWithPasskey(uint32_t passkey)
-    {
-        aci_gap_pass_key_resp(connectionContext.connectionHandle, passkey);
-    }
-
     void GapCentralSt::NumericComparisonConfirm(bool accept)
     {
         aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
@@ -235,69 +230,6 @@ namespace hal
         GapSt::HandleHciLePhyUpdateCompleteEvent(event);
 
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
-    }
-
-    void GapCentralSt::HandlePassKeyRequestEvent(const aci_gap_pass_key_req_event_rp0& event)
-    {
-        GapSt::HandlePassKeyRequestEvent(event);
-
-        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
-
-        // Determine pairing method based on local IO capabilities
-        // Following Bluetooth Core Spec Association Model (Vol 3, Part H, Section 2.3.5.1)
-        //
-        // IMPORTANT: The ST BLE stack already determined which pairing method to use based on
-        // both devices' IO capabilities. When ACI_GAP_PASS_KEY_REQ_EVENT is received:
-        //
-        // For Legacy Pairing, the Association Model matrix is:
-        //                    Initiator (Central)
-        //                   DisplayOnly  DisplayYesNo  KeyboardOnly  NoInputNoOutput  KeyboardDisplay
-        // R  DisplayOnly     JustWorks    JustWorks     InitInput        JustWorks        InitInput
-        // e  DisplayYesNo    JustWorks    JustWorks     InitInput        JustWorks        InitInput
-        // s  KeyboardOnly    RespInput    RespInput     BothInput        JustWorks        RespInput
-        // p  NoInputNoOutput JustWorks    JustWorks     JustWorks        JustWorks        JustWorks
-        // o  KeyboardDisplay RespInput    RespInput     InitInput        JustWorks        RespInput
-        // n
-        // d
-        //
-        // This means for KeyboardDisplay as Initiator (Central):
-        // - Responder DisplayOnly or DisplayYesNo → InitInput (Central INPUTS, Peer DISPLAYS)
-        // - Responder KeyboardOnly or KeyboardDisplay → RespInput (Central DISPLAYS, Peer INPUTS)
-        // - Responder NoInputNoOutput → JustWorks (no passkey event)
-        //
-        // LIMITATION: ST stack doesn't provide peer's IO capabilities in this event.
-        // We use the following strategy:
-        // - For Display capability: Always DISPLAY (generate passkey)
-        // - For Keyboard capability: Always INPUT (request passkey)
-        // - For KeyboardDisplay: Default to DISPLAY (most common for Central role)
-        //   Note: This may not work correctly if peer has DisplayOnly/DisplayYesNo in Legacy Pairing
-        //   In that case, pairing will fail and needs to be retried with different IO caps configuration
-
-        bool shouldDisplay = (ioCapabilities == services::GapPairing::IoCapabilities::display ||
-                              ioCapabilities == services::GapPairing::IoCapabilities::keyboardDisplay);
-
-        if (shouldDisplay)
-        {
-            // Generate and display passkey - peer should input it
-            uint32_t passkey = std::rand() % 1000000;
-            aci_gap_pass_key_resp(event.Connection_Handle, passkey);
-
-            GapPairing::NotifyObservers([passkey](auto& observer)
-                {
-                    // passkey > 0 indicates DISPLAY mode (show passkey to user)
-                    observer.DisplayPasskey(static_cast<int32_t>(passkey), false);
-                });
-        }
-        else
-        {
-            // Keyboard-only capability - request user to enter passkey from peer device
-            // Don't send response yet - wait for AuthenticateWithPasskey() call
-            GapPairing::NotifyObservers([](auto& observer)
-                {
-                    // passkey == 0 indicates INPUT mode (request passkey from user)
-                    observer.DisplayPasskey(0, false);
-                });
-        }
     }
 
     void GapCentralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
