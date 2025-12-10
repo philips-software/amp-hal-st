@@ -7,7 +7,6 @@
 #include "services/ble/Gap.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 
 namespace hal
 {
