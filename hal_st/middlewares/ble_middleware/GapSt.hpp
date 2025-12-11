@@ -140,7 +140,6 @@ namespace hal
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
-        uint16_t maxAttMtu = services::AttMtuExchange::defaultMaxAttMtuSize;
     };
 }
 
