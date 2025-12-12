@@ -165,7 +165,7 @@ namespace hal
         tracer.Trace() << "FSR/FAR:";
         tracer.Trace() << " HFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->HFSR;
         if (SCB->HFSR & SCB_HFSR_VECTTBL_Msk)
-            tracer.Trace() << "    ECTTBL (Hard Fault)";
+            tracer.Trace() << "    VECTTBL (Hard Fault)";
         if (SCB->HFSR & SCB_HFSR_DEBUGEVT_Msk)
             tracer.Trace() << "  DEBUGEVT"; // This is typically forced by a call to std::abort()
         if (SCB->HFSR & SCB_HFSR_FORCED_Msk)
