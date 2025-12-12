@@ -149,10 +149,10 @@ namespace hal
         auto pc = interruptContext.stack[6];
         auto psr = interruptContext.stack[7];
         tracer.Trace() << "Stack frame";
-        tracer.Trace() << " R0  : 0x" << infra::hex << infra::Width(8, '0') << r0; // Usuaully contains the parameter values
-        tracer.Trace() << " R1  : 0x" << infra::hex << infra::Width(8, '0') << r1; // Usuaully contains the parameter values
-        tracer.Trace() << " R2  : 0x" << infra::hex << infra::Width(8, '0') << r2; // Usuaully contains the parameter values
-        tracer.Trace() << " R3  : 0x" << infra::hex << infra::Width(8, '0') << r3; // Usuaully contains the parameter values
+        tracer.Trace() << " R0  : 0x" << infra::hex << infra::Width(8, '0') << r0; // Usually contains the parameter values
+        tracer.Trace() << " R1  : 0x" << infra::hex << infra::Width(8, '0') << r1; // Usually contains the parameter values
+        tracer.Trace() << " R2  : 0x" << infra::hex << infra::Width(8, '0') << r2; // Usually contains the parameter values
+        tracer.Trace() << " R3  : 0x" << infra::hex << infra::Width(8, '0') << r3; // Usually contains the parameter values
         tracer.Trace() << " R12 : 0x" << infra::hex << infra::Width(8, '0') << r12;
         tracer.Trace() << " LR  : 0x" << infra::hex << infra::Width(8, '0') << lr;  // Link Register, where the current function was called from.
         tracer.Trace() << " PC  : 0x" << infra::hex << infra::Width(8, '0') << pc;  // Program Counter, usually where the fault occurred.
