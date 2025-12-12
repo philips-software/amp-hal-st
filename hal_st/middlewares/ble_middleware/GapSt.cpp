@@ -67,12 +67,6 @@ namespace hal
         return maxAttMtu;
     }
 
-    void GapSt::MtuExchange()
-    {
-        auto status = aci_gatt_exchange_config(this->connectionContext.connectionHandle);
-        assert(status == BLE_STATUS_SUCCESS);
-    }
-
     void GapSt::RemoveAllBonds()
     {
         bondStorageSynchronizer.RemoveAllBonds();
@@ -229,7 +223,7 @@ namespace hal
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
         maxAttMtu = event.Server_RX_MTU;
 
-        AttMtuExchange::NotifyObservers([](auto& observer)
+        services::AttMtuExchange::NotifyObservers([](auto& observer)
             {
                 observer.ExchangedMaxAttMtuSize();
             });

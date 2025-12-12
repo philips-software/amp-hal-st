@@ -53,7 +53,6 @@ namespace hal
 
         // Implementation of AttMtuExchange
         uint16_t EffectiveMaxAttMtuSize() const override;
-        void MtuExchange() override;
 
         // Implementation of GapBonding
         void RemoveAllBonds() override;
@@ -141,7 +140,6 @@ namespace hal
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
-        uint16_t maxAttMtu = defaultMaxAttMtuSize;
     };
 }
 

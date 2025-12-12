@@ -7,6 +7,7 @@
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/Function.hpp"
+#include "services/ble/Gatt.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal
@@ -14,6 +15,7 @@ namespace hal
     class GattClientSt
         : public services::GattClient
         , public hal::HciEventSink
+        , public services::AttMtuExchange
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
@@ -29,9 +31,13 @@ namespace hal
         void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void MtuExchange() override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
+
+        // Implementation of AttMtuExchange
+        uint16_t EffectiveMaxAttMtuSize() const override;
 
     protected:
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
@@ -50,6 +56,7 @@ namespace hal
         virtual void HandleAttReadByGroupTypeResponse(const aci_att_read_by_group_type_resp_event_rp0& event);
         virtual void HandleAttReadByTypeResponse(const aci_att_read_by_type_resp_event_rp0& event);
         virtual void HandleAttFindInfoResponse(const aci_att_find_info_resp_event_rp0& event);
+        virtual void HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
