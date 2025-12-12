@@ -30,6 +30,7 @@ namespace hal
 
     private:
         void PrintBacktrace(const uint32_t* stack, services::Tracer& tracer) const;
+        void DumpCfsrContents(uint32_t cfsr, services::Tracer& tracer) const;
         [[noreturn]] void DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const;
 
     private:

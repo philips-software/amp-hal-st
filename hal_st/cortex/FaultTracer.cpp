@@ -69,6 +69,56 @@ namespace hal
         tracer.Trace() << "";
     }
 
+    void DefaultFaultTracer::DumpCfsrContents(uint32_t cfsr, services::Tracer& tracer) const
+    {
+        /* Memory Manage Faults */
+        if (cfsr & SCB_CFSR_IACCVIOL_Msk)
+            tracer.Trace() << "  MemManageFault: Instruction access violation";
+        if (cfsr & SCB_CFSR_DACCVIOL_Msk)
+            tracer.Trace() << "  MemManageFault: Data access violation";
+        if (cfsr & SCB_CFSR_MUNSTKERR_Msk)
+            tracer.Trace() << "  MemManageFault: Unstacking for exception return";
+        if (cfsr & SCB_CFSR_MSTKERR_Msk)
+            tracer.Trace() << "  MemManageFault: Stacking for exception entry";
+        if (cfsr & SCB_CFSR_MLSPERR_Msk)
+            tracer.Trace() << "  MemManageFault: FP lazy state preservation";
+        if (cfsr & SCB_CFSR_MMARVALID_Msk)
+            tracer.Trace() << "  MemManageFault: MMFAR valid";
+
+        /* Bus Faults */
+        if (cfsr & SCB_CFSR_IBUSERR_Msk)
+            tracer.Trace() << "  BusFault: Instruction bus error";
+        if (cfsr & SCB_CFSR_PRECISERR_Msk)
+            tracer.Trace() << "  BusFault: Precise data bus error";
+        if (cfsr & SCB_CFSR_IMPRECISERR_Msk)
+            tracer.Trace() << "  BusFault: Imprecise data bus error";
+        if (cfsr & SCB_CFSR_UNSTKERR_Msk)
+            tracer.Trace() << "  BusFault: Unstacking for exception return";
+        if (cfsr & SCB_CFSR_STKERR_Msk)
+            tracer.Trace() << "  BusFault: Stacking for exception entry";
+        if (cfsr & SCB_CFSR_LSPERR_Msk)
+            tracer.Trace() << "  BusFault: FP lazy state preservation";
+        if (cfsr & SCB_CFSR_BFARVALID_Msk)
+            tracer.Trace() << "  BusFault: BFAR valid";
+
+        /* Usage Faults */
+        if (cfsr & SCB_CFSR_UNDEFINSTR_Msk)
+            tracer.Trace() << "  UsageFault: Illegal instruction";
+        if (cfsr & SCB_CFSR_INVSTATE_Msk)
+            tracer.Trace() << "  UsageFault: Invalid state";
+        if (cfsr & SCB_CFSR_INVPC_Msk)
+            tracer.Trace() << "  UsageFault: Invalid PC load usage fault";
+            // Ignoring NOCP
+#if defined(SCB_CFSR_STKOF_Msk)
+        if (cfsr & SCB_CFSR_STKOF_Msk)
+            tracer.Trace() << "  UsageFault: Stack overflow";
+#endif
+        if (cfsr & SCB_CFSR_UNALIGNED_Msk)
+            tracer.Trace() << "  UsageFault: Unaligned access";
+        if (cfsr & SCB_CFSR_DIVBYZERO_Msk)
+            tracer.Trace() << "  UsageFault: Divide by zero";
+    }
+
     [[noreturn]] void DefaultFaultTracer::DumpCurrentInterruptStackAndAbort(services::Tracer& tracer) const
     {
         if (!interruptContext.stack)
@@ -114,9 +164,14 @@ namespace hal
 
         tracer.Trace() << "FSR/FAR:";
         tracer.Trace() << " HFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->HFSR;
+        if (SCB->HFSR & SCB_HFSR_VECTTBL_Msk)
+            tracer.Trace() << "    ECTTBL (Hard Fault)";
         if (SCB->HFSR & SCB_HFSR_DEBUGEVT_Msk)
-            tracer.Trace() << "  (DEBUGEVT active)"; // This is typically forced by a call to std::abort()
+            tracer.Trace() << "  DEBUGEVT"; // This is typically forced by a call to std::abort()
+        if (SCB->HFSR & SCB_HFSR_FORCED_Msk)
+            tracer.Trace() << "  FORCED (Hard Fault)";
         tracer.Trace() << " CFSR: 0x" << infra::hex << infra::Width(8, '0') << cfsr;
+        DumpCfsrContents(cfsr, tracer);
         tracer.Trace() << " DFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->DFSR;
         tracer.Trace() << " AFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->AFSR;
         if (cfsr & SCB_CFSR_MMARVALID_Msk)
