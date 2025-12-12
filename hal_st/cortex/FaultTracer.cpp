@@ -21,7 +21,7 @@ namespace hal
         , hardfaultRegistration(static_cast<IRQn_Type>(-13), [this]()
               {
                   static_assert(__CORTEX_M >= 0x3U);
-                  if (DefaultFaultTracer::InstanceSet() && DefaultFaultTracer::Instance().tracerProvider)
+                  if (this->tracerProvider)
                   {
                       auto& tracer = this->tracerProvider();
                       tracer.Trace() << "*** Hard fault! ***";
