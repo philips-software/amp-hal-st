@@ -134,7 +134,7 @@ namespace hal
          *   - DEBUGEVT (bit 31 set): Debug event, which is usually called during a `std::abort()`.
          *     - This usually means PC will point to the abort handler, and LR will point to the instruction that caused the abort.
          *   - FORCED (bit 30 set): A configurable fault (Usage, Bus, Memory Management) has occurred and the system could not handle it.
-         *     - This requires a bit more investiation, as explain below.
+         *     - This requires a bit more investigation, as explained below.
          *
          *  For FORCED faults, check the FSR/FAR registers to determine the cause.
          *  Looks for which bits are set. Sometimes BFAR or MMFAR points to the fault address.
