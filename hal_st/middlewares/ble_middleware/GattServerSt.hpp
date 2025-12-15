@@ -19,7 +19,7 @@ namespace hal
         void AddService(services::GattServerService& service) override;
 
         // Implementation of services::GattServerCharacteristicOperations
-        UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const override;
+        UpdateStatus Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
