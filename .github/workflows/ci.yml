@@ -70,7 +70,7 @@ jobs:
     container: ghcr.io/philips-software/amp-devcontainer-cpp:v6.6.1@sha256:9ba2d20db24a646edd6ea7a8a075e76239ce63d1542cc823242e680901e792f9 # v6.6.1
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+      - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-winsdk
         with:
           path: /winsdk
