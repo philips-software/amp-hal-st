@@ -67,7 +67,7 @@ namespace hal
         services.push_front(service);
     }
 
-    services::GattServerCharacteristicOperations::UpdateStatus GattServerSt::Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const
+    services::GattServerCharacteristicOperations::UpdateStatus GattServerSt::Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
     {
         constexpr uint8_t valueOffset = 0;
         auto result = aci_gatt_update_char_value(characteristic.ServiceHandle(),
