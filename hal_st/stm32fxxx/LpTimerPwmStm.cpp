@@ -72,12 +72,21 @@ namespace hal
         StartTimer();
     }
 
-    void LpTimerPwmBaseStm::Stop()
+    void LpTimerPwmBaseStm::StopTimer()
+    {
+        timer.Stop();
+    }
+
+    void LpTimerPwmBaseStm::StopChannels()
     {
         for (auto& channel : channels)
             channel.Stop();
+    }
 
-        timer.Stop();
+    void LpTimerPwmBaseStm::Stop()
+    {
+        StopChannels();
+        StopTimer();
     }
 
     LpTimerPwm::LpTimerPwm(infra::BoundedDeque<LpPwmChannelGpio>& channelStorage, uint8_t oneBasedIndex, LowPowerTimerBaseStm::Timing timing)
