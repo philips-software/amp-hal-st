@@ -36,9 +36,6 @@ namespace hal
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
 
-        // Implementation of AttMtuExchange
-        uint16_t EffectiveMaxAttMtuSize() const override;
-
     protected:
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
         virtual void HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent);

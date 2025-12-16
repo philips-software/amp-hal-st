@@ -62,11 +62,6 @@ namespace hal
         SVCCTL_Init();
     }
 
-    uint16_t GapSt::EffectiveMaxAttMtuSize() const
-    {
-        return maxAttMtu;
-    }
-
     void GapSt::RemoveAllBonds()
     {
         bondStorageSynchronizer.RemoveAllBonds();
@@ -221,7 +216,7 @@ namespace hal
     void GapSt::HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event)
     {
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
-        maxAttMtu = event.Server_RX_MTU;
+        SetMaxAttMtu(event.Server_RX_MTU);
 
         services::AttMtuExchange::NotifyObservers([](auto& observer)
             {
@@ -374,7 +369,7 @@ namespace hal
 
     void GapSt::SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress)
     {
-        maxAttMtu = defaultMaxAttMtuSize;
+        SetMaxAttMtu(defaultMaxAttMtuSize);
         connectionContext.connectionHandle = connectionHandle;
         connectionContext.peerAddressType = peerAddressType;
         std::copy_n(peerAddress, connectionContext.peerAddress.size(), std::begin(connectionContext.peerAddress));

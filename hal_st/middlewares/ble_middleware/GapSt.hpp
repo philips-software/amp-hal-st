@@ -51,9 +51,6 @@ namespace hal
             bool privacy;
         };
 
-        // Implementation of AttMtuExchange
-        uint16_t EffectiveMaxAttMtuSize() const override;
-
         // Implementation of GapBonding
         void RemoveAllBonds() override;
         void RemoveOldestBond() override;

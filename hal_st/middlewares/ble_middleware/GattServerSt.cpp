@@ -185,9 +185,4 @@ namespace hal
             }
         }
     }
-
-    uint16_t GattServerSt::EffectiveMaxAttMtuSize() const
-    {
-        return maxAttMtu;
-    }
 }

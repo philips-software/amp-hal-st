@@ -376,7 +376,7 @@ namespace hal
     void GattClientSt::HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event)
     {
         really_assert(event.Connection_Handle == connectionHandle);
-        maxAttMtu = event.Server_RX_MTU;
+        SetMaxAttMtu(event.Server_RX_MTU);
 
         AttMtuExchange::NotifyObservers([](auto& observer)
             {

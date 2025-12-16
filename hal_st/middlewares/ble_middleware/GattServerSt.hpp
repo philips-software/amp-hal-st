@@ -26,9 +26,6 @@ namespace hal
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
 
-        // Implementation of AttMtuExchange
-        uint16_t EffectiveMaxAttMtuSize() const override;
-
     protected:
         virtual void AddCharacteristic(services::GattServerCharacteristic& characteristic);
         virtual void AddCharacteristicDescriptor(const services::GattServerCharacteristic& characteristic, services::GattServerDescriptor& descriptor);
