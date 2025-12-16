@@ -15,7 +15,7 @@ namespace hal
         tracer.Trace() << "GattServerSt::AddService [" << service.Handle() << "] " << service.Type();
     }
 
-    services::GattServerCharacteristicOperations::UpdateStatus TracingGattServerSt::Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data) const
+    services::GattServerCharacteristicOperations::UpdateStatus TracingGattServerSt::Update(const services::GattServerCharacteristicOperationsObserver& characteristic, infra::ConstByteRange data)
     {
         tracer.Trace() << "GattServerSt::Update [" << characteristic.CharacteristicHandle() << "] 0x" << infra::AsHex(data);
         return GattServerSt::Update(characteristic, data);

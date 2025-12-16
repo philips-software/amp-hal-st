@@ -1,9 +1,11 @@
 #include "hal/interfaces/Gpio.hpp"
+#include "hal_st/cortex/FaultTracer.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
 #include "infra/timer/Timer.hpp"
+#include "infra/util/MemoryRange.hpp"
 #include "services/tracer/GlobalTracer.hpp"
 #include "services/tracer/StreamWriterOnSerialCommunication.hpp"
 #include "services/tracer/Tracer.hpp"
@@ -11,6 +13,10 @@
 #include "services/util/DebugLed.hpp"
 #include <array>
 #include <chrono>
+
+extern "C" uint32_t link_code_location;
+extern "C" uint32_t link_code_end;
+extern "C" uint32_t _estack;
 
 #if defined(STM32WBA)
 unsigned int hse_value = 32'000'000;
@@ -28,6 +34,13 @@ int main()
     static main_::NUCLEO ui;
     static services::DebugLed debugLed(ui.ledGreen);
     static hal::DmaStm dmaStm;
+
+#ifndef STM32G0
+    static const auto defaultFaultHandler = hal::DefaultFaultTracer(infra::MakeRange<const uint32_t>(&link_code_location, &link_code_end), &_estack, []() -> services::Tracer&
+        {
+            return services::GlobalTracer();
+        });
+#endif
 
 #if defined(STM32F7)
     static hal::GpioPinStm stLinkUartTxPin{ hal::Port::D, 8 };
