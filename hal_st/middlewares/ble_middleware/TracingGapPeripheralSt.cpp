@@ -9,6 +9,30 @@ namespace hal
         , tracer(tracer)
     {}
 
+    void TracingGapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
+    {
+        tracer.Trace() << "GapPeripheralSt::Advertise Type = " << static_cast<uint8_t>(type) << " Multiplier = " << static_cast<uint16_t>(multiplier);
+        GapPeripheralSt::Advertise(type, multiplier);
+    }
+
+    void TracingGapPeripheralSt::Standby()
+    {
+        tracer.Trace() << "GapPeripheralSt::Standby";
+        GapPeripheralSt::Standby();
+    }
+
+    void TracingGapPeripheralSt::RemoveAllBonds()
+    {
+        tracer.Trace() << "GapPeripheralSt::RemoveAllBonds";
+        GapPeripheralSt::RemoveAllBonds();
+    }
+
+    void TracingGapPeripheralSt::AllowPairing(bool allow)
+    {
+        tracer.Trace() << "GapPeripheralSt::AllowPairing Allow = " << allow;
+        GapPeripheralSt::AllowPairing(allow);
+    }
+
     void TracingGapPeripheralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
         tracer.Trace() << "GapPeripheralSt::HandleHciDisconnectEvent Handle = " << event.Connection_Handle;

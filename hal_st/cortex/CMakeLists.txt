@@ -9,9 +9,12 @@ target_include_directories(hal_st.cortex PUBLIC
 target_link_libraries(hal_st.cortex PUBLIC
     st.hal_driver
     infra.event
+    $<$<NOT:$<STREQUAL:${TARGET_CORTEX},m0+>>:services.tracer>
 )
 
 target_sources(hal_st.cortex PRIVATE
+    $<$<NOT:$<STREQUAL:${TARGET_CORTEX},m0+>>:FaultTracer.cpp>
+    $<$<NOT:$<STREQUAL:${TARGET_CORTEX},m0+>>:FaultTracer.hpp>
     InterruptCortex.cpp
     InterruptCortex.hpp
 )

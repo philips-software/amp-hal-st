@@ -37,6 +37,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32f767>:DefaultClockNucleoF767ZI.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g070>:DefaultClockNucleoG070RB.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g070>:DefaultClockNucleoG070RB.hpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g071>:DefaultClockNucleoG071RB.cpp>
+    $<$<STREQUAL:${TARGET_MCU},stm32g071>:DefaultClockNucleoG071RB.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.cpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g431>:DefaultClockNucleoG431RB.hpp>
     $<$<STREQUAL:${TARGET_MCU},stm32g474>:DefaultClockNucleoG474xxx.cpp>
@@ -163,6 +165,9 @@ if (TARGET_MCU_VENDOR STREQUAL st)
     elseif (TARGET_MCU STREQUAL stm32g070)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G07x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G070RBTx.xml")
+    elseif (TARGET_MCU STREQUAL stm32g071)
+        set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G07x_gpio_v1_0_Modes.xml")
+        set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G071R(6-8-B)Tx.xml")
     elseif (TARGET_MCU STREQUAL stm32g431)
         set(gpio_xml "${CMAKE_CURRENT_SOURCE_DIR}/ip/GPIO-STM32G43x_gpio_v1_0_Modes.xml")
         set(mcu_xml "${CMAKE_CURRENT_SOURCE_DIR}/mcu/STM32G431R(6-8-B)Tx.xml")
@@ -210,8 +215,10 @@ if (TARGET_MCU_VENDOR STREQUAL st)
         set(peripheral_xml "PeripheralTableWbxx.xml")
     elseif (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
         set(peripheral_xml "PeripheralTableWbaxx.xml")
+    elseif (TARGET_MCU_FAMILY STREQUAL stm32g0xx)
+        set(peripheral_xml "PeripheralTableG0xx.xml")
     elseif (TARGET_MCU_FAMILY STREQUAL stm32g4xx)
-        set(peripheral_xml "PeripheralTableGxxx.xml")
+        set(peripheral_xml "PeripheralTableG4xx.xml")
     elseif (TARGET_MCU_FAMILY STREQUAL stm32h5xx)
         set(peripheral_xml "PeripheralTableH5xx.xml")
     else()

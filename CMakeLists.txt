@@ -9,8 +9,8 @@ option(HALST_BUILD_TESTS "Enable building the tests" Off)
 option(HALST_INCLUDE_DEFAULT_INIT "Include default initialization code; turn off when providing custom initialization" ON)
 option(HALST_BUILD_EXAMPLES "Enable build of the examples" OFF)
 option(HALST_BUILD_EXAMPLES_FREERTOS "Enable build of the FreeRTOS example" OFF)
-set(HALST_XML_GPIO "" CACHE STRING "XML GPIO table")
-set(HALST_XML_STM32 "" CACHE STRING "XML STM32 table")
+set(HALST_XML_GPIO "" CACHE STRING "Optional: path to a GPIO-STM32xxx_gpio_vx_x_Modes.xml file that is not already supported by amp-hal-st. Usually found 'db/mcu/ip/GPIO-*' of CubeIDE/CubeMX.")
+set(HALST_XML_STM32 "" CACHE STRING "Optional: path to a STM32xxxx.xml file that is not already supported by amp-hal-st. Usually found 'db/mcu/' of CubeIDE/CubeMX.")
 
 if (HALST_BUILD_TESTS)
     # CTest cannot be included before the first project() statement, but amp-embedded-infa-lib
@@ -26,7 +26,7 @@ if (HALST_STANDALONE)
     FetchContent_Declare(
         emil
         GIT_REPOSITORY https://github.com/philips-software/amp-embedded-infra-lib.git
-        GIT_TAG        b44d4718f348b250477f2876236c1687876f12ab # unreleased
+        GIT_TAG        8d85c6a4b58eaa2688f0c497d071bc386ad383e2 # unreleased
     )
     FetchContent_MakeAvailable(emil)
 

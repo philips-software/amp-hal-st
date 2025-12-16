@@ -131,6 +131,7 @@ namespace application
         --transferBuffers;
         if (transferBuffers == 0 && readingBuffer.empty())
             onDone();
+
         MethodDone();
     }
 
@@ -142,6 +143,7 @@ namespace application
 
         if (transferBuffers == 0 && writingBuffer.empty())
             onDone();
+
         MethodDone();
     }
 
