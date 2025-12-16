@@ -1,4 +1,3 @@
-#include "hal_st/middlewares/ble_middleware/GattServerSt.hpp"
 #include "GattServerSt.hpp"
 
 namespace
