@@ -1,6 +1,5 @@
 #include "integration_test/logic/Flash.hpp"
 #include <utility>
-#include "services/tracer/GlobalTracer.hpp"
 
 namespace application
 {
@@ -92,11 +91,9 @@ namespace application
 
         if (!writingBuffer.empty())
         {
-            services::GlobalTracer().Trace() << "WriteBuffer requesting send";
             proxy.RequestSend([this, address]()
                 {
                     ++transferBuffers;
-                    services::GlobalTracer().Trace() << "WriteBuffer transferBuffers: " << transferBuffers;
                     auto size = std::min<std::size_t>(writingBuffer.size(), flash::WriteRequest::contentsSize);
                     proxy.Write(address, infra::Head(writingBuffer, size));
                     WriteBuffer(infra::DiscardHead(writingBuffer, size), address + size, this->onDone.Clone());
@@ -138,8 +135,6 @@ namespace application
     void FlashProxy::WriteDone()
     {
         --transferBuffers;
-
-        services::GlobalTracer().Trace() << "WriteDone transferBuffers: " << transferBuffers << " , writingBuffer.size(): " << writingBuffer.size();
 
         if (transferBuffers == 0 && writingBuffer.empty())
             onDone();
