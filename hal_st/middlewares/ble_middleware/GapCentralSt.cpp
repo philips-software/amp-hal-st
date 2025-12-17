@@ -6,7 +6,6 @@
 #include "infra/util/Function.hpp"
 #include "services/ble/Gap.hpp"
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 
 namespace hal
@@ -129,6 +128,11 @@ namespace hal
     void GapCentralSt::AllowPairing(bool)
     {}
 
+    void GapCentralSt::NumericComparisonConfirm(bool accept)
+    {
+        aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
+    }
+
     void GapCentralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
     {
         GapSt::HandleHciDisconnectEvent(event);
@@ -225,6 +229,18 @@ namespace hal
         GapSt::HandleHciLePhyUpdateCompleteEvent(event);
 
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
+    }
+
+    void GapCentralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
+    {
+        GapSt::HandleNumericComparisonValueEvent(event);
+
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
+
+        GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
+            {
+                observer.DisplayPasskey(static_cast<int32_t>(passkey), true);
+            });
     }
 
     void GapCentralSt::HandleGapDiscoveryProcedureEvent()

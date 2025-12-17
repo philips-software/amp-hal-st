@@ -26,6 +26,7 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
+        void NumericComparisonConfirm(bool accept) override;
 
     protected:
         [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
@@ -36,6 +37,7 @@ namespace hal
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
         void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) override;
         void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) override;
+        void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) override;
         void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) override;
         void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) override;
         void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) override;

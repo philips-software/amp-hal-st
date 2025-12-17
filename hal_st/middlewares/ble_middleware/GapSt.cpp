@@ -118,7 +118,11 @@ namespace hal
 
     uint8_t GapSt::SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const
     {
-        return 0;
+        // Level 3 and Level 4 require MITM protection
+        return (level == services::GapPairing::SecurityLevel::level3 ||
+                   level == services::GapPairing::SecurityLevel::level4)
+                   ? 1
+                   : 0;
     }
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
@@ -128,13 +132,11 @@ namespace hal
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
         uint8_t mitmMode = SecurityLevelToMITM(level);
 
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 0, 111111, GAP_PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 1, 111111, GAP_PUBLIC_ADDR);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
-        really_assert(caps == IoCapabilities::none);
-
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
@@ -360,6 +362,9 @@ namespace hal
                 break;
             case ACI_GAP_BOND_LOST_VSEVT_CODE:
                 HandleBondLostEvent();
+                break;
+            case ACI_GAP_NUMERIC_COMPARISON_VALUE_VSEVT_CODE:
+                HandleNumericComparisonValueEvent(*reinterpret_cast<const aci_gap_numeric_comparison_value_event_rp0*>(event.data));
                 break;
             case ACI_GAP_PROC_COMPLETE_VSEVT_CODE:
                 HandleGapProcedureCompleteEvent(*reinterpret_cast<const aci_gap_proc_complete_event_rp0*>(event.data));
