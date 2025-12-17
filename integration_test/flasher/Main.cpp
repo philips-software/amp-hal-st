@@ -43,11 +43,12 @@ int main(int argc, char** argv)
         static hal::FileSystemGeneric fileSystem;
 
         auto firmware = fileSystem.ReadBinaryFile(args::get(firmwareArgument));
-        auto [echo, echoTracer] = application::OpenTracingEcho(args::get(targetArgument), network.ConnectionFactoryWithNameResolver(), tracer.tracer);
+        auto echo = application::OpenEcho(args::get(targetArgument), network.ConnectionFactoryWithNameResolver());
+        //auto [echo, echoTracer] = application::OpenTracingEcho(args::get(targetArgument), network.ConnectionFactoryWithNameResolver(), tracer.tracer);
 
         tracer.tracer.Trace() << "Flashing " << args::get(firmwareArgument);
 
-        FlashTracer flashTracer(*echoTracer);
+        //FlashTracer flashTracer(*echoTracer);
         application::FirmwareSender sender(firmware, *echo, tracer.tracer);
 
         network.ExecuteUntil([&]()
