@@ -43,6 +43,9 @@ namespace hal
         void StartTimer();
         void StartChannels();
         void Start();
+        // Timer and configured channels can either be stopped independently from each other by invoking StopTimer() and StopChannels(), or together by invoking Stop()
+        void StopTimer();
+        void StopChannels();
         void Stop();
 
     protected:
