@@ -1,11 +1,13 @@
 #include "integration_test/logic/Tester.hpp"
+#include <chrono>
 
 namespace application
 {
-    Tester::Tester(services::Echo& echo, hal::GpioPin& resetTestedPin, EchoToTestedCreator& echoToTestedCreator, FlashTestedCreator& flashTestedCreator)
+    Tester::Tester(services::Echo& echo, hal::GpioPin& resetTestedPin, hal::GpioPin& boot0TestedPin, EchoToTestedCreator& echoToTestedCreator, FlashTestedCreator& flashTestedCreator)
         : testing::Tester(echo)
         , echoToTestedCreator(echoToTestedCreator)
-        , resetTested(resetTestedPin, true)
+        , resetTested(resetTestedPin)
+        , boot0Tested(boot0TestedPin)
         , testerObserverProxy(echo)
         , flashTestedCreator(flashTestedCreator)
     {}
@@ -15,6 +17,7 @@ namespace application
         switch (mode)
         {
             case testing::TestedMode::reset:
+                boot0Tested.SetAsInput();
                 resetTested.Set(false);
                 flash.reset();
                 Peripherals::Reset();
@@ -27,25 +30,37 @@ namespace application
                 break;
             case testing::TestedMode::programming:
                 assert(!resetTested.GetOutputLatch());
-                flash.emplace(flashTestedCreator, Rpc(), [this](infra::BoundedConstString result)
+                boot0Tested.Set(true);
+                testedResetDelay.Start(std::chrono::milliseconds(1), [this]()
                     {
-                        this->result = result;
-                        testerObserverProxy.RequestSend([this]()
+                        resetTested.Set(true);
+                        testedResetDelay.Start(std::chrono::milliseconds(100), [this]()
                             {
-                                testerObserverProxy.TestedModeSet(this->result);
-                                MethodDone();
+                                resetTested.SetAsInput();
+                                flash.emplace(flashTestedCreator, Rpc(), [this](infra::BoundedConstString result)
+                                    {
+                                        this->result = result;
+                                        testerObserverProxy.RequestSend([this]()
+                                            {
+                                                testerObserverProxy.TestedModeSet(this->result);
+                                                MethodDone();
+                                            });
+                                    });
                             });
                     });
-                resetTested.Set(true);
                 break;
             case testing::TestedMode::active:
                 assert(!resetTested.GetOutputLatch());
                 echoToTested.emplace(echoToTestedCreator);
                 resetTested.Set(true);
-                testerObserverProxy.RequestSend([this]()
+                testedResetDelay.Start(std::chrono::milliseconds(1), [this]()
                     {
-                        testerObserverProxy.TestedModeSet({});
-                        MethodDone();
+                        resetTested.SetAsInput();
+                        testerObserverProxy.RequestSend([this]()
+                            {
+                                testerObserverProxy.TestedModeSet({});
+                                MethodDone();
+                            });
                     });
                 break;
             default:

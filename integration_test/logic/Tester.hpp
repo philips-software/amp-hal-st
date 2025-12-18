@@ -19,7 +19,7 @@ namespace application
         using FlashTestedCreator = infra::CreatorBase<void, void(services::Echo& echo, const infra::Function<void(infra::BoundedConstString result)>& onDone)>;
         using EchoToTestedCreator = infra::CreatorBase<services::EchoOnSesame, void()>;
 
-        Tester(services::Echo& echo, hal::GpioPin& resetTestedPin, EchoToTestedCreator& echoToTestedCreator, FlashTestedCreator& flashTestedCreator);
+        Tester(services::Echo& echo, hal::GpioPin& resetTestedPin, hal::GpioPin& boot0TestedPin, EchoToTestedCreator& echoToTestedCreator, FlashTestedCreator& flashTestedCreator);
 
         // Implementation of Tester
         void SetTestedMode(testing::TestedMode mode) override;
@@ -31,11 +31,13 @@ namespace application
     private:
         EchoToTestedCreator& echoToTestedCreator;
         std::optional<infra::ProxyCreator<EchoToTestedCreator&>> echoToTested;
-        hal::OutputPin resetTested;
+        hal::TriStatePin resetTested;
+        hal::TriStatePin boot0Tested;
         testing::TesterObserverProxy testerObserverProxy;
         FlashTestedCreator& flashTestedCreator;
         std::optional<infra::ProxyCreator<FlashTestedCreator&>> flash;
         infra::BoundedConstString result;
+        infra::TimerSingleShot testedResetDelay;
     };
 
     class TesterObserver
