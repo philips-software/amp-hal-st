@@ -31,7 +31,7 @@ namespace hal
         void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
-        void MtuExchange() override;
+        void MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -63,11 +63,12 @@ namespace hal
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
 
         void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue);
+        void HandleBleStatusError(tBleStatus status);
 
         template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
         void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
         {
-            this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
+            this->onOperationDone = [this, onDone](services::OperationStatus result)
             {
                 onDone(result);
             };
@@ -89,9 +90,8 @@ namespace hal
 
         static constexpr uint16_t invalidConnection = 0xffff;
 
-        infra::AutoResetFunction<void(services::OperationStatus status)> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
-        infra::AutoResetFunction<void(services::OperationStatus), sizeof(void*) + sizeof(infra::Function<void(services::OperationStatus)>)> onCharacteristicOperationsDone;
+        infra::AutoResetFunction<void(services::OperationStatus), sizeof(void*) + sizeof(infra::Function<void(services::OperationStatus)>)> onOperationDone;
     };
 }
 

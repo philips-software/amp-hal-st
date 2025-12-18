@@ -69,10 +69,10 @@ namespace hal
         GattClientSt::DisableIndication(handle, onDone);
     }
 
-    void TracingGattClientSt::MtuExchange()
+    void TracingGattClientSt::MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone)
     {
         tracer.Trace() << "TracingGattClientSt::MtuExchange";
-        GattClientSt::MtuExchange();
+        GattClientSt::MtuExchange(onDone);
     }
 
     void TracingGattClientSt::HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event)
