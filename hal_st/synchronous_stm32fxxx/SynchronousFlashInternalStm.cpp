@@ -19,6 +19,21 @@ namespace
     {
         return sectorIndex < FLASH_PAGE_NB ? FLASH_BANK_1 : FLASH_BANK_2;
     }
+#elif defined(STM32H5)
+    uint32_t GetBank(const uint8_t* memoryBegin)
+    {
+        auto address = reinterpret_cast<uint32_t>(memoryBegin);
+        if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK) == 0)
+        {
+            // No Bank swap
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
+        }
+        else
+        {
+            // Bank swap
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
+        }
+    }
 #endif
 }
 
@@ -51,7 +66,7 @@ namespace hal
 
 #if defined(STM32F0) || defined(STM32F3)
         detail::AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD, false>(buffer, address);
-#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0) && !defined(STM32WBA)
+#elif !defined(STM32WB) && !defined(STM32G4) && !defined(STM32G0) && !defined(STM32WBA) && !defined(STM32H5)
         for (uint8_t byte : buffer)
         {
             auto result = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, reinterpret_cast<uint32_t>(flashMemory.begin() + address), byte);
@@ -102,6 +117,18 @@ namespace hal
         erase(beginIndex, endIndex - beginIndex, 0);
 #endif
 
+#elif defined(STM32H5)
+        uint32_t sectorError = 0;
+
+        FLASH_EraseInitTypeDef eraseInitStruct{};
+        eraseInitStruct.Banks = GetBank(flashMemory.begin());
+        eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+        eraseInitStruct.Sector = beginIndex;
+        eraseInitStruct.NbSectors = endIndex - beginIndex;
+
+        auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
+        really_assert(result == HAL_OK);
+
 #else
         for (uint32_t index = beginIndex; index != endIndex; ++index)
         {
@@ -112,7 +139,8 @@ namespace hal
 #endif
 
             while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY))
-            {}
+            {
+            }
         }
 #endif
 
