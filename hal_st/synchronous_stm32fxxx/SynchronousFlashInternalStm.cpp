@@ -139,8 +139,7 @@ namespace hal
 #endif
 
             while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY))
-            {
-            }
+            {}
         }
 #endif
 
