@@ -1,6 +1,7 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/FaultTracer.hpp"
 #include "hal_st/instantiations/NucleoUi.hpp"
+#include "hal_st/instantiations/ResetReason.hpp"
 #include "hal_st/instantiations/StmEventInfrastructure.hpp"
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDma.hpp"
@@ -81,6 +82,8 @@ int main()
     static services::TracerWithDateTime tracerWithDateTime{ textOutputStream };
 
     services::SetGlobalTracerInstance(tracerWithDateTime);
+
+    services::GlobalTracer().Trace() << "Reset reason: " << hal::GetResetReasonString();
 
     static infra::TimerRepeating timerRepeating{ std::chrono::seconds{ 1 }, []
         {
