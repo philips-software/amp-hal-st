@@ -11,6 +11,7 @@ target_link_libraries(hal_st.instantiations PUBLIC
     hal_st.synchronous_stm32fxxx
     infra.event
     infra.timer
+    infra.util
     services.tracer
 )
 
@@ -25,4 +26,5 @@ target_sources(hal_st.instantiations PRIVATE
     StmTracerInfrastructure.hpp
     TracingResetStm.cpp
     TracingResetStm.hpp
+    ResetReason.hpp
 )
