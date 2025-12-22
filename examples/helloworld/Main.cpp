@@ -83,7 +83,7 @@ int main()
 
     services::SetGlobalTracerInstance(tracerWithDateTime);
 
-    services::GlobalTracer().Trace() << "Reset reason: " << hal::GetResetReason();
+    services::GlobalTracer().Trace() << "Reset reason: " << hal::GetResetReasonString();
 
     static infra::TimerRepeating timerRepeating{ std::chrono::seconds{ 1 }, []
         {

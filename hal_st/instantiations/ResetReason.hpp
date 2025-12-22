@@ -7,7 +7,7 @@
 namespace hal
 {
     // Note: This function clears the reset flags after reading them
-    infra::BoundedConstString GetResetReason()
+    infra::BoundedConstString GetResetReasonString()
     {
         const char* resetReason;
 
