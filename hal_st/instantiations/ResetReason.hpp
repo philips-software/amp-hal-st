@@ -13,8 +13,10 @@ namespace hal
 
         if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST))
             resetReason = "LowPower";
+#if defined(RCC_FLAG_PORRST)
         else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST))
             resetReason = "PowerOn";
+#endif
         else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST))
             resetReason = "Window WatchDog";
         else if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST))
