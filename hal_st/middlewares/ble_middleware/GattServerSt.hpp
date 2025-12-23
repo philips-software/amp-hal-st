@@ -3,6 +3,7 @@
 
 #include "ble/ble.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
+#include "services/ble/Gatt.hpp"
 #include "services/ble/GattServer.hpp"
 
 namespace hal
@@ -11,7 +12,7 @@ namespace hal
         : public services::GattServer
         , public services::GattServerCharacteristicOperations
         , public hal::HciEventSink
-        , public services::AttMtuExchange
+        , public services::AttMtuExchangeImpl
 
     {
     public:

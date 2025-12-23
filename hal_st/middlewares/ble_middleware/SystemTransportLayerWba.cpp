@@ -2,8 +2,8 @@
 #include <array>
 extern "C"
 {
-#include "ble_common.h"
 #include "ble_bufsize.h"
+#include "ble_common.h"
 #include "blestack.h"
 }
 
@@ -21,7 +21,7 @@ extern "C"
 
     tBleStatus ProcessEventPacket(const uint8_t* data)
     {
-        SVCCTL_UserEvtRx(const_cast<uint8_t *>(data));
+        SVCCTL_UserEvtRx(const_cast<uint8_t*>(data));
         return BLE_STATUS_SUCCESS;
     }
 
@@ -50,18 +50,18 @@ namespace
     std::array<uint32_t, DIVC(gattBufferSize, 4)> bleGattBuffer;
     const uint8_t bleStackOptions = 0;
 
-    constexpr uint8_t PrepareWriteListSize(uint16_t maxAttMtuSize)
+    constexpr uint8_t PrepareWriteListSize(uint16_t attMtuSize)
     {
-        return static_cast<uint8_t>(BLE_PREP_WRITE_X_ATT(maxAttMtuSize));
+        return static_cast<uint8_t>(BLE_PREP_WRITE_X_ATT(attMtuSize));
     }
 }
 
 namespace hal
 {
-    SystemTransportLayerWba::SystemTransportLayerWba(uint16_t maxAttMtuSize)
+    SystemTransportLayerWba::SystemTransportLayerWba(uint16_t attMtuSize)
     {
-        really_assert(maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && maxAttMtuSize <= 251);
-        // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
+        really_assert(attMtuSize >= BLE_DEFAULT_ATT_MTU && attMtuSize <= 251);
+        // BLE middleware supported attMtuSize = 512. Current usage of library limits attMtuSize to 251 (max HCI buffer size)
 
         BleStack_init_t bleStackInitParameters = {
             reinterpret_cast<uint8_t*>(bleBuffer.begin()),
@@ -72,9 +72,9 @@ namespace hal
             numAttrServ,
             attrValueArrSize,
             maxNumberOfBleLinks,
-            PrepareWriteListSize(maxAttMtuSize),
+            PrepareWriteListSize(attMtuSize),
             mblockCount,
-            maxAttMtuSize,
+            attMtuSize,
             248,
             64,
             maxNumberOfConnectionOrientedChannels,

@@ -348,7 +348,7 @@ namespace hal
     void GattClientSt::MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone)
     {
         onOperationDone = onDone;
-        
+
         auto status = aci_gatt_exchange_config(connectionHandle);
         HandleBleStatusError(status);
     }
@@ -356,11 +356,11 @@ namespace hal
     void GattClientSt::HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event)
     {
         really_assert(event.Connection_Handle == connectionHandle);
-        SetMaxAttMtu(event.Server_RX_MTU);
+        SetAttMtu(event.Server_RX_MTU);
 
         AttMtuExchange::NotifyObservers([](auto& observer)
             {
-                observer.ExchangedMaxAttMtuSize();
+                observer.ExchangedAttMtuSize();
             });
     }
 

@@ -12,7 +12,7 @@
 namespace hal
 {
     class GapSt
-        : public services::AttMtuExchange
+        : public services::AttMtuExchangeImpl
         , public services::GapBonding
         , public services::GapPairing
         , private HciEventSink
