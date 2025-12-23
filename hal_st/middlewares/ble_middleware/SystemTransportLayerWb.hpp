@@ -24,7 +24,7 @@ namespace hal
 
         struct Configuration
         {
-            uint16_t maxAttMtuSize;
+            uint16_t attMtuSize;
             RfWakeupClock rfWakeupClock;
         };
 

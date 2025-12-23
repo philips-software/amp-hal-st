@@ -15,7 +15,7 @@ namespace hal
     class GattClientSt
         : public services::GattClient
         , public hal::HciEventSink
-        , public services::AttMtuExchange
+        , public services::AttMtuExchangeImpl
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
