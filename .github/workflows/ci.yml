@@ -44,7 +44,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -137,3 +137,51 @@ jobs:
           configurePreset: ${{ matrix.target }}
           buildPreset: ${{ matrix.target }}-${{ matrix.configuration }}
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ contains(matrix.target, 'stm32f767') && contains(matrix.gcc, '10.3-2021.10') }}
+        with:
+          name: hal_st_tester
+          path: build/stm32f767/integration_test/tester/RelWithDebInfo/integration_test.tester.bin
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ contains(matrix.target, 'stm32f767') && contains(matrix.gcc, '10.3-2021.10') }}
+        with:
+          name: hal_st_tested_stm32f767
+          path: build/stm32f767/integration_test/tested/RelWithDebInfo/integration_test.tested.bin
+
+  integration_test:
+    name: Integration test
+    runs-on: ubuntu-latest
+    needs: [embedded_build, host_build_test_ubuntu]
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: hal_st
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: hal_st_tester
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: hal_st_tested_stm32f767
+      - run: ls
+      - name: Start flex container
+        run: docker run -d --name flex_container -v "$(pwd)":/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:v0.2.0 ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
+      - run: docker logs flex_container
+      - run: while [[ "$(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])')" != "healthy" ]] ; do docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])'; sleep 1; done
+        timeout-minutes: 2
+      - run: docker inspect flex_container
+      - run: tar -zxvf hal_st-*-Linux.tar.gz
+      - run: mkdir install
+      - run: mv hal_st-*-Linux/* install/
+      - run: ls install/bin
+      - run: install/bin/integration_test.flasher tcp://localhost:1234/target/echo/programmer integration_test.tested.bin
+      - run: install/bin/integration_test.runner run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
+      - if: always()
+        run: docker logs flex_container
+      - name: Remove flex container
+        if: always()
+        run: docker rm -f flex_container

@@ -90,6 +90,7 @@ namespace application
         this->onDone = onDone;
 
         if (!writingBuffer.empty())
+        {
             proxy.RequestSend([this, address]()
                 {
                     ++transferBuffers;
@@ -97,6 +98,7 @@ namespace application
                     proxy.Write(address, infra::Head(writingBuffer, size));
                     WriteBuffer(infra::DiscardHead(writingBuffer, size), address + size, this->onDone.Clone());
                 });
+        }
     }
 
     void FlashProxy::ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone)
@@ -133,6 +135,7 @@ namespace application
     void FlashProxy::WriteDone()
     {
         --transferBuffers;
+
         if (transferBuffers == 0 && writingBuffer.empty())
             onDone();
 

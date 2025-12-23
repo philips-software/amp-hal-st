@@ -63,6 +63,8 @@ STEP("uart peripherals are enabled")
             return context.Get<application::TestedObserver>().ReceivedPong();
         }));
 
+    context.Get<UartObserver>().testerData.clear(); // Remove spurious 0 byte due to initialisation order
+
     context.Emplace<testing::UartTesterProxy>(context.Get<services::Echo>());
     context.Emplace<testing::UartTestedProxy>(context.Get<services::Echo>());
 }
