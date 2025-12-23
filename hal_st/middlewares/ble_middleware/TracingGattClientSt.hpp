@@ -23,6 +23,7 @@ namespace hal
         void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone) override;
 
     protected:
         void HandleGattIndicationEvent(const aci_gatt_indication_event_rp0& event) override;
