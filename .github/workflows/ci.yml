@@ -168,6 +168,7 @@ jobs:
         with:
           name: hal_st_tested_stm32f767
       - run: ls
+      - run: echo ${{ vars.ENV_POSTMASTER_IP }}
       - name: Start flex container
         run: docker run -d --name flex_container -v "$(pwd)":/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:v0.2.0 ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
       - run: docker logs flex_container
