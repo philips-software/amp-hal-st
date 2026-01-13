@@ -28,7 +28,6 @@ namespace hal
 
         void WaitForCpu2AllowFlashOperation(infra::Function<void()> onAvailable);
         void HsemInterruptHandler();
-        void EccErrorHandler();
         void TryWrite();
         void TryErase();
         bool SingleOperation(FlashOperation operation);
@@ -50,7 +49,6 @@ namespace hal
         infra::ConstByteRange flashMemory;
         WatchDogStm& watchdog;
         ImmediateInterruptHandler hwSemInterruptHandler;
-        ImmediateInterruptHandler nmiHandler;
         infra::Function<void()> onHwSemaphoreAvailable;
 
         services::FlashAlign::WithAlignment<sizeof(uint64_t)> flashAlign;
