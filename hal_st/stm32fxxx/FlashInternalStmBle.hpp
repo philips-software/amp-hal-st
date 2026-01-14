@@ -5,8 +5,11 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStm.hpp"
 #include "hal_st/stm32fxxx/WatchDogStm.hpp"
+#include "infra/util/AutoResetFunction.hpp"
+#include "services/ble/GapPeripheralIntervalDecorator.hpp"
 #include "services/util/FlashAlign.hpp"
 #include <cstdint>
+#include <variant>
 
 namespace hal
 {
@@ -58,6 +61,35 @@ namespace hal
         uint32_t currentEraseIndex;
         uint32_t endEraseIndex;
         infra::Function<void()> onEraseDone;
+    };
+
+    class FlashInternalWithBleAware
+        : public hal::Flash
+    {
+    public:
+        explicit FlashInternalWithBleAware(infra::ConstByteRange flashMemory, hal::WatchDogStm& watchdog);
+
+        void BleStackInitialized(services::GapPeripheralIntervalController& intervalController);
+
+        uint32_t NumberOfSectors() const override;
+        uint32_t SizeOfSector(uint32_t sectorIndex) const override;
+        uint32_t SectorOfAddress(uint32_t address) const override;
+        uint32_t AddressOfSector(uint32_t sectorIndex) const override;
+        void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
+        void ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
+        void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
+
+    private:
+        void TrySwitchFlashToBleAware();
+        void TrySwitchToLongInterval();
+        void TrySwitchToUserInterval();
+
+        infra::ConstByteRange flashMemory;
+        hal::WatchDogStm& watchdog;
+        std::variant<hal::FlashHomogeneousInternalStm, hal::FlashInternalStmBle> currentFlash;
+        std::optional<std::reference_wrapper<services::GapPeripheralIntervalController>> intervalController;
+        bool hasPendingFlashBleRequest = false;
+        infra::AutoResetFunction<void()> onFlashDone;
     };
 }
 
