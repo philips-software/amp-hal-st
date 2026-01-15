@@ -1,7 +1,7 @@
 #include "services/st_util/StBootloaderCommunicatorUart.hpp"
-#include "infra/util/Optional.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 namespace
 {

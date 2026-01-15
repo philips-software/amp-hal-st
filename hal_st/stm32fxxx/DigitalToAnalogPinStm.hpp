@@ -4,8 +4,8 @@
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/DigitalToAnalogPin.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
-#include "infra/util/Optional.hpp"
 #include <cstdint>
+#include <optional>
 
 #include DEVICE_HEADER
 

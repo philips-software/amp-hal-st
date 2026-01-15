@@ -1,7 +1,8 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
-#include "infra/util/Optional.hpp"
+#include "infra/util/ReallyAssert.hpp"
+#include <optional>
 #include <variant>
 
 #if !defined(STM32F0) && !defined(STM32F1) && !defined(STM32F3)

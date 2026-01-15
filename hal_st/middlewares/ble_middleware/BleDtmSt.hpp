@@ -2,8 +2,8 @@
 #define HAL_ST_DTM_ST_HPP
 
 #include "hal/interfaces/BleDtm.hpp"
-#include "infra/util/Optional.hpp"
 #include <cstdint>
+#include <optional>
 
 namespace hal
 {

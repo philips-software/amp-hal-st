@@ -1,6 +1,7 @@
 #include "hal_st/synchronous_stm32fxxx/SynchronousSpiMasterStm.hpp"
 #include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "infra/util/BitLogic.hpp"
+#include "infra/util/ReallyAssert.hpp"
 
 namespace hal
 {

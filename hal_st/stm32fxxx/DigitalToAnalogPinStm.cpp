@@ -3,10 +3,10 @@
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "infra/util/BitLogic.hpp"
 #include "infra/util/EnumCast.hpp"
-#include "infra/util/Optional.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
 
 #include DEVICE_HEADER
 
