@@ -5,8 +5,8 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/Function.hpp"
-#include "infra/util/Optional.hpp"
 #include <atomic>
+#include <optional>
 #include DEVICE_HEADER
 
 #if defined(HAS_PERIPHERAL_TIMER)

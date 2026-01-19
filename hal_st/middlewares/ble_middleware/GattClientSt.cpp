@@ -332,9 +332,13 @@ namespace hal
     void GattClientSt::HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type)
     {
         if (isUuid16)
-            stream >> type.Emplace<services::AttAttribute::Uuid16>();
+        {
+            stream >> type.emplace<services::AttAttribute::Uuid16>();
+        }
         else
-            stream >> type.Emplace<services::AttAttribute::Uuid128>();
+        {
+            stream >> type.emplace<services::AttAttribute::Uuid128>();
+        }
     }
 
     void GattClientSt::WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue)
