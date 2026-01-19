@@ -251,6 +251,21 @@ namespace hal
     </xsl:if>
   </xsl:template>
 
+  <xsl:template name="strip-trailing-digits">
+    <xsl:param name="value"/>
+    <xsl:variable name="length" select="string-length($value)"/>
+    <xsl:choose>
+      <xsl:when test="$length &gt; 0 and contains('0123456789', substring($value, $length, 1))">
+        <xsl:call-template name="strip-trailing-digits">
+          <xsl:with-param name="value" select="substring($value, 1, $length - 1)"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$value"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <xsl:template name="reset-peripheral">
     <xsl:param name="index"/>
     <xsl:param name="max"/>
@@ -264,7 +279,16 @@ namespace hal
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>__HAL_RCC_</xsl:text>
-          <xsl:value-of select="item[@position=$index]/@name"/>
+          <xsl:choose>
+            <xsl:when test="contains(item[@position=$index]/@name, 'ADC')">
+              <xsl:call-template name="strip-trailing-digits">
+                <xsl:with-param name="value" select="item[@position=$index]/@name"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="item[@position=$index]/@name"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:text>_FORCE_RESET(); </xsl:text>
@@ -274,7 +298,16 @@ namespace hal
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>__HAL_RCC_</xsl:text>
-          <xsl:value-of select="item[@position=$index]/@name"/>
+          <xsl:choose>
+            <xsl:when test="contains(item[@position=$index]/@name, 'ADC')">
+              <xsl:call-template name="strip-trailing-digits">
+                <xsl:with-param name="value" select="item[@position=$index]/@name"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="item[@position=$index]/@name"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:text>_RELEASE_RESET(); break;
