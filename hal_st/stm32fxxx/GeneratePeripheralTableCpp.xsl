@@ -5,6 +5,7 @@
 
   <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
+  <xsl:variable name="stripTrailingDigitsPrefixes" select="'ADC'"/>  <!-- space separated list -->
 
   <xsl:template match="/">
     <xsl:text>#include "PeripheralTable.hpp"
@@ -266,6 +267,34 @@ namespace hal
     </xsl:choose>
   </xsl:template>
 
+  <xsl:template name="should-strip-trailing-digits">
+    <xsl:param name="value"/>
+    <xsl:param name="prefixes" select="$stripTrailingDigitsPrefixes"/>
+    <xsl:variable name="list" select="normalize-space($prefixes)"/>
+    <xsl:choose>
+      <xsl:when test="$list = ''">0</xsl:when>
+      <xsl:when test="contains($list, ' ')">
+        <xsl:variable name="head" select="substring-before($list, ' ')"/>
+        <xsl:variable name="tail" select="substring-after($list, ' ')"/>
+        <xsl:choose>
+          <xsl:when test="starts-with($value, $head)">1</xsl:when>
+          <xsl:otherwise>
+            <xsl:call-template name="should-strip-trailing-digits">
+              <xsl:with-param name="value" select="$value"/>
+              <xsl:with-param name="prefixes" select="$tail"/>
+            </xsl:call-template>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:choose>
+          <xsl:when test="starts-with($value, $list)">1</xsl:when>
+          <xsl:otherwise>0</xsl:otherwise>
+        </xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <xsl:template name="reset-peripheral">
     <xsl:param name="index"/>
     <xsl:param name="max"/>
@@ -273,6 +302,11 @@ namespace hal
       <xsl:text>            case </xsl:text>
       <xsl:value-of select="$index - 1"/>
       <xsl:text>: </xsl:text>
+      <xsl:variable name="shouldStrip">
+        <xsl:call-template name="should-strip-trailing-digits">
+          <xsl:with-param name="value" select="item[@position=$index]/@name"/>
+        </xsl:call-template>
+      </xsl:variable>
       <xsl:choose>
         <xsl:when test="item[@position=$index]/@clock-enable">
           <xsl:value-of select="substring(item[@position=$index]/@clock-enable, 1, string-length(item[@position=$index]/@clock-enable) - 11)"/>
@@ -280,7 +314,7 @@ namespace hal
         <xsl:otherwise>
           <xsl:text>__HAL_RCC_</xsl:text>
           <xsl:choose>
-            <xsl:when test="contains(item[@position=$index]/@name, 'ADC')">
+            <xsl:when test="normalize-space($shouldStrip) = '1'">
               <xsl:call-template name="strip-trailing-digits">
                 <xsl:with-param name="value" select="item[@position=$index]/@name"/>
               </xsl:call-template>
@@ -299,7 +333,7 @@ namespace hal
         <xsl:otherwise>
           <xsl:text>__HAL_RCC_</xsl:text>
           <xsl:choose>
-            <xsl:when test="contains(item[@position=$index]/@name, 'ADC')">
+            <xsl:when test="normalize-space($shouldStrip) = '1'">
               <xsl:call-template name="strip-trailing-digits">
                 <xsl:with-param name="value" select="item[@position=$index]/@name"/>
               </xsl:call-template>
