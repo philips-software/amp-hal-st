@@ -121,7 +121,7 @@ namespace hal
 </xsl:text>
 
       <xsl:choose>
-        <xsl:when test="@name = 'Spi'">
+        <xsl:when test="@name = 'Spi' or @name = 'Adc'">
           <xsl:text>
     void ResetPeripheral</xsl:text>
           <xsl:value-of select="@name"/>
@@ -226,7 +226,7 @@ namespace hal
       </xsl:call-template>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template name="disable-clock">
     <xsl:param name="index"/>
     <xsl:param name="max"/>
