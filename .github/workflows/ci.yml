@@ -137,12 +137,12 @@ jobs:
           configurePreset: ${{ matrix.target }}
           buildPreset: ${{ matrix.target }}-${{ matrix.configuration }}
           configurePresetAdditionalArgs: "['-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache']"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ contains(matrix.target, 'stm32f767') && contains(matrix.gcc, '10.3-2021.10') }}
         with:
           name: hal_st_tester
           path: build/stm32f767/integration_test/tester/RelWithDebInfo/integration_test.tester.bin
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ contains(matrix.target, 'stm32f767') && contains(matrix.gcc, '10.3-2021.10') }}
         with:
           name: hal_st_tested_stm32f767
