@@ -5,7 +5,7 @@
 
   <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
-  <xsl:variable name="stripTrailingDigitsPrefixes" select="'ADC'"/>  <!-- space separated list -->
+  <xsl:variable name="stripTrailingDigitsPeripherals" select="'ADC'"/>  <!-- space separated list -->
 
   <xsl:template match="/">
     <xsl:text>#include "PeripheralTable.hpp"
@@ -269,7 +269,7 @@ namespace hal
 
   <xsl:template name="should-strip-trailing-digits">
     <xsl:param name="value"/>
-    <xsl:param name="prefixes" select="$stripTrailingDigitsPrefixes"/>
+    <xsl:param name="prefixes" select="$stripTrailingDigitsPeripherals"/>
     <xsl:variable name="list" select="normalize-space($prefixes)"/>
     <xsl:choose>
       <xsl:when test="$list = ''">0</xsl:when>
