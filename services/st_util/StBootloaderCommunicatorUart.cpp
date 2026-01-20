@@ -1,7 +1,7 @@
 #include "services/st_util/StBootloaderCommunicatorUart.hpp"
-#include "infra/util/Optional.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 namespace
 {
@@ -281,7 +281,7 @@ namespace services
     template<class T, class... Args>
     void StBootloaderCommunicatorUart::AddCommandAction(Args&&... args)
     {
-        commandActions.emplace_back(infra::InPlaceType<T>(), *this, std::forward<Args>(args)...);
+        commandActions.emplace_back(std::in_place_type_t<T>(), *this, std::forward<Args>(args)...);
     }
 
     void StBootloaderCommunicatorUart::ExecuteCommand(const infra::Function<void(), sizeof(StBootloaderCommunicatorUart*) + sizeof(infra::Function<void()>) + sizeof(infra::ByteRange)>& onCommandExecuted)
