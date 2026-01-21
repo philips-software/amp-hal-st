@@ -5,12 +5,12 @@
 #include "hal_st/stm32fxxx/GpioStm.hpp"
 #include "hal_st/stm32fxxx/UartStm.hpp"
 #include "hal_st/stm32fxxx/UartStmDuplexDma.hpp"
-#include "integration_test/logic/Flash.hpp"
 #include "integration_test/logic/Gpio.hpp"
 #include "integration_test/logic/Tester.hpp"
 #include "integration_test/logic/Uart.hpp"
 #include "services/st_util/FlashOnStBootloaderCommunicator.hpp"
 #include "services/st_util/StBootloaderCommunicatorUart.hpp"
+#include "services/util/FlashEcho.hpp"
 
 namespace main_
 {
@@ -89,7 +89,7 @@ namespace main_
             }
         };
         services::FlashHeterogeneousOnStBootloaderCommunicator flashProgrammer{ infra::MakeRange(sectorSizes), programmer };
-        application::Flash flashOverEcho;
+        services::FlashEcho flashOverEcho;
     };
 
     struct Tester
