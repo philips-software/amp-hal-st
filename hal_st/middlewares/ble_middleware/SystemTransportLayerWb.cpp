@@ -99,8 +99,8 @@ namespace
     void ShciCore2Init(const hal::SystemTransportLayerWb::Configuration& configuration)
     {
         const uint8_t maxNumberOfBleLinks = 0x01;
-        const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(configuration.maxAttMtuSize);
-        const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, configuration.maxAttMtuSize, maxNumberOfBleLinks);
+        const uint8_t prepareWriteListSize = BLE_PREP_WRITE_X_ATT(configuration.attMtuSize);
+        const uint8_t numberOfBleMemoryBlocks = BLE_MBLOCKS_CALC(prepareWriteListSize, configuration.attMtuSize, maxNumberOfBleLinks);
         const uint8_t bleStackOptions = (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV | SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 |
                                          SHCI_C2_BLE_INIT_OPTIONS_FULL_GATTDB_NVM | SHCI_C2_BLE_INIT_OPTIONS_GATT_CACHING_NOTUSED | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3 | SHCI_C2_BLE_INIT_OPTIONS_APPEARANCE_READONLY | SHCI_C2_BLE_INIT_OPTIONS_ENHANCED_ATT_NOTSUPPORTED);
 
@@ -130,7 +130,7 @@ namespace
                 0x01, // Enable or disable the Extended Packet length feature
                 prepareWriteListSize,
                 numberOfBleMemoryBlocks,
-                configuration.maxAttMtuSize,
+                configuration.attMtuSize,
                 0x1FA,                                        // Sleep clock accuracy in Slave mode
                 0x00,                                         // Sleep clock accuracy in Master mode
                 ToLowSpeedClock(configuration.rfWakeupClock), // Source for the low speed clock for RF wake-up
@@ -163,8 +163,8 @@ namespace hal
         , configuration(configuration)
         , onInitialized(onInitialized)
     {
-        really_assert(configuration.maxAttMtuSize >= BLE_DEFAULT_ATT_MTU && configuration.maxAttMtuSize <= 251);
-        // BLE middleware supported maxAttMtuSize = 512. Current usage of library limits maxAttMtuSize to 251 (max HCI buffer size)
+        really_assert(configuration.attMtuSize >= BLE_DEFAULT_ATT_MTU && configuration.attMtuSize <= 251);
+        // BLE middleware supported attMtuSize = 512. Current usage of library limits attMtuSize to 251 (max HCI buffer size)
 
         TL_Init();
         ShciInit();

@@ -11,7 +11,7 @@ namespace hal
         , public HciEventSource
     {
     public:
-        explicit SystemTransportLayerWba(uint16_t maxAttMtuSize);
+        explicit SystemTransportLayerWba(uint16_t attMtuSize);
 
         // Implementation of HciEventSource
         void HciEventHandler(hci_event_pckt& event) override;

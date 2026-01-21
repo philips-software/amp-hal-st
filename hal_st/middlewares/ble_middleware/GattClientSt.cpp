@@ -18,7 +18,7 @@ namespace hal
 
     void GattClientSt::StartServiceDiscovery()
     {
-        onDiscoveryCompletion = [this](services::OperationStatus status)
+        onOperationDone = [this](services::OperationStatus status)
         {
             infra::Subject<services::GattClientObserver>::NotifyObservers([status](auto& observer)
                 {
@@ -27,13 +27,12 @@ namespace hal
         };
 
         auto ret = aci_gatt_disc_all_primary_services(connectionHandle);
-        if (ret != BLE_STATUS_SUCCESS)
-            onDiscoveryCompletion(services::OperationStatus::error);
+        HandleBleStatusError(ret);
     }
 
     void GattClientSt::StartCharacteristicDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
-        onDiscoveryCompletion = [this](services::OperationStatus status)
+        onOperationDone = [this](services::OperationStatus status)
         {
             infra::Subject<services::GattClientObserver>::NotifyObservers([status](auto& observer)
                 {
@@ -42,13 +41,12 @@ namespace hal
         };
 
         auto ret = aci_gatt_disc_all_char_of_service(connectionHandle, handle, endHandle);
-        if (ret != BLE_STATUS_SUCCESS)
-            onDiscoveryCompletion(services::OperationStatus::error);
+        HandleBleStatusError(ret);
     }
 
     void GattClientSt::StartDescriptorDiscovery(services::AttAttribute::Handle handle, services::AttAttribute::Handle endHandle)
     {
-        onDiscoveryCompletion = [this](services::OperationStatus status)
+        onOperationDone = [this](services::OperationStatus status)
         {
             infra::Subject<services::GattClientObserver>::NotifyObservers([status](auto& observer)
                 {
@@ -57,41 +55,32 @@ namespace hal
         };
 
         auto ret = aci_gatt_disc_all_char_desc(connectionHandle, handle, endHandle);
-        if (ret != BLE_STATUS_SUCCESS)
-            onDiscoveryCompletion(services::OperationStatus::error);
+        HandleBleStatusError(ret);
     }
 
     void GattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        this->onReadResponse = onResponse;
-        this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
-        {
-            onDone(result);
-        };
+        onReadResponse = onResponse;
+        onOperationDone = onDone;
 
         auto ret = aci_gatt_read_char_value(connectionHandle, handle);
-        if (ret != BLE_STATUS_SUCCESS)
-            this->onCharacteristicOperationsDone(services::OperationStatus::error);
+        HandleBleStatusError(ret);
     }
 
     void GattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
-        {
-            onDone(result);
-        };
+        onOperationDone = onDone;
 
         auto ret = aci_gatt_write_char_value(connectionHandle, handle, data.size(), data.cbegin());
-        if (ret != BLE_STATUS_SUCCESS)
-            this->onCharacteristicOperationsDone(services::OperationStatus::error);
+        HandleBleStatusError(ret);
     }
 
     void GattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        auto var = aci_gatt_write_without_resp(connectionHandle, handle, data.size(), data.cbegin());
-        if (var == BLE_STATUS_SUCCESS)
+        auto ret = aci_gatt_write_without_resp(connectionHandle, handle, data.size(), data.cbegin());
+        if (ret == BLE_STATUS_SUCCESS)
             onDone(services::OperationStatus::success);
-        else if (var == BLE_STATUS_INSUFFICIENT_RESOURCES)
+        else if (ret == BLE_STATUS_INSUFFICIENT_RESOURCES)
             onDone(services::OperationStatus::retry);
         else
             onDone(services::OperationStatus::error);
@@ -216,10 +205,9 @@ namespace hal
 
     void GattClientSt::HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event)
     {
-        if (this->onDiscoveryCompletion)
-            this->onDiscoveryCompletion(event.Error_Code == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error); // Does this conflict with other operations? If not, why do we even get a GattComplete for discovery?
-        else if (this->onCharacteristicOperationsDone)
-            this->onCharacteristicOperationsDone(event.Error_Code == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error);
+        really_assert(onOperationDone);
+
+        onOperationDone(event.Error_Code == BLE_STATUS_SUCCESS ? services::OperationStatus::success : services::OperationStatus::error);
     }
 
     void GattClientSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
@@ -262,7 +250,7 @@ namespace hal
             {
                 observer.IndicationReceived(event.Attribute_Handle, data, [this]()
                     {
-                        this->HandleGattConfirmIndication();
+                        HandleGattConfirmIndication();
                     });
             });
     }
@@ -358,7 +346,31 @@ namespace hal
         const uint16_t offsetCccd = 1;
 
         auto ret = aci_gatt_write_char_desc(connectionHandle, handle + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
-        if (ret != BLE_STATUS_SUCCESS)
-            onCharacteristicOperationsDone(services::OperationStatus::error);
+        HandleBleStatusError(ret);
+    }
+
+    void GattClientSt::MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone)
+    {
+        onOperationDone = onDone;
+
+        auto status = aci_gatt_exchange_config(connectionHandle);
+        HandleBleStatusError(status);
+    }
+
+    void GattClientSt::HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event)
+    {
+        really_assert(event.Connection_Handle == connectionHandle);
+        SetAttMtu(event.Server_RX_MTU);
+
+        AttMtuExchange::NotifyObservers([](auto& observer)
+            {
+                observer.ExchangedAttMtuSize();
+            });
+    }
+
+    void GattClientSt::HandleBleStatusError(tBleStatus status)
+    {
+        if (status != BLE_STATUS_SUCCESS)
+            onOperationDone(services::OperationStatus::error);
     }
 }

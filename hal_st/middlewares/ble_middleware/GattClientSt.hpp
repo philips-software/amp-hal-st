@@ -7,6 +7,7 @@
 #include "infra/util/AutoResetFunction.hpp"
 #include "infra/util/BoundedVector.hpp"
 #include "infra/util/Function.hpp"
+#include "services/ble/Gatt.hpp"
 #include "services/ble/GattClient.hpp"
 
 namespace hal
@@ -14,6 +15,7 @@ namespace hal
     class GattClientSt
         : public services::GattClient
         , public hal::HciEventSink
+        , public services::AttMtuExchangeImpl
     {
     public:
         explicit GattClientSt(hal::HciEventSource& hciEventSource);
@@ -29,6 +31,7 @@ namespace hal
         void DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
         void DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone) override;
+        void MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone) override;
 
         // Implementation of hal::HciEventSink
         void HciEvent(hci_event_pckt& event) override;
@@ -50,6 +53,7 @@ namespace hal
         virtual void HandleAttReadByGroupTypeResponse(const aci_att_read_by_group_type_resp_event_rp0& event);
         virtual void HandleAttReadByTypeResponse(const aci_att_read_by_type_resp_event_rp0& event);
         virtual void HandleAttFindInfoResponse(const aci_att_find_info_resp_event_rp0& event);
+        virtual void HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
@@ -59,11 +63,12 @@ namespace hal
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
 
         void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue);
+        void HandleBleStatusError(tBleStatus status);
 
         template<services::GattCharacteristic::PropertyFlags p, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue v>
         void WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
         {
-            this->onCharacteristicOperationsDone = [this, onDone](services::OperationStatus result)
+            this->onOperationDone = [this, onDone](services::OperationStatus result)
             {
                 onDone(result);
             };
@@ -85,9 +90,8 @@ namespace hal
 
         static constexpr uint16_t invalidConnection = 0xffff;
 
-        infra::AutoResetFunction<void(services::OperationStatus status)> onDiscoveryCompletion;
         infra::AutoResetFunction<void(const infra::ConstByteRange&)> onReadResponse;
-        infra::AutoResetFunction<void(services::OperationStatus), sizeof(void*) + sizeof(infra::Function<void(services::OperationStatus)>)> onCharacteristicOperationsDone;
+        infra::AutoResetFunction<void(services::OperationStatus), sizeof(void*) + sizeof(infra::Function<void(services::OperationStatus)>)> onOperationDone;
     };
 }
 
