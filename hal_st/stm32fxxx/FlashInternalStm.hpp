@@ -3,7 +3,6 @@
 
 #include DEVICE_HEADER
 #include "hal/interfaces/Flash.hpp"
-#include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
 
@@ -20,13 +19,7 @@ namespace hal
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
 
     private:
-#if defined(STM32WB)
-        void EccErrorHandler();
-#endif
         infra::ConstByteRange flashMemory;
-#if defined(STM32WB)
-        ImmediateInterruptHandler nmiHandler;
-#endif
     };
 
     class FlashInternalStm

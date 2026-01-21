@@ -38,12 +38,6 @@ namespace hal
 {
     FlashInternalStmBase::FlashInternalStmBase(infra::ConstByteRange flashMemory)
         : flashMemory(flashMemory)
-#if defined(STM32WB)
-        , nmiHandler(NonMaskableInt_IRQn, [this]()
-              {
-                  EccErrorHandler();
-              })
-#endif
     {
     }
 
@@ -136,21 +130,6 @@ namespace hal
 
         infra::EventDispatcher::Instance().Schedule(onDone);
     }
-
-#if defined(STM32WB)
-    void FlashInternalStmBase::EccErrorHandler()
-    {
-        if (__HAL_FLASH_GET_FLAG(FLASH_FLAG_ECCD))
-        {
-            __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ECCD);
-            uint32_t errorAddress = READ_BIT(FLASH->ECCR, FLASH_ECCR_ADDR_ECC);
-            uint32_t errorSector = SectorOfAddress(errorAddress);
-            uint32_t pageError = 0;
-            FLASH_EraseInitTypeDef eraseInitStruct{ .TypeErase = FLASH_TYPEERASE_PAGES, .Page = errorSector, .NbPages = 1 };
-            HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
-        }
-    }
-#endif
 
     FlashInternalStm::FlashInternalStm(infra::MemoryRange<const uint32_t> sectorSizes, infra::ConstByteRange flashMemory)
         : FlashInternalStmBase(flashMemory)
