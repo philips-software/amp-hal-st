@@ -5,9 +5,9 @@
 #include "hal/interfaces/Gpio.hpp"
 #include "infra/timer/Timer.hpp"
 #include "infra/util/ProxyCreator.hpp"
-#include "integration_test/logic/Flash.hpp"
 #include "integration_test/logic/Peripheral.hpp"
 #include "services/util/EchoOnSesame.hpp"
+#include "services/util/FlashEcho.hpp"
 
 namespace application
 {

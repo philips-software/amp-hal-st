@@ -3,8 +3,8 @@
 
 #include "generated/echo/Testing.pb.hpp"
 #include "infra/timer/Timer.hpp"
-#include "integration_test/logic/Flash.hpp"
 #include "services/tracer/Tracer.hpp"
+#include "services/util/FlashEcho.hpp"
 
 namespace application
 {
@@ -25,7 +25,7 @@ namespace application
 
     private:
         std::vector<uint8_t> firmware;
-        application::FlashProxy flash;
+        services::FlashEchoProxy flash;
         testing::TesterProxy tester;
         services::Tracer& tracer;
         bool done = false;

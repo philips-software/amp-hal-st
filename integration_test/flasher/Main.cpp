@@ -5,10 +5,10 @@
 #include "hal/generic/FileSystemGeneric.hpp"
 #include "hal/generic/TimerServiceGeneric.hpp"
 #include "integration_test/flasher/FirmwareSender.hpp"
-#include "integration_test/logic/Flash.hpp"
 #include "services/network_instantiations/EchoInstantiation.hpp"
 #include "services/network_instantiations/NetworkAdapter.hpp"
 #include "services/tracer/TracerOnIoOutputInfrastructure.hpp"
+#include "services/util/FlashEcho.hpp"
 
 struct FlashTracer
 {
