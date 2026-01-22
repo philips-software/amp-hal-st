@@ -15,10 +15,6 @@ namespace hal
               {
                   HsemInterruptHandler();
               })
-        , nmiHandler(NonMaskableInt_IRQn, [this]()
-              {
-                  EccErrorHandler();
-              })
     {
         SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7);
     }
@@ -67,19 +63,6 @@ namespace hal
         HAL_HSEM_DeactivateNotification(__HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2));
         if (statusreg == __HAL_HSEM_SEMID_TO_MASK(hwBlockFlashReqByCpu2))
             onHwSemaphoreAvailable();
-    }
-
-    void FlashInternalStmBle::EccErrorHandler()
-    {
-        if (__HAL_FLASH_GET_FLAG(FLASH_FLAG_ECCD))
-        {
-            __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ECCD);
-            uint32_t errorAddress = READ_BIT(FLASH->ECCR, FLASH_ECCR_ADDR_ECC);
-            uint32_t errorSector = SectorOfAddress(errorAddress);
-            uint32_t pageError = 0;
-            FLASH_EraseInitTypeDef eraseInitStruct{ .TypeErase = FLASH_TYPEERASE_PAGES, .Page = errorSector, .NbPages = 1 };
-            HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
-        }
     }
 
     void FlashInternalStmBle::TryWrite()
