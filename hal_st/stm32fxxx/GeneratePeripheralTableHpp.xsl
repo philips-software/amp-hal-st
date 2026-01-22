@@ -38,7 +38,7 @@ namespace hal
     void EnableClock</xsl:text><xsl:value-of select="@name"/><xsl:text>(std::size_t index);
     void DisableClock</xsl:text><xsl:value-of select="@name"/><xsl:text>(std::size_t index);</xsl:text>
         <xsl:choose>
-          <xsl:when test="@name = 'Spi'">
+          <xsl:when test="@name = 'Spi' or @name = 'Adc'">
             <xsl:text>
     void ResetPeripheral</xsl:text><xsl:value-of select="@name"/><xsl:text>(std::size_t index);</xsl:text>
           </xsl:when>

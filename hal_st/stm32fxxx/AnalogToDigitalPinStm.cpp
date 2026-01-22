@@ -217,6 +217,7 @@ namespace hal
     AdcStm::~AdcStm()
     {
         DisableClockAdc(index);
+        ResetPeripheralAdc(index);
     }
 
     void AdcStm::Measure(const infra::Function<void(infra::MemoryRange<uint16_t>)>& onDone)

@@ -5,6 +5,7 @@
 
   <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyz'"/>
   <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'"/>
+  <xsl:variable name="stripTrailingDigitsPeripherals" select="'ADC'"/>  <!-- space separated list -->
 
   <xsl:template match="/">
     <xsl:text>#include "PeripheralTable.hpp"
@@ -121,7 +122,7 @@ namespace hal
 </xsl:text>
 
       <xsl:choose>
-        <xsl:when test="@name = 'Spi'">
+        <xsl:when test="@name = 'Spi' or @name = 'Adc'">
           <xsl:text>
     void ResetPeripheral</xsl:text>
           <xsl:value-of select="@name"/>
@@ -226,7 +227,7 @@ namespace hal
       </xsl:call-template>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template name="disable-clock">
     <xsl:param name="index"/>
     <xsl:param name="max"/>
@@ -251,6 +252,49 @@ namespace hal
     </xsl:if>
   </xsl:template>
 
+  <xsl:template name="strip-trailing-digits">
+    <xsl:param name="value"/>
+    <xsl:variable name="length" select="string-length($value)"/>
+    <xsl:choose>
+      <xsl:when test="$length &gt; 0 and contains('0123456789', substring($value, $length, 1))">
+        <xsl:call-template name="strip-trailing-digits">
+          <xsl:with-param name="value" select="substring($value, 1, $length - 1)"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$value"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template name="should-strip-trailing-digits">
+    <xsl:param name="value"/>
+    <xsl:param name="prefixes" select="$stripTrailingDigitsPeripherals"/>
+    <xsl:variable name="list" select="normalize-space($prefixes)"/>
+    <xsl:choose>
+      <xsl:when test="$list = ''">0</xsl:when>
+      <xsl:when test="contains($list, ' ')">
+        <xsl:variable name="head" select="substring-before($list, ' ')"/>
+        <xsl:variable name="tail" select="substring-after($list, ' ')"/>
+        <xsl:choose>
+          <xsl:when test="starts-with($value, $head)">1</xsl:when>
+          <xsl:otherwise>
+            <xsl:call-template name="should-strip-trailing-digits">
+              <xsl:with-param name="value" select="$value"/>
+              <xsl:with-param name="prefixes" select="$tail"/>
+            </xsl:call-template>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:choose>
+          <xsl:when test="starts-with($value, $list)">1</xsl:when>
+          <xsl:otherwise>0</xsl:otherwise>
+        </xsl:choose>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
   <xsl:template name="reset-peripheral">
     <xsl:param name="index"/>
     <xsl:param name="max"/>
@@ -258,13 +302,27 @@ namespace hal
       <xsl:text>            case </xsl:text>
       <xsl:value-of select="$index - 1"/>
       <xsl:text>: </xsl:text>
+      <xsl:variable name="shouldStrip">
+        <xsl:call-template name="should-strip-trailing-digits">
+          <xsl:with-param name="value" select="item[@position=$index]/@name"/>
+        </xsl:call-template>
+      </xsl:variable>
       <xsl:choose>
         <xsl:when test="item[@position=$index]/@clock-enable">
           <xsl:value-of select="substring(item[@position=$index]/@clock-enable, 1, string-length(item[@position=$index]/@clock-enable) - 11)"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>__HAL_RCC_</xsl:text>
-          <xsl:value-of select="item[@position=$index]/@name"/>
+          <xsl:choose>
+            <xsl:when test="normalize-space($shouldStrip) = '1'">
+              <xsl:call-template name="strip-trailing-digits">
+                <xsl:with-param name="value" select="item[@position=$index]/@name"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="item[@position=$index]/@name"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:text>_FORCE_RESET(); </xsl:text>
@@ -274,7 +332,16 @@ namespace hal
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>__HAL_RCC_</xsl:text>
-          <xsl:value-of select="item[@position=$index]/@name"/>
+          <xsl:choose>
+            <xsl:when test="normalize-space($shouldStrip) = '1'">
+              <xsl:call-template name="strip-trailing-digits">
+                <xsl:with-param name="value" select="item[@position=$index]/@name"/>
+              </xsl:call-template>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="item[@position=$index]/@name"/>
+            </xsl:otherwise>
+          </xsl:choose>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:text>_RELEASE_RESET(); break;
