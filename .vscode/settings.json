@@ -1,0 +1,21 @@
+{
+    "cucumberautocomplete.steps": [
+        "integration_test/runner/*.cpp"
+    ],
+    "cucumberautocomplete.stepsInvariants": true,
+    "cucumberautocomplete.gherkinDefinitionPart": "(GIVEN|WHEN|THEN|STEP)\\(",
+    "cucumberautocomplete.customParameters": [
+        {
+            "parameter": "R\"(",
+            "value": "\""
+        },
+        {
+            "parameter": ")\"",
+            "value": "\""
+        },
+        {
+            "parameter": "{PinState}",
+            "value": "(high|low)"
+        }
+    ]
+}
