@@ -1,4 +1,4 @@
-#include "cucumber_cpp/library/Steps.hpp"
+#include "cucumber_cpp/CucumberCpp.hpp"
 #include "generated/echo/Testing.pb.hpp"
 #include "infra/timer/Waiting.hpp"
 #include "integration_test/logic/Tested.hpp"
@@ -40,6 +40,11 @@ namespace
         bool testerGpio = false;
         bool testedGpio = false;
     };
+
+    PARAMETER(std::string, "PinState", "(high|low)")
+    {
+        return group.value.value();
+    }
 }
 
 STEP("gpio peripherals are enabled")
@@ -77,7 +82,7 @@ STEP("gpio peripherals are enabled")
     context.Emplace<testing::GpioTestedProxy>(context.Get<services::Echo>());
 }
 
-STEP("the tester sets its output pin (high|low)", (std::string state))
+STEP("the tester sets its output pin {PinState}", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
@@ -91,7 +96,7 @@ STEP("the tester sets its output pin (high|low)", (std::string state))
         }));
 }
 
-STEP("the tester sees a (high|low) value", (std::string state))
+STEP("the tester sees a {PinState} value", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
@@ -101,7 +106,7 @@ STEP("the tester sees a (high|low) value", (std::string state))
         }));
 }
 
-STEP("the tested sets its output pin (high|low)", (std::string state))
+STEP("the tested sets its output pin {PinState}", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
@@ -115,7 +120,7 @@ STEP("the tested sets its output pin (high|low)", (std::string state))
         }));
 }
 
-STEP("the tested sees a (high|low) value", (std::string state))
+STEP("the tested sees a {PinState} value", (std::string state))
 {
     context.EmplaceAt<bool>("state", ConvertPinState(state));
 
