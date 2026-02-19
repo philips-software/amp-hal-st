@@ -23,6 +23,7 @@ namespace hal
                   static_assert(__CORTEX_M >= 0x3U);
                   if (this->tracerProvider)
                   {
+                      FeedWatchdog();
                       auto& tracer = this->tracerProvider();
                       tracer.Trace() << "*** Hard fault! ***";
                       DumpCurrentInterruptStackAndAbort(tracer);
@@ -36,6 +37,7 @@ namespace hal
     {
         if (tracerProvider)
         {
+            FeedWatchdog();
             auto& tracer = tracerProvider();
             tracer.Trace() << "*** Fault: " << fault << " ***";
             DumpCurrentInterruptStackAndAbort(tracer);
@@ -72,6 +74,7 @@ namespace hal
     void DefaultFaultTracer::DumpCfsrContents(uint32_t cfsr, services::Tracer& tracer) const
     {
         /* Memory Manage Faults */
+        FeedWatchdog();
         if (cfsr & SCB_CFSR_IACCVIOL_Msk)
             tracer.Trace() << "  MemManageFault: Instruction access violation";
         if (cfsr & SCB_CFSR_DACCVIOL_Msk)
@@ -86,6 +89,7 @@ namespace hal
             tracer.Trace() << "  MemManageFault: MMFAR valid";
 
         /* Bus Faults */
+        FeedWatchdog();
         if (cfsr & SCB_CFSR_IBUSERR_Msk)
             tracer.Trace() << "  BusFault: Instruction bus error";
         if (cfsr & SCB_CFSR_PRECISERR_Msk)
@@ -102,13 +106,14 @@ namespace hal
             tracer.Trace() << "  BusFault: BFAR valid";
 
         /* Usage Faults */
+        FeedWatchdog();
         if (cfsr & SCB_CFSR_UNDEFINSTR_Msk)
             tracer.Trace() << "  UsageFault: Illegal instruction";
         if (cfsr & SCB_CFSR_INVSTATE_Msk)
             tracer.Trace() << "  UsageFault: Invalid state";
         if (cfsr & SCB_CFSR_INVPC_Msk)
             tracer.Trace() << "  UsageFault: Invalid PC load usage fault";
-            // Ignoring NOCP
+        // Ignoring NOCP
 #if defined(SCB_CFSR_STKOF_Msk)
         if (cfsr & SCB_CFSR_STKOF_Msk)
             tracer.Trace() << "  UsageFault: Stack overflow";
@@ -148,6 +153,7 @@ namespace hal
         auto lr = interruptContext.stack[5];
         auto pc = interruptContext.stack[6];
         auto psr = interruptContext.stack[7];
+        FeedWatchdog();
         tracer.Trace() << "Stack frame";
         tracer.Trace() << " R0  : 0x" << infra::hex << infra::Width(8, '0') << r0; // Usually contains the parameter values
         tracer.Trace() << " R1  : 0x" << infra::hex << infra::Width(8, '0') << r1; // Usually contains the parameter values
@@ -162,6 +168,7 @@ namespace hal
         auto MemManageFaultAddress = SCB->MMFAR;
         auto BusFaultAddress = SCB->BFAR;
 
+        FeedWatchdog();
         tracer.Trace() << "FSR/FAR:";
         tracer.Trace() << " HFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->HFSR;
         if (SCB->HFSR & SCB_HFSR_VECTTBL_Msk)
@@ -172,6 +179,7 @@ namespace hal
             tracer.Trace() << "  FORCED (Hard Fault)";
         tracer.Trace() << " CFSR: 0x" << infra::hex << infra::Width(8, '0') << cfsr;
         DumpCfsrContents(cfsr, tracer);
+        FeedWatchdog();
         tracer.Trace() << " DFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->DFSR;
         tracer.Trace() << " AFSR: 0x" << infra::hex << infra::Width(8, '0') << SCB->AFSR;
         if (cfsr & SCB_CFSR_MMARVALID_Msk)
