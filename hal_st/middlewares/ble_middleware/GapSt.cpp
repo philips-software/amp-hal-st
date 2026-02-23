@@ -36,7 +36,8 @@ namespace hal
 
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : HciEventSink(hciEventSource)
-        , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
+        , identityAddressType(configuration.address.type == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR)
+        , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : identityAddressType)
         , securityLevel(configuration.security.securityLevel)
         , bondStorageSynchronizer(bondStorageSynchronizer)
     {
@@ -54,7 +55,7 @@ namespace hal
         aci_hal_set_tx_power_level(1, configuration.txPowerLevel);
         aci_gatt_init();
 
-        aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());
+        SetAddress(configuration.address);
 
         const std::array<uint8_t, 8> events = { { 0x9F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
         hci_le_set_event_mask(events.data());
@@ -121,7 +122,7 @@ namespace hal
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
         uint8_t mitmMode = SecurityLevelToMITM(level);
 
-        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 1, 111111, GAP_PUBLIC_ADDR);
+        aci_gap_set_authentication_requirement(bondingMode, mitmMode, static_cast<uint8_t>(secureConnectionSupport), keypressNotificationSupport, 16, 16, 1, 111111, identityAddressType);
     }
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
@@ -286,12 +287,12 @@ namespace hal
             });
     }
 
-    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
+    void GapSt::SetAddress(services::GapAddress address) const
     {
-        uint8_t offset = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
-        uint8_t length = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_LEN : CONFIG_DATA_RANDOM_ADDRESS_LEN;
+        uint8_t offset = address.type == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
+        uint8_t length = address.type == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_LEN : CONFIG_DATA_RANDOM_ADDRESS_LEN;
 
-        aci_hal_write_config_data(offset, length, address.data());
+        aci_hal_write_config_data(offset, length, address.address.data());
     }
 
     void GapSt::HciEvent(hci_event_pckt& event)
