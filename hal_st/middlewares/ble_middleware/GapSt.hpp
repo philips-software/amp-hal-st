@@ -43,7 +43,7 @@ namespace hal
 
         struct Configuration
         {
-            const MacAddress& address;
+            const services::GapAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
             const Security& security;
@@ -98,7 +98,7 @@ namespace hal
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
         [[nodiscard]] virtual uint8_t SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const;
 
-        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
+        void SetAddress(services::GapAddress address) const;
 
     private:
         // Implementation of HciEventSink
@@ -120,6 +120,7 @@ namespace hal
         };
 
         ConnectionContext connectionContext;
+        uint8_t identityAddressType;
         uint8_t ownAddressType;
         services::GapPairing::SecurityLevel securityLevel;
 
