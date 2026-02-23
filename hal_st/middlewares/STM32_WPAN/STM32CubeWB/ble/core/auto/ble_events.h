@@ -794,9 +794,17 @@ void aci_gap_pairing_complete_event( uint16_t Connection_Handle,
  * @param Connection_Handle Handle of the connection where this event occurred.
  *        Values:
  *        - 0x0000 ... 0x0EFF
+ * @param IO_Capability IO capability of the remote device.
+ *        Values:
+ *        - 0x00: IO_CAP_DISPLAY_ONLY
+ *        - 0x01: IO_CAP_DISPLAY_YES_NO
+ *        - 0x02: IO_CAP_KEYBOARD_ONLY
+ *        - 0x03: IO_CAP_NO_INPUT_NO_OUTPUT
+ *        - 0x04: IO_CAP_KEYBOARD_DISPLAY
  * @return None
  */
-void aci_gap_pass_key_req_event( uint16_t Connection_Handle );
+void aci_gap_pass_key_req_event( uint16_t Connection_Handle,
+                                 uint8_t IO_Capability );
 
 /**
  * @brief ACI_GAP_AUTHORIZATION_REQ_EVENT

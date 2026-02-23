@@ -669,7 +669,8 @@ static void aci_gap_pairing_complete_event_process( const uint8_t* in )
 }
 
 /* ACI_GAP_PASS_KEY_REQ_EVENT callback function */
-__WEAK void aci_gap_pass_key_req_event( uint16_t Connection_Handle )
+__WEAK void aci_gap_pass_key_req_event( uint16_t Connection_Handle,
+                                        uint8_t IO_Capability )
 {
 }
 
@@ -677,7 +678,8 @@ __WEAK void aci_gap_pass_key_req_event( uint16_t Connection_Handle )
 static void aci_gap_pass_key_req_event_process( const uint8_t* in )
 {
   aci_gap_pass_key_req_event_rp0 *rp0 = (void*)in;
-  aci_gap_pass_key_req_event( rp0->Connection_Handle );
+  aci_gap_pass_key_req_event( rp0->Connection_Handle,
+                              rp0->IO_Capability );
 }
 
 /* ACI_GAP_AUTHORIZATION_REQ_EVENT callback function */

@@ -3052,6 +3052,7 @@ typedef __PACKED_STRUCT
 typedef __PACKED_STRUCT
 {
   uint16_t Connection_Handle;
+  uint8_t IO_Capability;
 } aci_gap_pass_key_req_event_rp0;
 
 typedef __PACKED_STRUCT
