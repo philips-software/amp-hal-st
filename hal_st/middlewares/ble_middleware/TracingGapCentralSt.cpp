@@ -228,4 +228,19 @@ namespace hal
         tracer.Trace() << "\tReason              : 0x" << infra::hex << event.Reason;
         GapCentralSt::HandlePairingCompleteEvent(event);
     }
+
+    void TracingGapCentralSt::HandlePassKeyRequestEvent(const aci_gap_pass_key_req_event_rp0& event)
+    {
+        tracer.Trace() << "TracingGapCentralSt::HandlePassKeyRequestEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << event.Connection_Handle;
+        GapCentralSt::HandlePassKeyRequestEvent(event);
+    }
+
+    void TracingGapCentralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
+    {
+        tracer.Trace() << "TracingGapCentralSt::HandleNumericComparisonValueEvent";
+        tracer.Trace() << "\tConnection handle   : 0x" << infra::hex << event.Connection_Handle;
+        tracer.Trace() << "\tNumeric value       : " << event.Numeric_Value;
+        GapCentralSt::HandleNumericComparisonValueEvent(event);
+    }
 }

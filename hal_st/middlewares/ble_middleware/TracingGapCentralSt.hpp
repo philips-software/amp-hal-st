@@ -46,6 +46,8 @@ namespace hal
         void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) override;
         void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event) override;
         void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event) override;
+        void HandlePassKeyRequestEvent(const aci_gap_pass_key_req_event_rp0& event) override;
+        void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) override;
 
     private:
         services::Tracer& tracer;
