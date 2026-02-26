@@ -10,7 +10,10 @@
   "postCreateCommand": "git submodule update --init --recursive",
   "customizations": {
     "vscode": {
-      "extensions": ["ms-vscode.vscode-serial-monitor"]
+      "extensions": [
+        "ms-vscode.vscode-serial-monitor",
+        "alexkrechik.cucumberautocomplete"
+      ]
     }
   }
 }
