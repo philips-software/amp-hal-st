@@ -18,6 +18,12 @@ namespace hal
         GapCentralSt::Connect(macAddress, addressType, initiatingTimeout);
     }
 
+    void TracingGapCentralSt::CancelConnect()
+    {
+        tracer.Trace() << "TracingGapCentralSt::CancelConnect";
+        GapCentralSt::CancelConnect();
+    }
+
     void TracingGapCentralSt::Disconnect()
     {
         tracer.Trace() << "TracingGapCentralSt::Disconnect";

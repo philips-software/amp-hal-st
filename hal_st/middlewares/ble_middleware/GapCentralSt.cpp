@@ -76,7 +76,7 @@ namespace hal
 
         initiatingStateTimer.Start(initiatingTimeout, [this]()
             {
-                aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
+                CancelConnect();
             });
     }
 
