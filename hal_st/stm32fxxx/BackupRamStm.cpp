@@ -11,7 +11,8 @@ namespace hal
         return infra::MakeRange(&TAMP->BKP0R, &TAMP->BKP15R + 1);
 #elif defined(STM32H5)
         auto* base = reinterpret_cast<volatile uint32_t*>(BKPSRAM_BASE);
-        return infra::MakeRange(base, base + BKPSRAM_SIZE / sizeof(uint32_t));
+        auto* end = reinterpret_cast<volatile uint32_t*>(BKPSRAM_BASE + BKPSRAM_SIZE );
+        return infra::MakeRange(base, end);
 #else
         return infra::MakeRange(&peripheralRtc[0]->BKP0R, &peripheralRtc[0]->BKP19R + 1);
 #endif
