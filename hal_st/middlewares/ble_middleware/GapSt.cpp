@@ -60,6 +60,12 @@ namespace hal
         hci_le_set_event_mask(events.data());
 
         SVCCTL_Init();
+
+        if (securityLevel == services::GapPairing::SecurityLevel::level4)
+        {
+            auto status = hci_le_read_local_p256_public_key();
+            really_assert(status == BLE_STATUS_SUCCESS);
+        }
     }
 
     uint16_t GapSt::EffectiveMaxAttMtuSize() const
@@ -176,8 +182,28 @@ namespace hal
     {
         really_assert(securityLevel == services::GapPairing::SecurityLevel::level4);
 
-        auto status = hci_le_read_local_p256_public_key();
-        really_assert(status == BLE_STATUS_SUCCESS);
+        uint8_t addressType = 0;
+        hal::MacAddress address{};
+        uint8_t dataSize = 0;
+        std::array<uint8_t, 16> randomData{};
+        std::array<uint8_t, 16> confirmData{};
+
+        /* OOB data generation */
+        aci_gap_set_oob_data(0x00, 0x00, nullptr, 0x00, 0x00, nullptr);
+
+        /* OOB data recovery */
+        auto status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
+        really_assert(status == BLE_STATUS_SUCCESS && dataSize == randomData.size());
+        status = aci_gap_get_oob_data(0x02, &addressType, address.data(), &dataSize, confirmData.data());
+        really_assert(status == BLE_STATUS_SUCCESS && dataSize == confirmData.size());
+
+        auto addressTypeConverted = addressType == GAP_PUBLIC_ADDR ? services::GapDeviceAddressType::publicAddress : services::GapDeviceAddressType::randomAddress;
+        services::GapOutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
+
+        infra::Subject<services::GapPairingObserver>::NotifyObservers([outOfBandData](auto& observer)
+            {
+                observer.OutOfBandDataGenerated(outOfBandData);
+            });
     }
 
     void GapSt::SetOutOfBandData(const services::GapOutOfBandData& outOfBandData)
@@ -262,37 +288,6 @@ namespace hal
     void GapSt::HandleHciLeReadLocalP256PublicKeyCompleteEvent(const hci_le_read_local_p256_public_key_complete_event_rp0& event)
     {
         really_assert(event.Status == BLE_STATUS_SUCCESS);
-
-        infra::EventDispatcherWithWeakPtr::Instance().Schedule([this]()
-            {
-                HandleOobDataGeneration();
-            });
-    }
-
-    void GapSt::HandleOobDataGeneration()
-    {
-        uint8_t addressType = 0;
-        hal::MacAddress address{};
-        uint8_t dataSize = 0;
-        std::array<uint8_t, 16> randomData{};
-        std::array<uint8_t, 16> confirmData{};
-
-        /* OOB data generation */
-        aci_gap_set_oob_data(0x00, 0x00, nullptr, 0x00, 0x00, nullptr);
-
-        /* OOB data recovery */
-        auto status = aci_gap_get_oob_data(0x01, &addressType, address.data(), &dataSize, randomData.data());
-        really_assert(status == BLE_STATUS_SUCCESS && dataSize == randomData.size());
-        status = aci_gap_get_oob_data(0x02, &addressType, address.data(), &dataSize, confirmData.data());
-        really_assert(status == BLE_STATUS_SUCCESS && dataSize == confirmData.size());
-
-        auto addressTypeConverted = addressType == GAP_PUBLIC_ADDR ? services::GapDeviceAddressType::publicAddress : services::GapDeviceAddressType::randomAddress;
-        services::GapOutOfBandData outOfBandData = { address, addressTypeConverted, infra::MakeConstByteRange(randomData), infra::MakeConstByteRange(confirmData) };
-
-        infra::Subject<services::GapPairingObserver>::NotifyObservers([outOfBandData](auto& observer)
-            {
-                observer.OutOfBandDataGenerated(outOfBandData);
-            });
     }
 
     void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
