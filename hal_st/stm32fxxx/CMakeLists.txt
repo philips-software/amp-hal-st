@@ -68,6 +68,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU},stm32wb55>:FlashInternalStmBle.hpp>
     GpioStm.cpp
     GpioStm.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:HighCycleAreaOrOtpIrqHandler.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:HighCycleAreaOrOtpIrqHandler.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.hpp>
     QuadSpiStm.cpp
@@ -80,6 +82,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     LpTimerStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:LpTimerPwmStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU},stm32wb55>>:LpTimerPwmStm.hpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:OneTimeProgrammableFlashStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:OneTimeProgrammableFlashStm.hpp>
     RandomDataGeneratorStm.cpp
     RandomDataGeneratorStm.hpp
     ResetStm.cpp
