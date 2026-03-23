@@ -20,7 +20,7 @@ namespace hal
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address);
         void ReadBuffer(infra::ByteRange buffer, uint32_t address);
-        void EraseSectors(uint32_t beginIndex, uint32_t endIndex);
+        [[noreturn]] void EraseSectors(uint32_t beginIndex, uint32_t endIndex);
 
         static uint32_t SectorNumber();
         static uint32_t SectorSize();

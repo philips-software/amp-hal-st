@@ -38,10 +38,10 @@ namespace
         }
     }
 
-    void Copy(const uint16_t* first, const uint16_t* last, uint16_t* result)
+    void Copy(const uint16_t* begin, const uint16_t* end, uint16_t* destination)
     {
-        for (; first != last; ++result, ++first)
-            *result = *first;
+        for (; begin != end; ++destination, ++begin)
+            *destination = *begin;
     }
 }
 

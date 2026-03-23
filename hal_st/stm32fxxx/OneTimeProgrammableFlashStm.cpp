@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/OneTimeProgrammableFlashStm.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStmDetail.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/LogAndAbort.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include <cstddef>
 #include <cstdint>
@@ -22,10 +23,10 @@ namespace
     constexpr uint32_t sectorSize{ FLASH_OTP_SIZE / sectorNumber };
     const ConstHalfWordRange OtpRange{ ptr<FLASH_OTP_BASE>(), ptr<FLASH_OTP_BASE + FLASH_OTP_SIZE>() };
 
-    void Copy(const uint16_t* first, const uint16_t* last, uint16_t* result)
+    void Copy(const uint16_t* begin, const uint16_t* end, uint16_t* destination)
     {
-        for (; first != last; ++result, ++first)
-            *result = *first;
+        for (; begin != end; ++destination, ++begin)
+            *destination = *begin;
     }
 }
 
@@ -56,10 +57,10 @@ namespace hal
         HAL_FLASH_Lock();
     }
 
-    void OneTimeProgrammableFlashWorker::EraseSectors(uint32_t beginIndex, uint32_t endIndex)
+    [[noreturn]] void OneTimeProgrammableFlashWorker::EraseSectors([[maybe_unused]] uint32_t beginIndex, [[maybe_unused]] uint32_t endIndex)
     {
         // OTP cannot be erased
-        std::abort();
+        LOG_AND_ABORT("Not supported");
     }
 
     uint32_t OneTimeProgrammableFlashWorker::SectorNumber()

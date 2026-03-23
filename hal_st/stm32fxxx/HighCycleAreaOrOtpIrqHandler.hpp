@@ -11,6 +11,8 @@ namespace hal
     {
     public:
         HighCycleAreaOrOtpIrqHandler();
+        HighCycleAreaOrOtpIrqHandler(const HighCycleAreaOrOtpIrqHandler&) = delete;
+        HighCycleAreaOrOtpIrqHandler& operator=(const HighCycleAreaOrOtpIrqHandler&) = delete;
 
     private:
         hal::ImmediateInterruptHandler nmi;
