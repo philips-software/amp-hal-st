@@ -25,14 +25,19 @@ namespace
     const ConstHalfWordRange bank1Range{ ptr<FLASH_EDATA_BASE>(), ptr<FLASH_EDATA_BASE + bankSize>() };
     const ConstHalfWordRange bank2Range{ ptr<FLASH_EDATA_BASE + bankSize>(), ptr<FLASH_EDATA_BASE + fullSize>() };
 
+    bool IsBankSwapActive()
+    {
+        return (FLASH->OPTCR & FLASH_OPTCR_SWAP_BANK) != 0;
+    }
+
     ConstHalfWordRange GetBankRange(uint32_t bank)
     {
         switch (bank)
         {
             case FLASH_BANK_1:
-                return bank1Range;
+                return IsBankSwapActive() ? bank2Range : bank1Range;
             case FLASH_BANK_2:
-                return bank2Range;
+                return IsBankSwapActive() ? bank1Range : bank2Range;
             default:
                 std::abort();
         }
