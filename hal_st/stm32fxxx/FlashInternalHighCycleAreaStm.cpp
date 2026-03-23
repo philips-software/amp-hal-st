@@ -1,10 +1,10 @@
-#include DEVICE_HEADER
 #include "hal_st/stm32fxxx/FlashInternalHighCycleAreaStm.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStmDetail.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <cstdint>
+#include DEVICE_HEADER
 
 namespace
 {
@@ -38,10 +38,10 @@ namespace
         }
     }
 
-    void Copy(const uint16_t* first, const uint16_t* last, uint16_t* result)
+    void Copy(const uint16_t* begin, const uint16_t* end, uint16_t* destination)
     {
-        for (; first != last; ++result, ++first)
-            *result = *first;
+        for (; begin != end; ++destination, ++begin)
+            *destination = *begin;
     }
 }
 
@@ -139,19 +139,6 @@ namespace hal
 
     FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(uint32_t bank)
         : FlashInternalHighCycleAreaStm(bank)
-        , nmi{
-            IRQn_Type::NonMaskableInt_IRQn, []
-            {
-                // From RM0481, Section 7.3.4 FLASH read operations:
-                // If the application reads an OTP data or flash high-cycle data not previously written, a
-                // double ECC error is reported and only a word full of set bits is returned (see
-                // Section 7.3.9 for details). The read data (in 16 bits) is stored in FLASH_ECCDR
-                // register, so that the user can identify if the double ECC error is due to a virgin data or a
-                // real ECC error.
-                really_assert(__HAL_FLASH_GET_FLAG(FLASH_FLAG_ECCD) && READ_REG(FLASH->ECCDR) == 0xFFFF);
-
-                __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ECCD);
-            }
-        }
+        , HighCycleAreaOrOtpIrqHandler()
     {}
 }

@@ -19,6 +19,8 @@ target_sources(hal_st.synchronous_stm32fxxx PRIVATE
     SynchronousFlashInternalStm.hpp
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousHardwareSemaphoreStm.cpp>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:SynchronousHardwareSemaphoreStm.hpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:SynchronousOneTimeProgrammableFlashStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:SynchronousOneTimeProgrammableFlashStm.hpp>
     SynchronousRandomDataGeneratorStm.cpp
     SynchronousRandomDataGeneratorStm.hpp
     SynchronousSpiMasterStm.cpp
