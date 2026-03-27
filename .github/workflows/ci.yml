@@ -179,7 +179,7 @@ jobs:
       - run: mv hal_st-*-Linux/* install/
       - run: ls install/bin
       - run: install/bin/integration_test.flasher tcp://localhost:1234/target/echo/programmer integration_test.tested.bin
-      - run: install/bin/integration_test.runner run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
+      - run: install/bin/integration_test.runner --format pretty --target tcp://localhost:1234/target/echo/programmer -- integration_test/runner/features
       - if: always()
         run: docker logs flex_container
       - name: Remove flex container
