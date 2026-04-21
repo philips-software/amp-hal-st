@@ -1,12 +1,11 @@
-// Copyright (c) 2024 Koninklijke Philips N.V.
 #ifndef HAL_FLASH_INTERNAL_HIGH_CYCLE_AREA_STM_HPP
 #define HAL_FLASH_INTERNAL_HIGH_CYCLE_AREA_STM_HPP
 
-#include DEVICE_HEADER
 #include "hal/interfaces/Flash.hpp"
-#include "hal_st/cortex/InterruptCortex.hpp"
+#include "hal_st/stm32fxxx/HighCycleAreaOrOtpIrqHandler.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <cstdint>
+#include DEVICE_HEADER
 
 namespace hal
 {
@@ -19,7 +18,7 @@ namespace hal
 
         class WithIrqHandler;
 
-        FlashInternalHighCycleAreaStm(uint32_t bank = FLASH_BANK_2);
+        explicit FlashInternalHighCycleAreaStm(uint32_t bank = FLASH_BANK_2);
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
@@ -37,12 +36,10 @@ namespace hal
 
     class FlashInternalHighCycleAreaStm::WithIrqHandler
         : public FlashInternalHighCycleAreaStm
+        , private HighCycleAreaOrOtpIrqHandler
     {
     public:
-        WithIrqHandler(uint32_t bank = FLASH_BANK_2);
-
-    private:
-        hal::ImmediateInterruptHandler nmi;
+        explicit WithIrqHandler(uint32_t bank = FLASH_BANK_2);
     };
 }
 

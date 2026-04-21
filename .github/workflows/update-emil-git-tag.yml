@@ -3,7 +3,7 @@ name: Update amp-embedded-infra-lib Git Tag
 
 on:
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -51,13 +51,13 @@ jobs:
           sed -i 's/${{ steps.pull_head.outputs.current_hash }}/${{ steps.pull_head.outputs.latest_hash }}/g' CMakeLists.txt
           rm -rf ninja-build
 
-      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+      - uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         id: token
         with:
           app-id: ${{ vars.FOREST_RELEASER_APP_ID }}
           private-key: ${{ secrets.FOREST_RELEASER_APP_PRIVATE_KEY }}
 
-      - uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         if: ${{ steps.pull_head.outputs.current_hash != steps.pull_head.outputs.latest_hash }}
         with:
           token: ${{ steps.token.outputs.token }}

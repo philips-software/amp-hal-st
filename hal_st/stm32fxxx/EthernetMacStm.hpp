@@ -79,6 +79,8 @@ namespace hal
 
         ReceiveDescriptors receiveDescriptors;
         SendDescriptors sendDescriptors;
+
+        uint8_t multicastFilterCount = 0;
     };
 }
 
