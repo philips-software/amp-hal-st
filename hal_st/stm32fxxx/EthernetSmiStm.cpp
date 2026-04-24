@@ -10,36 +10,13 @@ namespace hal
     EthernetSmiStm::EthernetSmiStm(hal::GpioPinStm& ethernetMdio, hal::GpioPinStm& ethernetMdc, hal::GpioPinStm& ethernetRmiiRefClk,
         hal::GpioPinStm& ethernetRmiiCrsDv, hal::GpioPinStm& ethernetRmiiRxD0, hal::GpioPinStm& ethernetRmiiRxD1,
         hal::GpioPinStm& ethernetRmiiTxEn, hal::GpioPinStm& ethernetRmiiTxD0, hal::GpioPinStm& ethernetRmiiTxD1, uint16_t phyAddress)
-        : ethernetMdio(ethernetMdio, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetMdc(ethernetMdc, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiRefClk(ethernetRmiiRefClk, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiCrsDv(ethernetRmiiCrsDv, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiRxD0(ethernetRmiiRxD0, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiRxD1(ethernetRmiiRxD1, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiTxEn(ethernetRmiiTxEn, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiTxD0(ethernetRmiiTxD0, hal::PinConfigTypeStm::ethernet, 0)
-        , ethernetRmiiTxD1(ethernetRmiiTxD1, hal::PinConfigTypeStm::ethernet, 0)
+        : smiBus(ethernetMdio, ethernetMdc, ethernetRmiiRefClk, ethernetRmiiCrsDv, ethernetRmiiRxD0, ethernetRmiiRxD1, ethernetRmiiTxEn, ethernetRmiiTxD0, ethernetRmiiTxD1)
         , phyAddress(phyAddress)
     {
-#if !defined(STM32H5)
-        __HAL_RCC_SYSCFG_CLK_ENABLE();
-        SYSCFG->PMC |= SYSCFG_PMC_MII_RMII_SEL; // Select RMII Mode
-#else
-        __HAL_RCC_SBS_CLK_ENABLE();
-        SBS->PMCR |= SBS_ETH_RMII; // Select RMII Mode
-        (void)SBS->PMCR;           // Dummy read to sync with ETH
-#endif
-
-        EnableClockEthernet(0);
-
-        SetMiiClockRange();
         RunPhy();
     }
 
-    EthernetSmiStm::~EthernetSmiStm()
-    {
-        DisableClockEthernet(0);
-    }
+    EthernetSmiStm::~EthernetSmiStm() = default;
 
     uint16_t EthernetSmiStm::PhyAddress() const
     {
@@ -59,39 +36,6 @@ namespace hal
                 Delay(std::chrono::milliseconds(200));
                 sequencer.EndWhile();
             });
-    }
-
-    void EthernetSmiStm::SetMiiClockRange()
-    {
-        uint32_t hclk = HAL_RCC_GetHCLKFreq();
-
-#if defined(STM32H5)
-        if (hclk >= 20000000 && hclk < 35000000)
-            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV16;
-        else if (hclk >= 35000000 && hclk < 60000000)
-            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV26;
-        else if (hclk >= 60000000 && hclk < 100000000)
-            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV42;
-        else if (hclk >= 100000000 && hclk < 150000000)
-            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV62;
-        else if (hclk >= 150000000 && hclk <= 250000000)
-            peripheralEthernet[0]->MACMDIOAR = ETH_MACMDIOAR_CR_DIV102;
-        else
-            std::abort();
-#else
-        if (hclk >= 20000000 && hclk < 35000000)
-            peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div16;
-        else if (hclk >= 35000000 && hclk < 60000000)
-            peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div26;
-        else if (hclk >= 60000000 && hclk < 100000000)
-            peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div42;
-        else if (hclk >= 100000000 && hclk < 150000000)
-            peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div62;
-        else if (hclk >= 150000000 && hclk <= 216000000)
-            peripheralEthernet[0]->MACMIIAR = ETH_MACMIIAR_CR_Div102;
-        else
-            std::abort();
-#endif
     }
 
     void EthernetSmiStm::ResetPhy()
@@ -139,7 +83,7 @@ namespace hal
                     else
                     {
                         GetObserver().LinkDown();
-                        SetMiiClockRange();
+                        smiBus.SetMiiClockRange();
                     }
                 }
             });
@@ -174,42 +118,12 @@ namespace hal
 
     uint16_t EthernetSmiStm::ReadPhyRegister(uint16_t reg) const
     {
-#if defined(STM32H5)
-        peripheralEthernet[0]->MACMDIOAR = (peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_CR) | ((static_cast<uint32_t>(phyAddress) << 21) & ETH_MACMDIOAR_PA) | ((static_cast<uint32_t>(reg) << 16) & ETH_MACMDIOAR_RDA) | ETH_MACMDIOAR_MOC_RD | ETH_MACMDIOAR_MB;
-
-        while ((peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_MB) != 0)
-        {
-        }
-
-        return static_cast<uint16_t>(peripheralEthernet[0]->MACMDIODR);
-#else
-        peripheralEthernet[0]->MACMIIAR = (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_CR) | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA) | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR) | ETH_MACMIIAR_MB;
-
-        while (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_MB != 0)
-        {
-        }
-
-        return peripheralEthernet[0]->MACMIIDR;
-#endif
+        return smiBus.Read(static_cast<uint8_t>(phyAddress), reg);
     }
 
     void EthernetSmiStm::WritePhyRegister(uint16_t reg, uint16_t value)
     {
-#if defined(STM32H5)
-        peripheralEthernet[0]->MACMDIODR = value;
-        peripheralEthernet[0]->MACMDIOAR = (peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_CR) | ((static_cast<uint32_t>(phyAddress) << 21) & ETH_MACMDIOAR_PA) | ((static_cast<uint32_t>(reg) << 16) & ETH_MACMDIOAR_RDA) | ETH_MACMDIOAR_MOC_WR | ETH_MACMDIOAR_MB;
-
-        while ((peripheralEthernet[0]->MACMDIOAR & ETH_MACMDIOAR_MB) != 0)
-        {
-        }
-#else
-        peripheralEthernet[0]->MACMIIDR = value;
-        peripheralEthernet[0]->MACMIIAR = (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_CR) | ((static_cast<uint32_t>(phyAddress) << 11) & ETH_MACMIIAR_PA) | ((static_cast<uint32_t>(reg) << 6) & ETH_MACMIIAR_MR) | ETH_MACMIIAR_MW | ETH_MACMIIAR_MB;
-
-        while (peripheralEthernet[0]->MACMIIAR & ETH_MACMIIAR_MB != 0)
-        {
-        }
-#endif
+        smiBus.Write(static_cast<uint8_t>(phyAddress), reg, value);
     }
 
     void EthernetSmiStm::Delay(infra::Duration duration)

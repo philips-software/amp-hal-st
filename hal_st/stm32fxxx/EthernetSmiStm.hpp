@@ -3,6 +3,7 @@
 
 #include "hal/interfaces/Ethernet.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
+#include "hal_st/stm32fxxx/SmiBusStm.hpp"
 #include "infra/timer/Timer.hpp"
 #include "infra/util/Sequencer.hpp"
 
@@ -22,7 +23,6 @@ namespace hal
 
     private:
         void RunPhy();
-        void SetMiiClockRange();
         void ResetPhy();
         void DetectLink();
         LinkSpeed GetLinkSpeedNegotiated() const;
@@ -32,15 +32,7 @@ namespace hal
         void Delay(infra::Duration duration);
 
     private:
-        hal::PeripheralPinStm ethernetMdio;
-        hal::PeripheralPinStm ethernetMdc;
-        hal::PeripheralPinStm ethernetRmiiRefClk;
-        hal::PeripheralPinStm ethernetRmiiCrsDv;
-        hal::PeripheralPinStm ethernetRmiiRxD0;
-        hal::PeripheralPinStm ethernetRmiiRxD1;
-        hal::PeripheralPinStm ethernetRmiiTxEn;
-        hal::PeripheralPinStm ethernetRmiiTxD0;
-        hal::PeripheralPinStm ethernetRmiiTxD1;
+        SmiBusStm smiBus;
         uint16_t phyAddress;
 
         infra::Sequencer sequencer;
