@@ -5,20 +5,19 @@
 
 namespace
 {
-#if defined(STM32H5)
-    uint32_t GetBank(const uint8_t* memoryBegin)
-    {
-        auto address = reinterpret_cast<uint32_t>(memoryBegin);
-        if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK) == 0)
-        {
-            // No Bank swap
-            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
-        }
-        else
-        {
-            // Bank swap
-            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
-        }
+#if defined(FLASH_DBANK_SUPPORT)
+     uint32_t GetBank(const uint8_t* memoryBegin)
+     {
+         auto address = reinterpret_cast<uint32_t>(memoryBegin);
+#if defined(FLASH_OPTSR_SWAP_BANK)
+        if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK))
+         {
+             // Bank swap
+             return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
+         }
+#else
+        return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
+#endif
     }
 #endif
 
@@ -96,6 +95,9 @@ namespace hal
         eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
         eraseInitStruct.Page = beginIndex;
         eraseInitStruct.NbPages = endIndex - beginIndex;
+#if defined(FLASH_DBANK_SUPPORT)
+        eraseInitStruct.Banks = GetBank(flashMemory.begin());
+#endif
 
         auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
         really_assert(result == HAL_OK);
