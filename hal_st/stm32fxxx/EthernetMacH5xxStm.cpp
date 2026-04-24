@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/EthernetMacStm.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/BitLogic.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include DEVICE_HEADER
 
 namespace hal
@@ -86,6 +87,15 @@ namespace hal
 
     void EthernetMacStm::AddMacAddressFilter(MacAddress address)
     {
+        // Multicast MAC addresses (first byte LSB set) use the pass-all-multicast filter
+        // to avoid exhausting the 3 exact-match slots (MACA1-3) with group addresses.
+        if ((address[0] & 1) != 0)
+        {
+            if (multicastFilterCount++ == 0)
+                peripheralEthernet[0]->MACPFR |= ETH_MACPFR_PM;
+            return;
+        }
+
         uint32_t lr = reinterpret_cast<const uint32_t*>(address.data())[0];
         uint32_t hr = (reinterpret_cast<const uint32_t*>(address.data())[1] & 0xffff) | (1 << 31);
 
@@ -106,13 +116,21 @@ namespace hal
         }
         else
         {
-            // No free mac address found. Hint: implement address hashing
+            // No free unicast exact-match slot found
             abort();
         }
     }
 
     void EthernetMacStm::RemoveMacAddressFilter(MacAddress address)
     {
+        if ((address[0] & 1) != 0)
+        {
+            really_assert(multicastFilterCount > 0);
+            if (--multicastFilterCount == 0)
+                peripheralEthernet[0]->MACPFR &= ~ETH_MACPFR_PM;
+            return;
+        }
+
         uint32_t lr = reinterpret_cast<const uint32_t*>(address.data())[0];
         uint32_t hr = (reinterpret_cast<const uint32_t*>(address.data())[1] & 0xffff) | (1 << 31);
 
@@ -133,7 +151,7 @@ namespace hal
         }
         else
         {
-            // Address not found
+            // Unicast address not found
             abort();
         }
     }
