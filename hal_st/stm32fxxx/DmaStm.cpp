@@ -488,6 +488,7 @@ namespace hal
 
     DmaStm::Stream::~Stream()
     {
+        StopTransfer();
         if (streamIndex != 0xff)
             dma.ReleaseStream(dmaIndex, streamIndex);
     }
