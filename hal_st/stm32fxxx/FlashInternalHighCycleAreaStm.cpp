@@ -47,31 +47,10 @@ namespace
 
 namespace hal
 {
-    FlashInternalHighCycleAreaStm::FlashInternalHighCycleAreaStm(uint32_t bank)
-        : flashMemory(GetBankRange(bank))
-        , bank(bank)
+    FlashInternalHighCycleAreaStm::FlashInternalHighCycleAreaStm(HalfWordRange flashMemory)
+        : flashMemory(flashMemory)
+        , bank(GetBankRange(reinterpret_cast<uint32_t>(flashMemory.begin())) == bank1Range ? FLASH_BANK_1 : FLASH_BANK_2)
     {
-        FLASH_OBProgramInitTypeDef obCurrent{};
-        obCurrent.Banks = bank;
-        HAL_FLASHEx_OBGetConfig(&obCurrent);
-
-        bool updateNeeded = obCurrent.EDATASize != bankSectorNumber;
-        if (updateNeeded)
-        {
-            HAL_FLASH_OB_Unlock();
-
-            FLASH_OBProgramInitTypeDef obInit;
-            obInit.Banks = bank;
-            obInit.OptionType = OPTIONBYTE_EDATA;
-            obInit.EDATASize = bankSectorNumber;
-
-            auto result = HAL_FLASHEx_OBProgram(&obInit);
-            really_assert(result == HAL_OK);
-
-            HAL_FLASH_OB_Launch();
-
-            HAL_FLASH_OB_Lock();
-        }
     }
 
     void FlashInternalHighCycleAreaStm::ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone)
@@ -137,8 +116,8 @@ namespace hal
         return sectorIndex * sectorSize;
     }
 
-    FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(uint32_t bank)
-        : FlashInternalHighCycleAreaStm(bank)
+    FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(HalfWordRange flashMemory)
+        : FlashInternalHighCycleAreaStm(flashMemory)
         , HighCycleAreaOrOtpIrqHandler()
     {}
 }
