@@ -3,7 +3,6 @@
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include "stm32h563xx.h"
 #include <cstdint>
 #include DEVICE_HEADER
 
