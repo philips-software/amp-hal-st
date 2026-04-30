@@ -14,11 +14,10 @@ namespace hal
     {
     public:
         using HalfWordRange = infra::MemoryRange<uint16_t>;
-        using ConstHalfWordRange = infra::MemoryRange<const uint16_t>;
 
         class WithIrqHandler;
 
-        explicit FlashInternalHighCycleAreaStm(uint32_t bank = FLASH_BANK_2);
+        explicit FlashInternalHighCycleAreaStm(HalfWordRange flashMemory);
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
@@ -30,8 +29,19 @@ namespace hal
         uint32_t AddressOfSector(uint32_t sectorIndex) const override;
 
     private:
-        ConstHalfWordRange flashMemory;
-        uint32_t bank;
+        struct BankConfig
+        {
+            uint32_t activeBank;
+            uint32_t inactiveBank;
+            uint32_t enabledSectorsActiveBank;
+            uint32_t enabledSectorsInactiveBank;
+        };
+
+        static BankConfig ReadBankConfig();
+
+    private:
+        HalfWordRange flashMemory;
+        const BankConfig bankConfig;
     };
 
     class FlashInternalHighCycleAreaStm::WithIrqHandler
@@ -39,7 +49,7 @@ namespace hal
         , private HighCycleAreaOrOtpIrqHandler
     {
     public:
-        explicit WithIrqHandler(uint32_t bank = FLASH_BANK_2);
+        explicit WithIrqHandler(HalfWordRange flashMemory);
     };
 }
 
