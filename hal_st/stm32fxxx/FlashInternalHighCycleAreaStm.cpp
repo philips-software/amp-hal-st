@@ -8,35 +8,9 @@
 
 namespace
 {
-    using ConstHalfWordRange = hal::FlashInternalHighCycleAreaStm::ConstHalfWordRange;
-
     constexpr uint32_t fullSize{ FLASH_EDATA_SIZE };
-    constexpr uint32_t bankSize{ fullSize / 2 };
-    constexpr uint32_t bankSectorNumber{ FLASH_EDATA_SECTOR_NB };
-    constexpr uint32_t sectorSize{ bankSize / bankSectorNumber };
-    constexpr uint32_t bankSectorOffset{ FLASH_SECTOR_NB - bankSectorNumber };
-
-    template<uint32_t address>
-    constexpr auto ptr()
-    {
-        return reinterpret_cast<const uint16_t*>(address);
-    }
-
-    const ConstHalfWordRange bank1Range{ ptr<FLASH_EDATA_BASE>(), ptr<FLASH_EDATA_BASE + bankSize>() };
-    const ConstHalfWordRange bank2Range{ ptr<FLASH_EDATA_BASE + bankSize>(), ptr<FLASH_EDATA_BASE + fullSize>() };
-
-    ConstHalfWordRange GetBankRange(uint32_t bank)
-    {
-        switch (bank)
-        {
-            case FLASH_BANK_1:
-                return bank1Range;
-            case FLASH_BANK_2:
-                return bank2Range;
-            default:
-                std::abort();
-        }
-    }
+    constexpr uint32_t fullbankSize{ fullSize / 2 };
+    constexpr uint32_t sectorSize{ fullbankSize / FLASH_EDATA_SECTOR_NB };
 
     void Copy(const uint16_t* begin, const uint16_t* end, uint16_t* destination)
     {
@@ -49,13 +23,19 @@ namespace hal
 {
     FlashInternalHighCycleAreaStm::FlashInternalHighCycleAreaStm(HalfWordRange flashMemory)
         : flashMemory(flashMemory)
-        , bank(GetBankRange(reinterpret_cast<uint32_t>(flashMemory.begin())) == bank1Range ? FLASH_BANK_1 : FLASH_BANK_2)
+        , bankConfig(ReadBankConfig())
     {
+        const uint32_t totalEnabledSectors = bankConfig.enabledSectorsActiveBank + bankConfig.enabledSectorsInactiveBank;
+        const uint32_t totalEnabledHalfWords = totalEnabledSectors * sectorSize / sizeof(uint16_t);
+
+        really_assert(static_cast<uint32_t>(flashMemory.end() - flashMemory.begin()) == totalEnabledHalfWords);
     }
 
     void FlashInternalHighCycleAreaStm::ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
         really_assert(buffer.size() % sizeof(uint16_t) == 0);
+        really_assert(address + buffer.size() <= NumberOfSectors() * sectorSize);
+
         // address is byte-based, addressAdjusted is half-word-based
         auto addressAdjusted = address / 2;
         auto destination = infra::ReinterpretCastMemoryRange<uint16_t>(buffer);
@@ -67,6 +47,9 @@ namespace hal
 
     void FlashInternalHighCycleAreaStm::WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone)
     {
+        really_assert(buffer.size() % sizeof(uint16_t) == 0);
+        really_assert(address + buffer.size() <= NumberOfSectors() * sectorSize);
+
         HAL_FLASH_Unlock();
 
         detail::AlignedWriteBuffer<uint16_t, FLASH_TYPEPROGRAM_HALFWORD_EDATA, true>(buffer, address, reinterpret_cast<uint32_t>(flashMemory.begin()));
@@ -82,14 +65,33 @@ namespace hal
 
         uint32_t sectorError = 0;
 
-        FLASH_EraseInitTypeDef eraseInitStruct{};
-        eraseInitStruct.Banks = bank;
-        eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-        eraseInitStruct.Sector = beginIndex + bankSectorOffset;
-        eraseInitStruct.NbSectors = endIndex - beginIndex;
+        const uint32_t activeSectorsEnd = std::min(endIndex, bankConfig.enabledSectorsActiveBank);
+        if (beginIndex < activeSectorsEnd)
+        {
+            FLASH_EraseInitTypeDef eraseInitStruct{};
+            eraseInitStruct.Banks = bankConfig.activeBank;
+            eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+            eraseInitStruct.Sector = beginIndex + FLASH_SECTOR_NB - bankConfig.enabledSectorsActiveBank;
+            eraseInitStruct.NbSectors = activeSectorsEnd - beginIndex;
 
-        auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
-        really_assert(result == HAL_OK);
+            auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
+            really_assert(result == HAL_OK);
+            really_assert(sectorError == 0xFFFFFFFFU);
+        }
+
+        const uint32_t inactiveSectorsBegin = std::max(beginIndex, bankConfig.enabledSectorsActiveBank);
+        if (inactiveSectorsBegin < endIndex)
+        {
+            FLASH_EraseInitTypeDef eraseInitStruct{};
+            eraseInitStruct.Banks = bankConfig.inactiveBank;
+            eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+            eraseInitStruct.Sector = (inactiveSectorsBegin - bankConfig.enabledSectorsActiveBank) + FLASH_SECTOR_NB - bankConfig.enabledSectorsInactiveBank;
+            eraseInitStruct.NbSectors = endIndex - inactiveSectorsBegin;
+
+            auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
+            really_assert(result == HAL_OK);
+            really_assert(sectorError == 0xFFFFFFFFU);
+        }
 
         HAL_FLASH_Lock();
 
@@ -98,7 +100,7 @@ namespace hal
 
     uint32_t FlashInternalHighCycleAreaStm::NumberOfSectors() const
     {
-        return bankSectorNumber;
+        return bankConfig.enabledSectorsActiveBank + bankConfig.enabledSectorsInactiveBank;
     }
 
     uint32_t FlashInternalHighCycleAreaStm::SizeOfSector(uint32_t sectorIndex) const
@@ -114,6 +116,24 @@ namespace hal
     uint32_t FlashInternalHighCycleAreaStm::AddressOfSector(uint32_t sectorIndex) const
     {
         return sectorIndex * sectorSize;
+    }
+
+    FlashInternalHighCycleAreaStm::BankConfig FlashInternalHighCycleAreaStm::ReadBankConfig()
+    {
+        const bool swapBankEnabled = (FLASH->OPTSR_CUR & FLASH_OPTSR_SWAP_BANK) != 0;
+        const uint32_t activeBank = swapBankEnabled ? FLASH_BANK_2 : FLASH_BANK_1;
+        const uint32_t inactiveBank = swapBankEnabled ? FLASH_BANK_1 : FLASH_BANK_2;
+
+        FLASH_OBProgramInitTypeDef obCurrent{};
+        obCurrent.Banks = activeBank;
+        HAL_FLASHEx_OBGetConfig(&obCurrent);
+        const uint32_t enabledSectorsActiveBank = obCurrent.EDATASize;
+
+        obCurrent.Banks = inactiveBank;
+        HAL_FLASHEx_OBGetConfig(&obCurrent);
+        const uint32_t enabledSectorsInactiveBank = obCurrent.EDATASize;
+
+        return { activeBank, inactiveBank, enabledSectorsActiveBank, enabledSectorsInactiveBank };
     }
 
     FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(HalfWordRange flashMemory)

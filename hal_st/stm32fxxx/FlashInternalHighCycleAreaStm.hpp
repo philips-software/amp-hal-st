@@ -14,7 +14,6 @@ namespace hal
     {
     public:
         using HalfWordRange = infra::MemoryRange<uint16_t>;
-        using ConstHalfWordRange = infra::MemoryRange<const uint16_t>;
 
         class WithIrqHandler;
 
@@ -30,8 +29,19 @@ namespace hal
         uint32_t AddressOfSector(uint32_t sectorIndex) const override;
 
     private:
+        struct BankConfig
+        {
+            uint32_t activeBank;
+            uint32_t inactiveBank;
+            uint32_t enabledSectorsActiveBank;
+            uint32_t enabledSectorsInactiveBank;
+        };
+
+        static BankConfig ReadBankConfig();
+
+    private:
         HalfWordRange flashMemory;
-        uint32_t bank;
+        const BankConfig bankConfig;
     };
 
     class FlashInternalHighCycleAreaStm::WithIrqHandler
