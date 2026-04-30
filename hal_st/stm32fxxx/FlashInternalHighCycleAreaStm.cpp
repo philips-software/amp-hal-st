@@ -3,6 +3,7 @@
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/MemoryRange.hpp"
+#include "stm32h563xx.h"
 #include <cstdint>
 #include DEVICE_HEADER
 
@@ -25,6 +26,9 @@ namespace hal
         : flashMemory(flashMemory)
         , bankConfig(ReadBankConfig())
     {
+        really_assert(reinterpret_cast<uintptr_t>(flashMemory.begin()) >= FLASH_EDATA_BASE_NS);
+        really_assert(reinterpret_cast<uintptr_t>(flashMemory.end()) <= FLASH_EDATA_BASE_NS + FLASH_EDATA_SIZE);
+
         const uint32_t totalEnabledSectors = bankConfig.enabledSectorsActiveBank + bankConfig.enabledSectorsInactiveBank;
         const uint32_t totalEnabledHalfWords = totalEnabledSectors * sectorSize / sizeof(uint16_t);
 
