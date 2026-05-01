@@ -5,6 +5,7 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "infra/timer/Timer.hpp"
 #include "infra/util/AutoResetFunction.hpp"
+#include "services/ble/Gap.hpp"
 
 namespace hal
 {
@@ -19,7 +20,7 @@ namespace hal
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
         void CancelConnect() override;
         void Disconnect() override;
-        void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void SetAddress(services::GapAddress address) override;
         void StartDeviceDiscovery() override;
         void StopDeviceDiscovery() override;
         std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
