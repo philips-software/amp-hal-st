@@ -34,17 +34,17 @@ namespace hal
         really_assert(flashBeginAddress >= FLASH_EDATA_BASE_NS);
         really_assert(flashEndAddress <= FLASH_EDATA_BASE_NS + FLASH_EDATA_SIZE);
 
-        amountOfSectorsInActiveBankInMemoryRange_ = static_cast<uint32_t>(std::ceil(static_cast<float>(std::min(activeBankEndAddress, flashEndAddress) - flashBeginAddress) / sectorSize));
-        amountOfSectorsInInactiveBankInMemoryRange_ = static_cast<uint32_t>(std::ceil(static_cast<float>(flashEndAddress - std::max(activeBankEndAddress, flashBeginAddress)) / sectorSize));
+        amountOfSectorsInActiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(std::min(activeBankEndAddress, flashEndAddress) - flashBeginAddress) / sectorSize));
+        amountOfSectorsInInactiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(flashEndAddress - std::max(activeBankEndAddress, flashBeginAddress)) / sectorSize));
 
-        really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange_);
-        really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange_);
+        really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange);
+        really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange);
 
-        if (amountOfSectorsInInactiveBankInMemoryRange_ > 0 && amountOfSectorsInInactiveBankInMemoryRange_ < 8)
+        if (amountOfSectorsInInactiveBankInMemoryRange > 0 && amountOfSectorsInInactiveBankInMemoryRange < 8)
         {
             // If some but not all sectors of the inactive bank are part of the memory map then the active bank must not contain any mapped sectors
             // otherwise the memory mapped high cycle area would be not continuous
-            really_assert(amountOfSectorsInActiveBankInMemoryRange_ == 0);
+            really_assert(amountOfSectorsInActiveBankInMemoryRange == 0);
         }
     }
 
@@ -79,13 +79,13 @@ namespace hal
         really_assert(beginIndex < NumberOfSectors());
         really_assert(endIndex <= NumberOfSectors());
 
-        const uint32_t activeSectorsEnd = std::min(endIndex, amountOfSectorsInActiveBankInMemoryRange_);
+        const uint32_t activeSectorsEnd = std::min(endIndex, amountOfSectorsInActiveBankInMemoryRange);
         if (beginIndex < activeSectorsEnd)
         {
             FLASH_EraseInitTypeDef eraseInitStruct{};
             eraseInitStruct.Banks = bankConfig.activeBank;
             eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-            eraseInitStruct.Sector = beginIndex + FLASH_SECTOR_NB - amountOfSectorsInActiveBankInMemoryRange_;
+            eraseInitStruct.Sector = beginIndex + FLASH_SECTOR_NB - amountOfSectorsInActiveBankInMemoryRange;
             eraseInitStruct.NbSectors = activeSectorsEnd - beginIndex;
 
             uint32_t sectorError = 0;
@@ -94,13 +94,13 @@ namespace hal
             really_assert(sectorError == 0xFFFFFFFFU);
         }
 
-        const uint32_t inactiveSectorsBegin = std::max(beginIndex, amountOfSectorsInActiveBankInMemoryRange_);
+        const uint32_t inactiveSectorsBegin = std::max(beginIndex, amountOfSectorsInActiveBankInMemoryRange);
         if (inactiveSectorsBegin < endIndex)
         {
             FLASH_EraseInitTypeDef eraseInitStruct{};
             eraseInitStruct.Banks = bankConfig.inactiveBank;
             eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-            eraseInitStruct.Sector = (inactiveSectorsBegin - amountOfSectorsInActiveBankInMemoryRange_) + FLASH_SECTOR_NB - amountOfSectorsInInactiveBankInMemoryRange_;
+            eraseInitStruct.Sector = (inactiveSectorsBegin - amountOfSectorsInActiveBankInMemoryRange) + FLASH_SECTOR_NB - amountOfSectorsInInactiveBankInMemoryRange;
             eraseInitStruct.NbSectors = endIndex - inactiveSectorsBegin;
 
             uint32_t sectorError = 0;
@@ -114,7 +114,7 @@ namespace hal
 
     uint32_t FlashInternalHighCycleAreaWorker::NumberOfSectors() const
     {
-        return amountOfSectorsInActiveBankInMemoryRange_ + amountOfSectorsInInactiveBankInMemoryRange_;
+        return amountOfSectorsInActiveBankInMemoryRange + amountOfSectorsInInactiveBankInMemoryRange;
     }
 
     uint32_t FlashInternalHighCycleAreaWorker::SizeOfSector([[maybe_unused]] uint32_t sectorIndex) const

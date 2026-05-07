@@ -38,14 +38,13 @@ namespace hal
             uint32_t enabledSectorsInactiveBank;
         };
 
-        uint32_t amountOfSectorsInActiveBankInMemoryRange_;
-        uint32_t amountOfSectorsInInactiveBankInMemoryRange_;
-
         static BankConfig ReadBankConfig();
 
     private:
         HalfWordRange flashMemory;
         const BankConfig bankConfig;
+        uint32_t amountOfSectorsInActiveBankInMemoryRange;
+        uint32_t amountOfSectorsInInactiveBankInMemoryRange;
     };
 
     class FlashInternalHighCycleAreaStm
