@@ -1,4 +1,5 @@
 #include "hal_st/stm32fxxx/FlashInternalHighCycleAreaStm.hpp"
+#include "hal/synchronous_interfaces/SynchronousFlashHomogeneous.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStmDetail.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/ByteRange.hpp"
@@ -51,7 +52,7 @@ namespace hal
     void FlashInternalHighCycleAreaWorker::ReadBuffer(infra::ByteRange buffer, uint32_t address)
     {
         really_assert(buffer.size() % sizeof(uint16_t) == 0);
-        really_assert(address + buffer.size() <= NumberOfSectors() * sectorSize);
+        really_assert(address + buffer.size() <= TotalSectors() * sectorSize);
 
         // address is byte-based, addressAdjusted is half-word-based
         auto addressAdjusted = address / 2;
@@ -63,7 +64,7 @@ namespace hal
     void FlashInternalHighCycleAreaWorker::WriteBuffer(infra::ConstByteRange buffer, uint32_t address)
     {
         really_assert(buffer.size() % sizeof(uint16_t) == 0);
-        really_assert(address + buffer.size() <= NumberOfSectors() * sectorSize);
+        really_assert(address + buffer.size() <= TotalSectors() * sectorSize);
 
         HAL_FLASH_Unlock();
 
@@ -76,8 +77,8 @@ namespace hal
     {
         HAL_FLASH_Unlock();
 
-        really_assert(beginIndex < NumberOfSectors());
-        really_assert(endIndex <= NumberOfSectors());
+        really_assert(beginIndex < TotalSectors());
+        really_assert(endIndex <= TotalSectors());
 
         const uint32_t activeSectorsEnd = std::min(endIndex, amountOfSectorsInActiveBankInMemoryRange);
         if (beginIndex < activeSectorsEnd)
@@ -112,24 +113,9 @@ namespace hal
         HAL_FLASH_Lock();
     }
 
-    uint32_t FlashInternalHighCycleAreaWorker::NumberOfSectors() const
+    uint32_t FlashInternalHighCycleAreaWorker::TotalSectors() const
     {
         return amountOfSectorsInActiveBankInMemoryRange + amountOfSectorsInInactiveBankInMemoryRange;
-    }
-
-    uint32_t FlashInternalHighCycleAreaWorker::SizeOfSector([[maybe_unused]] uint32_t sectorIndex) const
-    {
-        return sectorSize;
-    }
-
-    uint32_t FlashInternalHighCycleAreaWorker::SectorOfAddress(uint32_t address) const
-    {
-        return address / sectorSize;
-    }
-
-    uint32_t FlashInternalHighCycleAreaWorker::AddressOfSector(uint32_t sectorIndex) const
-    {
-        return sectorIndex * sectorSize;
     }
 
     FlashInternalHighCycleAreaWorker::BankConfig FlashInternalHighCycleAreaWorker::ReadBankConfig()
@@ -170,10 +156,30 @@ namespace hal
 
     FlashInternalHighCycleAreaStm::FlashInternalHighCycleAreaStm(HalfWordRange flashMemory)
         : FlashInternalHighCycleAreaWorker(flashMemory)
-        , FlashHomogeneous{ FlashInternalHighCycleAreaWorker::NumberOfSectors(), FlashInternalHighCycleAreaWorker::SizeOfSector(0) }
+        , FlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), sectorSize }
     {}
 
     FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(HalfWordRange flashMemory)
         : FlashInternalHighCycleAreaStm(flashMemory)
     {}
+
+    SynchronousFlashInternalHighCycleAreaStm::SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory)
+        : FlashInternalHighCycleAreaWorker(flashMemory)
+        , SynchronousFlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), sectorSize }
+    {}
+
+    void SynchronousFlashInternalHighCycleAreaStm::WriteBuffer(infra::ConstByteRange buffer, uint32_t address)
+    {
+        FlashInternalHighCycleAreaWorker::WriteBuffer(buffer, address);
+    }
+
+    void SynchronousFlashInternalHighCycleAreaStm::ReadBuffer(infra::ByteRange buffer, uint32_t address)
+    {
+        FlashInternalHighCycleAreaWorker::ReadBuffer(buffer, address);
+    }
+
+    void SynchronousFlashInternalHighCycleAreaStm::EraseSectors(uint32_t beginIndex, uint32_t endIndex)
+    {
+        FlashInternalHighCycleAreaWorker::EraseSectors(beginIndex, endIndex);
+    }
 }
