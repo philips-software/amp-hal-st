@@ -2,7 +2,6 @@
 #define HAL_FLASH_INTERNAL_HIGH_CYCLE_AREA_STM_HPP
 
 #include "hal/interfaces/FlashHomogeneous.hpp"
-#include "hal/synchronous_interfaces/SynchronousFlashHomogeneous.hpp"
 #include "hal_st/stm32fxxx/HighCycleAreaOrOtpIrqHandler.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <cstdint>
@@ -68,21 +67,6 @@ namespace hal
     {
     public:
         explicit WithIrqHandler(HalfWordRange flashMemory);
-    };
-
-    class SynchronousFlashInternalHighCycleAreaStm
-        : private FlashInternalHighCycleAreaWorker
-        , public SynchronousFlashHomogeneous
-    {
-    public:
-        using HalfWordRange = FlashInternalHighCycleAreaWorker::HalfWordRange;
-
-        explicit SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory);
-
-        // implementation of Flash interface
-        void WriteBuffer(infra::ConstByteRange buffer, uint32_t address) override;
-        void ReadBuffer(infra::ByteRange buffer, uint32_t address) override;
-        void EraseSectors(uint32_t beginIndex, uint32_t endIndex) override;
     };
 }
 

@@ -1,5 +1,4 @@
 #include "hal_st/stm32fxxx/FlashInternalHighCycleAreaStm.hpp"
-#include "hal/synchronous_interfaces/SynchronousFlashHomogeneous.hpp"
 #include "hal_st/stm32fxxx/FlashInternalStmDetail.hpp"
 #include "infra/event/EventDispatcher.hpp"
 #include "infra/util/ByteRange.hpp"
@@ -162,24 +161,4 @@ namespace hal
     FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(HalfWordRange flashMemory)
         : FlashInternalHighCycleAreaStm(flashMemory)
     {}
-
-    SynchronousFlashInternalHighCycleAreaStm::SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory)
-        : FlashInternalHighCycleAreaWorker(flashMemory)
-        , SynchronousFlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), sectorSize }
-    {}
-
-    void SynchronousFlashInternalHighCycleAreaStm::WriteBuffer(infra::ConstByteRange buffer, uint32_t address)
-    {
-        FlashInternalHighCycleAreaWorker::WriteBuffer(buffer, address);
-    }
-
-    void SynchronousFlashInternalHighCycleAreaStm::ReadBuffer(infra::ByteRange buffer, uint32_t address)
-    {
-        FlashInternalHighCycleAreaWorker::ReadBuffer(buffer, address);
-    }
-
-    void SynchronousFlashInternalHighCycleAreaStm::EraseSectors(uint32_t beginIndex, uint32_t endIndex)
-    {
-        FlashInternalHighCycleAreaWorker::EraseSectors(beginIndex, endIndex);
-    }
 }
