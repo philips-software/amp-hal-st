@@ -5,19 +5,16 @@
 
 namespace
 {
-#if defined(FLASH_DBANK_SUPPORT)
-     uint32_t GetBank(const uint8_t* memoryBegin)
-     {
-         auto address = reinterpret_cast<uint32_t>(memoryBegin);
-#if defined(FLASH_OPTSR_SWAP_BANK)
-        if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK))
-         {
-             // Bank swap
-             return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
-         }
-#else
+#if defined(FLASH_DBANK_SUPPORT) || defined(FLASH_BANK_BOTH)
+    uint32_t GetBank(const uint8_t* memoryBegin)
+    {
+        auto address = reinterpret_cast<uint32_t>(memoryBegin);
+
+        // Bank swap
+        if (FLASH_OPTSR_SWAP_BANK && READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK))
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
+
         return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
-#endif
     }
 #endif
 
@@ -46,7 +43,7 @@ namespace hal
 
         const auto flashBegin = reinterpret_cast<uint32_t>(flashMemory.begin());
 
-#if defined(STM32WBA) || defined(STM32H5)
+#if defined(FLASH_TYPEPROGRAM_QUADWORD)
         detail::AlignedWriteBuffer<uint128_t, FLASH_TYPEPROGRAM_QUADWORD, true>(buffer, address, flashBegin);
 #elif defined(STM32WB) || defined(STM32G4) || defined(STM32G0)
         detail::AlignedWriteBuffer<uint64_t, FLASH_TYPEPROGRAM_DOUBLEWORD, false>(buffer, address, flashBegin);
@@ -95,7 +92,7 @@ namespace hal
         eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
         eraseInitStruct.Page = beginIndex;
         eraseInitStruct.NbPages = endIndex - beginIndex;
-#if defined(FLASH_DBANK_SUPPORT)
+#if defined(FLASH_DBANK_SUPPORT) || defined(FLASH_BANK_BOTH)
         eraseInitStruct.Banks = GetBank(flashMemory.begin());
 #endif
 
