@@ -5,14 +5,15 @@
 
 namespace
 {
-#if defined(FLASH_DBANK_SUPPORT) || defined(FLASH_BANK_BOTH)
+#if defined(FLASH_DBANK_SUPPORT) || defined(FLASH_BANK_SIZE)
     uint32_t GetBank(const uint8_t* memoryBegin)
     {
         auto address = reinterpret_cast<uint32_t>(memoryBegin);
-
+#if defined(FLASH_OPTSR_SWAP_BANK)
         // Bank swap
-        if (FLASH_OPTSR_SWAP_BANK && READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK))
-            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
+        if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK))
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;  
+#endif
 
         return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
     }
