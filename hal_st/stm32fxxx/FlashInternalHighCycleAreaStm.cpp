@@ -51,7 +51,7 @@ namespace hal
     void FlashInternalHighCycleAreaWorker::ReadBuffer(infra::ByteRange buffer, uint32_t address)
     {
         really_assert(buffer.size() % sizeof(uint16_t) == 0);
-        really_assert(address + buffer.size() <= TotalSectors() * sectorSize);
+        really_assert(address + buffer.size() <= TotalSectors() * SectorSize());
 
         // address is byte-based, addressAdjusted is half-word-based
         auto addressAdjusted = address / 2;
@@ -63,7 +63,7 @@ namespace hal
     void FlashInternalHighCycleAreaWorker::WriteBuffer(infra::ConstByteRange buffer, uint32_t address)
     {
         really_assert(buffer.size() % sizeof(uint16_t) == 0);
-        really_assert(address + buffer.size() <= TotalSectors() * sectorSize);
+        really_assert(address + buffer.size() <= TotalSectors() * SectorSize());
 
         HAL_FLASH_Unlock();
 
@@ -115,6 +115,11 @@ namespace hal
     uint32_t FlashInternalHighCycleAreaWorker::TotalSectors() const
     {
         return amountOfSectorsInActiveBankInMemoryRange + amountOfSectorsInInactiveBankInMemoryRange;
+    }
+
+    uint32_t FlashInternalHighCycleAreaWorker::SectorSize()
+    {
+        return sectorSize;
     }
 
     FlashInternalHighCycleAreaWorker::BankConfig FlashInternalHighCycleAreaWorker::ReadBankConfig()

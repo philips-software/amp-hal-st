@@ -25,6 +25,7 @@ namespace hal
         void EraseSectors(uint32_t beginIndex, uint32_t endIndexExcluding);
 
         uint32_t TotalSectors() const;
+        static uint32_t SectorSize();
 
     private:
         struct BankConfig

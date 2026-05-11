@@ -2,18 +2,11 @@
 #include <cstdint>
 #include DEVICE_HEADER
 
-namespace
-{
-    constexpr uint32_t fullSize{ FLASH_EDATA_SIZE };
-    constexpr uint32_t fullbankSize{ fullSize / 2 };
-    constexpr uint32_t sectorSize{ fullbankSize / FLASH_EDATA_SECTOR_NB };
-}
-
 namespace hal
 {
     SynchronousFlashInternalHighCycleAreaStm::SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory)
         : FlashInternalHighCycleAreaWorker(flashMemory)
-        , SynchronousFlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), sectorSize }
+        , SynchronousFlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), FlashInternalHighCycleAreaWorker::SectorSize() }
     {}
 
     void SynchronousFlashInternalHighCycleAreaStm::WriteBuffer(infra::ConstByteRange buffer, uint32_t address)
