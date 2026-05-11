@@ -1,6 +1,7 @@
 #include DEVICE_HEADER
 #include "hal_st/cortex/FaultTracer.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
+#include "infra/util/LogAndAbort.hpp"
 #include <cstdlib>
 #include <errno.h>
 #include <sys/types.h>
@@ -68,13 +69,23 @@ extern "C"
     void _init()
     {}
 
-    void __assert_func(const char*, int, const char*, const char*)
+    void __assert_func(const char* file, int line, const char* func, const char* expr)
     {
+#if defined(EMIL_ENABLE_LOGGING_FILE_UPON_ABORT) || defined(EMIL_ENABLE_LOGGING_ONLY_FILENAMES_UPON_ABORT)
+        infra::ExecuteLogAndAbortHook("Assertion failed", file, line, "%s", expr);
+#else
+        infra::ExecuteLogAndAbortHook("Assertion failed", nullptr, 0, "%s", expr);
+#endif
         std::abort();
     }
 
     void assert_failed(uint8_t* file, uint32_t line)
     {
+#if defined(EMIL_ENABLE_LOGGING_FILE_UPON_ABORT) || defined(EMIL_ENABLE_LOGGING_ONLY_FILENAMES_UPON_ABORT)
+        infra::ExecuteLogAndAbortHook("Assertion failed", file, line, "<debug>");
+#else
+        infra::ExecuteLogAndAbortHook("Assertion failed", nullptr, 0, "<debug>");
+#endif
         std::abort();
     }
 }
