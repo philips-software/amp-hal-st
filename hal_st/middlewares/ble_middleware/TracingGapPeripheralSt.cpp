@@ -150,6 +150,8 @@ namespace hal
             }
             if (event.Next_State == 0x01 && advertisingCount != 1)
                 tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent unexpected: expected 1 advertising link, found " << advertisingCount;
+            if (event.Last_State == 0x01 && event.Next_State == 0x00 && advertisingCount != 0)
+                tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent unexpected: expected 0 advertising links when going idle, found " << advertisingCount;
         }
     }
 }
