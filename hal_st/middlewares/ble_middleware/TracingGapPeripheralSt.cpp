@@ -148,7 +148,7 @@ namespace hal
                 if (linkStatus[i] == 0x01)
                     ++advertisingCount;
             }
-            if (advertisingCount != 1)
+            if (event.Next_State == 0x01 && advertisingCount != 1)
                 tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent unexpected: expected 1 advertising link, found " << advertisingCount;
         }
     }
