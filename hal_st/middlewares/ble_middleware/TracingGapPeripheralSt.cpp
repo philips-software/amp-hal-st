@@ -135,14 +135,21 @@ namespace hal
     {
         tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent Last_State = " << RadioStateName(event.Last_State) << " -> Next_State = " << RadioStateName(event.Next_State);
 
-        if (event.Last_State == 0x01)
+        if (event.Last_State == 0x01 || event.Next_State == 0x01)
         {
             std::array<uint8_t, 8> linkStatus{};
             std::array<uint16_t, 8> linkConnectionHandle{};
             aci_hal_get_link_status(linkStatus.data(), linkConnectionHandle.data());
+            std::size_t advertisingCount = 0;
             for (std::size_t i = 0; i < linkStatus.size(); ++i)
+            {
                 if (linkStatus[i] != 0x00)
                     tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent link[" << i << "] = " << LinkStatusName(linkStatus[i]);
+                if (linkStatus[i] == 0x01)
+                    ++advertisingCount;
+            }
+            if (advertisingCount != 1)
+                tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent unexpected: expected 1 advertising link, found " << advertisingCount;
         }
     }
 }
