@@ -1,5 +1,7 @@
 #include "hal_st/middlewares/ble_middleware/TracingGapPeripheralSt.hpp"
+#include "ble_hal_aci.h"
 #include "infra/util/BoundedString.hpp"
+#include <array>
 #include <cstdint>
 
 namespace hal
@@ -77,5 +79,24 @@ namespace hal
     void TracingGapPeripheralSt::ReceivedNumberOfBondedAddresses(uint8_t numberOfBondedAddresses)
     {
         tracer.Trace() << "ST BLE Peripheral numberOfBondedAddresses: " << numberOfBondedAddresses;
+    }
+
+    void TracingGapPeripheralSt::HandleHciHardwareErrorEvent(const hci_hardware_error_event_rp0& event)
+    {
+        tracer.Trace() << "GapPeripheralSt::HandleHciHardwareErrorEvent Hardware_Code = " << event.Hardware_Code;
+    }
+
+    void TracingGapPeripheralSt::HandleAciHalEndOfRadioActivityEvent(const aci_hal_end_of_radio_activity_event_rp0& event)
+    {
+        tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent Last_State = " << event.Last_State << " Next_State = " << event.Next_State;
+
+        if (event.Last_State == 0x01)
+        {
+            std::array<uint8_t, 8> linkStatus{};
+            std::array<uint16_t, 8> linkConnectionHandle{};
+            aci_hal_get_link_status(linkStatus.data(), linkConnectionHandle.data());
+            for (std::size_t i = 0; i < linkStatus.size(); ++i)
+                tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent link[" << i << "] status = " << linkStatus[i];
+        }
     }
 }

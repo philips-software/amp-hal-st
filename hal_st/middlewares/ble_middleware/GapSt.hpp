@@ -79,6 +79,8 @@ namespace hal
         virtual void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) {};
         virtual void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) {};
         virtual void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event);
+        virtual void HandleHciHardwareErrorEvent(const hci_hardware_error_event_rp0& event) {};
+        virtual void HandleAciHalEndOfRadioActivityEvent(const aci_hal_end_of_radio_activity_event_rp0& event) {};
 
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
 
