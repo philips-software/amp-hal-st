@@ -53,6 +53,7 @@ namespace hal
 
         aci_hal_set_tx_power_level(1, configuration.txPowerLevel);
         aci_gatt_init();
+        aci_hal_set_radio_activity_mask(0x0003);
 
         aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());
 
@@ -301,6 +302,9 @@ namespace hal
             case HCI_DISCONNECTION_COMPLETE_EVT_CODE:
                 HandleHciDisconnectEvent(*reinterpret_cast<const hci_disconnection_complete_event_rp0*>(event.data));
                 break;
+            case HCI_HARDWARE_ERROR_EVT_CODE:
+                HandleHciHardwareErrorEvent(*reinterpret_cast<const hci_hardware_error_event_rp0*>(event.data));
+                break;
             case HCI_LE_META_EVT_CODE:
                 HandleHciLeMetaEvent(*reinterpret_cast<const evt_le_meta_event*>(event.data));
                 break;
@@ -366,6 +370,9 @@ namespace hal
                 break;
             case ACI_ATT_EXCHANGE_MTU_RESP_VSEVT_CODE:
                 HandleMtuExchangeResponseEvent(*reinterpret_cast<const aci_att_exchange_mtu_resp_event_rp0*>(event.data));
+                break;
+            case ACI_HAL_END_OF_RADIO_ACTIVITY_VSEVT_CODE:
+                HandleAciHalEndOfRadioActivityEvent(*reinterpret_cast<const aci_hal_end_of_radio_activity_event_rp0*>(event.data));
                 break;
             default:
                 break;
