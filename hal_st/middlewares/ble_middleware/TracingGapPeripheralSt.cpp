@@ -141,7 +141,8 @@ namespace hal
             std::array<uint16_t, 8> linkConnectionHandle{};
             aci_hal_get_link_status(linkStatus.data(), linkConnectionHandle.data());
             for (std::size_t i = 0; i < linkStatus.size(); ++i)
-                tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent link[" << i << "] = " << LinkStatusName(linkStatus[i]);
+                if (linkStatus[i] != 0x00)
+                    tracer.Trace() << "GapPeripheralSt::HandleAciHalEndOfRadioActivityEvent link[" << i << "] = " << LinkStatusName(linkStatus[i]);
         }
     }
 }
