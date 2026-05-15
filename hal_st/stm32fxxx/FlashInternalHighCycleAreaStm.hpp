@@ -1,7 +1,7 @@
 #ifndef HAL_FLASH_INTERNAL_HIGH_CYCLE_AREA_STM_HPP
 #define HAL_FLASH_INTERNAL_HIGH_CYCLE_AREA_STM_HPP
 
-#include "hal/interfaces/Flash.hpp"
+#include "hal/interfaces/FlashHomogeneous.hpp"
 #include "hal_st/stm32fxxx/HighCycleAreaOrOtpIrqHandler.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <cstdint>
@@ -9,29 +9,57 @@
 
 namespace hal
 {
-    class FlashInternalHighCycleAreaStm
-        : public Flash
+    // This class is used to implement both the synchronous and asynchronous version of the high cycle flash,
+    // as the underlying implementation is the same except for scheduling the onDone callback.
+    class FlashInternalHighCycleAreaWorker
     {
     public:
         using HalfWordRange = infra::MemoryRange<uint16_t>;
-        using ConstHalfWordRange = infra::MemoryRange<const uint16_t>;
 
         class WithIrqHandler;
 
-        explicit FlashInternalHighCycleAreaStm(uint32_t bank = FLASH_BANK_2);
+        explicit FlashInternalHighCycleAreaWorker(HalfWordRange flashMemory);
 
+        void WriteBuffer(infra::ConstByteRange buffer, uint32_t address);
+        void ReadBuffer(infra::ByteRange buffer, uint32_t address);
+        void EraseSectors(uint32_t beginIndex, uint32_t endIndexExcluding);
+
+        uint32_t TotalSectors() const;
+        static uint32_t SectorSize();
+
+    private:
+        struct BankConfig
+        {
+            uint32_t activeBank;
+            uint32_t inactiveBank;
+            uint32_t enabledSectorsActiveBank;
+            uint32_t enabledSectorsInactiveBank;
+        };
+
+        static BankConfig ReadBankConfig();
+
+    private:
+        HalfWordRange flashMemory;
+        const BankConfig bankConfig;
+        uint32_t amountOfSectorsInActiveBankInMemoryRange;
+        uint32_t amountOfSectorsInInactiveBankInMemoryRange;
+    };
+
+    class FlashInternalHighCycleAreaStm
+        : private FlashInternalHighCycleAreaWorker
+        , public FlashHomogeneous
+    {
+    public:
+        using HalfWordRange = FlashInternalHighCycleAreaWorker::HalfWordRange;
+
+        class WithIrqHandler;
+
+        explicit FlashInternalHighCycleAreaStm(HalfWordRange flashMemory);
+
+        // implementation of Flash interface
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void ReadBuffer(infra::ByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
         void EraseSectors(uint32_t beginIndex, uint32_t endIndex, infra::Function<void()> onDone) override;
-
-        uint32_t NumberOfSectors() const override;
-        uint32_t SizeOfSector(uint32_t sectorIndex) const override;
-        uint32_t SectorOfAddress(uint32_t address) const override;
-        uint32_t AddressOfSector(uint32_t sectorIndex) const override;
-
-    private:
-        ConstHalfWordRange flashMemory;
-        uint32_t bank;
     };
 
     class FlashInternalHighCycleAreaStm::WithIrqHandler
@@ -39,7 +67,7 @@ namespace hal
         , private HighCycleAreaOrOtpIrqHandler
     {
     public:
-        explicit WithIrqHandler(uint32_t bank = FLASH_BANK_2);
+        explicit WithIrqHandler(HalfWordRange flashMemory);
     };
 }
 
