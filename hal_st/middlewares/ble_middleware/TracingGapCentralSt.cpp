@@ -24,13 +24,13 @@ namespace hal
         GapCentralSt::Disconnect();
     }
 
-    void TracingGapCentralSt::SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void TracingGapCentralSt::SetAddress(services::GapAddress address)
     {
         tracer.Trace() << "TracingGapCentralSt::SetAddress, MAC address: "
-                       << infra::AsMacAddress(macAddress)
+                       << infra::AsMacAddress(address.address)
                        << ", type: "
-                       << addressType;
-        GapCentralSt::SetAddress(macAddress, addressType);
+                       << address.type;
+        GapCentralSt::SetAddress(address);
     }
 
     void TracingGapCentralSt::StartDeviceDiscovery()
