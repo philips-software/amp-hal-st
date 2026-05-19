@@ -6,9 +6,8 @@
 
 namespace hal
 {
-    EthernetMacStm::EthernetMacStm(EthernetSmi& ethernetSmi, LinkSpeed linkSpeed, std::array<uint8_t, 6> macAddress)
-        : ethernetSmi(ethernetSmi)
-        , macAddress(macAddress)
+    EthernetMacStm::EthernetMacStm(LinkSpeed linkSpeed, std::array<uint8_t, 6> macAddress)
+        : macAddress(macAddress)
         , interrupt(peripheralEthernetIrq[0], [this]()
               {
                   Interrupt();
