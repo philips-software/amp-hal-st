@@ -36,6 +36,7 @@ namespace hal
         uint16_t savedBcr_ = 0;
         infra::TimerSingleShot delayTimer;
         infra::Duration delay;
+        services::SmiPhy::LinkState lastLinkState_ = services::SmiPhy::LinkState::Down;
     };
 }
 

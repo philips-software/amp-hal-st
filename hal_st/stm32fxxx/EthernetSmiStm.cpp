@@ -64,6 +64,10 @@ namespace hal
         sequencer.Execute([this]()
             {
                 const auto linkState = phy_.ReadLinkState();
+                if (linkState == lastLinkState_)
+                    return;
+
+                lastLinkState_ = linkState;
                 if (linkState == services::SmiPhy::LinkState::Up)
                     GetObserver().LinkUp(phy_.LinkSpeed());
                 else if (linkState == services::SmiPhy::LinkState::Down)
