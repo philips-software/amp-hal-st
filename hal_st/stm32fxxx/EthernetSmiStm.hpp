@@ -17,7 +17,6 @@ namespace hal
         EthernetSmiStm(hal::GpioPinStm& ethernetMdio, hal::GpioPinStm& ethernetMdc, hal::GpioPinStm& ethernetRmiiRefClk, hal::GpioPinStm& ethernetRmiiCrsDv,
             hal::GpioPinStm& ethernetRmiiRxD0, hal::GpioPinStm& ethernetRmiiRxD1, hal::GpioPinStm& ethernetRmiiTxEn,
             hal::GpioPinStm& ethernetRmiiTxD0, hal::GpioPinStm& ethernetRmiiTxD1, uint8_t phyAddress = 0);
-        ~EthernetSmiStm();
 
     public:
         uint16_t PhyAddress() const override;

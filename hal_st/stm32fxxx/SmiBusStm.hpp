@@ -14,7 +14,7 @@ namespace hal
         SmiBusStm(GpioPinStm& ethernetMdio, GpioPinStm& ethernetMdc, GpioPinStm& ethernetRmiiRefClk,
             GpioPinStm& ethernetRmiiCrsDv, GpioPinStm& ethernetRmiiRxD0, GpioPinStm& ethernetRmiiRxD1,
             GpioPinStm& ethernetRmiiTxEn, GpioPinStm& ethernetRmiiTxD0, GpioPinStm& ethernetRmiiTxD1);
-        ~SmiBusStm() override;
+        ~SmiBusStm();
 
         uint16_t Read(uint8_t phyAddress, uint16_t reg) const override;
         void Write(uint8_t phyAddress, uint16_t reg, uint16_t value) override;

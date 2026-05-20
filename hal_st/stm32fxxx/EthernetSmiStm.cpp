@@ -17,8 +17,6 @@ namespace hal
         RunPhy();
     }
 
-    EthernetSmiStm::~EthernetSmiStm() = default;
-
     uint16_t EthernetSmiStm::PhyAddress() const
     {
         return phyAddress;
