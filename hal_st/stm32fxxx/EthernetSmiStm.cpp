@@ -12,7 +12,7 @@ namespace hal
         hal::GpioPinStm& ethernetRmiiTxEn, hal::GpioPinStm& ethernetRmiiTxD0, hal::GpioPinStm& ethernetRmiiTxD1, uint8_t phyAddress)
         : smiBus(ethernetMdio, ethernetMdc, ethernetRmiiRefClk, ethernetRmiiCrsDv, ethernetRmiiRxD0, ethernetRmiiRxD1, ethernetRmiiTxEn, ethernetRmiiTxD0, ethernetRmiiTxD1)
         , phyAddress(phyAddress)
-        , phy_(smiBus, phyAddress)
+        , phy(smiBus, phyAddress)
     {
         RunPhy();
     }
@@ -41,21 +41,21 @@ namespace hal
     {
         sequencer.Execute([this]()
             {
-                phy_.WriteBcr(infra::Bit<uint16_t>(services::SmiPhy::BasicControlRegister::ResetBit));
+                phy.WriteBcr(infra::Bit<uint16_t>(services::SmiPhy::BasicControlRegister::ResetBit));
             });
         sequencer.DoWhile();
         Delay(std::chrono::milliseconds(1));
         sequencer.Execute([this]()
             {
-                savedBcr_ = phy_.ReadBcr();
+                savedBcr = phy.ReadBcr();
             });
         sequencer.EndDoWhile([this]()
             {
-                return services::SmiPhy::BasicControlRegister::IsResetting(savedBcr_);
+                return services::SmiPhy::BasicControlRegister::IsResetting(savedBcr);
             });
         sequencer.Execute([this]()
             {
-                phy_.EnableAutoNegIfCapable();
+                phy.EnableAutoNegIfCapable();
             });
     }
 
@@ -63,13 +63,13 @@ namespace hal
     {
         sequencer.Execute([this]()
             {
-                const auto linkState = phy_.ReadLinkState();
-                if (linkState == lastLinkState_)
+                const auto linkState = phy.ReadLinkState();
+                if (linkState == lastLinkState)
                     return;
 
-                lastLinkState_ = linkState;
+                lastLinkState = linkState;
                 if (linkState == services::SmiPhy::LinkState::Up)
-                    GetObserver().LinkUp(phy_.LinkSpeed());
+                    GetObserver().LinkUp(phy.LinkSpeed());
                 else if (linkState == services::SmiPhy::LinkState::Down)
                 {
                     GetObserver().LinkDown();
