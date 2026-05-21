@@ -17,7 +17,7 @@ namespace main_
 
     void EthernetSmiObserver::LinkUp(hal::LinkSpeed linkSpeed)
     {
-        ethernetMac.emplace(Subject(), linkSpeed, lightweightIpOverEthernetFactory.MacAddress());
+        ethernetMac.emplace(linkSpeed, lightweightIpOverEthernetFactory.MacAddress());
 #if STM32F767xx
         ethernetStm32f767Workaround.emplace(*ethernetMac, ethernetRmiiRefClk, ethernetRmiiRefClkPeripheral);
         lightweightIpOverEthernetFactory.Create(*ethernetStm32f767Workaround);
