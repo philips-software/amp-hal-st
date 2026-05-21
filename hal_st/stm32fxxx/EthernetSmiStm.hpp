@@ -30,13 +30,13 @@ namespace hal
     private:
         SmiBusStm smiBus;
         uint8_t phyAddress;
-        services::SmiPhy phy_;
+        services::SmiPhy phy;
 
         infra::Sequencer sequencer;
-        uint16_t savedBcr_ = 0;
+        uint16_t savedBcr = 0;
         infra::TimerSingleShot delayTimer;
         infra::Duration delay;
-        services::SmiPhy::LinkState lastLinkState_ = services::SmiPhy::LinkState::Down;
+        services::SmiPhy::LinkState lastLinkState = services::SmiPhy::LinkState::Down;
     };
 }
 
