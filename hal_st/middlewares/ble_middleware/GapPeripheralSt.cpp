@@ -36,8 +36,16 @@ namespace hal
         services::GapAddress address;
         uint8_t length = 0;
 
-        aci_hal_read_config_data(CONFIG_DATA_PUBADDR_OFFSET, &length, address.address.data());
-        address.type = services::GapDeviceAddressType::publicAddress;
+        if (identityAddressType == GAP_PUBLIC_ADDR)
+        {
+            aci_hal_read_config_data(CONFIG_DATA_PUBADDR_OFFSET, &length, address.address.data());
+            address.type = services::GapDeviceAddressType::publicAddress;
+        }
+        else
+        {
+            aci_hal_read_config_data(CONFIG_DATA_RANDOM_ADDRESS_OFFSET, &length, address.address.data());
+            address.type = services::GapDeviceAddressType::randomAddress;
+        }
 
         return address;
     }
