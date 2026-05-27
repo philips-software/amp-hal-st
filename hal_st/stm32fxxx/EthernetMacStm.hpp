@@ -15,7 +15,7 @@ namespace hal
         : public EthernetMac
     {
     public:
-        EthernetMacStm(EthernetSmi& ethernetSmi, LinkSpeed linkSpeed, MacAddress macAddress);
+        EthernetMacStm(LinkSpeed linkSpeed, MacAddress macAddress);
         ~EthernetMacStm();
 
         void SendBuffer(infra::ConstByteRange data, bool last) override;
@@ -73,7 +73,6 @@ namespace hal
         };
 
     private:
-        EthernetSmi& ethernetSmi;
         MacAddress macAddress;
         DispatchedInterruptHandler interrupt;
 
