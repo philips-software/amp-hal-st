@@ -34,11 +34,21 @@ namespace hal
         really_assert(flashBeginAddress >= FLASH_EDATA_BASE_NS);
         really_assert(flashEndAddress <= FLASH_EDATA_BASE_NS + FLASH_EDATA_SIZE);
 
+        const uint32_t activeBankEdataStart = FLASH_EDATA_BASE_NS + fullbankSize - bankConfig.enabledSectorsActiveBank * sectorSize;
+        const uint32_t inactiveBankEdataStart = activeBankEndAddress + fullbankSize - bankConfig.enabledSectorsInactiveBank * sectorSize;
+
         amountOfSectorsInActiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(std::min(activeBankEndAddress, flashEndAddress) - std::min(activeBankEndAddress, flashBeginAddress)) / sectorSize));
         amountOfSectorsInInactiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(std::max(activeBankEndAddress, flashEndAddress) - std::max(activeBankEndAddress, flashBeginAddress)) / sectorSize));
 
-        really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange);
-        really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange);
+        firstSectorOffsetInActiveBank = (flashBeginAddress < activeBankEndAddress)
+                                            ? (std::max(flashBeginAddress, activeBankEdataStart) - activeBankEdataStart) / sectorSize
+                                            : 0;
+        firstSectorOffsetInInactiveBank = (flashBeginAddress >= activeBankEndAddress)
+                                              ? (std::max(flashBeginAddress, inactiveBankEdataStart) - inactiveBankEdataStart) / sectorSize
+                                              : 0;
+
+        really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange + firstSectorOffsetInActiveBank);
+        really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange + firstSectorOffsetInInactiveBank);
 
         if (amountOfSectorsInInactiveBankInMemoryRange > 0 && amountOfSectorsInInactiveBankInMemoryRange < 8)
         {
@@ -85,7 +95,7 @@ namespace hal
             FLASH_EraseInitTypeDef eraseInitStruct{};
             eraseInitStruct.Banks = bankConfig.activeBank;
             eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-            eraseInitStruct.Sector = beginIndex + FLASH_SECTOR_NB - amountOfSectorsInActiveBankInMemoryRange;
+            eraseInitStruct.Sector = FLASH_SECTOR_NB - bankConfig.enabledSectorsActiveBank + firstSectorOffsetInActiveBank + beginIndex;
             eraseInitStruct.NbSectors = activeSectorsEnd - beginIndex;
 
             uint32_t sectorError = 0;
@@ -100,7 +110,7 @@ namespace hal
             FLASH_EraseInitTypeDef eraseInitStruct{};
             eraseInitStruct.Banks = bankConfig.inactiveBank;
             eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-            eraseInitStruct.Sector = (inactiveSectorsBegin - amountOfSectorsInActiveBankInMemoryRange) + FLASH_SECTOR_NB - amountOfSectorsInInactiveBankInMemoryRange;
+            eraseInitStruct.Sector = FLASH_SECTOR_NB - bankConfig.enabledSectorsInactiveBank + firstSectorOffsetInInactiveBank + (inactiveSectorsBegin - amountOfSectorsInActiveBankInMemoryRange);
             eraseInitStruct.NbSectors = endIndex - inactiveSectorsBegin;
 
             uint32_t sectorError = 0;
