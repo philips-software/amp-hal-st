@@ -34,8 +34,8 @@ namespace hal
         really_assert(flashBeginAddress >= FLASH_EDATA_BASE_NS);
         really_assert(flashEndAddress <= FLASH_EDATA_BASE_NS + FLASH_EDATA_SIZE);
 
-        amountOfSectorsInActiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(std::min(activeBankEndAddress, flashEndAddress) - flashBeginAddress) / sectorSize));
-        amountOfSectorsInInactiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(flashEndAddress - std::max(activeBankEndAddress, flashBeginAddress)) / sectorSize));
+        amountOfSectorsInActiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(std::min(activeBankEndAddress, flashEndAddress) - std::min(activeBankEndAddress, flashBeginAddress)) / sectorSize));
+        amountOfSectorsInInactiveBankInMemoryRange = static_cast<uint32_t>(std::ceil(static_cast<float>(std::max(activeBankEndAddress, flashEndAddress) - std::max(activeBankEndAddress, flashBeginAddress)) / sectorSize));
 
         really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange);
         really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange);
