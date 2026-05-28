@@ -129,6 +129,9 @@ namespace hal
 
     void GapCentralSt::SetPrivacyMode(bool enabled)
     {
+        if (discovering || initiatingStateTimer.Armed() || connectionContext.connectionHandle != invalidConnection)
+            return;
+
         ReinitializeGapWithPrivacy(GAP_CENTRAL_ROLE, enabled, gapService);
         SetIoCapabilities(security.ioCapabilities);
         SetSecurityMode(security.securityMode, security.securityLevel);
