@@ -294,6 +294,20 @@ namespace hal
         aci_hal_write_config_data(offset, length, address.data());
     }
 
+    void GapSt::ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService)
+    {
+        uint16_t gapServiceHandle = 0;
+        uint16_t gapDevNameCharHandle = 0;
+        uint16_t gapAppearanceCharHandle = 0;
+
+        hci_reset();
+        aci_gap_init(role, privacyEnabled ? PRIVACY_ENABLED : PRIVACY_DISABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
+        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
+
+        ownAddressType = privacyEnabled ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR;
+    }
+
     void GapSt::HciEvent(hci_event_pckt& event)
     {
         switch (event.evt)

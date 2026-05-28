@@ -56,6 +56,12 @@ namespace hal
         return resolvedMac;
     }
 
+    void TracingGapCentralSt::SetPrivacyMode(bool enabled)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetPrivacyMode enabled=" << enabled;
+        GapCentralSt::SetPrivacyMode(enabled);
+    }
+
     void TracingGapCentralSt::RemoveAllBonds()
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";

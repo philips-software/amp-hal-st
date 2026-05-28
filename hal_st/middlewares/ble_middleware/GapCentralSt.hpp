@@ -23,6 +23,7 @@ namespace hal
         void StartDeviceDiscovery() override;
         void StopDeviceDiscovery() override;
         std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
+        void SetPrivacyMode(bool enabled) override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
@@ -70,6 +71,9 @@ namespace hal
         bool discovering = false;
         services::GapConnectionParameters connectionParameters;
         infra::TimerSingleShot initiatingStateTimer;
+
+        GapService gapService;
+        Security security;
     };
 }
 
