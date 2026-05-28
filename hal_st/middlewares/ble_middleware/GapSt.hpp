@@ -109,6 +109,8 @@ namespace hal
         void HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event);
         void HandleOobDataGeneration();
 
+        void InitializeBleStack();
+
         void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
 
@@ -139,6 +141,9 @@ namespace hal
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
+        RootKeys rootKeys;
+        MacAddress publicAddress;
+        uint8_t txPowerLevel;
     };
 }
 
