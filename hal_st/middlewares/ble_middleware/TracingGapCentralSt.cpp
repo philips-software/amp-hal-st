@@ -24,13 +24,13 @@ namespace hal
         GapCentralSt::Disconnect();
     }
 
-    void TracingGapCentralSt::SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void TracingGapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
     {
-        tracer.Trace() << "TracingGapCentralSt::SetAddress, MAC address: "
+        tracer.Trace() << "TracingGapCentralSt::SetIdentityAddress, MAC address: "
                        << infra::AsMacAddress(macAddress)
                        << ", type: "
                        << addressType;
-        GapCentralSt::SetAddress(macAddress, addressType);
+        GapCentralSt::SetIdentityAddress(macAddress, addressType);
     }
 
     void TracingGapCentralSt::StartDeviceDiscovery()
@@ -54,6 +54,12 @@ namespace hal
         else
             tracer.Continue() << ", could not resolve MAC address";
         return resolvedMac;
+    }
+
+    void TracingGapCentralSt::SetPrivacyMode(bool enabled)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetPrivacyMode enabled=" << enabled;
+        GapCentralSt::SetPrivacyMode(enabled);
     }
 
     void TracingGapCentralSt::RemoveAllBonds()

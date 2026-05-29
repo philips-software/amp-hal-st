@@ -98,7 +98,8 @@ namespace hal
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
         [[nodiscard]] virtual uint8_t SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const;
 
-        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
+        void SetIdentityAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
+        void ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService);
 
     private:
         // Implementation of HciEventSink
@@ -106,6 +107,8 @@ namespace hal
 
         void HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent);
         void HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event);
+
+        void InitializeBleStack();
 
         void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
@@ -137,6 +140,9 @@ namespace hal
 
     private:
         services::BondStorageSynchronizer& bondStorageSynchronizer;
+        RootKeys rootKeys;
+        MacAddress publicAddress;
+        uint8_t txPowerLevel;
     };
 }
 

@@ -39,22 +39,30 @@ namespace hal
         , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
         , securityLevel(configuration.security.securityLevel)
         , bondStorageSynchronizer(bondStorageSynchronizer)
+        , rootKeys(configuration.rootKeys)
+        , publicAddress(configuration.address)
+        , txPowerLevel(configuration.txPowerLevel)
     {
         connectionContext.connectionHandle = GapSt::invalidConnection;
 
+        InitializeBleStack();
+    }
+
+    void GapSt::InitializeBleStack()
+    {
         // HCI Reset to synchronize BLE Stack
         hci_reset();
 
         // Write Identity root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, configuration.rootKeys.identity.data());
+        aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, rootKeys.identity.data());
 
         // Write Encryption root key used to derive LTK and CSRK
-        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, configuration.rootKeys.encryption.data());
+        aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, rootKeys.encryption.data());
 
-        aci_hal_set_tx_power_level(1, configuration.txPowerLevel);
+        aci_hal_set_tx_power_level(1, txPowerLevel);
         aci_gatt_init();
 
-        aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, configuration.address.data());
+        aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, publicAddress.data());
 
         const std::array<uint8_t, 8> events = { { 0x9F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
         hci_le_set_event_mask(events.data());
@@ -281,12 +289,26 @@ namespace hal
         really_assert(event.Status == BLE_STATUS_SUCCESS);
     }
 
-    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
+    void GapSt::SetIdentityAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
     {
         uint8_t offset = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
         uint8_t length = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_LEN : CONFIG_DATA_RANDOM_ADDRESS_LEN;
 
         aci_hal_write_config_data(offset, length, address.data());
+    }
+
+    void GapSt::ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService)
+    {
+        uint16_t gapServiceHandle = 0;
+        uint16_t gapDevNameCharHandle = 0;
+        uint16_t gapAppearanceCharHandle = 0;
+
+        InitializeBleStack();
+        aci_gap_init(role, privacyEnabled ? PRIVACY_ENABLED : PRIVACY_DISABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
+        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
+        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
+
+        ownAddressType = privacyEnabled ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR;
     }
 
     void GapSt::HciEvent(hci_event_pckt& event)

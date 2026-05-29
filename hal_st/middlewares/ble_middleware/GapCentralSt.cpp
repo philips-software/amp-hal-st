@@ -47,6 +47,8 @@ namespace hal
 
     GapCentralSt::GapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : GapSt(hciEventSource, bondStorageSynchronizer, configuration)
+        , gapService(configuration.gapService)
+        , security(configuration.security)
     {
         Initialize(configuration);
 
@@ -94,9 +96,9 @@ namespace hal
         aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
     }
 
-    void GapCentralSt::SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void GapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
     {
-        GapSt::SetAddress(macAddress, addressType);
+        GapSt::SetIdentityAddress(macAddress, addressType);
     }
 
     void GapCentralSt::StartDeviceDiscovery()
@@ -123,6 +125,16 @@ namespace hal
         if (aci_gap_resolve_private_addr(address.data(), identityAddress.data()) != BLE_STATUS_SUCCESS)
             return std::nullopt;
         return std::make_optional(identityAddress);
+    }
+
+    void GapCentralSt::SetPrivacyMode(bool enabled)
+    {
+        really_assert(!discovering && !initiatingStateTimer.Armed() && connectionContext.connectionHandle == invalidConnection);
+
+        ReinitializeGapWithPrivacy(GAP_CENTRAL_ROLE, enabled, gapService);
+        SetIoCapabilities(security.ioCapabilities);
+        SetSecurityMode(security.securityMode, security.securityLevel);
+        hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
     void GapCentralSt::AllowPairing(bool)
