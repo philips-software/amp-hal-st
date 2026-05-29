@@ -129,8 +129,7 @@ namespace hal
 
     void GapCentralSt::SetPrivacyMode(bool enabled)
     {
-        if (discovering || initiatingStateTimer.Armed() || connectionContext.connectionHandle != invalidConnection)
-            return;
+        really_assert(!discovering && !initiatingStateTimer.Armed() && connectionContext.connectionHandle == invalidConnection);
 
         ReinitializeGapWithPrivacy(GAP_CENTRAL_ROLE, enabled, gapService);
         SetIoCapabilities(security.ioCapabilities);
