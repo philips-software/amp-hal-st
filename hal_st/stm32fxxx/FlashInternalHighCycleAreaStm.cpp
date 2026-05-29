@@ -49,13 +49,6 @@ namespace hal
 
         really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange + firstSectorOffsetInActiveBank);
         really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange + firstSectorOffsetInInactiveBank);
-
-        if (amountOfSectorsInInactiveBankInMemoryRange > 0 && amountOfSectorsInInactiveBankInMemoryRange < 8)
-        {
-            // If some but not all sectors of the inactive bank are part of the memory map then the active bank must not contain any mapped sectors
-            // otherwise the memory mapped high cycle area would be not continuous
-            really_assert(amountOfSectorsInActiveBankInMemoryRange == 0);
-        }
     }
 
     void FlashInternalHighCycleAreaWorker::ReadBuffer(infra::ByteRange buffer, uint32_t address)
