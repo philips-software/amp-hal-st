@@ -43,6 +43,8 @@ namespace hal
         const BankConfig bankConfig;
         uint32_t amountOfSectorsInActiveBankInMemoryRange;
         uint32_t amountOfSectorsInInactiveBankInMemoryRange;
+        uint32_t firstSectorOffsetInActiveBank{};
+        uint32_t firstSectorOffsetInInactiveBank{};
     };
 
     class FlashInternalHighCycleAreaStm
