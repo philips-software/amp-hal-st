@@ -7,10 +7,10 @@ namespace main_
 {
     struct NucleoF767ziTracerInfrastructure
     {
-        NucleoF767ziTracerInfrastructure(bool loggingEnabled = true)
+        NucleoF767ziTracerInfrastructure(bool loggingEnabled = true, uint32_t baudrate = 115200)
             : traceUartTx(hal::Port::D, 8)
             , traceUartRx(hal::Port::D, 9)
-            , tracerInfrastructure({ 3, traceUartTx, traceUartRx }, loggingEnabled)
+            , tracerInfrastructure({ 3, traceUartTx, traceUartRx, baudrate }, loggingEnabled)
             , tracer(tracerInfrastructure.tracer)
             , alwaysEnabledTracer(tracerInfrastructure.alwaysEnabledTracer)
         {}
@@ -25,10 +25,10 @@ namespace main_
 
     struct NucleoWb55rgTracerInfrastructure
     {
-        NucleoWb55rgTracerInfrastructure(bool loggingEnabled = true)
+        NucleoWb55rgTracerInfrastructure(bool loggingEnabled = true, uint32_t baudrate = 115200)
             : traceUartTx(hal::Port::B, 6)
             , traceUartRx(hal::Port::B, 7)
-            , tracerInfrastructure({ 1, traceUartTx, traceUartRx }, loggingEnabled)
+            , tracerInfrastructure({ 1, traceUartTx, traceUartRx, baudrate }, loggingEnabled)
             , tracer(tracerInfrastructure.tracer)
             , alwaysEnabledTracer(tracerInfrastructure.alwaysEnabledTracer)
         {}
