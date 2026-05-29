@@ -106,7 +106,6 @@ namespace hal
 
         void HandleHciLeMetaEvent(const evt_le_meta_event& metaEvent);
         void HandleHciVendorSpecificDebugEvent(const evt_blecore_aci& event);
-        void HandleOobDataGeneration();
 
         void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
