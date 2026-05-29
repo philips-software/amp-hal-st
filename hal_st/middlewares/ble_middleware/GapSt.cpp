@@ -294,7 +294,7 @@ namespace hal
             });
     }
 
-    void GapSt::SetAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
+    void GapSt::SetIdentityAddress(const hal::MacAddress& address, services::GapDeviceAddressType addressType) const
     {
         uint8_t offset = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_OFFSET : CONFIG_DATA_RANDOM_ADDRESS_OFFSET;
         uint8_t length = addressType == services::GapDeviceAddressType::publicAddress ? CONFIG_DATA_PUBADDR_LEN : CONFIG_DATA_RANDOM_ADDRESS_LEN;

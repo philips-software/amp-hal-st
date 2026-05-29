@@ -98,7 +98,7 @@ namespace hal
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
         [[nodiscard]] virtual uint8_t SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const;
 
-        void SetAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
+        void SetIdentityAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
         void ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService);
 
     private:

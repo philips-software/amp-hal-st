@@ -15,7 +15,7 @@ namespace hal
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
         void Disconnect() override;
-        void SetAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;
         void StopDeviceDiscovery() override;
         std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
