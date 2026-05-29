@@ -70,6 +70,8 @@ jobs:
     container: ghcr.io/philips-software/amp-devcontainer-cpp:v6.10.3@sha256:e1f388179dbeabaddcdd37b8b563ed89ca3cd36dcf158aa2e5c4f70eb513efec # v6.10.3
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-winsdk
         with:
@@ -169,7 +171,9 @@ jobs:
           name: hal_st_tested_stm32f767
       - run: ls
       - name: Start flex container
-        run: docker run -d --name flex_container -v "$(pwd)":/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:v0.2.0 ${{ vars.ENV_POSTMASTER_IP }} /external/integration_test.tester.bin
+        env:
+          ENV_POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
+        run: docker run -d --name flex_container -v "$(pwd)":/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:v0.2.0 "$ENV_POSTMASTER_IP" /external/integration_test.tester.bin
       - run: docker logs flex_container
       - run: while [[ "$(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])')" != "healthy" ]] ; do docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])'; sleep 1; done
         timeout-minutes: 2
