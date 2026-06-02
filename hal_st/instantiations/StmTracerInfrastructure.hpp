@@ -25,11 +25,12 @@ namespace main_
     {
         struct Configuration
         {
-            Configuration(uint8_t index, hal::GpioPinStm& tx, hal::GpioPinStm& rx);
+            Configuration(uint8_t index, hal::GpioPinStm& tx, hal::GpioPinStm& rx, uint32_t baudrate = 115200);
 
             uint8_t index;
             hal::GpioPinStm& tx;
             hal::GpioPinStm& rx;
+            uint32_t baudrate;
         };
 
         StmTracerInfrastructure(const Configuration& configuration, bool loggingEnabled = true);
