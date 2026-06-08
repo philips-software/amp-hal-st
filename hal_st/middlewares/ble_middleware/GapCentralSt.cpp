@@ -28,9 +28,9 @@ namespace hal
 
     namespace
     {
-        services::GapAdvertisingEventType ToAdvertisingEventType(uint8_t eventType)
+        services::AdvertisingReportType ToAdvertisingEventType(uint8_t reportType)
         {
-            return static_cast<services::GapAdvertisingEventType>(eventType);
+            return static_cast<services::AdvertisingReportType>(reportType);
         }
 
         services::GapDeviceAddressType ToAdvertisingAddressType(uint8_t addressType)
@@ -285,9 +285,9 @@ namespace hal
         services::GapAdvertisingReport discoveredDevice;
 
         auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
-        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
-        discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
-        discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
+        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.gapAddress.address.size(), std::begin(discoveredDevice.gapAddress.address));
+        discoveredDevice.reportType = ToAdvertisingEventType(advertisingReport.Event_Type);
+        discoveredDevice.gapAddress.type = ToAdvertisingAddressType(advertisingReport.Address_Type);
         discoveredDevice.data.assign(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
