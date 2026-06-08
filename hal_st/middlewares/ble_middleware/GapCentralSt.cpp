@@ -82,19 +82,13 @@ namespace hal
             });
     }
 
-    void GapCentralSt::CancelConnect()
-    {
-        if (initiatingStateTimer.Armed())
-        {
-            initiatingStateTimer.Cancel();
-            aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
-        }
-    }
-
     void GapCentralSt::Standby()
     {
-        if (std::exchange(discovering, false))
+        if (std::exchange(discovering, false) || initiatingStateTimer.Armed())
+        {
+            initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
+        }
         else
             aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
     }
