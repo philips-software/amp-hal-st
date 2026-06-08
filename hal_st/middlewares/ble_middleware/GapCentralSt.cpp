@@ -113,11 +113,12 @@ namespace hal
         }
     }
 
-    void GapCentralSt::StopDeviceDiscovery()
-    {
-        if (std::exchange(discovering, false))
-            aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
-    }
+    // TODO(HW): Handle in standby
+    // void GapCentralSt::StopDeviceDiscovery()
+    // {
+    //     if (std::exchange(discovering, false))
+    //         aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
+    // }
 
     std::optional<hal::MacAddress> GapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
     {

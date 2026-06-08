@@ -39,12 +39,6 @@ namespace hal
         GapCentralSt::StartDeviceDiscovery();
     }
 
-    void TracingGapCentralSt::StopDeviceDiscovery()
-    {
-        tracer.Trace() << "TracingGapCentralSt::StopDeviceDiscovery";
-        GapCentralSt::StopDeviceDiscovery();
-    }
-
     std::optional<hal::MacAddress> TracingGapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
     {
         auto resolvedMac = GapCentralSt::ResolvePrivateAddress(address);
