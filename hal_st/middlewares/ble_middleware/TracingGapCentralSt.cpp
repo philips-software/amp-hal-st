@@ -18,10 +18,10 @@ namespace hal
         GapCentralSt::Connect(macAddress, addressType, initiatingTimeout);
     }
 
-    void TracingGapCentralSt::Disconnect()
+    void TracingGapCentralSt::Standby()
     {
-        tracer.Trace() << "TracingGapCentralSt::Disconnect";
-        GapCentralSt::Disconnect();
+        tracer.Trace() << "TracingGapCentralSt::Standby";
+        GapCentralSt::Standby();
     }
 
     void TracingGapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
