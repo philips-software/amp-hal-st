@@ -242,7 +242,7 @@ namespace hal
 
         GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
             {
-                observer.DisplayPasskey(static_cast<int32_t>(passkey), true);
+                observer.AuthenticationRequired(static_cast<int32_t>(passkey), true);
             });
     }
 
