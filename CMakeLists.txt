@@ -47,7 +47,7 @@ project(hal_st LANGUAGES C CXX ASM VERSION 4.0.0) # x-release-please-version
 # Emil's fix uses $<CXX_COMPILER_ID:Clang> which does not evaluate to true for C-language
 # targets in cmake 4.x. CMAKE_C_COMPILER_FRONTEND_VARIANT is the reliable cmake variable
 # for detecting clang-cl (Clang with MSVC-like command-line frontend).
-if (HALST_STANDALONE AND (CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC" OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC"))
+if (HALST_STANDALONE AND CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     foreach(mbedtls_target IN ITEMS mbedcrypto mbedx509 mbedtls)
         if (TARGET ${mbedtls_target})
             target_compile_options(${mbedtls_target} PRIVATE
