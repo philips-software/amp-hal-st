@@ -26,8 +26,6 @@ namespace hal
                         return services::GapPairingObserver::PairingFailedReason::insufficientEncryptionKeySize;
                     case CONFIRM_VALUE_FAILED:
                         return services::GapPairingObserver::PairingFailedReason::passkeyEntryFailed;
-                    case PAIRING_NOT_SUPPORTED:
-                        return services::GapPairingObserver::PairingFailedReason::pairingNotSupported;
                     case SMP_SC_NUMCOMPARISON_FAILED:
                         return services::GapPairingObserver::PairingFailedReason::numericComparisonFailed;
                     default:
