@@ -273,8 +273,8 @@ namespace hal
         }
 
         auto pairedSuccessfully = event.Status == SMP_PAIRING_STATUS_SUCCESS;
-        auto pairingFailedReason = pairedSuccessfully ? GapPairingObserver::PairingFailedReason::unknown : ParserPairingFailure(event.Status, event.Reason);
-        GapPairing::NotifyObservers([](auto& observer)
+        auto pairingFailedReason = pairedSuccessfully ? services::GapPairingObserver::PairingFailedReason::unknown : ParserPairingFailure(event.Status, event.Reason);
+        GapPairing::NotifyObservers([pairedSuccessfully, pairingFailedReason](auto& observer)
             {
                 observer.PairingResult(pairedSuccessfully, pairingFailedReason);
             });
