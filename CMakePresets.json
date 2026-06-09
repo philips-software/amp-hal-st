@@ -217,7 +217,11 @@
         "CCACHE_DEPEND": "true",
         "CCACHE_COMPILERTYPE": "clang-cl"
       },
-      "generator": "Ninja Multi-Config"
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "-Wno-uninitialized-const-pointer -Wno-unterminated-string-initialization",
+        "CMAKE_CXX_FLAGS": "-Wno-uninitialized-const-pointer -Wno-unterminated-string-initialization"
+      }
     }
   ],
   "buildPresets": [
@@ -230,7 +234,10 @@
       "name": "host-Debug-WithPackage",
       "configuration": "Debug",
       "configurePreset": "host",
-      "targets": ["all", "package"]
+      "targets": [
+        "all",
+        "package"
+      ]
     },
     {
       "name": "host-RelWithDebInfo",
@@ -246,7 +253,9 @@
       "name": "release-package",
       "configuration": "MinSizeRel",
       "configurePreset": "host-single-MinSizeRel",
-      "targets": ["package"]
+      "targets": [
+        "package"
+      ]
     },
     {
       "name": "stm32wb55-RelWithDebInfo",

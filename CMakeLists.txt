@@ -30,21 +30,6 @@ if (HALST_STANDALONE)
     )
     FetchContent_MakeAvailable(emil)
 
-    # Suppress clang-22+ warnings in mbedtls when using clang-cl on Windows.
-    # The fix in amp-embedded-infra-lib uses $<CXX_COMPILER_ID:Clang> which evaluates to false
-    # for clang-cl cross-compilation (where CMAKE_CXX_SIMULATE_ID is MSVC).
-    # Use a configure-time check instead, following the existing approach for external libraries.
-    if (CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
-        foreach(mbedtls_target IN ITEMS mbedcrypto mbedx509 mbedtls)
-            if (TARGET ${mbedtls_target})
-                target_compile_options(${mbedtls_target} PRIVATE
-                    -Wno-uninitialized-const-pointer
-                    -Wno-unterminated-string-initialization
-                )
-            endif()
-        endforeach()
-    endif()
-
     if (EMIL_HOST_BUILD)
         FetchContent_Declare(
             cucumber-cpp-runner
@@ -57,6 +42,21 @@ if (HALST_STANDALONE)
 endif()
 
 project(hal_st LANGUAGES C CXX ASM VERSION 4.0.0) # x-release-please-version
+
+# Suppress clang-22+ warnings in mbedtls when cross-compiling for Windows with clang-cl.
+# Emil's fix uses $<CXX_COMPILER_ID:Clang> which does not evaluate to true for C-language
+# targets in cmake 4.x. CMAKE_C_COMPILER_FRONTEND_VARIANT is the reliable cmake variable
+# for detecting clang-cl (Clang with MSVC-like command-line frontend).
+if (HALST_STANDALONE AND (CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC" OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC"))
+    foreach(mbedtls_target IN ITEMS mbedcrypto mbedx509 mbedtls)
+        if (TARGET ${mbedtls_target})
+            target_compile_options(${mbedtls_target} PRIVATE
+                -Wno-uninitialized-const-pointer
+                -Wno-unterminated-string-initialization
+            )
+        endif()
+    endforeach()
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED On)
