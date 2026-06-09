@@ -30,6 +30,21 @@ if (HALST_STANDALONE)
     )
     FetchContent_MakeAvailable(emil)
 
+    # Suppress clang-22+ warnings in mbedtls when using clang-cl on Windows.
+    # The fix in amp-embedded-infra-lib uses $<CXX_COMPILER_ID:Clang> which evaluates to false
+    # for clang-cl cross-compilation (where CMAKE_CXX_SIMULATE_ID is MSVC).
+    # Use a configure-time check instead, following the existing approach for external libraries.
+    if (CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
+        foreach(mbedtls_target IN ITEMS mbedcrypto mbedx509 mbedtls)
+            if (TARGET ${mbedtls_target})
+                target_compile_options(${mbedtls_target} PRIVATE
+                    -Wno-uninitialized-const-pointer
+                    -Wno-unterminated-string-initialization
+                )
+            endif()
+        endforeach()
+    endif()
+
     if (EMIL_HOST_BUILD)
         FetchContent_Declare(
             cucumber-cpp-runner
