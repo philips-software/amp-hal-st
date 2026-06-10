@@ -62,6 +62,15 @@ namespace hal
         GapCentralSt::RemoveAllBonds();
     }
 
+    void TracingGapCentralSt::RemoveBondWithAddress(services::GapAddress gapAddress)
+    {
+        tracer.Trace() << "TracingGapCentralSt::RemoveBondWithAddress, MAC address: "
+                       << infra::AsMacAddress(gapAddress.address)
+                       << ", type: "
+                       << gapAddress.type;
+        GapCentralSt::RemoveBondWithAddress(gapAddress);
+    }
+
     void TracingGapCentralSt::RemoveOldestBond()
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveOldestBond";

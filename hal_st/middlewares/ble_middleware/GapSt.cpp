@@ -82,9 +82,14 @@ namespace hal
         UpdateNrBonds();
     }
 
+    void GapSt::RemoveBondWithAddress(services::GapAddress gapAddress)
+    {
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
+    }
+
     void GapSt::RemoveOldestBond()
     {
-        std::abort();
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     std::size_t GapSt::GetMaxNumberOfBonds() const
