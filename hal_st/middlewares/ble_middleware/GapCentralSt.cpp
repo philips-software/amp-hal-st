@@ -28,7 +28,7 @@ namespace hal
 
     namespace
     {
-        services::AdvertisingReportType ToAdvertisingEventType(uint8_t reportType)
+        services::AdvertisingReportType ToAdvertisingReportType(uint8_t reportType)
         {
             return static_cast<services::AdvertisingReportType>(reportType);
         }
@@ -84,12 +84,17 @@ namespace hal
 
     void GapCentralSt::Standby()
     {
-        if (std::exchange(discovering, false) || initiatingStateTimer.Armed())
+        if (std::exchange(discovering, false))
         {
             initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
         }
-        else
+        else if (initiatingStateTimer.Armed())
+        {
+            initiatingStateTimer.Cancel();
+            aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
+        }
+        else if (connectionContext.connectionHandle != GapSt::invalidConnection)
             aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
     }
 
@@ -277,7 +282,7 @@ namespace hal
 
         auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
         std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.gapAddress.address.size(), std::begin(discoveredDevice.gapAddress.address));
-        discoveredDevice.reportType = ToAdvertisingEventType(advertisingReport.Event_Type);
+        discoveredDevice.reportType = ToAdvertisingReportType(advertisingReport.Event_Type);
         discoveredDevice.gapAddress.type = ToAdvertisingAddressType(advertisingReport.Address_Type);
         discoveredDevice.data.assign(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
