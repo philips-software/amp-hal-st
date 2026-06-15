@@ -112,7 +112,7 @@ namespace hal
         return aci_gap_is_device_bonded(static_cast<uint8_t>(addressType), address.data()) == BLE_STATUS_SUCCESS;
     }
 
-    std::pair<infra::MemoryRange<const services::Bond>, uint32_t> GapSt::GetBondList() const
+    infra::MemoryRange<const services::Bond> GapSt::GetBondList() const
     {
         LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
