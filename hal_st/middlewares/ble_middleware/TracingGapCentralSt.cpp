@@ -18,10 +18,10 @@ namespace hal
         GapCentralSt::Connect(macAddress, addressType, initiatingTimeout);
     }
 
-    void TracingGapCentralSt::Disconnect()
+    void TracingGapCentralSt::Standby()
     {
-        tracer.Trace() << "TracingGapCentralSt::Disconnect";
-        GapCentralSt::Disconnect();
+        tracer.Trace() << "TracingGapCentralSt::Standby";
+        GapCentralSt::Standby();
     }
 
     void TracingGapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
@@ -37,12 +37,6 @@ namespace hal
     {
         tracer.Trace() << "TracingGapCentralSt::StartDeviceDiscovery";
         GapCentralSt::StartDeviceDiscovery();
-    }
-
-    void TracingGapCentralSt::StopDeviceDiscovery()
-    {
-        tracer.Trace() << "TracingGapCentralSt::StopDeviceDiscovery";
-        GapCentralSt::StopDeviceDiscovery();
     }
 
     std::optional<hal::MacAddress> TracingGapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
@@ -66,6 +60,15 @@ namespace hal
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
         GapCentralSt::RemoveAllBonds();
+    }
+
+    void TracingGapCentralSt::RemoveBondWithAddress(services::GapAddress gapAddress)
+    {
+        tracer.Trace() << "TracingGapCentralSt::RemoveBondWithAddress, MAC address: "
+                       << infra::AsMacAddress(gapAddress.address)
+                       << ", type: "
+                       << gapAddress.type;
+        GapCentralSt::RemoveBondWithAddress(gapAddress);
     }
 
     void TracingGapCentralSt::RemoveOldestBond()

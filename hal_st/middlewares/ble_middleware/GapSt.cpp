@@ -9,27 +9,27 @@ namespace hal
 {
     namespace
     {
-        constexpr services::GapPairingObserver::PairingErrorType ParserPairingFailure(uint8_t status, uint8_t error)
+        constexpr services::GapPairingObserver::PairingFailedReason ParserPairingFailure(uint8_t status, uint8_t error)
         {
             if (status == SMP_PAIRING_STATUS_SMP_TIMEOUT)
-                return services::GapPairingObserver::PairingErrorType::timeout;
+                return services::GapPairingObserver::PairingFailedReason::timeout;
             else if (status == SMP_PAIRING_STATUS_ENCRYPT_FAILED)
-                return services::GapPairingObserver::PairingErrorType::encryptionFailed;
+                return services::GapPairingObserver::PairingFailedReason::encryptionFailed;
             else
                 switch (error)
                 {
                     case PAIRING_NOT_SUPPORTED:
-                        return services::GapPairingObserver::PairingErrorType::pairingNotSupported;
+                        return services::GapPairingObserver::PairingFailedReason::pairingNotSupported;
                     case AUTH_REQ_CANNOT_BE_MET:
-                        return services::GapPairingObserver::PairingErrorType::authenticationRequirementsNotMet;
+                        return services::GapPairingObserver::PairingFailedReason::authenticationRequirementsNotMet;
                     case INSUFF_ENCRYPTION_KEY_SIZE:
-                        return services::GapPairingObserver::PairingErrorType::insufficientEncryptionKeySize;
+                        return services::GapPairingObserver::PairingFailedReason::insufficientEncryptionKeySize;
                     case CONFIRM_VALUE_FAILED:
-                        return services::GapPairingObserver::PairingErrorType::passkeyEntryFailed;
+                        return services::GapPairingObserver::PairingFailedReason::passkeyEntryFailed;
                     case SMP_SC_NUMCOMPARISON_FAILED:
-                        return services::GapPairingObserver::PairingErrorType::numericComparisonFailed;
+                        return services::GapPairingObserver::PairingFailedReason::numericComparisonFailed;
                     default:
-                        return services::GapPairingObserver::PairingErrorType::unknown;
+                        return services::GapPairingObserver::PairingFailedReason::unknown;
                 }
         }
     }
@@ -82,9 +82,14 @@ namespace hal
         UpdateNrBonds();
     }
 
+    void GapSt::RemoveBondWithAddress(services::GapAddress gapAddress)
+    {
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
+    }
+
     void GapSt::RemoveOldestBond()
     {
-        std::abort();
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     std::size_t GapSt::GetMaxNumberOfBonds() const
@@ -105,6 +110,11 @@ namespace hal
     bool GapSt::IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const
     {
         return aci_gap_is_device_bonded(static_cast<uint8_t>(addressType), address.data()) == BLE_STATUS_SUCCESS;
+    }
+
+    infra::MemoryRange<const services::Bond> GapSt::GetBondList() const
+    {
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     void GapSt::PairAndBond()
@@ -272,16 +282,12 @@ namespace hal
             UpdateNrBonds();
         }
 
-        if (event.Status == SMP_PAIRING_STATUS_SUCCESS)
-            GapPairing::NotifyObservers([](auto& observer)
-                {
-                    observer.PairingSuccessfullyCompleted();
-                });
-        else
-            GapPairing::NotifyObservers([&event](auto& observer)
-                {
-                    observer.PairingFailed(ParserPairingFailure(event.Status, event.Reason));
-                });
+        auto pairedSuccessfully = event.Status == SMP_PAIRING_STATUS_SUCCESS;
+        auto pairingFailedReason = pairedSuccessfully ? services::GapPairingObserver::PairingFailedReason::unknown : ParserPairingFailure(event.Status, event.Reason);
+        GapPairing::NotifyObservers([pairedSuccessfully, pairingFailedReason](auto& observer)
+            {
+                observer.PairingResult(pairedSuccessfully, pairingFailedReason);
+            });
     }
 
     void GapSt::HandleHciLeReadLocalP256PublicKeyCompleteEvent(const hci_le_read_local_p256_public_key_complete_event_rp0& event)

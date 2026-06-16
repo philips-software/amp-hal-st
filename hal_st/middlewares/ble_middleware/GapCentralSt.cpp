@@ -28,9 +28,9 @@ namespace hal
 
     namespace
     {
-        services::GapAdvertisingEventType ToAdvertisingEventType(uint8_t eventType)
+        services::AdvertisingReportType ToAdvertisingReportType(uint8_t reportType)
         {
-            return static_cast<services::GapAdvertisingEventType>(eventType);
+            return static_cast<services::AdvertisingReportType>(reportType);
         }
 
         services::GapDeviceAddressType ToAdvertisingAddressType(uint8_t addressType)
@@ -82,18 +82,20 @@ namespace hal
             });
     }
 
-    void GapCentralSt::CancelConnect()
+    void GapCentralSt::Standby()
     {
-        if (initiatingStateTimer.Armed())
+        if (std::exchange(discovering, false))
+        {
+            initiatingStateTimer.Cancel();
+            aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
+        }
+        else if (initiatingStateTimer.Armed())
         {
             initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
         }
-    }
-
-    void GapCentralSt::Disconnect()
-    {
-        aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
+        else if (connectionContext.connectionHandle != GapSt::invalidConnection)
+            aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
     }
 
     void GapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
@@ -111,12 +113,6 @@ namespace hal
                     observer.StateChanged(services::GapState::scanning);
                 });
         }
-    }
-
-    void GapCentralSt::StopDeviceDiscovery()
-    {
-        if (std::exchange(discovering, false))
-            aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
     }
 
     std::optional<hal::MacAddress> GapCentralSt::ResolvePrivateAddress(hal::MacAddress address) const
@@ -251,7 +247,7 @@ namespace hal
 
         GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
             {
-                observer.DisplayPasskey(static_cast<int32_t>(passkey), true);
+                observer.AuthenticationRequired(true, static_cast<int32_t>(passkey));
             });
     }
 
@@ -285,9 +281,9 @@ namespace hal
         services::GapAdvertisingReport discoveredDevice;
 
         auto advertisementData = const_cast<uint8_t*>(&advertisingReport.Length_Data) + 1;
-        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.address.size(), std::begin(discoveredDevice.address));
-        discoveredDevice.eventType = ToAdvertisingEventType(advertisingReport.Event_Type);
-        discoveredDevice.addressType = ToAdvertisingAddressType(advertisingReport.Address_Type);
+        std::copy_n(std::begin(advertisingReport.Address), discoveredDevice.gapAddress.address.size(), std::begin(discoveredDevice.gapAddress.address));
+        discoveredDevice.reportType = ToAdvertisingReportType(advertisingReport.Event_Type);
+        discoveredDevice.gapAddress.type = ToAdvertisingAddressType(advertisingReport.Address_Type);
         discoveredDevice.data.assign(advertisementData, advertisementData + advertisingReport.Length_Data);
         discoveredDevice.rssi = static_cast<int8_t>(*const_cast<uint8_t*>(advertisementData + advertisingReport.Length_Data));
 
