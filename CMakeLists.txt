@@ -31,10 +31,12 @@ if (HALST_STANDALONE)
     FetchContent_MakeAvailable(emil)
 
     if (EMIL_HOST_BUILD)
+        set(CCR_FETCH_DEPS ON)
+
         FetchContent_Declare(
             cucumber-cpp-runner
             GIT_REPOSITORY https://github.com/philips-software/amp-cucumber-cpp-runner.git
-            GIT_TAG        1c7fcde3dd140ce3f9c7327e66e2a73344625328 # unreleased
+            GIT_TAG        d05c54bc49b4a969c1cee0cc16101ab7b592945e # unreleased
         )
 
         FetchContent_MakeAvailable(cucumber-cpp-runner)
