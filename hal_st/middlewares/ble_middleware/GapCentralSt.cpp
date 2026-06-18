@@ -51,14 +51,6 @@ namespace hal
         , security(configuration.security)
     {
         Initialize(configuration);
-
-        infra::EventDispatcher::Instance().Schedule([this]
-            {
-                infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
-                    {
-                        observer.StateChanged(services::GapState::standby);
-                    });
-            });
     }
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
