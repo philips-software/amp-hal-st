@@ -8,14 +8,10 @@
 
 namespace hal
 {
-    class WatchDogStm
+    namespace detail
     {
-    public:
-        struct Config
+        struct WatchDogStmConfig
         {
-            constexpr Config()
-            {}
-
             // WWDG clock (Hz) = PCLK1 / (4096 * Prescaler)                     --> 54Mhz / 32768 = 1728 Hz
             // WWDG timeout (mS) = 1000 * Counter / WWDG clock                  -->  73 ms
             // WWDG Counter refresh is allowed between the following limits :
@@ -26,6 +22,12 @@ namespace hal
             infra::Duration feedTimerInterval{ std::chrono::milliseconds(25) };
             uint32_t maxMissedFeeds{ 41 };
         };
+    }
+
+    class WatchDogStm
+    {
+    public:
+        using Config = detail::WatchDogStmConfig;
 
         WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
 
