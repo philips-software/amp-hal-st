@@ -415,7 +415,13 @@ namespace hal
 
     bool GapSt::UpdateBondAgingForConnectedPeer()
     {
-        if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
+        constexpr uint8_t resolvedIdentityAddressTypeOffset = 2;
+        auto peerAddressType = static_cast<uint8_t>(connectionContext.peerAddressType);
+        auto addressType = peerAddressType >= resolvedIdentityAddressTypeOffset
+                               ? static_cast<services::GapDeviceAddressType>(peerAddressType - resolvedIdentityAddressTypeOffset)
+                               : connectionContext.peerAddressType;
+
+        if (!IsDeviceBonded(connectionContext.peerAddress, addressType))
             return false;
 
         hal::MacAddress address = connectionContext.peerAddress;
