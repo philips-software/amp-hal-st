@@ -245,13 +245,19 @@ namespace hal
     void GapSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
     {
         if (event.Status == BLE_STATUS_SUCCESS)
+        {
             SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
+            UpdateBondAgingForConnectedPeer();
+        }
     }
 
     void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
         if (event.Status == BLE_STATUS_SUCCESS)
+        {
             SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
+            UpdateBondAgingForConnectedPeer();
+        }
     }
 
     void GapSt::HandleBondLostEvent()
@@ -274,13 +280,8 @@ namespace hal
     {
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
 
-        if (IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
-        {
-            hal::MacAddress address = connectionContext.peerAddress;
-            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-            bondStorageSynchronizer.UpdateBondedDevice(address);
+        if (UpdateBondAgingForConnectedPeer())
             UpdateNrBonds();
-        }
 
         auto pairedSuccessfully = event.Status == SMP_PAIRING_STATUS_SUCCESS;
         auto pairingFailedReason = pairedSuccessfully ? services::GapPairingObserver::PairingFailedReason::unknown : ParserPairingFailure(event.Status, event.Reason);
@@ -410,5 +411,17 @@ namespace hal
             {
                 obs.NumberOfBondsChanged(nrBonds);
             });
+    }
+
+    bool GapSt::UpdateBondAgingForConnectedPeer()
+    {
+        if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
+            return false;
+
+        hal::MacAddress address = connectionContext.peerAddress;
+        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
+        bondStorageSynchronizer.UpdateBondedDevice(address);
+
+        return true;
     }
 }
