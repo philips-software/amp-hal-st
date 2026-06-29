@@ -47,7 +47,7 @@ namespace hal
 
     void TracingGattClientSt::ReadDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::ReadDescriptor, Value Handle: " << infra::hex << handle;
+        tracer.Trace() << "TracingGattClientSt::ReadDescriptor, Descriptor Handle: " << infra::hex << handle;
         GattClientSt::ReadDescriptor(handle, onResponse, onDone);
     }
 
