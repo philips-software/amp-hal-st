@@ -53,7 +53,7 @@ namespace hal
 
     void TracingGattClientSt::WriteDescriptor(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::WriteDescriptor, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
+        tracer.Trace() << "TracingGattClientSt::WriteDescriptor, Descriptor Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
         GattClientSt::WriteDescriptor(handle, data, onDone);
     }
 
