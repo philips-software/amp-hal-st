@@ -58,7 +58,7 @@ namespace hal
         HandleBleStatusError(ret);
     }
 
-    void GattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
+    void GattClientSt::ReadCharacteristic(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         onReadResponse = onResponse;
         onOperationDone = onDone;
@@ -67,7 +67,7 @@ namespace hal
         HandleBleStatusError(ret);
     }
 
-    void GattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
+    void GattClientSt::WriteCharacteristic(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         onOperationDone = onDone;
 
@@ -75,7 +75,7 @@ namespace hal
         HandleBleStatusError(ret);
     }
 
-    void GattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
+    void GattClientSt::WriteCharacteristicWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
         auto ret = aci_gatt_write_without_resp(connectionHandle, handle, data.size(), data.cbegin());
         if (ret == BLE_STATUS_SUCCESS)
@@ -86,24 +86,16 @@ namespace hal
             onDone(services::OperationStatus::error);
     }
 
-    void GattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
+    void GattClientSt::ReadDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableNotification>(handle, onDone);
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
-    void GattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
+    void GattClientSt::WriteDescriptor(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::notify, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(handle, onDone);
-    }
-
-    void GattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
-    {
-        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::enableIndication>(handle, onDone);
-    }
-
-    void GattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
-    {
-        WriteCharacteristicDescriptor<services::GattCharacteristic::PropertyFlags::indicate, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue::disable>(handle, onDone);
+        onOperationDone = onDone;
+        auto ret = aci_gatt_write_char_desc(connectionHandle, handle, data.size(), data.cbegin());
+        HandleBleStatusError(ret);
     }
 
     void GattClientSt::HciEvent(hci_event_pckt& event)
@@ -339,14 +331,6 @@ namespace hal
         {
             stream >> type.emplace<services::AttAttribute::Uuid128>();
         }
-    }
-
-    void GattClientSt::WriteCharacteristicDescriptor(services::AttAttribute::Handle handle, services::GattCharacteristic::PropertyFlags property, services::GattDescriptor::ClientCharacteristicConfiguration::CharacteristicValue characteristicValue)
-    {
-        const uint16_t offsetCccd = 1;
-
-        auto ret = aci_gatt_write_char_desc(connectionHandle, handle + offsetCccd, sizeof(characteristicValue), reinterpret_cast<uint8_t*>(&characteristicValue));
-        HandleBleStatusError(ret);
     }
 
     void GattClientSt::MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone)
