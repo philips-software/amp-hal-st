@@ -32,6 +32,9 @@ namespace hal
                         return services::GapPairingObserver::PairingFailedReason::unknown;
                 }
         }
+
+        constexpr auto publicIdentityAddress = static_cast<services::GapDeviceAddressType>(2);
+        constexpr auto randomIdentityAddress = static_cast<services::GapDeviceAddressType>(3);
     }
 
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
@@ -415,11 +418,11 @@ namespace hal
 
     bool GapSt::UpdateBondAgingForConnectedPeer()
     {
-        constexpr uint8_t resolvedIdentityAddressTypeOffset = 2;
-        auto peerAddressType = static_cast<uint8_t>(connectionContext.peerAddressType);
-        auto addressType = peerAddressType >= resolvedIdentityAddressTypeOffset
-                               ? static_cast<services::GapDeviceAddressType>(peerAddressType - resolvedIdentityAddressTypeOffset)
-                               : connectionContext.peerAddressType;
+        auto addressType = connectionContext.peerAddressType;
+        if (addressType == publicIdentityAddress)
+            addressType = services::GapDeviceAddressType::publicAddress;
+        else if (addressType == randomIdentityAddress)
+            addressType = services::GapDeviceAddressType::randomAddress;
 
         if (!IsDeviceBonded(connectionContext.peerAddress, addressType))
             return false;
