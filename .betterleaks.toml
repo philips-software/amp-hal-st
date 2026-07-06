@@ -1,0 +1,10 @@
+# Configuration for betterleaks (MegaLinter REPOSITORY_BETTERLEAKS).
+# Keep the default rule set and only allowlist known false positives.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore false positive in KiCad footprint info cache (hkey query parameter in a datasheet URL is not a secret)"
+paths = [
+  '''integration_test/pcb/integration_test_board/fp-info-cache''',
+]

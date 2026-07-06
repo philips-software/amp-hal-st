@@ -1,5 +1,4 @@
 ls:
-  .dir: snake_case
   .hpp: PascalCase
   .cpp: PascalCase
 
