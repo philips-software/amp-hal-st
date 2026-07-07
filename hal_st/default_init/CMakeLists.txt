@@ -20,6 +20,12 @@ target_sources(hal_st.default_init PRIVATE
     DefaultInit.cpp
 )
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+    target_sources(hal_st.default_init PRIVATE
+        SysCallStubs.cpp
+    )
+endif()
+
 if (TARGET_MCU_VENDOR STREQUAL st)
     get_target_property(startup_source st.hal_driver_${TARGET_MCU_FAMILY} HALST_STARTUP_SOURCE)
 
