@@ -262,7 +262,7 @@ namespace hal
     {
         if (event.Status == BLE_STATUS_SUCCESS)
         {
-            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(event.Peer_Address_Type), &event.Peer_Address[0]);
+            SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
             UpdateBondAgingForConnectedPeer();
         }
     }
