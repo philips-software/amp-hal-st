@@ -33,8 +33,20 @@ namespace hal
                 }
         }
 
-        constexpr auto publicIdentityAddress = static_cast<services::GapDeviceAddressType>(2);
-        constexpr auto randomIdentityAddress = static_cast<services::GapDeviceAddressType>(3);
+        services::GapDeviceAddressType ToDeviceAddressType(HciPeerAddressType peerAddressType)
+        {
+            switch (peerAddressType)
+            {
+                case HciPeerAddressType::publicDeviceAddress:
+                case HciPeerAddressType::publicIdentityAddress:
+                    return services::GapDeviceAddressType::publicAddress;
+                case HciPeerAddressType::randomDeviceAddress:
+                case HciPeerAddressType::randomIdentityAddress:
+                    return services::GapDeviceAddressType::randomAddress;
+            }
+
+            LOG_AND_ABORT_ENUM(peerAddressType);
+        }
     }
 
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
@@ -249,7 +261,7 @@ namespace hal
     {
         if (event.Status == BLE_STATUS_SUCCESS)
         {
-            SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
+            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(static_cast<HciPeerAddressType>(event.Peer_Address_Type)), &event.Peer_Address[0]);
             UpdateBondAgingForConnectedPeer();
         }
     }
@@ -258,7 +270,7 @@ namespace hal
     {
         if (event.Status == BLE_STATUS_SUCCESS)
         {
-            SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
+            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(static_cast<HciPeerAddressType>(event.Peer_Address_Type)), &event.Peer_Address[0]);
             UpdateBondAgingForConnectedPeer();
         }
     }
@@ -418,13 +430,7 @@ namespace hal
 
     bool GapSt::UpdateBondAgingForConnectedPeer()
     {
-        auto addressType = connectionContext.peerAddressType;
-        if (addressType == publicIdentityAddress)
-            addressType = services::GapDeviceAddressType::publicAddress;
-        else if (addressType == randomIdentityAddress)
-            addressType = services::GapDeviceAddressType::randomAddress;
-
-        if (!IsDeviceBonded(connectionContext.peerAddress, addressType))
+        if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
             return false;
 
         hal::MacAddress address = connectionContext.peerAddress;
