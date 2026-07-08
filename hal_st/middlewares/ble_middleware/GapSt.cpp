@@ -4,6 +4,7 @@
 #include "ble_types.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "services/ble/Gap.hpp"
+#include <cstdint>
 
 namespace hal
 {
@@ -33,15 +34,15 @@ namespace hal
                 }
         }
 
-        services::GapDeviceAddressType ToDeviceAddressType(HciPeerAddressType peerAddressType)
+        services::GapDeviceAddressType ToDeviceAddressType(uint8_t peerAddressType)
         {
             switch (peerAddressType)
             {
-                case HciPeerAddressType::publicDeviceAddress:
-                case HciPeerAddressType::publicIdentityAddress:
+                case 0: // public device address
+                case 2: // public identity address
                     return services::GapDeviceAddressType::publicAddress;
-                case HciPeerAddressType::randomDeviceAddress:
-                case HciPeerAddressType::randomIdentityAddress:
+                case 1: // random device address
+                case 3: // random identity address
                     return services::GapDeviceAddressType::randomAddress;
             }
 
@@ -261,7 +262,7 @@ namespace hal
     {
         if (event.Status == BLE_STATUS_SUCCESS)
         {
-            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(static_cast<HciPeerAddressType>(event.Peer_Address_Type)), &event.Peer_Address[0]);
+            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(event.Peer_Address_Type), &event.Peer_Address[0]);
             UpdateBondAgingForConnectedPeer();
         }
     }
@@ -270,7 +271,7 @@ namespace hal
     {
         if (event.Status == BLE_STATUS_SUCCESS)
         {
-            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(static_cast<HciPeerAddressType>(event.Peer_Address_Type)), &event.Peer_Address[0]);
+            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(event.Peer_Address_Type), &event.Peer_Address[0]);
             UpdateBondAgingForConnectedPeer();
         }
     }

@@ -11,14 +11,6 @@
 
 namespace hal
 {
-    enum class HciPeerAddressType : uint8_t
-    {
-        publicDeviceAddress = 0,
-        randomDeviceAddress = 1,
-        publicIdentityAddress = 2,
-        randomIdentityAddress = 3,
-    };
-
     class GapSt
         : public services::AttMtuExchangeImpl
         , public services::GapBonding
