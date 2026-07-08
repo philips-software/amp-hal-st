@@ -4,6 +4,7 @@
 #include "ble_types.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "services/ble/Gap.hpp"
+#include <cstdint>
 
 namespace hal
 {
@@ -31,6 +32,21 @@ namespace hal
                     default:
                         return services::GapPairingObserver::PairingFailedReason::unknown;
                 }
+        }
+
+        services::GapDeviceAddressType ToDeviceAddressType(uint8_t peerAddressType)
+        {
+            switch (peerAddressType)
+            {
+                case 0: // public device address
+                case 2: // public identity address
+                    return services::GapDeviceAddressType::publicAddress;
+                case 1: // random device address
+                case 3: // random identity address
+                    return services::GapDeviceAddressType::randomAddress;
+            }
+
+            LOG_AND_ABORT_ENUM(peerAddressType);
         }
     }
 
@@ -245,13 +261,19 @@ namespace hal
     void GapSt::HandleHciLeConnectionCompleteEvent(const hci_le_connection_complete_event_rp0& event)
     {
         if (event.Status == BLE_STATUS_SUCCESS)
+        {
             SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
+            UpdateBondAgingForConnectedPeer();
+        }
     }
 
     void GapSt::HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event)
     {
         if (event.Status == BLE_STATUS_SUCCESS)
-            SetConnectionContext(event.Connection_Handle, static_cast<services::GapDeviceAddressType>(event.Peer_Address_Type), &event.Peer_Address[0]);
+        {
+            SetConnectionContext(event.Connection_Handle, ToDeviceAddressType(event.Peer_Address_Type), &event.Peer_Address[0]);
+            UpdateBondAgingForConnectedPeer();
+        }
     }
 
     void GapSt::HandleBondLostEvent()
@@ -274,13 +296,8 @@ namespace hal
     {
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
 
-        if (IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
-        {
-            hal::MacAddress address = connectionContext.peerAddress;
-            aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-            bondStorageSynchronizer.UpdateBondedDevice(address);
+        if (UpdateBondAgingForConnectedPeer())
             UpdateNrBonds();
-        }
 
         auto pairedSuccessfully = event.Status == SMP_PAIRING_STATUS_SUCCESS;
         auto pairingFailedReason = pairedSuccessfully ? services::GapPairingObserver::PairingFailedReason::unknown : ParserPairingFailure(event.Status, event.Reason);
@@ -410,5 +427,17 @@ namespace hal
             {
                 obs.NumberOfBondsChanged(nrBonds);
             });
+    }
+
+    bool GapSt::UpdateBondAgingForConnectedPeer()
+    {
+        if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
+            return false;
+
+        hal::MacAddress address = connectionContext.peerAddress;
+        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
+        bondStorageSynchronizer.UpdateBondedDevice(address);
+
+        return true;
     }
 }
