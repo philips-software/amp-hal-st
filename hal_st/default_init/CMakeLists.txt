@@ -20,7 +20,7 @@ target_sources(hal_st.default_init PRIVATE
     DefaultInit.cpp
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_sources(hal_st.default_init PRIVATE
         SysCallStubs.cpp
     )
