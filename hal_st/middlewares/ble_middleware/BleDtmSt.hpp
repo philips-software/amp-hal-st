@@ -1,17 +1,17 @@
 #ifndef HAL_ST_DTM_ST_HPP
 #define HAL_ST_DTM_ST_HPP
 
-#include "hal/interfaces/BleDtm.hpp"
+#include "services/ble/Dtm.hpp"
 #include <cstdint>
 #include <optional>
 
 namespace hal
 {
     class BleDtmSt
-        : public BleDtm
+        : public services::Dtm
     {
     public:
-        // Implementation of BleDtm
+        // Implementation of services::Dtm
         bool StartTone(uint8_t rfChannel, uint8_t offset) override;
         bool StopTone() override;
         bool SetTxPowerLevel(uint8_t txPower) override;
