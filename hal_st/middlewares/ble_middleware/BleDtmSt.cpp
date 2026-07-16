@@ -48,13 +48,13 @@ namespace hal
         return false;
     }
 
-    std::optional<uint16_t> BleDtmSt::StopTest()
+    void BleDtmSt::StopTest(const infra::Function<void(std::optional<uint16_t>)>& onStopped)
     {
         uint16_t numberOfPackets = 0;
 
         if (hci_le_test_end(&numberOfPackets) == BLE_STATUS_SUCCESS)
-            return std::make_optional(numberOfPackets);
+            onStopped(numberOfPackets);
 
-        return std::nullopt;
+        onStopped(std::nullopt);
     }
 }

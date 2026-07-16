@@ -17,7 +17,7 @@ namespace hal
         bool SetTxPowerLevel(uint8_t txPower) override;
         bool StartRxTest(uint8_t frequency, uint8_t phy) override;
         bool StartTxTest(uint8_t frequency, uint8_t dataLength, uint8_t packetPayload, uint8_t phy) override;
-        std::optional<uint16_t> StopTest() override;
+        void StopTest(const infra::Function<void(std::optional<uint16_t>)>& onStopped) override;
 
     private:
         struct ParameterLimits
