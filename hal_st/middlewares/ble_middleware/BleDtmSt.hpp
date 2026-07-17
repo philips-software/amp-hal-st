@@ -1,23 +1,23 @@
 #ifndef HAL_ST_DTM_ST_HPP
 #define HAL_ST_DTM_ST_HPP
 
-#include "hal/interfaces/BleDtm.hpp"
+#include "services/ble/Dtm.hpp"
 #include <cstdint>
 #include <optional>
 
 namespace hal
 {
     class BleDtmSt
-        : public BleDtm
+        : public services::Dtm
     {
     public:
-        // Implementation of BleDtm
+        // Implementation of services::Dtm
         bool StartTone(uint8_t rfChannel, uint8_t offset) override;
         bool StopTone() override;
         bool SetTxPowerLevel(uint8_t txPower) override;
         bool StartRxTest(uint8_t frequency, uint8_t phy) override;
         bool StartTxTest(uint8_t frequency, uint8_t dataLength, uint8_t packetPayload, uint8_t phy) override;
-        std::optional<uint16_t> StopTest() override;
+        void StopTest(const infra::Function<void(std::optional<uint16_t>)>& onStopped) override;
 
     private:
         struct ParameterLimits
