@@ -114,6 +114,7 @@ namespace hal
 
         void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
+        bool UpdateBondAgingForConnectedPeer();
 
     protected:
         struct ConnectionContext
