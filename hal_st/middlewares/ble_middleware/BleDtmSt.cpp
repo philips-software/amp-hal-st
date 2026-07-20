@@ -48,7 +48,7 @@ namespace hal
         return false;
     }
 
-    void BleDtmSt::StopTest(const infra::AutoResetFunction<void(std::optional<uint16_t>)>& onStopped)
+    void BleDtmSt::StopTest(infra::AutoResetFunction<void(std::optional<uint16_t>)>&& onStopped)
     {
         uint16_t numberOfPackets = 0;
 
