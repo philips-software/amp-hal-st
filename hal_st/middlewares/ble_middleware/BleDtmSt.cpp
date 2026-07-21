@@ -53,7 +53,7 @@ namespace hal
         uint16_t numberOfPackets = 0;
 
         if (hci_le_test_end(&numberOfPackets) == BLE_STATUS_SUCCESS)
-            onStopped(numberOfPackets);
+            onStopped(std::make_optional(numberOfPackets));
         else
             onStopped(std::nullopt);
     }
