@@ -5,6 +5,7 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/timer/Timer.hpp"
 #include <atomic>
+#include <optional>
 
 namespace hal
 {
@@ -29,16 +30,18 @@ namespace hal
     public:
         using Config = detail::WatchDogStmConfig;
 
-        WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
+        explicit WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
 
         void WatchDogRefresh();
+        void UseTimerService(uint32_t timerServiceId);
 
     private:
         void Interrupt();
         void Feed();
 
         ImmediateInterruptHandler interruptRegistration;
-        infra::TimerRepeating feedingTimer;
+        std::optional<infra::TimerRepeating> feedingTimer;
+        infra::Duration feedTimerInterval;
         WWDG_HandleTypeDef handle;
         std::atomic<uint32_t> missedFeedCount{ 0 };
         const uint32_t maxMissedFeeds{ 0 };

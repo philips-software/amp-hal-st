@@ -3,19 +3,20 @@
 namespace hal
 {
     WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, const Config& config)
-        : maxMissedFeeds(config.maxMissedFeeds)
-        , onExpired(onExpired)
-        , interruptRegistration(WWDG_IRQn, [this]()
+        : interruptRegistration(WWDG_IRQn, [this]()
               {
                   Interrupt();
               })
+        , feedTimerInterval(config.feedTimerInterval)
+        , maxMissedFeeds(config.maxMissedFeeds)
+        , onExpired(onExpired)
     {
         __WWDG_CLK_ENABLE();
         handle.Instance = WWDG;
         handle.Init.Prescaler = config.prescaler;
         handle.Init.Window = WWDG_CR_T;
         handle.Init.Counter = WWDG_CR_T;
-#ifdef STM32F7
+#if defined(STM32F7) || defined(STM32H5)
         handle.Init.EWIMode = WWDG_EWI_ENABLE;
 #endif
         HAL_WWDG_Init(&handle);
@@ -28,10 +29,17 @@ namespace hal
         NVIC_SetPriority(WWDG_IRQn, 0);
         WWDG->CFR |= WWDG_CFR_EWI;
 
-        feedingTimer.Start(config.feedTimerInterval, [this]()
+        UseTimerService(infra::systemTimerServiceId);
+    }
+
+    void WatchDogStm::UseTimerService(uint32_t timerServiceId)
+    {
+        Feed();
+        feedingTimer.emplace(feedTimerInterval, [this]()
             {
                 Feed();
-            });
+            },
+            timerServiceId);
     }
 
     void WatchDogStm::WatchDogRefresh()
