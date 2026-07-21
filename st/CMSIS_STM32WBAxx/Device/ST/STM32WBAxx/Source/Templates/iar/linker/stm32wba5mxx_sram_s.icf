@@ -5,13 +5,15 @@
 define symbol __ICFEDIT_intvec_start__ = 0x30000000;
 /*-Memory Regions-*/
 define symbol __ICFEDIT_region_ROM_start__ = 0x30000000;
-define symbol __ICFEDIT_region_ROM_end__   = 0x30007DFF;
-define symbol __ICFEDIT_region_RAM_start__ = 0x30008000;
-define symbol __ICFEDIT_region_RAM_end__   = 0x3000FFFF;
-define symbol __region_ROM_NSC_start__     = 0x30007E00;
-define symbol __region_ROM_NSC_end__       = 0x30007FFF;
-define symbol __region_ROM_NS_start__      = 0x20010000;
-define symbol __region_ROM_NS_end__        = 0x20017FFF;
+define symbol __ICFEDIT_region_ROM_end__   = 0x30003DFF;
+define symbol __ICFEDIT_region_RAM_start__ = 0x30004000;
+define symbol __ICFEDIT_region_RAM_end__   = 0x30007FFF;
+define symbol __region_ROM_NSC_start__     = 0x30003E00;
+define symbol __region_ROM_NSC_end__       = 0x30003FFF;
+define symbol __region_ROM_NS_start__      = 0x20008000;
+define symbol __region_ROM_NS_end__        = 0x2000FFFF;
+define symbol __region_SRAM2_start__       = 0x30010000;
+define symbol __region_SRAM2_end__         = 0x30017FFF;
 
 /*-Sizes-*/
 define symbol __ICFEDIT_size_cstack__ = 0x400;
@@ -22,6 +24,7 @@ define memory mem with size = 4G;
 define region ROM_region      = mem:[from __ICFEDIT_region_ROM_start__     to __ICFEDIT_region_ROM_end__];
 define region ROM_NSC_region  = mem:[from __region_ROM_NSC_start__         to __region_ROM_NSC_end__];
 define region RAM_region      = mem:[from __ICFEDIT_region_RAM_start__     to __ICFEDIT_region_RAM_end__];
+define region SRAM2_region    = mem:[from __region_SRAM2_start__           to __region_SRAM2_end__];
 
 define exported symbol __VTOR_TABLE_start       = __ICFEDIT_intvec_start__;
 define exported symbol __VTOR_TABLE_NS_start    = __region_ROM_NS_start__;
@@ -38,3 +41,4 @@ place in ROM_region     { readonly };
 place in ROM_NSC_region { section Veneer$$CMSE };
 place in RAM_region     { readwrite,
                           block CSTACK, block HEAP };
+place in SRAM2_region   { };

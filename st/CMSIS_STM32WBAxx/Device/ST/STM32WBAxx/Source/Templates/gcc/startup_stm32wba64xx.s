@@ -32,7 +32,6 @@
 
 .global	g_pfnVectors
 .global	Default_Handler
-.global Default_Handler_Forwarded
 
 /* start address for the initialization values of the .data section.
 defined in linker script */
@@ -61,6 +60,8 @@ defined in linker script */
 	.type	Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack    /* set stack pointer */
+  ldr   r0, =_sstack
+  msr   MSPLIM, r0      /* set stack pointer limit */
 
 /* Call the clock system initialization function.*/
   bl  SystemInit
@@ -113,7 +114,8 @@ LoopForever:
 */
     .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
-	b  Default_Handler_Forwarded
+Infinite_Loop:
+	b	Infinite_Loop
 	.size	Default_Handler, .-Default_Handler
 /******************************************************************************
 *
