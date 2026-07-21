@@ -74,6 +74,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32h5xx>:HighCycleAreaOrOtpIrqHandler.hpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.cpp>
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.hpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:PowerModeStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:PowerModeStm.hpp>
     QuadSpiStm.cpp
     QuadSpiStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.cpp>
