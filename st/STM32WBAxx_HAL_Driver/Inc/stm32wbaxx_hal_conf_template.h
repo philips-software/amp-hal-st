@@ -52,6 +52,7 @@ extern "C" {
 #define HAL_IRDA_MODULE_ENABLED
 #define HAL_IWDG_MODULE_ENABLED
 #define HAL_LPTIM_MODULE_ENABLED
+#define HAL_OTFDEC_MODULE_ENABLED
 #define HAL_PCD_MODULE_ENABLED
 #define HAL_PKA_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
@@ -68,6 +69,7 @@ extern "C" {
 #define HAL_UART_MODULE_ENABLED
 #define HAL_USART_MODULE_ENABLED
 #define HAL_WWDG_MODULE_ENABLED
+#define HAL_XSPI_MODULE_ENABLED
 
 /* ########################## Oscillator Values adaptation ####################*/
 /**
@@ -166,6 +168,7 @@ extern "C" {
 #define  USE_HAL_IRDA_REGISTER_CALLBACKS       0U /* IRDA register callback disabled      */
 #define  USE_HAL_IWDG_REGISTER_CALLBACKS       0U /* IWDG register callback disabled      */
 #define  USE_HAL_LPTIM_REGISTER_CALLBACKS      0U /* LPTIM register callback disabled     */
+#define  USE_HAL_OTFDEC_REGISTER_CALLBACKS     0U /* OTFDEC register callback disabled    */
 #define  USE_HAL_PCD_REGISTER_CALLBACKS        0U /* PCD register callback disabled       */
 #define  USE_HAL_PKA_REGISTER_CALLBACKS        0U /* PKA register callback disabled       */
 #define  USE_HAL_RAMCFG_REGISTER_CALLBACKS     0U /* RAMCFG register callback disabled    */
@@ -180,6 +183,7 @@ extern "C" {
 #define  USE_HAL_UART_REGISTER_CALLBACKS       0U /* UART register callback disabled      */
 #define  USE_HAL_USART_REGISTER_CALLBACKS      0U /* USART register callback disabled     */
 #define  USE_HAL_WWDG_REGISTER_CALLBACKS       0U /* WWDG register callback disabled      */
+#define  USE_HAL_XSPI_REGISTER_CALLBACKS       0U /* XSPI register callback disabled      */
 
 /* ################## SPI peripheral configuration ########################## */
 
@@ -204,6 +208,10 @@ extern "C" {
 #ifdef HAL_DMA_MODULE_ENABLED
 #include "stm32wbaxx_hal_dma.h"
 #endif /* HAL_DMA_MODULE_ENABLED */
+
+#ifdef HAL_RCC_MODULE_ENABLED
+#include "stm32wbaxx_hal_rcc.h"
+#endif /* HAL_RCC_MODULE_ENABLED */
 
 #ifdef HAL_ADC_MODULE_ENABLED
 #include "stm32wbaxx_hal_adc.h"
@@ -273,6 +281,10 @@ extern "C" {
 #include "stm32wbaxx_hal_lptim.h"
 #endif /* HAL_LPTIM_MODULE_ENABLED */
 
+#ifdef HAL_OTFDEC_MODULE_ENABLED
+#include "stm32wbaxx_hal_otfdec.h"
+#endif /* HAL_OTFDEC_MODULE_ENABLED */
+
 #ifdef HAL_PCD_MODULE_ENABLED
 #include "stm32wbaxx_hal_pcd.h"
 #endif /* HAL_PCD_MODULE_ENABLED */
@@ -288,10 +300,6 @@ extern "C" {
 #ifdef HAL_RAMCFG_MODULE_ENABLED
 #include "stm32wbaxx_hal_ramcfg.h"
 #endif /* HAL_RAMCFG_MODULE_ENABLED */
-
-#ifdef HAL_RCC_MODULE_ENABLED
-#include "stm32wbaxx_hal_rcc.h"
-#endif /* HAL_RCC_MODULE_ENABLED */
 
 #ifdef HAL_RNG_MODULE_ENABLED
 #include "stm32wbaxx_hal_rng.h"
@@ -337,6 +345,9 @@ extern "C" {
 #include "stm32wbaxx_hal_wwdg.h"
 #endif /* HAL_WWDG_MODULE_ENABLED */
 
+#ifdef HAL_XSPI_MODULE_ENABLED
+#include "stm32wbaxx_hal_xspi.h"
+#endif /* HAL_XSPI_MODULE_ENABLED */
 
 /* Exported macro ------------------------------------------------------------*/
 #ifdef  USE_FULL_ASSERT

@@ -69,20 +69,20 @@ static const uint8_t LL_LPTIM_SHIFT_TAB_CCxSEL[] =
 
 static const uint8_t LL_LPTIM_SHIFT_TAB_CCxE[] =
 {
-  LPTIM_CCMR1_CC1E_Pos,            /* CC1E */
-  LPTIM_CCMR1_CC2E_Pos             /* CC2E */
+  (uint8_t)LPTIM_CCMR1_CC1E_Pos,            /* CC1E */
+  (uint8_t)LPTIM_CCMR1_CC2E_Pos             /* CC2E */
 };
 
 static const uint8_t LL_LPTIM_OFFSET_TAB_ICx[8][4] =
 {
-  {2, 7, 9, 13},
-  {3, 5, 6, 8},
-  {2, 3, 4, 5},
-  {2, 2, 3, 3},
-  {2, 2, 2, 2},
-  {2, 2, 2, 2},
-  {2, 2, 2, 2},
-  {2, 2, 2, 2}
+  {2U, 7U, 9U, 13U},
+  {3U, 5U, 6U, 8U},
+  {2U, 3u, 4U, 5U},
+  {2U, 2U, 3U, 3U},
+  {2U, 2U, 2U, 2U},
+  {2U, 2U, 2U, 2U},
+  {2U, 2U, 2U, 2U},
+  {2U, 2U, 2U, 2U}
 
 };
 
@@ -308,8 +308,14 @@ typedef struct
 #if defined(COMP2)
 #define LL_LPTIM_TRIG_SOURCE_COMP2            LPTIM_CFGR_TRIGSEL                                                   /*!<External input trigger is connected to COMP2 output*/
 #endif /* COMP2 */
+#if defined(GPDMA1)
 #define LL_LPTIM_TRIG_SOURCE_GPDMA_CH0_TCF    LPTIM_CFGR_TRIGSEL_2                                                 /*!<External input trigger is connected to GPDMA CH0 transfer complete */
 #define LL_LPTIM_TRIG_SOURCE_GPDMA_CH4_TCF    (LPTIM_CFGR_TRIGSEL_2 | LPTIM_CFGR_TRIGSEL_0)                        /*!<External input trigger is connected to GPDMA CH4 transfer complete */
+#endif /* GPDMA1 */
+#if defined(LPDMA1)
+#define LL_LPTIM_TRIG_SOURCE_LPDMA_CH0_TCF    LPTIM_CFGR_TRIGSEL_2                                                 /*!<External input trigger is connected to LPDMA CH0 transfer complete */
+#define LL_LPTIM_TRIG_SOURCE_LPDMA_CH4_TCF    (LPTIM_CFGR_TRIGSEL_2 | LPTIM_CFGR_TRIGSEL_0)                        /*!<External input trigger is connected to LPDMA CH4 transfer complete */
+#endif /* LPDMA1 */
 /**
   * @}
   */

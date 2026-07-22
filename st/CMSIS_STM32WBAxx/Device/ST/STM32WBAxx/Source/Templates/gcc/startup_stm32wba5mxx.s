@@ -61,6 +61,8 @@ defined in linker script */
 	.type	Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack    /* set stack pointer */
+  ldr   r0, =_sstack
+  msr   MSPLIM, r0      /* set stack pointer limit */
 
 /* Call the clock system initialization function.*/
   bl  SystemInit
@@ -113,7 +115,7 @@ LoopForever:
 */
     .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
-	b  Default_Handler_Forwarded
+  b  Default_Handler_Forwarded
 	.size	Default_Handler, .-Default_Handler
 /******************************************************************************
 *
