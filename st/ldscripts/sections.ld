@@ -1,5 +1,8 @@
 __stack = ORIGIN(RAM) + LENGTH(RAM);
 _estack = __stack;         /* STM specific definition */
+_sstack = _estack - _Min_Stack_Size;
+
+_Min_Stack_Size = 0x400; /* required amount of stack */
 
 __Main_Stack_Size = 1024 ;
 PROVIDE(_Main_Stack_Size = __Main_Stack_Size);
