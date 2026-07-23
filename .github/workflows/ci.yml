@@ -160,32 +160,94 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+      - name: Check Postmaster availability
+        id: postmaster
+        env:
+          ENV_POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
+        run: |
+          python - <<'PY'
+          import os
+          import socket
+          import urllib.parse
+
+          url = os.environ.get("ENV_POSTMASTER_IP", "")
+          available = "false"
+
+          if not url:
+              print("::warning::Skipping integration test because ENV_POSTMASTER_IP is not configured.")
+          else:
+              parsed = urllib.parse.urlsplit(url if "://" in url else f"//{url}")
+              host = parsed.hostname
+              port = parsed.port or (443 if parsed.scheme == "https" else 80)
+
+              if not host:
+                  print(f"::warning::Skipping integration test because ENV_POSTMASTER_IP={url!r} is not a valid host.")
+              else:
+                  try:
+                      socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+                      with socket.create_connection((host, port), timeout=10):
+                          pass
+                  except OSError as exc:
+                      print(f"::warning::Skipping integration test because {host}:{port} is unavailable: {exc}")
+                  else:
+                      available = "true"
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"available={available}\n")
+          PY
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        if: ${{ steps.postmaster.outputs.available == 'true' }}
         with:
           name: hal_st
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        if: ${{ steps.postmaster.outputs.available == 'true' }}
         with:
           name: hal_st_tester
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        if: ${{ steps.postmaster.outputs.available == 'true' }}
         with:
           name: hal_st_tested_stm32f767
-      - run: ls
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: ls
       - name: Start flex container
+        if: ${{ steps.postmaster.outputs.available == 'true' }}
         env:
           ENV_POSTMASTER_IP: ${{ vars.ENV_POSTMASTER_IP }}
         run: docker run -d --name flex_container -v "$(pwd)":/external -p 1234:1234/tcp -p 1235:1235/tcp ghcr.io/philips-software/amp-postmaster-flex:v0.2.0 "$ENV_POSTMASTER_IP" /external/integration_test.tester.bin
-      - run: docker logs flex_container
-      - run: while [[ "$(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])')" != "healthy" ]] ; do docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])'; sleep 1; done
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: docker logs flex_container
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: |
+          while true; do
+            health="$(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Health"]["Status"])')"
+            running="$(docker inspect flex_container | python -c 'import json,sys;print(json.load(sys.stdin)[0]["State"]["Running"])')"
+            echo "$health"
+            if [[ "$health" == "healthy" ]]; then
+              break
+            fi
+            if [[ "$running" != "True" ]]; then
+              docker logs flex_container || true
+              exit 1
+            fi
+            sleep 1
+          done
         timeout-minutes: 2
-      - run: docker inspect flex_container
-      - run: tar -zxvf hal_st-*-Linux.tar.gz
-      - run: mkdir install
-      - run: mv hal_st-*-Linux/* install/
-      - run: ls install/bin
-      - run: install/bin/integration_test.flasher tcp://localhost:1234/target/echo/programmer integration_test.tested.bin
-      - run: install/bin/integration_test.runner run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
-      - if: always()
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: docker inspect flex_container
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: tar -zxvf hal_st-*-Linux.tar.gz
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: mkdir install
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: mv hal_st-*-Linux/* install/
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: ls install/bin
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: install/bin/integration_test.flasher tcp://localhost:1234/target/echo/programmer integration_test.tested.bin
+      - if: ${{ steps.postmaster.outputs.available == 'true' }}
+        run: install/bin/integration_test.runner run --feature integration_test/runner/features --report console --target tcp://localhost:1234/target/echo/programmer
+      - if: ${{ always() && steps.postmaster.outputs.available == 'true' }}
         run: docker logs flex_container
       - name: Remove flex container
-        if: always()
+        if: ${{ always() && steps.postmaster.outputs.available == 'true' }}
         run: docker rm -f flex_container
