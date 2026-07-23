@@ -153,7 +153,7 @@ jobs:
   embedded_build_devcontainer:
     name: Embedded Build on devcontainer
     runs-on: ubuntu-latest
-    container: ghcr.io/philips-software/amp-devcontainer-cpp:pr-1380
+    container: ghcr.io/philips-software/amp-devcontainer-embedded-cpp:pr-1380
     needs: [host_build_test_ubuntu]
     strategy:
       matrix:
