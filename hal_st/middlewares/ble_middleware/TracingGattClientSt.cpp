@@ -27,46 +27,34 @@ namespace hal
         GattClientSt::StartDescriptorDiscovery(handle, endHandle);
     }
 
-    void TracingGattClientSt::Read(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
+    void TracingGattClientSt::ReadCharacteristic(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::Read, Value Handle: " << infra::hex << handle;
-        GattClientSt::Read(handle, onResponse, onDone);
+        tracer.Trace() << "TracingGattClientSt::ReadCharacteristic, Value Handle: " << infra::hex << handle;
+        GattClientSt::ReadCharacteristic(handle, onResponse, onDone);
     }
 
-    void TracingGattClientSt::Write(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
+    void TracingGattClientSt::WriteCharacteristic(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::Write, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
-        GattClientSt::Write(handle, data, onDone);
+        tracer.Trace() << "TracingGattClientSt::WriteCharacteristic, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
+        GattClientSt::WriteCharacteristic(handle, data, onDone);
     }
 
-    void TracingGattClientSt::WriteWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
+    void TracingGattClientSt::WriteCharacteristicWithoutResponse(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::WriteWithoutResponse, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
-        GattClientSt::WriteWithoutResponse(handle, data, onDone);
+        tracer.Trace() << "TracingGattClientSt::WriteCharacteristicWithoutResponse, Value Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
+        GattClientSt::WriteCharacteristicWithoutResponse(handle, data, onDone);
     }
 
-    void TracingGattClientSt::EnableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
+    void TracingGattClientSt::ReadDescriptor(services::AttAttribute::Handle handle, const infra::Function<void(const infra::ConstByteRange&)>& onResponse, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::EnableNotification, Handle: " << infra::hex << (handle + 1);
-        GattClientSt::EnableNotification(handle, onDone);
+        tracer.Trace() << "TracingGattClientSt::ReadDescriptor, Descriptor Handle: " << infra::hex << handle;
+        GattClientSt::ReadDescriptor(handle, onResponse, onDone);
     }
 
-    void TracingGattClientSt::DisableNotification(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
+    void TracingGattClientSt::WriteDescriptor(services::AttAttribute::Handle handle, infra::ConstByteRange data, const infra::Function<void(services::OperationStatus)>& onDone)
     {
-        tracer.Trace() << "TracingGattClientSt::DisableNotification, Handle: " << infra::hex << (handle + 1);
-        GattClientSt::DisableNotification(handle, onDone);
-    }
-
-    void TracingGattClientSt::EnableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
-    {
-        tracer.Trace() << "TracingGattClientSt::EnableIndication, Handle: " << infra::hex << (handle + 1);
-        GattClientSt::EnableIndication(handle, onDone);
-    }
-
-    void TracingGattClientSt::DisableIndication(services::AttAttribute::Handle handle, const infra::Function<void(services::OperationStatus)>& onDone)
-    {
-        tracer.Trace() << "TracingGattClientSt::DisableIndication, Handle: " << infra::hex << (handle + 1);
-        GattClientSt::DisableIndication(handle, onDone);
+        tracer.Trace() << "TracingGattClientSt::WriteDescriptor, Descriptor Handle: " << infra::hex << handle << ", data: " << infra::AsHex(data);
+        GattClientSt::WriteDescriptor(handle, data, onDone);
     }
 
     void TracingGattClientSt::MtuExchange(const infra::Function<void(services::OperationStatus)>& onDone)

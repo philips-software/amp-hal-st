@@ -53,10 +53,12 @@ namespace hal
 
         // Implementation of GapBonding
         void RemoveAllBonds() override;
+        void RemoveBondWithAddress(services::GapAddress gapAddress) override;
         void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
         bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
+        infra::MemoryRange<const services::Bond> GetBondList() const override;
 
         // Implementation of GapPairing
         void PairAndBond() override;
@@ -112,6 +114,7 @@ namespace hal
 
         void SetConnectionContext(uint16_t connectionHandle, services::GapDeviceAddressType peerAddressType, const uint8_t* peerAddress);
         void UpdateNrBonds();
+        bool UpdateBondAgingForConnectedPeer();
 
     protected:
         struct ConnectionContext

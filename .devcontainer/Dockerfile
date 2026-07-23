@@ -1,3 +1,3 @@
-FROM ghcr.io/philips-software/amp-devcontainer-cpp:7.0.0@sha256:dc6bb049da53127b887c4ad5312ddbafd7daf57fb76bcca26abe643e65af9f59
+FROM ghcr.io/philips-software/amp-devcontainer-cpp:7.2.1@sha256:4d171db10d16f3f8ea17e694f8acce758cd3e5505fffbb62d1dc472afc1604d9
 
 HEALTHCHECK NONE
