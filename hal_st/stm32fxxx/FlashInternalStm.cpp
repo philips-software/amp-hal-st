@@ -5,7 +5,7 @@
 
 namespace
 {
-#if defined(FLASH_DBANK_SUPPORT) || defined(FLASH_BANK_SIZE)
+#if defined(STM32H5) || defined(STM32WBA) && defined(FLASH_DBANK_SUPPORT)
     uint32_t GetBank(const uint8_t* memoryBegin)
     {
         auto address = reinterpret_cast<uint32_t>(memoryBegin);
@@ -93,7 +93,7 @@ namespace hal
         eraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
         eraseInitStruct.Page = beginIndex;
         eraseInitStruct.NbPages = endIndex - beginIndex;
-#if defined(FLASH_DBANK_SUPPORT) || defined(FLASH_BANK_BOTH)
+#if defined(STM32H5) || defined(STM32WBA) && defined(FLASH_DBANK_SUPPORT)
         eraseInitStruct.Banks = GetBank(flashMemory.begin());
 #endif
 
