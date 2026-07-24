@@ -1,0 +1,5 @@
+[allowlist]
+description = "Allowlist for false positives"
+paths = [
+    "integration_test/pcb/integration_test_board/fp-info-cache",
+]
