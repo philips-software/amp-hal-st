@@ -5,4 +5,5 @@
 build/
 out/
 megalinter-reports/
+.megalinter_github_conf/
 install/
