@@ -54,12 +54,12 @@ namespace hal
         virtual void HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
+        virtual void HandleBleStatusError(tBleStatus status);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
 
     private:
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
-        void HandleBleStatusError(tBleStatus status);
 
     protected:
         struct Atttributes

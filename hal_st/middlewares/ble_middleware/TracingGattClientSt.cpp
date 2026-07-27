@@ -107,4 +107,12 @@ namespace hal
 
         GattClientSt::HandleServiceDiscovered(stream, isUuid16);
     }
+
+    void TracingGattClientSt::HandleBleStatusError(tBleStatus status)
+    {
+        if (status != BLE_STATUS_SUCCESS)
+            tracer.Trace() << "TracingGattClientSt::HandleBleStatusError, status: 0x" << infra::hex << status;
+
+        GattClientSt::HandleBleStatusError(status);
+    }
 }
