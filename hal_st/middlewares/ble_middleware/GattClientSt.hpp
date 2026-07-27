@@ -1,11 +1,10 @@
 #ifndef HAL_ST_GATT_CLIENT_ST_HPP
 #define HAL_ST_GATT_CLIENT_ST_HPP
 
-#include "ble/ble.h"
+#include "ble_types.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
-#include "infra/util/BoundedVector.hpp"
 #include "infra/util/Function.hpp"
 #include "services/ble/Gatt.hpp"
 #include "services/ble/GattClient.hpp"

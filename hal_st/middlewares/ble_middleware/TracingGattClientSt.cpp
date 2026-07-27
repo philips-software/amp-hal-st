@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/TracingGattClientSt.hpp"
+#include "ble_defs.h"
 
 namespace hal
 {
