@@ -1,11 +1,10 @@
 #ifndef HAL_ST_GATT_CLIENT_ST_HPP
 #define HAL_ST_GATT_CLIENT_ST_HPP
 
-#include "ble/ble.h"
+#include "ble_types.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/stream/ByteInputStream.hpp"
 #include "infra/util/AutoResetFunction.hpp"
-#include "infra/util/BoundedVector.hpp"
 #include "infra/util/Function.hpp"
 #include "services/ble/Gatt.hpp"
 #include "services/ble/GattClient.hpp"
@@ -54,12 +53,12 @@ namespace hal
         virtual void HandleAttExchangeMtuResponse(const aci_att_exchange_mtu_resp_event_rp0& event);
 
         virtual void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16);
+        virtual void HandleBleStatusError(tBleStatus status);
         void HandleUuidFromDiscovery(infra::DataInputStream& stream, bool isUuid16, services::AttAttribute::Uuid& type);
 
     private:
         void HandleCharacteristicDiscovered(infra::DataInputStream& stream, bool isUuid16);
         void HandleDescriptorDiscovered(infra::DataInputStream& stream, bool isUuid16);
-        void HandleBleStatusError(tBleStatus status);
 
     protected:
         struct Atttributes

@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/TracingGattClientSt.hpp"
+#include "ble_defs.h"
 
 namespace hal
 {
@@ -106,5 +107,13 @@ namespace hal
         }
 
         GattClientSt::HandleServiceDiscovered(stream, isUuid16);
+    }
+
+    void TracingGattClientSt::HandleBleStatusError(tBleStatus status)
+    {
+        if (status != BLE_STATUS_SUCCESS)
+            tracer.Trace() << "TracingGattClientSt::HandleBleStatusError, status: 0x" << infra::hex << status;
+
+        GattClientSt::HandleBleStatusError(status);
     }
 }
