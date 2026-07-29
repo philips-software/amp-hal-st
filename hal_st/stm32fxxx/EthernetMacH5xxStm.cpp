@@ -284,7 +284,7 @@ namespace hal
         // Store receive buffer size
         descriptors[receiveDescriptorAllocatedIndex].BackupAddr1 = buffer.size();
 
-        // DSB instruction to avoid race condition
+        // DSB instruction to make sure that the descriptors are updated in RAM before the peripheral register is written
          __DSB();
 
         // Set tail pointer to last element
