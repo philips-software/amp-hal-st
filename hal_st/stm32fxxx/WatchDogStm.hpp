@@ -21,6 +21,7 @@ namespace hal
             uint32_t prescaler{ WWDG_PRESCALER_8 };
             infra::Duration feedTimerInterval{ std::chrono::milliseconds(25) };
             uint32_t maxMissedFeeds{ 41 };
+            uint32_t timerServiceId = infra::systemTimerServiceId;
         };
     }
 
@@ -29,7 +30,7 @@ namespace hal
     public:
         using Config = detail::WatchDogStmConfig;
 
-        WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config(), uint32_t timerServiceId = infra::systemTimerServiceId);
+        WatchDogStm(const infra::Function<void()>& onExpired, const Config& config = Config());
 
         void WatchDogRefresh();
 

@@ -2,12 +2,12 @@
 
 namespace hal
 {
-    WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, const Config& config, uint32_t timerServiceId)
+    WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, const Config& config)
         : interruptRegistration(WWDG_IRQn, [this]()
               {
                   Interrupt();
               })
-        , feedingTimer(timerServiceId)
+        , feedingTimer(config.timerServiceId)
         , maxMissedFeeds(config.maxMissedFeeds)
         , onExpired(onExpired)
     {
