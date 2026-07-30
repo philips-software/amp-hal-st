@@ -1,5 +1,6 @@
 #include "hal_st/stm32fxxx/PowerModeStm.hpp"
 #include "stm32wbaxx_ll_pwr.h"
+#include "stm32wbaxx_ll_system.h"
 
 namespace hal
 {
@@ -19,7 +20,7 @@ namespace hal
             return false;
 
         if (config.disableDebugInLowPowerMode)
-            CLEAR_BIT(DBGMCU->SCR, DBGMCU_SCR_DBG_STANDBY);
+            LL_DBGMCU_DisableDBGStandbyMode();
 
         __HAL_PWR_CLEAR_FLAG(PWR_WAKEUP_ALL_FLAG);
 
@@ -30,6 +31,9 @@ namespace hal
         __HAL_PWR_CLEAR_FLAG(PWR_WAKEUP_ALL_FLAG);
 
         HAL_SuspendTick();
+
+        if (config.enableUltraLowPowerMode)
+            LL_PWR_EnableUltraLowPowerMode();
 
         HAL_PWR_EnterSTANDBYMode();
 

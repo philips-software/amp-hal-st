@@ -16,8 +16,8 @@ namespace hal
             constexpr Config()
             {}
 
-            bool enableUltraLowPowerMode{ false };
-            bool disableDebugInLowPowerMode{ false };
+            bool enableUltraLowPowerMode{ true };
+            bool disableDebugInLowPowerMode{ true };
         };
 
         explicit PowerModeStm(uint32_t wakeUpPin, const Config& config = Config());
