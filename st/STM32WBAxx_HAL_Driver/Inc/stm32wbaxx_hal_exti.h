@@ -162,7 +162,7 @@ typedef struct
   * @}
   */
 
-#if defined(EXTI_SECCFGR1_SEC0)
+#if defined(EXTI_SECCFGR1_SEC1)
 /** @defgroup EXTI_Line_attributes EXTI line attributes
   * @brief EXTI line secure or non-secure and privileged or non-privileged attributes
   * @note secure and non-secure attributes are only available from secure state when the system
@@ -178,7 +178,7 @@ typedef struct
 /**
   * @}
   */
-#endif /* #if defined(EXTI_SECCFGR1_SEC0) */
+#endif /* #if defined(EXTI_SECCFGR1_SEC1) */
 
 /**
   * @}
@@ -192,19 +192,19 @@ typedef struct
 /**
   * @brief  EXTI Line property definition
   */
-#define EXTI_PROPERTY_SHIFT                  24U
-#define EXTI_DIRECT                         (0x01U << EXTI_PROPERTY_SHIFT)
-#define EXTI_CONFIG                         (0x02U << EXTI_PROPERTY_SHIFT)
-#define EXTI_GPIO                           ((0x04U << EXTI_PROPERTY_SHIFT) | EXTI_CONFIG)
-#define EXTI_RESERVED                       (0x08U << EXTI_PROPERTY_SHIFT)
+#define EXTI_PROPERTY_SHIFT                 24U
+#define EXTI_DIRECT                         (0x01UL << EXTI_PROPERTY_SHIFT)
+#define EXTI_CONFIG                         (0x02UL << EXTI_PROPERTY_SHIFT)
+#define EXTI_GPIO                           ((0x04UL << EXTI_PROPERTY_SHIFT) | EXTI_CONFIG)
+#define EXTI_RESERVED                       (0x08UL << EXTI_PROPERTY_SHIFT)
 #define EXTI_PROPERTY_MASK                  (EXTI_DIRECT | EXTI_CONFIG | EXTI_GPIO)
 
 /**
   * @brief  EXTI Register and bit usage
   */
 #define EXTI_REG_SHIFT                      16U
-#define EXTI_REG1                           (0x00U << EXTI_REG_SHIFT)
-#define EXTI_REG2                           (0x01U << EXTI_REG_SHIFT)
+#define EXTI_REG1                           (0x00UL << EXTI_REG_SHIFT)
+#define EXTI_REG2                           (0x01UL << EXTI_REG_SHIFT)
 #define EXTI_REG_MASK                       (EXTI_REG1 | EXTI_REG2)
 #define EXTI_PIN_MASK                       0x0000001FU
 
@@ -229,7 +229,7 @@ typedef struct
 #define EXTI_LINE_NB                        18U
 #endif /* EXTI_IMR1_IM20 */
 
-#if defined(EXTI_SECCFGR1_SEC0)
+#if defined(EXTI_SECCFGR1_SEC1)
 /**
   * @brief  EXTI Mask for secure & privilege attributes
   */
@@ -238,7 +238,7 @@ typedef struct
 /**
   * @}
   */
-#endif /* #if defined(EXTI_SECCFGR1_SEC0) */
+#endif /* #if defined(EXTI_SECCFGR1_SEC1) */
 
 /* Private macros ------------------------------------------------------------*/
 /** @defgroup EXTI_Private_Macros EXTI Private Macros
@@ -321,7 +321,7 @@ typedef struct
 
 #define IS_EXTI_GPIO_PIN(__PIN__)        ((__PIN__) < 16U)
 
-#if defined(EXTI_SECCFGR1_SEC0)
+#if defined(EXTI_SECCFGR1_SEC1)
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
 
 #define IS_EXTI_LINE_ATTRIBUTES(__ATTRIBUTES__) (((((__ATTRIBUTES__) & EXTI_LINE_SEC) == EXTI_LINE_SEC) || \
@@ -337,7 +337,7 @@ typedef struct
                                                  (((__ATTRIBUTES__) & ~(EXTI_LINE_PRIV|EXTI_LINE_NPRIV)) == 0U))
 
 #endif /* __ARM_FEATURE_CMSE */
-#endif /* #if defined(EXTI_SECCFGR1_SEC0) */
+#endif /* #if defined(EXTI_SECCFGR1_SEC1) */
 
 /**
   * @}
@@ -355,8 +355,8 @@ typedef struct
   * @{
   */
 /* Configuration functions ****************************************************/
-HAL_StatusTypeDef HAL_EXTI_SetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigTypeDef *pExtiConfig);
-HAL_StatusTypeDef HAL_EXTI_GetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigTypeDef *pExtiConfig);
+HAL_StatusTypeDef HAL_EXTI_SetConfigLine(EXTI_HandleTypeDef *hexti, const EXTI_ConfigTypeDef *pExtiConfig);
+HAL_StatusTypeDef HAL_EXTI_GetConfigLine(const EXTI_HandleTypeDef *hexti, EXTI_ConfigTypeDef *pExtiConfig);
 HAL_StatusTypeDef HAL_EXTI_ClearConfigLine(const EXTI_HandleTypeDef *hexti);
 HAL_StatusTypeDef HAL_EXTI_RegisterCallback(EXTI_HandleTypeDef *hexti, EXTI_CallbackIDTypeDef CallbackID, void (*pPendingCbfn)(void));
 HAL_StatusTypeDef HAL_EXTI_GetHandle(EXTI_HandleTypeDef *hexti, uint32_t ExtiLine);
@@ -382,11 +382,11 @@ void              HAL_EXTI_GenerateSWI(const EXTI_HandleTypeDef *hexti);
   * @{
   */
 
-#if defined(EXTI_SECCFGR1_SEC0)
+#if defined(EXTI_SECCFGR1_SEC1)
 /* EXTI line attributes management functions **********************************/
 void              HAL_EXTI_ConfigLineAttributes(uint32_t ExtiLine, uint32_t LineAttributes);
 HAL_StatusTypeDef HAL_EXTI_GetConfigLineAttributes(uint32_t ExtiLine, uint32_t *pLineAttributes);
-#endif /* #if defined(EXTI_SECCFGR1_SEC0) */
+#endif /* #if defined(EXTI_SECCFGR1_SEC1) */
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
 void              HAL_EXTI_LockAttributes(void);
 uint32_t          HAL_EXTI_GetLockAttributes(void);

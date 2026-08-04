@@ -42,7 +42,11 @@
   * @{
   */
 
-#if defined(STM32WBA52xx)
+#if defined(STM32WBA23xx)
+  #include "partition_stm32wba23xx.h"
+#elif defined(STM32WBA25xx)
+  #include "partition_stm32wba25xx.h"
+#elif defined(STM32WBA52xx)
   #include "partition_stm32wba52xx.h"
 #elif defined(STM32WBA54xx)
   #include "partition_stm32wba54xx.h"
@@ -58,6 +62,8 @@
   #include "partition_stm32wba64xx.h"
 #elif defined(STM32WBA65xx)
   #include "partition_stm32wba65xx.h"
+#elif defined(STM32WBA6Mxx)
+  #include "partition_stm32wba6mxx.h"
 #else
   #error "Please select first the target STM32WBAxx device used in your application (in stm32wbaxx.h file)"
 #endif

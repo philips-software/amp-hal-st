@@ -28,6 +28,7 @@ namespace hal
         void HandleGattNotificationEvent(const aci_gatt_notification_event_rp0& event) override;
         void HandleGattCompleteResponse(const aci_gatt_proc_complete_event_rp0& event) override;
         void HandleServiceDiscovered(infra::DataInputStream& stream, bool isUuid16) override;
+        void HandleBleStatusError(tBleStatus status) override;
 
     private:
         services::Tracer& tracer;

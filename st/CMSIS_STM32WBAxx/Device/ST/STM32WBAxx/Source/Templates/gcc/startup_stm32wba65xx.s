@@ -61,6 +61,8 @@ defined in linker script */
 	.type	Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack    /* set stack pointer */
+  ldr   r0, =_sstack
+  msr   MSPLIM, r0      /* set stack pointer limit */
 
 /* Call the clock system initialization function.*/
   bl  SystemInit
@@ -113,8 +115,9 @@ LoopForever:
 */
     .section	.text.Default_Handler,"ax",%progbits
 Default_Handler:
-  b  Default_Handler_Forwarded
-  .size Default_Handler, .-Default_Handler
+Infinite_Loop:
+	b	Default_Handler_Forwarded
+	.size	Default_Handler, .-Default_Handler
 /******************************************************************************
 *
 * The minimal vector table for a Cortex-M33.  Note that the proper constructs
@@ -219,7 +222,7 @@ g_pfnVectors:
         .word   I2C2_EV_IRQHandler
         .word   I2C2_ER_IRQHandler
         .word   SPI2_IRQHandler
-        .word   OTG_HS_IRQHandler
+        .word   USB_OTG_HS_IRQHandler
         .word   I2C4_EV_IRQHandler
         .word   I2C4_ER_IRQHandler
         .word   USART3_IRQHandler
@@ -495,8 +498,8 @@ g_pfnVectors:
 	.weak	SPI2_IRQHandler
 	.thumb_set SPI2_IRQHandler,Default_Handler
 
-	.weak	OTG_HS_IRQHandler
-	.thumb_set OTG_HS_IRQHandler,Default_Handler
+	.weak	USB_OTG_HS_IRQHandler
+	.thumb_set USB_OTG_HS_IRQHandler,Default_Handler
 
 	.weak	I2C4_EV_IRQHandler
 	.thumb_set I2C4_EV_IRQHandler,Default_Handler

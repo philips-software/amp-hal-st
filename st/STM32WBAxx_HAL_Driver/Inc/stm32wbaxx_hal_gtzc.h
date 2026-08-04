@@ -43,9 +43,10 @@ extern "C" {
   */
 
 /*!< Values needed for MPCBB_Attribute_ConfigTypeDef structure sizing */
-#if  defined (STM32WBA52xx) || defined (STM32WBA54xx) || defined (STM32WBA55xx) || defined (STM32WBA5Mxx)
+#if defined (STM32WBA23xx) || defined (STM32WBA25xx) || \
+    defined (STM32WBA52xx) || defined (STM32WBA54xx) || defined (STM32WBA55xx) || defined (STM32WBA5Mxx)
 #define GTZC_MPCBB_NB_VCTR_REG_MAX      4U  /*!< Maximum number of superblocks */
-#elif defined (STM32WBA62xx) || defined (STM32WBA63xx) || defined (STM32WBA64xx) || defined (STM32WBA65xx)
+#elif defined (STM32WBA62xx) || defined (STM32WBA63xx) || defined (STM32WBA64xx) || defined (STM32WBA65xx) || defined (STM32WBA6Mxx)
 #define GTZC_MPCBB_NB_VCTR_REG_MAX      28U /*!< Maximum number of superblocks */
 #endif
 #define GTZC_MPCBB_NB_LCK_VCTR_REG_MAX  1U  /*!< Maximum number of 32-bit registers to lock superblocks */
@@ -69,6 +70,26 @@ typedef struct
                                      It can be a value of @ref GTZC_MPCBB_InvertSecureState */
   MPCBB_Attribute_ConfigTypeDef AttributeConfig; /*!< MPCBB attribute configuration sub-structure */
 } MPCBB_ConfigTypeDef;
+
+#if defined(GTZC_TZIC_SR4_MPCWM1F)
+typedef struct
+{
+  uint32_t AreaId;     /*!< Area identifier field. It can be a value of @ref
+                            GTZC_MPCWM_AreaId */
+  uint32_t Offset;     /*!< Offset of the watermark area, starting from the selected
+                            memory base address. It must aligned on 128KB for FMC
+                            and OCTOSPI memories, and on 32-byte for BKPSRAM */
+  uint32_t Length;     /*!< Length of the watermark area, starting from the selected
+                            Offset. It must aligned on 128KB for FMC and OCTOSPI
+                            memories, and on 32-byte for BKPSRAM */
+  uint32_t Attribute;  /*!< Attributes of the watermark area. It can be a value
+                            of @ref GTZC_MPCWM_Attribute */
+  uint32_t Lock;       /*!< Lock of the watermark area. It can be a value
+                            of @ref GTZC_MPCWM_Lock */
+  uint32_t AreaStatus; /*!< Status of the watermark area. It can be set to
+                            ENABLE or DISABLE */
+} MPCWM_ConfigTypeDef;
+#endif /* GTZC_TZIC_SR4_MPCWM1F */
 
 /**
   * @}
@@ -149,6 +170,19 @@ typedef struct
   * @}
   */
 
+#if defined(GTZC_TZIC_SR4_MPCWM1F)
+/** @defgroup GTZC_MPCWM_AreaId GTZC MPCWM area identifier values
+  * @{
+  */
+
+#define GTZC_TZSC_MPCWM_ID1  (0U)
+#define GTZC_TZSC_MPCWM_ID2  (1U)
+
+/**
+  * @}
+  */
+#endif /* GTZC_TZIC_SR4_MPCWM1F */
+
 /** @defgroup GTZC_TZSC_TZIC_PeriphId GTZC TZSC and TZIC Peripheral identifier values
   * @{
   */
@@ -185,13 +219,18 @@ typedef struct
 #if defined (TIM1)
 #define GTZC_PERIPH_TIM1          (GTZC_PERIPH_REG2 | GTZC_CFGR2_TIM1_Pos)
 #endif /* TIM1 */
+#if defined (SPI1)
 #define GTZC_PERIPH_SPI1          (GTZC_PERIPH_REG2 | GTZC_CFGR2_SPI1_Pos)
+#endif /* SPI1 */
 #define GTZC_PERIPH_USART1        (GTZC_PERIPH_REG2 | GTZC_CFGR2_USART1_Pos)
 #define GTZC_PERIPH_TIM16         (GTZC_PERIPH_REG2 | GTZC_CFGR2_TIM16_Pos)
 #define GTZC_PERIPH_TIM17         (GTZC_PERIPH_REG2 | GTZC_CFGR2_TIM17_Pos)
 #if defined (SAI1)
 #define GTZC_PERIPH_SAI1          (GTZC_PERIPH_REG2 | GTZC_CFGR2_SAI1_Pos)
 #endif /* SAI1 */
+#if defined (USB_DRD_FS)
+#define GTZC_PERIPH_USB1          (GTZC_PERIPH_REG2 | GTZC_CFGR2_USB1_Pos)
+#endif /* USB_DRD_FS */
 #if defined (SPI3)
 #define GTZC_PERIPH_SPI3          (GTZC_PERIPH_REG2 | GTZC_CFGR2_SPI3_Pos)
 #endif /* SPI3 */
@@ -242,7 +281,7 @@ typedef struct
 #define GTZC_PERIPH_FLASH         (GTZC_PERIPH_REG4 | GTZC_CFGR4_FLASH_Pos)
 #define GTZC_PERIPH_FLASH_REG     (GTZC_PERIPH_REG4 | GTZC_CFGR4_FLASH_REG_Pos)
 #if defined (OTFDEC1)
-#define GTZC_PERIPH_OTFDEC1       (GTZC_PERIPH_REG4 | GTZC_CFGR4_FLASH_REG_Pos)
+#define GTZC_PERIPH_OTFDEC1       (GTZC_PERIPH_REG4 | GTZC_CFGR4_OTFDEC1_Pos)
 #endif /* OTFDEC1 */
 #define GTZC_PERIPH_SYSCFG        (GTZC_PERIPH_REG4 | GTZC_CFGR4_SYSCFG_Pos)
 #define GTZC_PERIPH_RTC           (GTZC_PERIPH_REG4 | GTZC_CFGR4_RTC_Pos)
@@ -259,10 +298,10 @@ typedef struct
 #define GTZC_PERIPH_MPCBB1_REG    (GTZC_PERIPH_REG4 | GTZC_CFGR4_MPCBB1_REG_Pos)
 #define GTZC_PERIPH_SRAM2         (GTZC_PERIPH_REG4 | GTZC_CFGR4_SRAM2_Pos)
 #define GTZC_PERIPH_MPCBB2_REG    (GTZC_PERIPH_REG4 | GTZC_CFGR4_MPCBB2_REG_Pos)
-#if defined (SRAM6_BASE)
+#if defined (GTZC_MPCBB6)
 #define GTZC_PERIPH_SRAM6         (GTZC_PERIPH_REG4 | GTZC_CFGR4_SRAM6_Pos)
 #define GTZC_PERIPH_MPCBB6_REG    (GTZC_PERIPH_REG4 | GTZC_CFGR4_MPCBB6_REG_Pos)
-#endif /* SRAM6 */
+#endif /* MPCBB6 */
 
 #define GTZC_PERIPH_ALL           (0x00000020U)
 
@@ -315,6 +354,44 @@ typedef struct
 /**
   * @}
   */
+#if defined(GTZC_TZIC_SR4_MPCWM1F)
+/** @defgroup GTZC_MPCWM_Group GTZC MPCWM values
+  * @{
+  */
+
+/* user-oriented definitions for TZSC_MPCWM */
+#define GTZC_TZSC_MPCWM_GRANULARITY_1    0x00020000U /* XSPI1 granularity: 128 kbytes */
+
+/**
+  * @}
+  */
+
+/** @defgroup GTZC_MPCWM_Lock GTZC MPCWM Lock values
+  * @{
+  */
+
+/* user-oriented definitions for TZSC_MPCWM */
+#define GTZC_TZSC_MPCWM_LOCK_OFF  (0U)
+#define GTZC_TZSC_MPCWM_LOCK_ON   GTZC1_TZSC_MPCWM1ACFGR_SRLOCK
+
+/**
+  * @}
+  */
+
+/** @defgroup GTZC_MPCWM_Attribute GTZC MPCWM Attribute values
+  * @{
+  */
+
+/* user-oriented definitions for TZSC_MPCWM */
+#define GTZC_TZSC_MPCWM_REGION_NSEC  (0U)
+#define GTZC_TZSC_MPCWM_REGION_SEC   (1U)
+#define GTZC_TZSC_MPCWM_REGION_NPRIV (0U)
+#define GTZC_TZSC_MPCWM_REGION_PRIV  (2U)
+
+/**
+  * @}
+  */
+#endif /* GTZC_TZIC_SR4_MPCWM1F */
 
 /** @defgroup GTZC_MPCBB_Group GTZC MPCBB values
   * @{
@@ -436,6 +513,21 @@ HAL_StatusTypeDef HAL_GTZC_TZSC_GetConfigPeriphAttributes(uint32_t PeriphId,
 /**
   * @}
   */
+
+#if defined(GTZC_TZIC_SR4_MPCWM1F)
+/** @addtogroup GTZC_Exported_Functions_Group2
+  * @brief    MPCWM Initialization and Configuration functions
+  * @{
+  */
+
+HAL_StatusTypeDef HAL_GTZC_TZSC_MPCWM_ConfigMemAttributes(uint32_t MemBaseAddress,
+                                                          const MPCWM_ConfigTypeDef *pMPCWM_Desc);
+HAL_StatusTypeDef HAL_GTZC_TZSC_MPCWM_GetConfigMemAttributes(uint32_t MemBaseAddress,
+                                                             MPCWM_ConfigTypeDef *pMPCWM_Desc);
+/**
+  * @}
+  */
+#endif /* GTZC_TZIC_SR4_MPCWM1F */
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
 
