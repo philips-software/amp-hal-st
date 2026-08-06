@@ -284,8 +284,8 @@ namespace hal
         // Store receive buffer size
         descriptors[receiveDescriptorAllocatedIndex].BackupAddr1 = buffer.size();
 
-        // DMB instruction to avoid race condition
-        __DMB();
+        // DSB instruction to make sure that the descriptors are updated in RAM before the peripheral register is written
+         __DSB();
 
         // Set tail pointer to last element
         peripheralEthernet[0]->DMACRDTPR = reinterpret_cast<uint32_t>(&descriptors[receiveDescriptorAllocatedIndex]);
