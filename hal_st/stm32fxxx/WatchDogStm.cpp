@@ -3,19 +3,20 @@
 namespace hal
 {
     WatchDogStm::WatchDogStm(const infra::Function<void()>& onExpired, const Config& config)
-        : maxMissedFeeds(config.maxMissedFeeds)
-        , onExpired(onExpired)
-        , interruptRegistration(WWDG_IRQn, [this]()
+        : interruptRegistration(WWDG_IRQn, [this]()
               {
                   Interrupt();
               })
+        , feedingTimer(config.timerServiceId)
+        , maxMissedFeeds(config.maxMissedFeeds)
+        , onExpired(onExpired)
     {
         __WWDG_CLK_ENABLE();
         handle.Instance = WWDG;
         handle.Init.Prescaler = config.prescaler;
         handle.Init.Window = WWDG_CR_T;
         handle.Init.Counter = WWDG_CR_T;
-#ifdef STM32F7
+#if defined(WWDG_EWI_ENABLE)
         handle.Init.EWIMode = WWDG_EWI_ENABLE;
 #endif
         HAL_WWDG_Init(&handle);

@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GattClientSt.hpp"
+#include "ble_defs.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/stream/InputStream.hpp"
 #include "infra/util/Endian.hpp"
