@@ -155,7 +155,7 @@ namespace hal
         UartStmHalInit(flowControl, baudrate);
     }
 
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32WBA)
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate)
         : SynchronousUartStmSendOnly(aUartIndex, uartTx, uartTx, lpUart, HwFlowControl::hwControlDisable, baudrate)
     {}
