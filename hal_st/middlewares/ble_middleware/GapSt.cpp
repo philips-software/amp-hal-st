@@ -95,7 +95,7 @@ namespace hal
 
     void GapSt::RemoveAllBonds()
     {
-        really_assert(connectionContext.connectionHandle == invalidConnection);
+        AssertNotConnected();
         bondStorageSynchronizer.RemoveAllBonds();
         UpdateNrBonds();
     }
@@ -135,6 +135,11 @@ namespace hal
         LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
+    void GapSt::AssertNotConnected() const
+    {
+        really_assert(connectionContext.connectionHandle == invalidConnection);
+    }
+
     void GapSt::PairAndBond()
     {
         really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
@@ -158,7 +163,7 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
-        really_assert(connectionContext.connectionHandle == invalidConnection);
+        AssertNotConnected();
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
@@ -169,7 +174,7 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
-        really_assert(connectionContext.connectionHandle == invalidConnection);
+        AssertNotConnected();
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
