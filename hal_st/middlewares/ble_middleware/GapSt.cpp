@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "ble_defs.h"
 #include "ble_gap_aci.h"
 #include "ble_types.h"
@@ -94,6 +95,7 @@ namespace hal
 
     void GapSt::RemoveAllBonds()
     {
+        really_assert(connectionContext.connectionHandle == invalidConnection);
         bondStorageSynchronizer.RemoveAllBonds();
         UpdateNrBonds();
     }
@@ -156,6 +158,7 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
+        really_assert(connectionContext.connectionHandle == invalidConnection);
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
@@ -166,6 +169,7 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        really_assert(connectionContext.connectionHandle == invalidConnection);
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)

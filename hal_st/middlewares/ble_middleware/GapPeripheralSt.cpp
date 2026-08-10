@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 
 namespace
@@ -44,6 +45,7 @@ namespace hal
 
     void GapPeripheralSt::SetAdvertisementData(infra::ConstByteRange data)
     {
+        AssertIsStandby();
         advertisementData.assign(data);
     }
 
@@ -54,12 +56,18 @@ namespace hal
 
     void GapPeripheralSt::SetScanResponseData(infra::ConstByteRange data)
     {
+        AssertIsStandby();
         scanResponseData.assign(data);
     }
 
     infra::ConstByteRange GapPeripheralSt::GetScanResponseData() const
     {
         return infra::MakeRange(scanResponseData);
+    }
+
+    void GapPeripheralSt::AssertIsStandby() const
+    {
+        really_assert(state == services::GapState::standby);
     }
 
     void GapPeripheralSt::UpdateAdvertisementData()
@@ -87,6 +95,7 @@ namespace hal
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
+        AssertIsStandby();
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -132,6 +141,7 @@ namespace hal
 
     void GapPeripheralSt::AllowPairing(bool allow)
     {
+        AssertIsStandby();
         allowPairing = allow;
     }
 

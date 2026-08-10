@@ -33,6 +33,7 @@ namespace hal
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
 
     private:
+        void AssertIsStandby() const;
         void UpdateAdvertisementData();
         void UpdateState(services::GapState newstate);
         void UpdateResolvingList();
