@@ -8,6 +8,7 @@
 #include "services/ble/BondStorageSynchronizer.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include "services/ble/StateGuard.hpp"
 
 namespace hal
 {
@@ -69,6 +70,8 @@ namespace hal
         void GenerateOutOfBandData() override;
         void SetOutOfBandData(const services::GapOutOfBandData& outOfBandData) override;
 
+        virtual services::GapState DetermineCurrentState() const;
+
     protected:
         enum class SecureConnection : uint8_t
         {
@@ -100,7 +103,6 @@ namespace hal
         [[nodiscard]] virtual SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const;
         [[nodiscard]] virtual uint8_t SecurityLevelToMITM(services::GapPairing::SecurityLevel level) const;
 
-        void AssertNotConnected() const;
         void SetIdentityAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
         void ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService);
 
@@ -126,6 +128,7 @@ namespace hal
         };
 
         ConnectionContext connectionContext;
+        services::StateGuardWithOwner<GapSt> stateGuard;
         uint8_t ownAddressType;
         services::GapPairing::SecurityLevel securityLevel;
 
