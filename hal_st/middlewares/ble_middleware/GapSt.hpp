@@ -16,6 +16,7 @@ namespace hal
         : public services::AttMtuExchangeImpl
         , public services::GapBonding
         , public services::GapPairing
+        , public services::StateGuard
         , private HciEventSink
     {
     public:
@@ -70,7 +71,7 @@ namespace hal
         void GenerateOutOfBandData() override;
         void SetOutOfBandData(const services::GapOutOfBandData& outOfBandData) override;
 
-        virtual services::GapState DetermineCurrentState() const;
+        services::GapState DetermineCurrentState() const override;
 
     protected:
         enum class SecureConnection : uint8_t
@@ -128,7 +129,6 @@ namespace hal
         };
 
         ConnectionContext connectionContext;
-        services::StateGuardWithOwner<GapSt> stateGuard;
         uint8_t ownAddressType;
         services::GapPairing::SecurityLevel securityLevel;
 

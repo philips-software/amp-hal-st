@@ -45,7 +45,7 @@ namespace hal
 
     void GapPeripheralSt::SetAdvertisementData(infra::ConstByteRange data)
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         advertisementData.assign(data);
     }
 
@@ -56,7 +56,7 @@ namespace hal
 
     void GapPeripheralSt::SetScanResponseData(infra::ConstByteRange data)
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         scanResponseData.assign(data);
     }
 
@@ -95,7 +95,7 @@ namespace hal
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -141,7 +141,7 @@ namespace hal
 
     void GapPeripheralSt::AllowPairing(bool allow)
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         allowPairing = allow;
     }
 

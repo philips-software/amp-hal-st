@@ -53,7 +53,6 @@ namespace hal
 
     GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
         : HciEventSink(hciEventSource)
-        , stateGuard(*this)
         , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
         , securityLevel(configuration.security.securityLevel)
         , bondStorageSynchronizer(bondStorageSynchronizer)
@@ -101,7 +100,7 @@ namespace hal
 
     void GapSt::RemoveAllBonds()
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         bondStorageSynchronizer.RemoveAllBonds();
         UpdateNrBonds();
     }
@@ -165,7 +164,7 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
@@ -176,7 +175,7 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
-        stateGuard.AssertStateIs({ services::GapState::standby });
+        AssertStateIs({ services::GapState::standby });
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
