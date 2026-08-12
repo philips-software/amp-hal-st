@@ -12,7 +12,7 @@ namespace
 #if defined(FLASH_OPTSR_SWAP_BANK)
         // Bank swap
         if (READ_BIT(FLASH->OPTSR_CUR, FLASH_OPTSR_SWAP_BANK))
-            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;  
+            return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_2 : FLASH_BANK_1;
 #endif
 
         return (address < (FLASH_BASE + FLASH_BANK_SIZE)) ? FLASH_BANK_1 : FLASH_BANK_2;
