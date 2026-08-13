@@ -14,8 +14,6 @@ namespace hal
     public:
         GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
-        services::GapState DetermineCurrentState() const override;
-
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;
         services::GapAddress GetIdentityAddress() const override;
@@ -33,6 +31,7 @@ namespace hal
 
     protected:
         // Implementation of GapSt
+        services::GapState DetermineCurrentState() const override;
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
 

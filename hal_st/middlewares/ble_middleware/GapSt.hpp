@@ -71,8 +71,6 @@ namespace hal
         void GenerateOutOfBandData() override;
         void SetOutOfBandData(const services::GapOutOfBandData& outOfBandData) override;
 
-        services::GapState DetermineCurrentState() const override;
-
     protected:
         enum class SecureConnection : uint8_t
         {
@@ -82,6 +80,8 @@ namespace hal
         };
 
         GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+
+        services::GapState DetermineCurrentState() const override;
 
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
 
