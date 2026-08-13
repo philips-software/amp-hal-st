@@ -16,7 +16,7 @@ namespace hal
         : public services::AttMtuExchangeImpl
         , public services::GapBonding
         , public services::GapPairing
-        , public services::StateGuard
+        , protected services::StateGuard
         , private HciEventSink
     {
     public:
