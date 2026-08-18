@@ -178,9 +178,12 @@ namespace hal
     SynchronousUartStmSendOnly::~SynchronousUartStmSendOnly()
     {
         uartBase->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+  
+#if defined(STM32WB) || defined(STM32WBA)
         if (isLpUart)
             DisableClockLpuart(uartIndex);
         else
+#endif
             DisableClockUart(uartIndex);
     }
 

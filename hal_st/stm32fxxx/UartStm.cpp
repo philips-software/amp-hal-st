@@ -103,9 +103,12 @@ namespace hal
     UartStm::~UartStm()
     {
         uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+        
+#if defined(HAS_PERIPHERAL_LPUART)
         if (isLpUart)
             DisableClockLpuart(uartIndex);
         else
+#endif
             DisableClockUart(uartIndex);
     }
 

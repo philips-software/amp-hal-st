@@ -90,7 +90,9 @@ namespace hal
         PeripheralPinStm uartTx;
         std::optional<PeripheralPinStm> uartRts;
         uint8_t uartIndex;
+#if defined(STM32WB) || defined(STM32WBA)
         bool isLpUart{false};
+#endif
     };
 }
 
