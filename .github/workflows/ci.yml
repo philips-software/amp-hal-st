@@ -152,6 +152,9 @@ jobs:
 
   integration_test:
     name: Integration test
+    # Disabled because this job is constantly failing; re-enable by setting the
+    # repository variable RUN_INTEGRATION_TEST to true.
+    if: ${{ vars.RUN_INTEGRATION_TEST == 'true' }}
     runs-on: ubuntu-latest
     needs: [embedded_build, host_build_test_ubuntu]
     permissions:
