@@ -10,7 +10,7 @@
 
 namespace hal
 {
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32WBA)
     struct SyncLpUart
     {};
 
@@ -74,7 +74,7 @@ namespace hal
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, uint32_t baudrate = 115200);
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
             HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
-#if defined(STM32WB)
+#if defined(STM32WB) || defined(STM32WBA)
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate = 115200);
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
 #endif
