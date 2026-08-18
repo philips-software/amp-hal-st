@@ -163,6 +163,8 @@ namespace hal
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl, uint32_t baudrate)
         : uartBase(peripheralLpuart[aUartIndex - 1])
         , uartTx(uartTx, PinConfigTypeStm::lpuartTx, aUartIndex)
+        , uartIndex(aUartIndex - 1)
+        , isLpUart{true}
     {
         EnableClockLpuart(aUartIndex - 1);
 
@@ -176,6 +178,10 @@ namespace hal
     SynchronousUartStmSendOnly::~SynchronousUartStmSendOnly()
     {
         uartBase->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+        if (isLpUart)
+            DisableClockLpuart(uartIndex);
+        else
+            DisableClockUart(uartIndex);
     }
 
     void SynchronousUartStmSendOnly::SendData(infra::ConstByteRange data)

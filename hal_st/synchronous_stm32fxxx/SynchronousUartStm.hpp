@@ -89,6 +89,8 @@ namespace hal
         USART_TypeDef* const uartBase;
         PeripheralPinStm uartTx;
         std::optional<PeripheralPinStm> uartRts;
+        uint8_t uartIndex;
+        bool isLpUart{false};
     };
 }
 

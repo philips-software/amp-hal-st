@@ -81,6 +81,7 @@ namespace hal
 
         infra::MemoryRange<const uint8_t> sendData;
         bool sending = false;
+        bool isLpUart = false;
         infra::MemoryRange<IRQn_Type const> uartIrqArray;
     };
 }
