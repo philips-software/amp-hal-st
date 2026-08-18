@@ -16,7 +16,7 @@ namespace hal
         GapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
 
         // Implementation of services::GapCentral
-        void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
+        void Connect(services::GapAddress address, const services::GapConnectionParameters& connectionParameters, infra::Duration initiatingTimeout) override;
         void Standby() override;
         void SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;
@@ -54,7 +54,8 @@ namespace hal
         void Initialize(const Configuration& configuration);
 
     private:
-        static const services::GapConnectionParameters connectionUpdateParameters;
+        // Retained from Connect so a parameter update request can be answered with the same values.
+        services::GapConnectionParameters connectionUpdateParameters{};
 
         // Create connection parameters
         const uint16_t leScanInterval = 0x320;

@@ -13,7 +13,7 @@ namespace hal
         TracingGapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer);
 
         // Implementation of services::GapCentral
-        void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
+        void Connect(services::GapAddress address, const services::GapConnectionParameters& connectionParameters, infra::Duration initiatingTimeout) override;
         void Standby() override;
         void SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void StartDeviceDiscovery() override;

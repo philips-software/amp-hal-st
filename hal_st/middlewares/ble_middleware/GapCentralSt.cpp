@@ -10,13 +10,6 @@
 
 namespace hal
 {
-    const services::GapConnectionParameters GapCentralSt::connectionUpdateParameters{
-        6, // 7.5 ms
-        6, // 7.5 ms
-        0,
-        50, // 500 ms
-    };
-
     // Connection Interval parameters
     const uint16_t minConnectionEventLength = 0;
     const uint16_t maxConnectionEventLength = 0x280; // 400 ms
@@ -53,12 +46,14 @@ namespace hal
         Initialize(configuration);
     }
 
-    void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
+    void GapCentralSt::Connect(services::GapAddress address, const services::GapConnectionParameters& connectionParameters, infra::Duration initiatingTimeout)
     {
-        auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
+        connectionUpdateParameters = connectionParameters;
+
+        auto peerAddress = address.type == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
         aci_gap_create_connection(
-            leScanInterval, leScanWindow, peerAddress, macAddress.data(), ownAddressType,
+            leScanInterval, leScanWindow, peerAddress, address.address.data(), ownAddressType,
             connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
             connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
             minConnectionEventLength, maxConnectionEventLength);
