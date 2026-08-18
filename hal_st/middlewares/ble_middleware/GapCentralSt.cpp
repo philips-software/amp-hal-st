@@ -54,8 +54,8 @@ namespace hal
 
         aci_gap_create_connection(
             leScanInterval, leScanWindow, peerAddress, address.address.data(), ownAddressType,
-            connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
-            connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
+            connectionUpdateParameters.minConnectionIntervalMultiplier, connectionUpdateParameters.maxConnectionIntervalMultiplier,
+            connectionUpdateParameters.peripheralLatency, connectionUpdateParameters.supervisionTimeoutMultiplier,
             minConnectionEventLength, maxConnectionEventLength);
 
         infra::Subject<services::GapCentralObserver>::NotifyObservers([](auto& observer)
@@ -197,8 +197,8 @@ namespace hal
         infra::EventDispatcherWithWeakPtr::Instance().Schedule([this, identifier]()
             {
                 auto status = aci_l2cap_connection_parameter_update_resp(
-                    connectionContext.connectionHandle, connectionUpdateParameters.minConnIntMultiplier, connectionUpdateParameters.maxConnIntMultiplier,
-                    connectionUpdateParameters.slaveLatency, connectionUpdateParameters.supervisorTimeoutMs,
+                    connectionContext.connectionHandle, connectionUpdateParameters.minConnectionIntervalMultiplier, connectionUpdateParameters.maxConnectionIntervalMultiplier,
+                    connectionUpdateParameters.peripheralLatency, connectionUpdateParameters.supervisionTimeoutMultiplier,
                     minConnectionEventLength, maxConnectionEventLength, identifier, rejectParameters);
                 assert(status == BLE_STATUS_SUCCESS);
             });

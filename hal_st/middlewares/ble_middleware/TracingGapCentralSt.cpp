@@ -14,13 +14,13 @@ namespace hal
                        << ", type: "
                        << address.type
                        << ", connection interval: "
-                       << connectionParameters.minConnIntMultiplier
+                       << connectionParameters.minConnectionIntervalMultiplier
                        << "-"
-                       << connectionParameters.maxConnIntMultiplier
+                       << connectionParameters.maxConnectionIntervalMultiplier
                        << ", peripheral latency: "
-                       << connectionParameters.slaveLatency
+                       << connectionParameters.peripheralLatency
                        << ", supervision timeout: "
-                       << connectionParameters.supervisorTimeoutMs
+                       << connectionParameters.supervisionTimeoutMultiplier
                        << ", initiating timeout (ms): "
                        << std::chrono::duration_cast<std::chrono::milliseconds>(initiatingTimeout).count();
         GapCentralSt::Connect(address, connectionParameters, initiatingTimeout);

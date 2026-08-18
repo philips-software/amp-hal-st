@@ -54,7 +54,6 @@ namespace hal
         void Initialize(const Configuration& configuration);
 
     private:
-        // Retained from Connect so a parameter update request can be answered with the same values.
         services::GapConnectionParameters connectionUpdateParameters{};
 
         // Create connection parameters
