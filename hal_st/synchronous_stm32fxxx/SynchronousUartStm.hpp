@@ -86,9 +86,11 @@ namespace hal
     private:
         void UartStmHalInit(HwFlowControl flowControl, uint32_t baudrate);
 
+        uint8_t uartIndex;
         USART_TypeDef* const uartBase;
         PeripheralPinStm uartTx;
         std::optional<PeripheralPinStm> uartRts;
+        bool isLpUart = false;
     };
 }
 

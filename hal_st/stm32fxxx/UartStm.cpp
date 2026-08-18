@@ -59,6 +59,7 @@ namespace hal
         RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
+        isLpUart = true;
     }
 #endif
 
@@ -102,7 +103,10 @@ namespace hal
     UartStm::~UartStm()
     {
         uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-        DisableClockUart(uartIndex);
+        if (isLpUart)
+            DisableClockLpuart(uartIndex);
+        else
+            DisableClockUart(uartIndex);
     }
 
     void UartStm::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
