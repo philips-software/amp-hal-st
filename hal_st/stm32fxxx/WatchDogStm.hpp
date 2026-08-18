@@ -21,6 +21,7 @@ namespace hal
             uint32_t prescaler{ WWDG_PRESCALER_8 };
             infra::Duration feedTimerInterval{ std::chrono::milliseconds(25) };
             uint32_t maxMissedFeeds{ 41 };
+            uint32_t timerServiceId{ infra::systemTimerServiceId };
         };
     }
 
