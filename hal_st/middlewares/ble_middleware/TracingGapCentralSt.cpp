@@ -89,6 +89,13 @@ namespace hal
         return GapCentralSt::GetNumberOfBonds();
     }
 
+    infra::MemoryRange<const services::Bond> TracingGapCentralSt::GetBondList() const
+    {
+        auto bonds = GapCentralSt::GetBondList();
+        tracer.Trace() << "TracingGapCentralSt::GetBondList called. Returned " << bonds.size() << " bonds";
+        return bonds;
+    }
+
     bool TracingGapCentralSt::IsDeviceBonded(hal::MacAddress address, services::GapDeviceAddressType addressType) const
     {
         auto ret = GapCentralSt::IsDeviceBonded(address, addressType);
