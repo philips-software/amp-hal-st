@@ -5,7 +5,7 @@
 #include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
-#include "services/ble/BondStorageSynchronizer.hpp"
+#include "services/ble/BondStorageInteractor.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
 
@@ -43,6 +43,7 @@ namespace hal
 
         struct Configuration
         {
+            services::BondStorageInteractor& bondStorageInteractor;
             const MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
@@ -77,7 +78,7 @@ namespace hal
             mandatory
         };
 
-        GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapSt(HciEventSource& hciEventSource, const Configuration& configuration);
 
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
 
@@ -142,7 +143,7 @@ namespace hal
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
-        services::BondStorageSynchronizer& bondStorageSynchronizer;
+        services::BondStorageInteractor& bondStorageInteractor;
         RootKeys rootKeys;
         MacAddress publicAddress;
         uint8_t txPowerLevel;

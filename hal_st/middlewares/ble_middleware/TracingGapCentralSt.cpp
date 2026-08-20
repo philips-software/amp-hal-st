@@ -2,8 +2,8 @@
 
 namespace hal
 {
-    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer)
-        : GapCentralSt(hciEventSource, bondStorageSynchronizer, configuration)
+    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration, services::Tracer& tracer)
+        : GapCentralSt(hciEventSource, configuration)
         , tracer(tracer)
     {}
 

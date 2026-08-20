@@ -12,8 +12,8 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
-        : GapSt(hciEventSource, bondStorageSynchronizer, configuration)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration)
+        : GapSt(hciEventSource, configuration)
     {
         Initialize(configuration);
     }

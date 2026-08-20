@@ -30,9 +30,9 @@ namespace
         }
     }
 
-    bool AddressMatchesBond(const services::GapAddress& address, Bonded_Device_Entry_t& bondEntry)
+    bool AddressMatchesBond(const services::GapAddress& address, const Bonded_Device_Entry_t& bondEntry)
     {
-        return address.type == ToHalAddressType(bondEntry.Address_Type) &&
+        return address.type == ToGapAddressType(bondEntry.Address_Type) &&
                infra::ContentsEqual(infra::MakeRange(address.address), infra::MakeRange(bondEntry.Address));
     }
 
@@ -75,7 +75,7 @@ namespace hal
             aci_gap_remove_bonded_device(storage[i].Address_Type, storage[i].Address);
     }
 
-    void BondStorageSt::RemoveBondIf(const infra::Function<bool(hal::MacAddress)>& onAddress)
+    void BondStorageSt::RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress)
     {
         // TODO: REmove this function?
     }

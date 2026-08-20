@@ -50,11 +50,11 @@ namespace hal
         }
     }
 
-    GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
+    GapSt::GapSt(hal::HciEventSource& hciEventSource, const Configuration& configuration)
         : HciEventSink(hciEventSource)
         , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
         , securityLevel(configuration.security.securityLevel)
-        , bondStorageSynchronizer(bondStorageSynchronizer)
+        , bondStorageInteractor(configuration.bondStorageInteractor)
         , rootKeys(configuration.rootKeys)
         , publicAddress(configuration.address)
         , txPowerLevel(configuration.txPowerLevel)
@@ -94,7 +94,7 @@ namespace hal
 
     void GapSt::RemoveAllBonds()
     {
-        bondStorageSynchronizer.RemoveAllBonds();
+        bondStorageInteractor.RemoveAllBonds();
         UpdateNrBonds();
     }
 
@@ -110,7 +110,7 @@ namespace hal
 
     std::size_t GapSt::GetMaxNumberOfBonds() const
     {
-        return bondStorageSynchronizer.GetMaxNumberOfBonds();
+        return bondStorageInteractor.GetMaxNumberOfBonds();
     }
 
     std::size_t GapSt::GetNumberOfBonds() const
@@ -436,7 +436,7 @@ namespace hal
 
         hal::MacAddress address = connectionContext.peerAddress;
         aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-        bondStorageSynchronizer.UpdateBondedDevice(address);
+        // bondStorageInteractor.UpdateBond(address); // Create the bond object
 
         return true;
     }
