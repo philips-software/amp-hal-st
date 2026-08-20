@@ -11,20 +11,19 @@ extern "C"
 namespace hal
 {
     class BondStorageSt
-        : public services::BondStorage
+        : public services::BondStorageAbsolute
     {
     public:
         explicit BondStorageSt(uint32_t maxNumberOfBonds);
 
         // Implementation of BondStorage
         void BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager) override;
-        void UpdateBondedDevice(hal::MacAddress address) override;
-        void RemoveBond(hal::MacAddress address) override;
+        void RemoveBond(const services::GapAddress& address) override;
         void RemoveAllBonds() override;
-        void RemoveBondIf(const infra::Function<bool(hal::MacAddress)>& onAddress) override;
+        void RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress) override;
         uint32_t GetMaxNumberOfBonds() const override;
-        bool IsBondStored(hal::MacAddress address) const override;
-        void IterateBondedDevices(const infra::Function<void(hal::MacAddress)>& onAddress) override;
+        bool IsBondStored(const services::GapAddress& address) const override;
+        void IterateBondedDevices(const infra::Function<void(const services::GapAddress&)>& onBond) override;
 
     private:
         using BondStorageInternal = Bonded_Device_Entry_t[((BLE_EVT_MAX_PARAM_LEN - 3) - 2) / sizeof(Bonded_Device_Entry_t)];

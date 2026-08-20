@@ -1,4 +1,49 @@
 #include "hal_st/middlewares/ble_middleware/BondStorageSt.hpp"
+#include "infra/util/LogAndAbort.hpp"
+#include "services/ble/Gap.hpp"
+
+namespace
+{
+    bool ToHalAddressType(services::GapDeviceAddressType addressType)
+    {
+        switch (addressType)
+        {
+            case services::GapDeviceAddressType::publicAddress:
+                return 0x00;
+            case services::GapDeviceAddressType::randomAddress:
+                return 0x01;
+            default:
+                LOG_AND_ABORT_ENUM(addressType);
+        }
+    }
+
+    services::GapDeviceAddressType ToGapAddressType(uint8_t addressType)
+    {
+        switch (addressType)
+        {
+            case 0x00:
+                return services::GapDeviceAddressType::publicAddress;
+            case 0x01:
+                return services::GapDeviceAddressType::randomAddress;
+            default:
+                LOG_AND_ABORT_ENUM(addressType);
+        }
+    }
+
+    bool AddressMatchesBond(const services::GapAddress& address, Bonded_Device_Entry_t& bondEntry)
+    {
+        return address.type == ToHalAddressType(bondEntry.Address_Type) &&
+               infra::ContentsEqual(infra::MakeRange(address.address), infra::MakeRange(bondEntry.Address));
+    }
+
+    services::GapAddress ToGapAddress(const Bonded_Device_Entry_t& bondEntry)
+    {
+        services::GapAddress address;
+        std::copy(bondEntry.Address, bondEntry.Address + sizeof(bondEntry.Address), address.address.begin());
+        address.type = ToGapAddressType(bondEntry.Address_Type);
+        return address;
+    }
+}
 
 namespace hal
 {
@@ -9,19 +54,14 @@ namespace hal
     void BondStorageSt::BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager)
     {}
 
-    void BondStorageSt::UpdateBondedDevice(hal::MacAddress address)
-    {
-        // ST middleware handles updating of bonds list internally, so we don't have anything to update here.
-    }
-
-    void BondStorageSt::RemoveBond(hal::MacAddress address)
+    void BondStorageSt::RemoveBond(const services::GapAddress& address)
     {
         uint8_t numberOfBonds;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
         for (auto i = 0; i != numberOfBonds; ++i)
-            if (infra::ContentsEqual(infra::MakeRange(storage[i].Address), infra::MakeRange(address)))
+            if (AddressMatchesBond(address, storage[i]))
                 aci_gap_remove_bonded_device(storage[i].Address_Type, storage[i].Address);
     }
 
@@ -36,37 +76,35 @@ namespace hal
     }
 
     void BondStorageSt::RemoveBondIf(const infra::Function<bool(hal::MacAddress)>& onAddress)
-    {}
+    {
+        // TODO: REmove this function?
+    }
 
     uint32_t BondStorageSt::GetMaxNumberOfBonds() const
     {
         return maxNumberOfBonds;
     }
 
-    bool BondStorageSt::IsBondStored(hal::MacAddress address) const
+    bool BondStorageSt::IsBondStored(const services::GapAddress& address) const
     {
         uint8_t numberOfBonds;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
         for (auto i = 0; i != numberOfBonds; ++i)
-            if (infra::ContentsEqual(infra::MakeRange(storage[i].Address), infra::MakeRange(address)))
+            if (AddressMatchesBond(address, storage[i]))
                 return true;
 
         return false;
     }
 
-    void BondStorageSt::IterateBondedDevices(const infra::Function<void(hal::MacAddress)>& onAddress)
+    void BondStorageSt::IterateBondedDevices(const infra::Function<void(const services::GapAddress&)>& onBond)
     {
         uint8_t numberOfBonds;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
         for (auto i = 0; i != numberOfBonds; ++i)
-        {
-            hal::MacAddress address;
-            infra::Copy(infra::MakeRange(storage[i].Address), infra::MakeRange(address));
-            onAddress(address);
-        }
+            onBond(ToGapAddress(storage[i]));
     }
 }
