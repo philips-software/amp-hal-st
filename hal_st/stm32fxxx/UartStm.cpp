@@ -55,6 +55,7 @@ namespace hal
         , uartHandle()
         , uartArray(peripheralLpuart)
         , uartIrqArray(peripheralLpuartIrq)
+        , isLpUart{true}
     {
         RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
@@ -102,7 +103,13 @@ namespace hal
     UartStm::~UartStm()
     {
         uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-        DisableClockUart(uartIndex);
+        
+#if defined(HAS_PERIPHERAL_LPUART)
+        if (isLpUart)
+            DisableClockLpuart(uartIndex);
+        else
+#endif
+            DisableClockUart(uartIndex);
     }
 
     void UartStm::SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion)
