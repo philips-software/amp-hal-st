@@ -45,7 +45,6 @@ namespace hal
 
     void GapPeripheralSt::SetAdvertisementData(infra::ConstByteRange data)
     {
-        AssertStateIs({ services::GapState::standby });
         advertisementData.assign(data);
     }
 
@@ -56,7 +55,6 @@ namespace hal
 
     void GapPeripheralSt::SetScanResponseData(infra::ConstByteRange data)
     {
-        AssertStateIs({ services::GapState::standby });
         scanResponseData.assign(data);
     }
 
