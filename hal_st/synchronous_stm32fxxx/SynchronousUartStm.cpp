@@ -1,5 +1,4 @@
 #include "hal_st/synchronous_stm32fxxx/SynchronousUartStm.hpp"
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 
 namespace hal
 {
@@ -155,7 +154,7 @@ namespace hal
         UartStmHalInit(flowControl, baudrate);
     }
 
-#if defined(STM32WB) || defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate)
         : SynchronousUartStmSendOnly(aUartIndex, uartTx, uartTx, lpUart, HwFlowControl::hwControlDisable, baudrate)
     {}
@@ -179,7 +178,7 @@ namespace hal
     {
         uartBase->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
   
-#if defined(STM32WB) || defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
         if (isLpUart)
             DisableClockLpuart(uartIndex);
         else
