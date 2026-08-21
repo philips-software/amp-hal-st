@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 
 namespace
@@ -62,6 +63,11 @@ namespace hal
         return infra::MakeRange(scanResponseData);
     }
 
+    services::GapState GapPeripheralSt::DetermineCurrentState() const
+    {
+        return state;
+    }
+
     void GapPeripheralSt::UpdateAdvertisementData()
     {
         // First clear the data set by the aci_gap_set_discoverable call by default
@@ -87,6 +93,7 @@ namespace hal
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
+        AssertStateIs({ services::GapState::standby });
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -132,6 +139,7 @@ namespace hal
 
     void GapPeripheralSt::AllowPairing(bool allow)
     {
+        AssertStateIs({ services::GapState::standby });
         allowPairing = allow;
     }
 
