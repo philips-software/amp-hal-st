@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "ble_defs.h"
 #include "ble_gap_aci.h"
 #include "ble_types.h"
@@ -92,8 +93,14 @@ namespace hal
         }
     }
 
+    services::GapState GapSt::DetermineCurrentState() const
+    {
+        return connectionContext.connectionHandle != invalidConnection ? services::GapState::connected : services::GapState::standby;
+    }
+
     void GapSt::RemoveAllBonds()
     {
+        AssertStateIs({ services::GapState::standby });
         bondStorageSynchronizer.RemoveAllBonds();
         UpdateNrBonds();
     }
@@ -133,6 +140,7 @@ namespace hal
         LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
+
     void GapSt::PairAndBond()
     {
         really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
@@ -156,6 +164,7 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
+        AssertStateIs({ services::GapState::standby });
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
@@ -166,6 +175,7 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        AssertStateIs({ services::GapState::standby });
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
