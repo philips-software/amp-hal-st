@@ -115,12 +115,7 @@ namespace hal
 
     std::size_t GapSt::GetNumberOfBonds() const
     {
-        uint8_t numberOfBondedAddress = 0;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
-
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
-
-        return numberOfBondedAddress;
+        return bondStorageInteractor.GetNumberOfBonds();
     }
 
     bool GapSt::IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const
@@ -186,7 +181,7 @@ namespace hal
                 status = aci_gap_set_io_capability(4);
                 break;
             default:
-                std::abort();
+                LOG_AND_ABORT_ENUM(caps);
                 break;
         }
 
@@ -195,12 +190,12 @@ namespace hal
 
     void GapSt::AuthenticateWithPasskey(uint32_t passkey)
     {
-        std::abort();
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     void GapSt::NumericComparisonConfirm(bool accept)
     {
-        std::abort();
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     void GapSt::GenerateOutOfBandData()
@@ -436,7 +431,15 @@ namespace hal
 
         hal::MacAddress address = connectionContext.peerAddress;
         aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-        // bondStorageInteractor.UpdateBond(address); // Create the bond object
+
+        auto gapAddress = services::GapAddress{ address, connectionContext.peerAddressType };
+        if (!bondStorageInteractor.GetBond(gapAddress))
+        {
+            auto newBond = services::Bond{ gapAddress, "" };
+            bondStorageInteractor.AddBond(newBond);
+        }
+        else
+            bondStorageInteractor.MarkAsRecentlyUsed(gapAddress);
 
         return true;
     }
