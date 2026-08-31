@@ -2,6 +2,7 @@
 #define HAL_ST_GAP_PERIPHERAL_ST_HPP
 
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+
 #include "infra/util/BoundedVector.hpp"
 
 namespace hal
@@ -27,8 +28,10 @@ namespace hal
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
 
+
     protected:
         // Implementation of GapSt
+        services::GapState DetermineCurrentState() const override;
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
 

@@ -8,6 +8,7 @@
 #include "services/ble/BondStorageInteractor.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include "services/ble/StateGuard.hpp"
 
 namespace hal
 {
@@ -15,6 +16,7 @@ namespace hal
         : public services::AttMtuExchangeImpl
         , public services::GapBonding
         , public services::GapPairing
+        , protected services::StateGuard
         , private HciEventSink
     {
     public:
@@ -79,6 +81,8 @@ namespace hal
         };
 
         GapSt(HciEventSource& hciEventSource, const Configuration& configuration);
+
+        services::GapState DetermineCurrentState() const override;
 
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
 

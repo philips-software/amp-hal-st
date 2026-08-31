@@ -16,7 +16,9 @@ namespace hal
         void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         void Standby() override;
         void RemoveAllBonds() override;
+        void RemoveBondWithAddress(services::GapAddress gapAddress) override;
         void AllowPairing(bool allow) override;
+        infra::MemoryRange<const services::Bond> GetBondList() const override;
 
     protected:
         // Implementation of GapPeripheralSt

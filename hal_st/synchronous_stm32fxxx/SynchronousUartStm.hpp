@@ -1,6 +1,7 @@
 #ifndef SYNCHRONOUS_HAL_SYNCHRONOUS_UART_STM_HPP
 #define SYNCHRONOUS_HAL_SYNCHRONOUS_UART_STM_HPP
 
+#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/synchronous_interfaces/SynchronousSerialCommunication.hpp"
 #include "hal/synchronous_interfaces/TimeKeeper.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
@@ -10,7 +11,7 @@
 
 namespace hal
 {
-#if defined(STM32WB) || defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
     struct SyncLpUart
     {};
 
@@ -74,7 +75,7 @@ namespace hal
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, uint32_t baudrate = 115200);
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
             HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
-#if defined(STM32WB) || defined(STM32WBA)
+#if defined(HAS_PERIPHERAL_LPUART)
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate = 115200);
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
 #endif
@@ -89,6 +90,10 @@ namespace hal
         USART_TypeDef* const uartBase;
         PeripheralPinStm uartTx;
         std::optional<PeripheralPinStm> uartRts;
+        uint8_t uartIndex;
+#if defined(HAS_PERIPHERAL_LPUART)
+        bool isLpUart{false};
+#endif
     };
 }
 

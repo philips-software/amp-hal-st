@@ -3,6 +3,7 @@
 #include "ble_gap_aci.h"
 #include "ble_types.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 #include <cstdint>
 
@@ -92,8 +93,14 @@ namespace hal
         }
     }
 
+    services::GapState GapSt::DetermineCurrentState() const
+    {
+        return connectionContext.connectionHandle != invalidConnection ? services::GapState::connected : services::GapState::standby;
+    }
+
     void GapSt::RemoveAllBonds()
     {
+        AssertStateIs({ services::GapState::standby });
         bondStorageInteractor.RemoveAllBonds();
         UpdateNrBonds();
     }
@@ -151,6 +158,7 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
+        AssertStateIs({ services::GapState::standby });
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
@@ -161,6 +169,7 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        AssertStateIs({ services::GapState::standby });
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
