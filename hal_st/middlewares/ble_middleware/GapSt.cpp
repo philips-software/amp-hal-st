@@ -444,6 +444,9 @@ namespace hal
         auto gapAddress = services::GapAddress{ address, connectionContext.peerAddressType };
         if (!bondStorageInteractor.GetBond(gapAddress))
         {
+            if (bondStorageInteractor.Full())
+                bondStorageInteractor.RemoveLeastRecentlyUsedBond();
+
             auto newBond = services::Bond{ gapAddress, "" };
             bondStorageInteractor.AddBond(newBond);
         }
