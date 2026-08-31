@@ -27,10 +27,26 @@ namespace hal
         GapPeripheralSt::RemoveAllBonds();
     }
 
+    void TracingGapPeripheralSt::RemoveBondWithAddress(services::GapAddress gapAddress)
+    {
+        tracer.Trace() << "GapPeripheralSt::RemoveBondWithAddress, MAC address: "
+                       << infra::AsLittleEndianMacAddress(gapAddress.address)
+                       << ", type: "
+                       << gapAddress.type;
+        GapPeripheralSt::RemoveBondWithAddress(gapAddress);
+    }
+
     void TracingGapPeripheralSt::AllowPairing(bool allow)
     {
         tracer.Trace() << "GapPeripheralSt::AllowPairing Allow = " << allow;
         GapPeripheralSt::AllowPairing(allow);
+    }
+
+    infra::MemoryRange<const services::Bond> TracingGapPeripheralSt::GetBondList() const
+    {
+        auto bonds = GapPeripheralSt::GetBondList();
+        tracer.Trace() << "GapPeripheralSt::GetBondList called. Returned " << bonds.size() << " bonds";
+        return bonds;
     }
 
     void TracingGapPeripheralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
