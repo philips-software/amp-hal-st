@@ -80,6 +80,15 @@ namespace hal
         // TODO: REmove this function?
     }
 
+    uint32_t BondStorageSt::GetNumberOfBonds() const
+    {
+        uint8_t numberOfBonds;
+        BondStorageInternal storage;
+        aci_gap_get_bonded_devices(&numberOfBonds, storage);
+
+        return numberOfBonds;
+    }
+
     uint32_t BondStorageSt::GetMaxNumberOfBonds() const
     {
         return maxNumberOfBonds;

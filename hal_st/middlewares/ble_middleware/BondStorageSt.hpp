@@ -21,6 +21,7 @@ namespace hal
         void RemoveBond(const services::GapAddress& address) override;
         void RemoveAllBonds() override;
         void RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress) override;
+        uint32_t GetNumberOfBonds() const override;
         uint32_t GetMaxNumberOfBonds() const override;
         bool IsBondStored(const services::GapAddress& address) const override;
         void IterateBondedDevices(const infra::Function<void(const services::GapAddress&)>& onBond) override;
