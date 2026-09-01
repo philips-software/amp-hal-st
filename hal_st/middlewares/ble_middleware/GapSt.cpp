@@ -102,6 +102,7 @@ namespace hal
     {
         AssertStateIs({ services::GapState::standby });
         bondStorageInteractor.RemoveAllBonds();
+        bondStorageInteractor.AssertBondStoragesAreInSync();
         UpdateNrBonds();
     }
 
@@ -452,6 +453,8 @@ namespace hal
         }
         else
             bondStorageInteractor.MarkAsRecentlyUsed(gapAddress);
+
+        bondStorageInteractor.AssertBondStoragesAreInSync();
 
         return true;
     }
