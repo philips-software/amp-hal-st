@@ -4,19 +4,6 @@
 
 namespace
 {
-    bool ToHalAddressType(services::GapDeviceAddressType addressType)
-    {
-        switch (addressType)
-        {
-            case services::GapDeviceAddressType::publicAddress:
-                return 0x00;
-            case services::GapDeviceAddressType::randomAddress:
-                return 0x01;
-            default:
-                LOG_AND_ABORT_ENUM(addressType);
-        }
-    }
-
     services::GapDeviceAddressType ToGapAddressType(uint8_t addressType)
     {
         switch (addressType)
@@ -56,7 +43,7 @@ namespace hal
 
     void BondStorageSt::RemoveBond(const services::GapAddress& address)
     {
-        uint8_t numberOfBonds;
+        uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
@@ -67,7 +54,7 @@ namespace hal
 
     void BondStorageSt::RemoveAllBonds()
     {
-        uint8_t numberOfBonds;
+        uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
@@ -77,13 +64,13 @@ namespace hal
 
     void BondStorageSt::RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress)
     {
-        // TODO: REmove this function?
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     uint32_t BondStorageSt::GetNumberOfBonds() const
     {
-        uint8_t numberOfBonds;
-        BondStorageInternal storage;
+        uint8_t numberOfBonds = 0;
+        BondStorageInternal storage = 0;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
         return numberOfBonds;
@@ -96,7 +83,7 @@ namespace hal
 
     bool BondStorageSt::IsBondStored(const services::GapAddress& address) const
     {
-        uint8_t numberOfBonds;
+        uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
@@ -109,7 +96,7 @@ namespace hal
 
     void BondStorageSt::IterateBondedDevices(const infra::Function<void(const services::GapAddress&)>& onBond)
     {
-        uint8_t numberOfBonds;
+        uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
