@@ -55,6 +55,8 @@ namespace hal
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
+        AssertStateIs({ services::GapState::standby });
+
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
 
         aci_gap_create_connection(
@@ -92,11 +94,14 @@ namespace hal
 
     void GapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
     {
+        AssertStateIs({ services::GapState::standby });
         GapSt::SetIdentityAddress(macAddress, addressType);
     }
 
     void GapCentralSt::StartDeviceDiscovery()
     {
+        AssertStateIs({ services::GapState::standby });
+
         if (!std::exchange(discovering, true))
         {
             aci_gap_start_general_discovery_proc(leScanInterval, leScanWindow, ownAddressType, filterDuplicatesEnabled);
@@ -117,7 +122,7 @@ namespace hal
 
     void GapCentralSt::SetPrivacyMode(bool enabled)
     {
-        really_assert(!discovering && !initiatingStateTimer.Armed() && connectionContext.connectionHandle == invalidConnection);
+        AssertStateIs({ services::GapState::standby });
 
         ReinitializeGapWithPrivacy(GAP_CENTRAL_ROLE, enabled, gapService);
         SetIoCapabilities(security.ioCapabilities);
@@ -125,12 +130,37 @@ namespace hal
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
     }
 
+    void GapCentralSt::PairAndBond()
+    {
+        AssertStateIs({ services::GapState::connected });
+        GapSt::PairAndBond();
+    }
+
     void GapCentralSt::AllowPairing(bool)
     {}
 
+    void GapCentralSt::AuthenticateWithPasskey(uint32_t passkey)
+    {
+        AssertStateIs({ services::GapState::connected });
+        GapSt::AuthenticateWithPasskey(passkey);
+    }
+
     void GapCentralSt::NumericComparisonConfirm(bool accept)
     {
+        AssertStateIs({ services::GapState::connected });
+
         aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
+    }
+
+    services::GapState GapCentralSt::DetermineCurrentState() const
+    {
+        if (discovering)
+            return services::GapState::scanning;
+
+        if (initiatingStateTimer.Armed())
+            return services::GapState::initiating;
+
+        return GapSt::DetermineCurrentState();
     }
 
     void GapCentralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)

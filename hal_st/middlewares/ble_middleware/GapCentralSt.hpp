@@ -24,10 +24,14 @@ namespace hal
         void SetPrivacyMode(bool enabled) override;
 
         // Implementation of GapPairing
+        void PairAndBond() override;
         void AllowPairing(bool allow) override;
+        void AuthenticateWithPasskey(uint32_t passkey) override;
         void NumericComparisonConfirm(bool accept) override;
 
     protected:
+        services::GapState DetermineCurrentState() const override;
+
         [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
 
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
