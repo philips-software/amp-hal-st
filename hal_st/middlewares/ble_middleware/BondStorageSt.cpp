@@ -32,8 +32,8 @@ namespace
 
     bool AddressMatchesBond(const services::GapAddress& address, const Bonded_Device_Entry_t& bondEntry)
     {
-        return address.type == ToGapAddressType(bondEntry.Address_Type) &&
-               infra::ContentsEqual(infra::MakeRange(address.address), infra::MakeRange(bondEntry.Address));
+        // Note: specifically not checking the address type, since it's not stored in shadow storage currently.
+        return infra::ContentsEqual(infra::MakeRange(address.address), infra::MakeRange(bondEntry.Address));
     }
 
     services::GapAddress ToGapAddress(const Bonded_Device_Entry_t& bondEntry)

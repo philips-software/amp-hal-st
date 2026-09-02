@@ -439,20 +439,19 @@ namespace hal
         if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
             return false;
 
-        hal::MacAddress address = connectionContext.peerAddress;
-        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
+        services::GapAddress identityAddress{ connectionContext.peerAddress, connectionContext.peerAddressType };
+        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), identityAddress.address.data());
 
-        auto gapAddress = services::GapAddress{ address, connectionContext.peerAddressType };
-        if (!bondStorageInteractor.GetBond(gapAddress))
+        if (!bondStorageInteractor.GetBond(identityAddress))
         {
             if (bondStorageInteractor.Full())
                 bondStorageInteractor.RemoveLeastRecentlyUsedBond();
 
-            auto newBond = services::Bond{ gapAddress, "" };
+            auto newBond = services::Bond{ identityAddress, "" };
             bondStorageInteractor.AddBond(newBond);
         }
         else
-            bondStorageInteractor.MarkAsRecentlyUsed(gapAddress);
+            bondStorageInteractor.MarkAsRecentlyUsed(identityAddress);
 
         bondStorageInteractor.AssertBondStoragesAreInSync();
 
