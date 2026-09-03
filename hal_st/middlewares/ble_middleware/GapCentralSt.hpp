@@ -13,7 +13,7 @@ namespace hal
         , public GapSt
     {
     public:
-        GapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration);
 
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
