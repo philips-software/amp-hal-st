@@ -70,7 +70,7 @@ namespace hal
     uint32_t BondStorageSt::GetNumberOfBonds() const
     {
         uint8_t numberOfBonds = 0;
-        BondStorageInternal storage = 0;
+        BondStorageInternal storage;
         aci_gap_get_bonded_devices(&numberOfBonds, storage);
 
         return numberOfBonds;
