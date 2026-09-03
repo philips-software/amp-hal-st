@@ -64,7 +64,14 @@ namespace hal
 
     void BondStorageSt::RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress)
     {
-        LOG_AND_ABORT_NOT_IMPLEMENTED();
+        uint8_t numberOfBonds = 0;
+        BondStorageInternal storage;
+        aci_gap_get_bonded_devices(&numberOfBonds, storage);
+
+        for (auto i = 0; i != numberOfBonds; ++i)
+            if (onAddress(ToGapAddress(storage[i])))
+                aci_gap_remove_bonded_device(storage[i].Address_Type, storage[i].Address);
+
     }
 
     uint32_t BondStorageSt::GetNumberOfBonds() const
@@ -102,5 +109,9 @@ namespace hal
 
         for (auto i = 0; i != numberOfBonds; ++i)
             onBond(ToGapAddress(storage[i]));
+
+        uint8_t numberOfBondsAfter = 0;
+        aci_gap_get_bonded_devices(&numberOfBondsAfter, storage);
+        really_assert(numberOfBondsAfter == numberOfBonds); // This iteration is not CRUD safe
     }
 }
