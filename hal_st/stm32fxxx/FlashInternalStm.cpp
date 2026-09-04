@@ -83,6 +83,8 @@ namespace hal
 
         HAL_FLASH_Lock();
 
+        detail::InvalidateFlashCache();
+
         infra::EventDispatcher::Instance().Schedule(onDone);
     }
 
@@ -139,6 +141,8 @@ namespace hal
 #endif
 
         HAL_FLASH_Lock();
+
+        detail::InvalidateFlashCache();
 
         infra::EventDispatcher::Instance().Schedule(onDone);
     }
