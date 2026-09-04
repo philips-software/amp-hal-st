@@ -2,6 +2,7 @@
 #define HAL_FLASH_INTERNAL_STM_DETAIL_HPP
 
 #include DEVICE_HEADER
+#include "infra/util/ReallyAssert.hpp"
 #include "services/util/FlashAlign.hpp"
 #include <cstdint>
 
@@ -9,6 +10,18 @@ namespace hal
 {
     namespace detail
     {
+        // The ICACHE sits on the Cortex-M33 code bus and caches data reads from flash as well, so it holds stale contents after programming or erasing
+        inline void InvalidateFlashCache()
+        {
+#if defined(ICACHE) && defined(HAL_ICACHE_MODULE_ENABLED)
+            if (HAL_ICACHE_IsEnabled() != 0)
+            {
+                auto result = HAL_ICACHE_Invalidate();
+                really_assert(result == HAL_OK);
+            }
+#endif
+        }
+
         template<typename alignment>
         void AlignedWriteBufferByAddress(services::FlashAlign::Chunk& chunk, uint32_t& fullAddress, uint32_t flashType)
         {

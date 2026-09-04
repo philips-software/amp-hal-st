@@ -76,6 +76,8 @@ namespace hal
 #endif
 
         HAL_FLASH_Lock();
+
+        detail::InvalidateFlashCache();
     }
 
     void SynchronousFlashInternalStmBase::ReadBuffer(infra::ByteRange buffer, uint32_t address)
@@ -139,11 +141,14 @@ namespace hal
 #endif
 
             while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY))
-            {}
+            {
+            }
         }
 #endif
 
         HAL_FLASH_Lock();
+
+        detail::InvalidateFlashCache();
     }
 
     SynchronousFlashInternalStm::SynchronousFlashInternalStm(infra::MemoryRange<uint32_t> sectorSizes, infra::ConstByteRange flashMemory)
