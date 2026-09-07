@@ -439,19 +439,23 @@ namespace hal
         if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
             return false;
 
-        services::GapAddress identityAddress{ connectionContext.peerAddress, connectionContext.peerAddressType };
-        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), identityAddress.address.data());
+        services::GapAddress peerIdentityAddress{ connectionContext.peerAddress, connectionContext.peerAddressType };
+        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), peerIdentityAddress.address.data());
 
-        if (!bondStorageInteractor.GetBond(identityAddress))
+        if (!bondStorageInteractor.GetBond(peerIdentityAddress))
         {
             if (bondStorageInteractor.Full())
-                bondStorageInteractor.RemoveLeastRecentlyUsedBond();
+            {
+                auto leastRecentlyUsedBond = bondStorageInteractor.GetLeastRecentlyUsedBond();
+                really_assert(leastRecentlyUsedBond.has_value());
+                bondStorageInteractor.RemoveBond(leastRecentlyUsedBond->address);
+            }
 
-            auto newBond = services::Bond{ identityAddress, "" };
+            auto newBond = services::Bond{ peerIdentityAddress, "" };
             bondStorageInteractor.AddBond(newBond);
         }
         else
-            bondStorageInteractor.MarkAsRecentlyUsed(identityAddress);
+            bondStorageInteractor.MarkAsRecentlyUsed(peerIdentityAddress);
 
         bondStorageInteractor.AssertBondStoragesAreInSync();
 
