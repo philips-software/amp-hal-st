@@ -11,7 +11,7 @@ extern "C"
 namespace hal
 {
     class BondStorageSt
-        : public services::BondStorageAbsolute
+        : public services::AuthoritativeBondStorage
     {
     public:
         explicit BondStorageSt(uint32_t maxNumberOfBonds);
