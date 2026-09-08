@@ -451,6 +451,8 @@ namespace hal
                 bondStorageInteractor.RemoveBond(leastRecentlyUsedBond->address);
             }
 
+            // Note: The peerIdentityAddress might be of the wrong type.
+            // This is not an issue right now, because it's not stored in the bond storage
             auto newBond = services::Bond{ peerIdentityAddress, "" };
             bondStorageInteractor.AddBond(newBond);
         }
