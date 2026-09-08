@@ -16,7 +16,7 @@ namespace hal
     public:
         explicit AuthoritativeBondStorageSt(uint32_t maxNumberOfBonds);
 
-        // Implementation of BondStorage
+        // Implementation of EnrichedBondStorage
         void BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager) override;
         void RemoveBond(const services::GapAddress& address) override;
         void RemoveAllBonds() override;
