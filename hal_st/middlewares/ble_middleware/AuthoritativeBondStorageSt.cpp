@@ -1,4 +1,4 @@
-#include "hal_st/middlewares/ble_middleware/BondStorageSt.hpp"
+#include "hal_st/middlewares/ble_middleware/AuthoritativeBondStorageSt.hpp"
 #include "infra/util/LogAndAbort.hpp"
 #include "services/ble/Gap.hpp"
 
@@ -34,14 +34,14 @@ namespace
 
 namespace hal
 {
-    BondStorageSt::BondStorageSt(uint32_t maxNumberOfBonds)
+    AuthoritativeBondStorageSt::AuthoritativeBondStorageSt(uint32_t maxNumberOfBonds)
         : maxNumberOfBonds(maxNumberOfBonds)
     {}
 
-    void BondStorageSt::BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager)
+    void AuthoritativeBondStorageSt::BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager)
     {}
 
-    void BondStorageSt::RemoveBond(const services::GapAddress& address)
+    void AuthoritativeBondStorageSt::RemoveBond(const services::GapAddress& address)
     {
         uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
@@ -52,7 +52,7 @@ namespace hal
                 aci_gap_remove_bonded_device(storage[i].Address_Type, storage[i].Address);
     }
 
-    void BondStorageSt::RemoveAllBonds()
+    void AuthoritativeBondStorageSt::RemoveAllBonds()
     {
         uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
@@ -62,7 +62,7 @@ namespace hal
             aci_gap_remove_bonded_device(storage[i].Address_Type, storage[i].Address);
     }
 
-    void BondStorageSt::RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress)
+    void AuthoritativeBondStorageSt::RemoveBondIf(const infra::Function<bool(const services::GapAddress&)>& onAddress)
     {
         uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
@@ -71,10 +71,9 @@ namespace hal
         for (auto i = 0; i != numberOfBonds; ++i)
             if (onAddress(ToGapAddress(storage[i])))
                 aci_gap_remove_bonded_device(storage[i].Address_Type, storage[i].Address);
-
     }
 
-    uint32_t BondStorageSt::GetNumberOfBonds() const
+    uint32_t AuthoritativeBondStorageSt::GetNumberOfBonds() const
     {
         uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
@@ -83,12 +82,12 @@ namespace hal
         return numberOfBonds;
     }
 
-    uint32_t BondStorageSt::GetMaxNumberOfBonds() const
+    uint32_t AuthoritativeBondStorageSt::GetMaxNumberOfBonds() const
     {
         return maxNumberOfBonds;
     }
 
-    bool BondStorageSt::IsBondStored(const services::GapAddress& address) const
+    bool AuthoritativeBondStorageSt::IsBondStored(const services::GapAddress& address) const
     {
         uint8_t numberOfBonds = 0;
         BondStorageInternal storage;
@@ -101,7 +100,7 @@ namespace hal
         return false;
     }
 
-    void BondStorageSt::IterateBondedDevices(const infra::Function<void(const services::GapAddress&)>& onBond)
+    void AuthoritativeBondStorageSt::IterateBondedDevices(const infra::Function<void(const services::GapAddress&)>& onBond)
     {
         uint8_t numberOfBonds = 0;
         BondStorageInternal storage;

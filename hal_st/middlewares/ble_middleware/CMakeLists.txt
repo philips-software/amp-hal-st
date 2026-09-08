@@ -20,8 +20,8 @@ target_link_libraries(hal_st.ble_middleware PUBLIC
 target_sources(hal_st.ble_middleware PRIVATE
     BleDtmSt.cpp
     BleDtmSt.hpp
-    BondStorageSt.cpp
-    BondStorageSt.hpp
+    AuthoritativeBondStorageSt.cpp
+    AuthoritativeBondStorageSt.hpp
     GapCentralSt.cpp
     GapCentralSt.hpp
     GapPeripheralSt.cpp

@@ -10,11 +10,11 @@ extern "C"
 
 namespace hal
 {
-    class BondStorageSt
+    class AuthoritativeBondStorageSt
         : public services::AuthoritativeBondStorage
     {
     public:
-        explicit BondStorageSt(uint32_t maxNumberOfBonds);
+        explicit AuthoritativeBondStorageSt(uint32_t maxNumberOfBonds);
 
         // Implementation of BondStorage
         void BondStorageSynchronizerCreated(services::BondStorageSynchronizer& manager) override;
