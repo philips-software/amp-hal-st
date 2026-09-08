@@ -12,7 +12,7 @@ namespace hal
         , public GapSt
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration);
 
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;
