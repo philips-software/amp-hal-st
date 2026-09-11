@@ -220,7 +220,7 @@ namespace hal
         class CircularStreamInterruptHandler
         {
         public:
-            CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
+            CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority = InterruptPriority::Normal);
 
             bool IsInterruptPending() const;
 
@@ -386,7 +386,7 @@ namespace hal
         : public TransceiverDmaChannelBase
     {
     public:
-        CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
+        CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority = InterruptPriority::Normal);
 
         bool IsInterruptPending() const;
 
@@ -398,7 +398,7 @@ namespace hal
         : private CircularTransceiverDmaChannel
     {
     public:
-        CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
+        CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority = InterruptPriority::Normal);
 
 #ifdef GPDMA1
         using CircularTransceiverDmaChannel::SetPeripheralAddress;
@@ -415,7 +415,7 @@ namespace hal
         : private CircularTransceiverDmaChannel
     {
     public:
-        CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete);
+        CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority = InterruptPriority::Normal);
 
 #ifdef GPDMA1
         using CircularTransceiverDmaChannel::SetPeripheralAddress;

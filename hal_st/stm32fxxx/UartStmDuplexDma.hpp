@@ -38,10 +38,15 @@ namespace hal
         // Implementation of SerialCommunication
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
+        // Number of times Drain() observed both the half- and full-transfer DMA flags pending at
+        // once, meaning the ISR ran at least half a ring late and may have missed data.
+        std::size_t OverrunCount() const;
+        void OverrunDetected(const infra::Function<void()>& onOverrun);
+
     private:
-        void HalfReceiveComplete();
-        void FullReceiveComplete();
-        void ReceiveComplete(size_t currentPosition);
+        // Delivers every byte written by the DMA since the last call, deriving the range(s) from
+        // the live DMA position instead of assuming which callback fired.
+        void Drain();
 
         // Implementation InterruptHandler
         void Invoke() override;
@@ -56,6 +61,9 @@ namespace hal
         infra::MemoryRange<uint8_t> rxBuffer;
         hal::CircularReceiveDmaChannel receiveDmaChannel;
         std::atomic<size_t> lastReceivedPosition{};
+        bool draining = false;
+        std::size_t overrunCount = 0;
+        infra::Function<void()> onOverrun;
     };
 }
 
