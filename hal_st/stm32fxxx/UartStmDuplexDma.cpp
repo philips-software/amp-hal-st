@@ -5,7 +5,6 @@
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
-#include "infra/util/ReallyAssert.hpp"
 #include <cstddef>
 #include <cstdint>
 
@@ -23,12 +22,13 @@ namespace hal
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
-                HalfReceiveComplete();
+                Drain();
             },
             [this]
             {
-                FullReceiveComplete();
-            } }
+                Drain();
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -38,12 +38,13 @@ namespace hal
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
-                HalfReceiveComplete();
+                Drain();
             },
             [this]
             {
-                FullReceiveComplete();
-            } }
+                Drain();
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -53,12 +54,13 @@ namespace hal
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
-                HalfReceiveComplete();
+                Drain();
             },
             [this]
             {
-                FullReceiveComplete();
-            } }
+                Drain();
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -81,6 +83,7 @@ namespace hal
         }
         else
         {
+            lastReceivedPosition = 0;
             receiveDmaChannel.StartReceive(rxBuffer);
 
             uartArray[uartIndex]->CR2 |= USART_CR2_RTOEN;
@@ -89,28 +92,54 @@ namespace hal
         }
     }
 
-    void UartStmDuplexDma::HalfReceiveComplete()
+    std::size_t UartStmDuplexDma::OverrunCount() const
     {
-        ReceiveComplete(this->rxBuffer.size() / 2);
+        return overrunCount;
     }
 
-    void UartStmDuplexDma::FullReceiveComplete()
+    void UartStmDuplexDma::OverrunDetected(const infra::Function<void()>& onOverrun)
     {
-        ReceiveComplete(this->rxBuffer.size());
+        this->onOverrun = onOverrun;
     }
 
-    void UartStmDuplexDma::ReceiveComplete(size_t currentPosition)
+    void UartStmDuplexDma::Drain()
     {
-        if (currentPosition == lastReceivedPosition || !dataReceived)
+        // Re-entered while already draining (e.g. RTOF firing mid-callback); the outer call will pick up the same progress.
+        if (draining || !dataReceived)
             return;
 
-        really_assert(lastReceivedPosition <= currentPosition);
+        draining = true;
 
-        infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
-        lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
+        // Both flags still pending here means the ISR is at least half a ring late.
+        if (receiveDmaChannel.IsInterruptPending())
+        {
+            ++overrunCount;
+            if (onOverrun)
+                onOverrun();
+        }
 
-        if (dataReceived != nullptr)
-            dataReceived(receivedData);
+        for (;;)
+        {
+            auto currentPosition = receiveDmaChannel.ReceivedSize();
+            if (currentPosition == rxBuffer.size())
+                currentPosition = 0;
+
+            if (currentPosition == lastReceivedPosition)
+                break;
+
+            if (currentPosition > lastReceivedPosition)
+                dataReceived(infra::ConstByteRange(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition));
+            else
+            {
+                dataReceived(infra::ConstByteRange(rxBuffer.begin() + lastReceivedPosition, rxBuffer.end()));
+                if (currentPosition != 0)
+                    dataReceived(infra::ConstByteRange(rxBuffer.begin(), rxBuffer.begin() + currentPosition));
+            }
+
+            lastReceivedPosition = currentPosition;
+        }
+
+        draining = false;
     }
 
     void UartStmDuplexDma::Invoke()
@@ -118,13 +147,7 @@ namespace hal
         if (uartArray[uartIndex]->ISR & USART_ISR_RTOF)
         {
             uartArray[uartIndex]->ICR = USART_ICR_RTOCF;
-
-            const auto receivedSize = receiveDmaChannel.ReceivedSize();
-
-            if (receiveDmaChannel.IsInterruptPending())
-                return;
-
-            ReceiveComplete(receivedSize);
+            Drain();
         }
     }
 }
