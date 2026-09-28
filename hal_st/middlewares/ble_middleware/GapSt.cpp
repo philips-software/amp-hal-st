@@ -111,11 +111,6 @@ namespace hal
         LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
-    void GapSt::RemoveOldestBond()
-    {
-        LOG_AND_ABORT_NOT_IMPLEMENTED();
-    }
-
     std::size_t GapSt::GetMaxNumberOfBonds() const
     {
         return bondStorageInteractor.GetMaxNumberOfBonds();

@@ -71,12 +71,6 @@ namespace hal
         GapCentralSt::RemoveBondWithAddress(gapAddress);
     }
 
-    void TracingGapCentralSt::RemoveOldestBond()
-    {
-        tracer.Trace() << "TracingGapCentralSt::RemoveOldestBond";
-        GapCentralSt::RemoveOldestBond();
-    }
-
     std::size_t TracingGapCentralSt::GetMaxNumberOfBonds() const
     {
         tracer.Trace() << "TracingGapCentralSt::GetMaxNumberOfBonds";
