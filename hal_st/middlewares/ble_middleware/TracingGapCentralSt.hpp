@@ -23,7 +23,6 @@ namespace hal
         // Implementation of GapBonding
         void RemoveAllBonds() override;
         void RemoveBondWithAddress(services::GapAddress gapAddress) override;
-        void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
         infra::MemoryRange<const services::Bond> GetBondList() const override;
