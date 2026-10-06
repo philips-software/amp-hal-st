@@ -22,6 +22,8 @@ if (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
     target_sources(services.st_util PRIVATE
         AesGcmStmDma.cpp
         AesGcmStmDma.hpp
+        SesameCryptoPka.cpp
+        SesameCryptoPka.hpp
     )
 
     target_link_libraries(services.st_util PUBLIC
