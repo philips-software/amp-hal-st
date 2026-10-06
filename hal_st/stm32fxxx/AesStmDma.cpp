@@ -196,13 +196,9 @@ namespace hal
         SetPhase(phaseFinal);
 
         const uint64_t payloadBits = static_cast<uint64_t>(data.size()) * 8;
-        std::array<uint8_t, blockSize> lengthBlock{};
-        for (auto i = 0u; i != sizeof(payloadBits); ++i)
-            lengthBlock[blockSize - 1 - i] = static_cast<uint8_t>(payloadBits >> (8 * i));
 
-        // Written as a byte stream like the payload, so that it gets the same byte swapping
-        std::array<uint32_t, 4> block;
-        std::memcpy(block.data(), lengthBlock.data(), blockSize);
+        // DATATYPE swapping does not apply to the length block of the final phase
+        std::array<uint32_t, 4> block{ 0, 0, static_cast<uint32_t>(payloadBits >> 32), static_cast<uint32_t>(payloadBits) };
         ProcessBlock(block);
         std::memcpy(tag.begin(), block.data(), blockSize);
     }
