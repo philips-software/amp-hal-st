@@ -534,12 +534,12 @@ namespace hal
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 
 #if defined(GPDMA1)
-        dataSizeInBytes &= 0x03;
+        const uint32_t log2DataSize = dataSizeInBytes == 4 ? 2 : (dataSizeInBytes & 0x03) >> 1;
         uint32_t mask{ 0 };
         if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
-            mask = (dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos;
+            mask = log2DataSize << DMA_CTR1_DDW_LOG2_Pos;
         else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
-            mask = (dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos;
+            mask = log2DataSize << DMA_CTR1_SDW_LOG2_Pos;
 
         streamRegister->CTR1 = (streamRegister->CTR1 & ~mask) | (streamRegister->CTR1 | mask);
 #elif defined(DMA_SxCR_PSIZE)
@@ -553,12 +553,12 @@ namespace hal
     {
         auto streamRegister = DmaChannel[dmaIndex][streamIndex];
 #if defined(GPDMA1)
-        dataSizeInBytes &= 0x03;
+        const uint32_t log2DataSize = dataSizeInBytes == 4 ? 2 : (dataSizeInBytes & 0x03) >> 1;
         uint32_t mask{ 0 };
         if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY) && (streamRegister->CTR2 & DMA_MEMORY_TO_PERIPH))
-            mask = (dataSizeInBytes >> 1) << DMA_CTR1_SDW_LOG2_Pos;
+            mask = log2DataSize << DMA_CTR1_SDW_LOG2_Pos;
         else if (!(streamRegister->CTR2 & DMA_MEMORY_TO_MEMORY))
-            mask = (dataSizeInBytes >> 1) << DMA_CTR1_DDW_LOG2_Pos;
+            mask = log2DataSize << DMA_CTR1_DDW_LOG2_Pos;
 
         streamRegister->CTR1 = (streamRegister->CTR1 & ~mask) | (streamRegister->CTR1 | mask);
 #elif defined(DMA_SxCR_MSIZE)

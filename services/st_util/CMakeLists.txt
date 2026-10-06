@@ -18,6 +18,18 @@ target_link_libraries(services.st_util PUBLIC
     services.util
 )
 
+if (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
+    target_sources(services.st_util PRIVATE
+        AesGcmStmDma.cpp
+        AesGcmStmDma.hpp
+    )
+
+    target_link_libraries(services.st_util PUBLIC
+        hal_st.stm32fxxx
+        services.sesame_secured
+    )
+endif()
+
 add_subdirectory(test_doubles)
 
 if (HALST_BUILD_TESTS)

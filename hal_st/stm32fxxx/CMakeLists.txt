@@ -21,6 +21,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     AnalogToDigitalPinStm.hpp
     AdcTimerTriggeredBase.cpp
     AdcTimerTriggeredBase.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:AesStmDma.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:AesStmDma.hpp>
     BackupRamStm.cpp
     BackupRamStm.hpp
     CanStm.cpp
