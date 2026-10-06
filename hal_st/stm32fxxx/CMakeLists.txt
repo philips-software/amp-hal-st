@@ -78,6 +78,8 @@ target_sources(hal_st.stm32fxxx PRIVATE
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:I2cStm.hpp>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:PowerModeStm.cpp>
     $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:PowerModeStm.hpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:PkaStm.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbaxx>:PkaStm.hpp>
     QuadSpiStm.cpp
     QuadSpiStm.hpp
     $<$<NOT:$<STREQUAL:${TARGET_MCU_FAMILY},stm32g0xx>>:QuadSpiStmDma.cpp>
