@@ -60,7 +60,7 @@ namespace hal
         result1 = resultX;
         result2 = resultY;
         onBoolResult = onDone;
-        Start(PKA_MODE_ECC_MUL, true);
+        Start(PKA_MODE_ECC_MUL, PkaOperation::scalarMultiplication, true);
     }
 
     void PkaStm::CheckPointOnCurve(const Curve& curve, infra::ConstByteRange x, infra::ConstByteRange y, const infra::Function<void(bool onCurve)>& onDone)
@@ -75,7 +75,7 @@ namespace hal
         WriteOperand(PKA_POINT_CHECK_IN_MONTGOMERY_PARAM, curve.montgomeryParameter);
 
         onBoolResult = onDone;
-        Start(PKA_MODE_POINT_CHECK, false);
+        Start(PKA_MODE_POINT_CHECK, PkaOperation::checkPointOnCurve, false);
     }
 
     void PkaStm::EcdsaSign(const Curve& curve, infra::ConstByteRange privateKey, infra::ConstByteRange k, infra::ConstByteRange hash, infra::ByteRange r, infra::ByteRange s, const infra::Function<void(bool success)>& onDone)
@@ -98,7 +98,7 @@ namespace hal
         result1 = r;
         result2 = s;
         onBoolResult = onDone;
-        Start(PKA_MODE_ECDSA_SIGNATURE, true);
+        Start(PKA_MODE_ECDSA_SIGNATURE, PkaOperation::ecdsaSign, true);
     }
 
     void PkaStm::EcdsaVerify(const Curve& curve, infra::ConstByteRange publicKeyX, infra::ConstByteRange publicKeyY, infra::ConstByteRange r, infra::ConstByteRange s, infra::ConstByteRange hash, const infra::Function<void(bool valid)>& onDone)
@@ -118,7 +118,7 @@ namespace hal
         WriteOperand(PKA_ECDSA_VERIF_IN_ORDER_N, curve.n);
 
         onBoolResult = onDone;
-        Start(PKA_MODE_ECDSA_VERIFICATION, false);
+        Start(PKA_MODE_ECDSA_VERIFICATION, PkaOperation::ecdsaVerify, false);
     }
 
     void PkaStm::Comparison(infra::ConstByteRange a, infra::ConstByteRange b, const infra::Function<void(ComparisonResult result)>& onDone)
@@ -128,7 +128,7 @@ namespace hal
         WriteOperand(PKA_COMPARISON_IN_OP2, b);
 
         onComparisonResult = onDone;
-        Start(PKA_MODE_COMPARISON, false);
+        Start(PKA_MODE_COMPARISON, PkaOperation::comparison, false);
     }
 
     void PkaStm::Enable() const
@@ -189,7 +189,7 @@ namespace hal
         return Pka().RAM[index];
     }
 
-    void PkaStm::Start(uint32_t mode, bool usesPrivateKey)
+    void PkaStm::Start(uint32_t mode, PkaOperation operation, bool usesPrivateKey)
     {
         really_assert(!busy);
 
@@ -200,6 +200,11 @@ namespace hal
         Pka().CLRFR = PKA_CLRFR_PROCENDFC;
         Pka().CR = (Pka().CR & ~PKA_CR_MODE) | (mode << PKA_CR_MODE_Pos) | PKA_CR_PROCENDIE | PKA_CR_RAMERRIE | PKA_CR_ADDRERRIE | PKA_CR_OPERRIE;
         Pka().CR |= PKA_CR_START;
+
+        NotifyObservers([operation](auto& observer)
+            {
+                observer.OperationStarted(operation);
+            });
     }
 
     void PkaStm::OnInterrupt()
@@ -209,6 +214,11 @@ namespace hal
         // The PKA raises a second interrupt after the operation; only the first one, with PROCENDF set, completes the operation
         if (!busy || (Pka().SR & PKA_SR_PROCENDF) == 0)
             return;
+
+        NotifyObservers([](auto& observer)
+            {
+                observer.OperationCompleted();
+            });
 
         Pka().CLRFR = PKA_CLRFR_PROCENDFC;
         while ((Pka().SR & PKA_SR_BUSY) != 0)

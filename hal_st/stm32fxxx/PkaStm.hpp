@@ -6,13 +6,37 @@
 #include "infra/util/ByteRange.hpp"
 #include "infra/util/Function.hpp"
 #include "infra/util/InterfaceConnector.hpp"
+#include "infra/util/Observer.hpp"
 #include <cstdint>
 
 namespace hal
 {
+    class PkaStm;
+
+    enum class PkaOperation : uint8_t
+    {
+        scalarMultiplication,
+        checkPointOnCurve,
+        ecdsaSign,
+        ecdsaVerify,
+        comparison
+    };
+
+    class PkaStmObserver
+        : public infra::Observer<PkaStmObserver, PkaStm>
+    {
+    public:
+        using infra::Observer<PkaStmObserver, PkaStm>::Observer;
+
+        virtual void OperationStarted(PkaOperation operation) = 0;
+        // Called from the dispatched completion interrupt, before the result is processed
+        virtual void OperationCompleted() = 0;
+    };
+
     // Single owner of the PKA peripheral and its interrupt, shared by all users through a claimable resource
     class PkaStm
         : public infra::InterfaceConnector<PkaStm>
+        , public infra::Subject<PkaStmObserver>
     {
     public:
         struct Curve
@@ -57,7 +81,7 @@ namespace hal
         void WriteOperand(uint32_t index, infra::ConstByteRange operand) const;
         void ReadOperand(uint32_t index, infra::ByteRange operand) const;
         uint32_t ReadValue(uint32_t index) const;
-        void Start(uint32_t mode, bool usesPrivateKey);
+        void Start(uint32_t mode, PkaOperation operation, bool usesPrivateKey);
         void OnInterrupt();
         void Processed();
         void ClearRam() const;
