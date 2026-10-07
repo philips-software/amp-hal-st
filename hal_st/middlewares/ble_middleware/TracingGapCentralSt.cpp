@@ -56,6 +56,12 @@ namespace hal
         GapCentralSt::SetPrivacyMode(enabled);
     }
 
+    void TracingGapCentralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetDeviceName name=" << name;
+        GapCentralSt::SetDeviceName(name);
+    }
+
     void TracingGapCentralSt::RemoveAllBonds()
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
