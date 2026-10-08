@@ -131,6 +131,11 @@ namespace hal
         LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
+    bool GapSt::IsBondListPersisted() const
+    {
+        return bondStorageInteractor.IsStoragePersisted();
+    }
+
     void GapSt::PairAndBond()
     {
         really_assert(connectionContext.connectionHandle != GapSt::invalidConnection);
