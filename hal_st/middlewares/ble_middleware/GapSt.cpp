@@ -2,7 +2,6 @@
 #include "ble_defs.h"
 #include "ble_gap_aci.h"
 #include "ble_types.h"
-#include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 #include <cstdint>
@@ -322,16 +321,25 @@ namespace hal
 
     void GapSt::ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService)
     {
-        uint16_t gapServiceHandle = 0;
-        uint16_t gapDevNameCharHandle = 0;
-        uint16_t gapAppearanceCharHandle = 0;
-
         InitializeBleStack();
-        aci_gap_init(role, privacyEnabled ? PRIVACY_ENABLED : PRIVACY_DISABLED, gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(gapService.deviceName.data()));
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
+        InitializeGapService(role, privacyEnabled, gapService);
 
         ownAddressType = privacyEnabled ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR;
+    }
+
+    void GapSt::InitializeGapService(uint8_t role, bool privacyEnabled, const GapService& gapService)
+    {
+        uint16_t gapAppearanceCharHandle = 0;
+
+        aci_gap_init(role, privacyEnabled ? PRIVACY_ENABLED : PRIVACY_DISABLED, gapService.deviceName.max_size(), &gapServiceHandle, &gapDeviceNameCharHandle, &gapAppearanceCharHandle);
+        UpdateDeviceName(gapService.deviceName);
+        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(gapService.appearance), reinterpret_cast<const uint8_t*>(&gapService.appearance));
+    }
+
+    void GapSt::UpdateDeviceName(infra::BoundedConstString name) const
+    {
+        auto status = aci_gatt_update_char_value(gapServiceHandle, gapDeviceNameCharHandle, 0, name.size(), reinterpret_cast<const uint8_t*>(name.data()));
+        really_assert(status == BLE_STATUS_SUCCESS);
     }
 
     void GapSt::HciEvent(hci_event_pckt& event)

@@ -22,6 +22,7 @@ namespace hal
         void StartDeviceDiscovery() override;
         std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
         void SetPrivacyMode(bool enabled) override;
+        void SetDeviceName(infra::BoundedConstString name) override;
 
         // Implementation of GapPairing
         void PairAndBond() override;

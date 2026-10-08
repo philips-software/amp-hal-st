@@ -20,9 +20,11 @@ namespace hal
         , private HciEventSink
     {
     public:
+        static constexpr std::size_t maxDeviceNameSize = 32;
+
         struct GapService
         {
-            infra::BoundedString::WithStorage<32> deviceName;
+            infra::BoundedString::WithStorage<maxDeviceNameSize> deviceName;
             uint16_t appearance;
         };
 
@@ -106,6 +108,8 @@ namespace hal
 
         void SetIdentityAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
         void ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService);
+        void InitializeGapService(uint8_t role, bool privacyEnabled, const GapService& gapService);
+        void UpdateDeviceName(infra::BoundedConstString name) const;
 
     private:
         // Implementation of HciEventSink
@@ -150,6 +154,8 @@ namespace hal
         RootKeys rootKeys;
         MacAddress publicAddress;
         uint8_t txPowerLevel;
+        uint16_t gapServiceHandle = 0;
+        uint16_t gapDeviceNameCharHandle = 0;
     };
 }
 

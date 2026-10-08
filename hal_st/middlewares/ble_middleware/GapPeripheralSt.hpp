@@ -24,6 +24,7 @@ namespace hal
         void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         void Standby() override;
         void SetConnectionParameters(const services::GapConnectionParameters& connParam) override;
+        void SetDeviceName(infra::BoundedConstString name) override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
