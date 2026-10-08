@@ -20,9 +20,11 @@ namespace hal
         , private HciEventSink
     {
     public:
+        static constexpr std::size_t maxDeviceNameSize = 32;
+
         struct GapService
         {
-            infra::BoundedString::WithStorage<32> deviceName;
+            infra::BoundedString::WithStorage<maxDeviceNameSize> deviceName;
             uint16_t appearance;
         };
 

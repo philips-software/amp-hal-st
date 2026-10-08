@@ -42,6 +42,12 @@ namespace hal
         GapPeripheralSt::AllowPairing(allow);
     }
 
+    void TracingGapPeripheralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        tracer.Trace() << "GapPeripheralSt::SetDeviceName name = " << name;
+        GapPeripheralSt::SetDeviceName(name);
+    }
+
     infra::MemoryRange<const services::Bond> TracingGapPeripheralSt::GetBondList() const
     {
         auto bonds = GapPeripheralSt::GetBondList();

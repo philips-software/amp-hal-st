@@ -137,6 +137,14 @@ namespace hal
             connParam.slaveLatency, connParam.supervisorTimeoutMs);
     }
 
+    void GapPeripheralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        AssertStateIs({ services::GapState::standby });
+        really_assert(name.size() <= maxDeviceNameSize);
+
+        UpdateDeviceName(name);
+    }
+
     void GapPeripheralSt::AllowPairing(bool allow)
     {
         AssertStateIs({ services::GapState::standby });
@@ -193,11 +201,7 @@ namespace hal
 
     void GapPeripheralSt::Initialize(const Configuration& configuration)
     {
-        uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
-
-        aci_gap_init(GAP_PERIPHERAL_ROLE, configuration.privacy ? PRIVACY_ENABLED : PRIVACY_DISABLED, configuration.gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, configuration.gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(configuration.gapService.deviceName.data()));
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(configuration.gapService.appearance), reinterpret_cast<const uint8_t*>(&configuration.gapService.appearance));
+        InitializeGapService(GAP_PERIPHERAL_ROLE, configuration.privacy, configuration.gapService);
 
         SetIoCapabilities(configuration.security.ioCapabilities);
         SetSecurityMode(configuration.security.securityMode, configuration.security.securityLevel);
