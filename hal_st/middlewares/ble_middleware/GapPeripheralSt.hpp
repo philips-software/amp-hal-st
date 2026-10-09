@@ -17,6 +17,7 @@ namespace hal
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;
         services::GapAddress GetIdentityAddress() const override;
+        void SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
         void SetAdvertisementData(infra::ConstByteRange data) override;
         infra::ConstByteRange GetAdvertisementData() const override;
         void SetScanResponseData(infra::ConstByteRange data) override;

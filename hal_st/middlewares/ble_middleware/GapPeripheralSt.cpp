@@ -43,6 +43,12 @@ namespace hal
         return address;
     }
 
+    void GapPeripheralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    {
+        AssertStateIs({ services::GapState::standby });
+        GapSt::SetIdentityAddress(macAddress, addressType);
+    }
+
     void GapPeripheralSt::SetAdvertisementData(infra::ConstByteRange data)
     {
         advertisementData.assign(data);
