@@ -1,6 +1,7 @@
 #include "hal_st/stm32fxxx/DmaStm.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/util/ByteRange.hpp"
+#include "infra/util/LogAndAbort.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include <optional>
 #include <variant>
@@ -56,6 +57,8 @@ namespace hal
         const std::array streamToTCIF{ DMA_FLAG_TCIF0_4, DMA_FLAG_TCIF1_5, DMA_FLAG_TCIF2_6, DMA_FLAG_TCIF3_7, DMA_FLAG_TCIF0_4, DMA_FLAG_TCIF1_5, DMA_FLAG_TCIF2_6, DMA_FLAG_TCIF3_7 };
         const std::array streamToHTIF{ DMA_FLAG_HTIF0_4, DMA_FLAG_HTIF1_5, DMA_FLAG_HTIF2_6, DMA_FLAG_HTIF3_7, DMA_FLAG_HTIF0_4, DMA_FLAG_HTIF1_5, DMA_FLAG_HTIF2_6, DMA_FLAG_HTIF3_7 };
         const std::array streamToTEIF{ DMA_FLAG_TEIF0_4, DMA_FLAG_TEIF1_5, DMA_FLAG_TEIF2_6, DMA_FLAG_TEIF3_7, DMA_FLAG_TEIF0_4, DMA_FLAG_TEIF1_5, DMA_FLAG_TEIF2_6, DMA_FLAG_TEIF3_7 };
+        const std::array streamToFEIF{ DMA_FLAG_FEIF0_4, DMA_FLAG_FEIF1_5, DMA_FLAG_FEIF2_6, DMA_FLAG_FEIF3_7, DMA_FLAG_FEIF0_4, DMA_FLAG_FEIF1_5, DMA_FLAG_FEIF2_6, DMA_FLAG_FEIF3_7 };
+        const std::array streamToDMEIF{ DMA_FLAG_DMEIF0_4, DMA_FLAG_DMEIF1_5, DMA_FLAG_DMEIF2_6, DMA_FLAG_DMEIF3_7, DMA_FLAG_DMEIF0_4, DMA_FLAG_DMEIF1_5, DMA_FLAG_DMEIF2_6, DMA_FLAG_DMEIF3_7 };
 #endif
 
 #if defined(DMA_CHANNEL_BASED)
@@ -392,6 +395,8 @@ namespace hal
         static_assert(dmaISR[0].size() == streamToTCIF.size());
         static_assert(dmaISR[0].size() == streamToHTIF.size());
         static_assert(dmaISR[0].size() == streamToTEIF.size());
+        static_assert(dmaISR[0].size() == streamToFEIF.size());
+        static_assert(dmaISR[0].size() == streamToDMEIF.size());
 
         uint32_t dummy;
     }
@@ -796,6 +801,16 @@ namespace hal
         return *dmaISR[dmaIndex][streamIndex] & streamToTCIF[streamIndex];
     }
 
+    bool DmaStm::Stream::HasTransferError() const
+    {
+        return *dmaISR[dmaIndex][streamIndex] & streamToTEIF[streamIndex];
+    }
+
+    bool DmaStm::Stream::HasFifoError() const
+    {
+        return *dmaISR[dmaIndex][streamIndex] & streamToFEIF[streamIndex];
+    }
+
     void DmaStm::Stream::ClearHalfComplete() const
     {
         *dmaIFCR[dmaIndex][streamIndex] |= streamToHTIF[streamIndex];
@@ -957,6 +972,16 @@ namespace hal
             immediateInterruptHandler.ClearPending();
 
             transferFullComplete();
+        }
+
+        if (stream.HasTransferError())
+        {
+            LOG_AND_ABORT("DMA transfer error on dma %d stream/channel %d", stream.dmaIndex, stream.streamIndex);
+        }
+
+        if (stream.HasFifoError())
+        {
+            LOG_AND_ABORT("DMA FIFO error on dma %d stream/channel %d", stream.dmaIndex, stream.streamIndex);
         }
     }
 
@@ -1189,7 +1214,6 @@ namespace hal
         stream.StartReceiveToAddress(const_cast<const void*>(destinationAddress), transferSize);
 #endif
     }
-
 }
 
 #endif

@@ -104,6 +104,8 @@ namespace hal
 
             bool IsHalfComplete() const;
             bool IsFullComplete() const;
+            bool HasTransferError() const;
+            bool HasFifoError() const;
 
             void ClearHalfComplete() const;
             void ClearFullComplete() const;
