@@ -14,7 +14,7 @@ namespace hal
         6, // 7.5 ms
         6, // 7.5 ms
         0,
-        50, // 500 ms
+        300, // 3000 ms
     };
 
     // Connection Interval parameters
