@@ -51,13 +51,18 @@ namespace hal
         void EcdsaVerify(const Curve& curve, infra::ConstByteRange publicKeyX, infra::ConstByteRange publicKeyY, infra::ConstByteRange r, infra::ConstByteRange s, infra::ConstByteRange hash, const infra::Function<void(bool valid)>& onDone);
         void Comparison(infra::ConstByteRange a, infra::ConstByteRange b, const infra::Function<void(ComparisonResult result)>& onDone);
 
+        // Polls for completion without using the interrupt; returns false when an asynchronous operation is in progress or the PKA reports an error
+        bool TryScalarMultiplicationBlocking(const Curve& curve, infra::ConstByteRange scalar, infra::ConstByteRange x, infra::ConstByteRange y, infra::ByteRange resultX, infra::ByteRange resultY);
+
     private:
         void Enable() const;
         void WriteValue(uint32_t index, uint32_t value) const;
         void WriteOperand(uint32_t index, infra::ConstByteRange operand) const;
         void ReadOperand(uint32_t index, infra::ByteRange operand) const;
         uint32_t ReadValue(uint32_t index) const;
+        void WriteScalarMultiplicationOperands(const Curve& curve, infra::ConstByteRange scalar, infra::ConstByteRange x, infra::ConstByteRange y) const;
         void Start(uint32_t mode, bool usesPrivateKey);
+        void RunBlocking(uint32_t mode);
         void OnInterrupt();
         void Processed();
         void ClearRam() const;

@@ -22,6 +22,10 @@ if (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
     target_sources(services.st_util PRIVATE
         AesGcmStmDma.cpp
         AesGcmStmDma.hpp
+        MbedTlsEcpAccelerationPka.cpp
+        MbedTlsEcpAccelerationPka.hpp
+        Secp256r1Pka.cpp
+        Secp256r1Pka.hpp
         SesameCryptoPka.cpp
         SesameCryptoPka.hpp
     )

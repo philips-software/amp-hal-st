@@ -46,16 +46,7 @@ namespace hal
     {
         really_assert(resultX.size() == curve.p.size() && resultY.size() == curve.p.size());
 
-        WriteValue(PKA_ECC_SCALAR_MUL_IN_EXP_NB_BITS, NumberOfBits(curve.n));
-        WriteValue(PKA_ECC_SCALAR_MUL_IN_OP_NB_BITS, NumberOfBits(curve.p));
-        WriteValue(PKA_ECC_SCALAR_MUL_IN_A_COEFF_SIGN, curve.aIsPositive ? 0 : 1);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_A_COEFF, curve.absA);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_B_COEFF, curve.b);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_MOD_GF, curve.p);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_K, scalar);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_INITIAL_POINT_X, x);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_INITIAL_POINT_Y, y);
-        WriteOperand(PKA_ECC_SCALAR_MUL_IN_N_PRIME_ORDER, curve.n);
+        WriteScalarMultiplicationOperands(curve, scalar, x, y);
 
         result1 = resultX;
         result2 = resultY;
@@ -131,6 +122,27 @@ namespace hal
         Start(PKA_MODE_COMPARISON, false);
     }
 
+    bool PkaStm::TryScalarMultiplicationBlocking(const Curve& curve, infra::ConstByteRange scalar, infra::ConstByteRange x, infra::ConstByteRange y, infra::ByteRange resultX, infra::ByteRange resultY)
+    {
+        really_assert(resultX.size() == curve.p.size() && resultY.size() == curve.p.size());
+
+        if (busy)
+            return false;
+
+        WriteScalarMultiplicationOperands(curve, scalar, x, y);
+        RunBlocking(PKA_MODE_ECC_MUL);
+
+        const bool success = ReadValue(PKA_ECC_SCALAR_MUL_OUT_ERROR) == PKA_NO_ERROR;
+        if (success)
+        {
+            ReadOperand(PKA_ECC_SCALAR_MUL_OUT_RESULT_X, resultX);
+            ReadOperand(PKA_ECC_SCALAR_MUL_OUT_RESULT_Y, resultY);
+        }
+
+        ClearRam();
+        return success;
+    }
+
     void PkaStm::Enable() const
     {
         // The PKA RAM is erased with the help of the RNG when the PKA gets enabled
@@ -189,6 +201,20 @@ namespace hal
         return Pka().RAM[index];
     }
 
+    void PkaStm::WriteScalarMultiplicationOperands(const Curve& curve, infra::ConstByteRange scalar, infra::ConstByteRange x, infra::ConstByteRange y) const
+    {
+        WriteValue(PKA_ECC_SCALAR_MUL_IN_EXP_NB_BITS, NumberOfBits(curve.n));
+        WriteValue(PKA_ECC_SCALAR_MUL_IN_OP_NB_BITS, NumberOfBits(curve.p));
+        WriteValue(PKA_ECC_SCALAR_MUL_IN_A_COEFF_SIGN, curve.aIsPositive ? 0 : 1);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_A_COEFF, curve.absA);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_B_COEFF, curve.b);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_MOD_GF, curve.p);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_K, scalar);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_INITIAL_POINT_X, x);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_INITIAL_POINT_Y, y);
+        WriteOperand(PKA_ECC_SCALAR_MUL_IN_N_PRIME_ORDER, curve.n);
+    }
+
     void PkaStm::Start(uint32_t mode, bool usesPrivateKey)
     {
         really_assert(!busy);
@@ -200,6 +226,24 @@ namespace hal
         Pka().CLRFR = PKA_CLRFR_PROCENDFC;
         Pka().CR = (Pka().CR & ~PKA_CR_MODE) | (mode << PKA_CR_MODE_Pos) | PKA_CR_PROCENDIE | PKA_CR_RAMERRIE | PKA_CR_ADDRERRIE | PKA_CR_OPERRIE;
         Pka().CR |= PKA_CR_START;
+    }
+
+    void PkaStm::RunBlocking(uint32_t mode)
+    {
+        Pka().CLRFR = PKA_CLRFR_PROCENDFC;
+        Pka().CR = (Pka().CR & ~(PKA_CR_MODE | PKA_CR_PROCENDIE | PKA_CR_RAMERRIE | PKA_CR_ADDRERRIE | PKA_CR_OPERRIE)) | (mode << PKA_CR_MODE_Pos);
+        Pka().CR |= PKA_CR_START;
+
+        while ((Pka().SR & (PKA_SR_PROCENDF | errorFlags)) == 0)
+            ;
+
+        really_assert((Pka().SR & errorFlags) == 0);
+
+        Pka().CLRFR = PKA_CLRFR_PROCENDFC;
+        while ((Pka().SR & PKA_SR_BUSY) != 0)
+            ;
+
+        interrupt.ClearPending();
     }
 
     void PkaStm::OnInterrupt()
