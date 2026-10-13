@@ -24,6 +24,8 @@ if (TARGET_MCU_FAMILY STREQUAL stm32wbaxx)
         AesGcmStmDma.hpp
         MbedTlsEcpAccelerationPka.cpp
         MbedTlsEcpAccelerationPka.hpp
+        MbedTlsGcmAccelerationAes.cpp
+        MbedTlsGcmAccelerationAes.hpp
         Secp256r1Pka.cpp
         Secp256r1Pka.hpp
         SesameCryptoPka.cpp

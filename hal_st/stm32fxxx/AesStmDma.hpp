@@ -10,8 +10,8 @@
 
 namespace hal
 {
-    // AES-128-GCM without additional authenticated data on the AES peripheral.
-    // Full blocks of large, word-aligned payloads are moved by DMA; everything else is processed by the CPU.
+    // AES-128-GCM on the AES peripheral.
+    // Asynchronous processing supports no additional authenticated data; full blocks of large, word-aligned payloads are moved by DMA, everything else is processed by the CPU.
     class AesStmDma
     {
     public:
@@ -37,18 +37,25 @@ namespace hal
         // Key and iv are only used during the call; data and tag must stay valid until onDone, which is called from the event dispatcher
         void ProcessGcm(Direction direction, infra::ConstByteRange key, infra::ConstByteRange iv, infra::ByteRange data, infra::ByteRange tag, const infra::Function<void()>& onDone);
 
+        // Processes on the CPU, polling for completion; returns false while an asynchronous ProcessGcm is in progress.
+        // Output may be the same range as input
+        bool TryProcessGcmBlocking(Direction direction, infra::ConstByteRange key, infra::ConstByteRange iv, infra::ConstByteRange additionalData, infra::ConstByteRange input, infra::ByteRange output, infra::ByteRange tag);
+
     private:
+        void StartGcm(Direction direction, infra::ConstByteRange key, infra::ConstByteRange iv) const;
         void Reset() const;
         void LoadKey(infra::ConstByteRange key) const;
         void LoadIv(infra::ConstByteRange iv) const;
         void SetPhase(uint32_t phase) const;
         void WaitForComputationComplete() const;
         void ProcessBlock(std::array<uint32_t, 4>& block) const;
+        void ProcessHeaderBlock(const std::array<uint32_t, 4>& block) const;
         void ProcessBlocksWithCpu(infra::ByteRange blocks) const;
         void PayloadTransferred();
         void FinishPayload();
         void ProcessLastPartialBlock() const;
-        void ComputeTag() const;
+        void ProcessPartialBlock(Direction direction, infra::ConstByteRange input, infra::ByteRange output) const;
+        void ComputeTag(std::size_t additionalDataSize, std::size_t payloadSize, infra::ByteRange tag) const;
 
     private:
         TransmitDmaChannel inputDma;

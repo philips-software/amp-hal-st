@@ -10,6 +10,7 @@ namespace hal
     namespace
     {
         constexpr uint32_t phaseInit = 0;
+        constexpr uint32_t phaseHeader = AES_CR_GCMPH_0;
         constexpr uint32_t phasePayload = AES_CR_GCMPH_1;
         constexpr uint32_t phaseFinal = AES_CR_GCMPH_0 | AES_CR_GCMPH_1;
         constexpr uint32_t initialCounter = 2;
@@ -65,15 +66,7 @@ namespace hal
         this->tag = tag;
         this->onDone = onDone;
 
-        // The AES clock is shared with other users that may have turned it off or reset the peripheral
-        EnableClockAes(0);
-        Reset();
-        Aes().CR = AES_CR_CHMOD_0 | AES_CR_CHMOD_1 | AES_CR_DATATYPE_1 | (direction == Direction::decrypt ? AES_CR_MODE_1 : 0);
-        LoadKey(key);
-        LoadIv(iv);
-
-        SetPhase(phaseInit);
-        WaitForComputationComplete();
+        StartGcm(direction, key, iv);
 
         SetPhase(phasePayload);
         auto fullBlocks = infra::Head(data, data.size() - data.size() % blockSize);
@@ -88,6 +81,71 @@ namespace hal
             ProcessBlocksWithCpu(fullBlocks);
             FinishPayload();
         }
+    }
+
+    bool AesStmDma::TryProcessGcmBlocking(Direction direction, infra::ConstByteRange key, infra::ConstByteRange iv, infra::ConstByteRange additionalData, infra::ConstByteRange input, infra::ByteRange output, infra::ByteRange tag)
+    {
+        really_assert(key.size() == keySize && iv.size() == ivSize && tag.size() == blockSize && output.size() == input.size());
+
+        if (onDone != nullptr)
+            return false;
+
+        const auto additionalDataSize = additionalData.size();
+        StartGcm(direction, key, iv);
+
+        if (!additionalData.empty())
+        {
+            SetPhase(phaseHeader);
+
+            std::array<uint32_t, 4> block;
+            while (additionalData.size() >= blockSize)
+            {
+                std::memcpy(block.data(), additionalData.begin(), blockSize);
+                ProcessHeaderBlock(block);
+                additionalData = infra::DiscardHead(additionalData, blockSize);
+            }
+
+            if (!additionalData.empty())
+            {
+                block = {};
+                std::memcpy(block.data(), additionalData.begin(), additionalData.size());
+                ProcessHeaderBlock(block);
+            }
+        }
+
+        if (!input.empty())
+        {
+            SetPhase(phasePayload);
+
+            const auto fullBlocksSize = input.size() - input.size() % blockSize;
+            std::array<uint32_t, 4> block;
+            for (auto offset = 0u; offset != fullBlocksSize; offset += blockSize)
+            {
+                std::memcpy(block.data(), input.begin() + offset, blockSize);
+                ProcessBlock(block);
+                std::memcpy(output.begin() + offset, block.data(), blockSize);
+            }
+
+            if (fullBlocksSize != input.size())
+                ProcessPartialBlock(direction, infra::DiscardHead(input, fullBlocksSize), infra::DiscardHead(output, fullBlocksSize));
+        }
+
+        ComputeTag(additionalDataSize, input.size(), tag);
+        Reset();
+        return true;
+    }
+
+    void AesStmDma::StartGcm(Direction direction, infra::ConstByteRange key, infra::ConstByteRange iv) const
+    {
+        // The AES clock is shared with other users that may have turned it off or reset the peripheral
+        EnableClockAes(0);
+        Reset();
+        Aes().CR = AES_CR_CHMOD_0 | AES_CR_CHMOD_1 | AES_CR_DATATYPE_1 | (direction == Direction::decrypt ? AES_CR_MODE_1 : 0);
+        LoadKey(key);
+        LoadIv(iv);
+
+        SetPhase(phaseInit);
+        WaitForComputationComplete();
     }
 
     void AesStmDma::Reset() const
@@ -144,6 +202,14 @@ namespace hal
             word = Aes().DOUTR;
     }
 
+    void AesStmDma::ProcessHeaderBlock(const std::array<uint32_t, 4>& block) const
+    {
+        for (auto word : block)
+            Aes().DINR = word;
+
+        WaitForComputationComplete();
+    }
+
     void AesStmDma::ProcessBlocksWithCpu(infra::ByteRange blocks) const
     {
         std::array<uint32_t, 4> block;
@@ -166,7 +232,7 @@ namespace hal
     void AesStmDma::FinishPayload()
     {
         ProcessLastPartialBlock();
-        ComputeTag();
+        ComputeTag(0, data.size(), tag);
         Reset();
 
         data = infra::ByteRange();
@@ -180,25 +246,31 @@ namespace hal
         if (remainder == 0)
             return;
 
-        // Encryption must exclude the padding bytes from the tag; decryption hashes the zero-padded input itself
-        if (direction == Direction::encrypt)
-            Aes().CR = (Aes().CR & ~AES_CR_NPBLB) | ((blockSize - remainder) << AES_CR_NPBLB_Pos);
-
-        std::array<uint32_t, 4> block{};
         auto lastBlock = infra::Tail(data, remainder);
-        std::memcpy(block.data(), lastBlock.begin(), remainder);
-        ProcessBlock(block);
-        std::memcpy(lastBlock.begin(), block.data(), remainder);
+        ProcessPartialBlock(direction, lastBlock, lastBlock);
     }
 
-    void AesStmDma::ComputeTag() const
+    void AesStmDma::ProcessPartialBlock(Direction direction, infra::ConstByteRange input, infra::ByteRange output) const
+    {
+        // Encryption must exclude the padding bytes from the tag; decryption hashes the zero-padded input itself
+        if (direction == Direction::encrypt)
+            Aes().CR = (Aes().CR & ~AES_CR_NPBLB) | ((blockSize - input.size()) << AES_CR_NPBLB_Pos);
+
+        std::array<uint32_t, 4> block{};
+        std::memcpy(block.data(), input.begin(), input.size());
+        ProcessBlock(block);
+        std::memcpy(output.begin(), block.data(), input.size());
+    }
+
+    void AesStmDma::ComputeTag(std::size_t additionalDataSize, std::size_t payloadSize, infra::ByteRange tag) const
     {
         SetPhase(phaseFinal);
 
-        const uint64_t payloadBits = static_cast<uint64_t>(data.size()) * 8;
+        const uint64_t additionalDataBits = static_cast<uint64_t>(additionalDataSize) * 8;
+        const uint64_t payloadBits = static_cast<uint64_t>(payloadSize) * 8;
 
         // DATATYPE swapping does not apply to the length block of the final phase
-        std::array<uint32_t, 4> block{ 0, 0, static_cast<uint32_t>(payloadBits >> 32), static_cast<uint32_t>(payloadBits) };
+        std::array<uint32_t, 4> block{ static_cast<uint32_t>(additionalDataBits >> 32), static_cast<uint32_t>(additionalDataBits), static_cast<uint32_t>(payloadBits >> 32), static_cast<uint32_t>(payloadBits) };
         ProcessBlock(block);
         std::memcpy(tag.begin(), block.data(), blockSize);
     }
