@@ -230,12 +230,24 @@ namespace hal
 
     void PkaStm::RunBlocking(uint32_t mode)
     {
+        constexpr uint32_t interruptEnables = PKA_CR_PROCENDIE | PKA_CR_RAMERRIE | PKA_CR_ADDRERRIE | PKA_CR_OPERRIE;
+
+        const auto irq = interrupt.Irq();
+        const bool irqWasEnabled = NVIC_GetEnableIRQ(irq) != 0;
+        const auto systemControl = SCB->SCR;
+
+        // The interrupt stays masked so that completion only wakes the core from WFE without running the asynchronous handler;
+        // deep sleep is excluded because it stops the PKA clock
+        NVIC_DisableIRQ(irq);
+        interrupt.ClearPending();
+        SCB->SCR = (systemControl | SCB_SCR_SEVONPEND_Msk) & ~SCB_SCR_SLEEPDEEP_Msk;
+
         Pka().CLRFR = PKA_CLRFR_PROCENDFC;
-        Pka().CR = (Pka().CR & ~(PKA_CR_MODE | PKA_CR_PROCENDIE | PKA_CR_RAMERRIE | PKA_CR_ADDRERRIE | PKA_CR_OPERRIE)) | (mode << PKA_CR_MODE_Pos);
+        Pka().CR = (Pka().CR & ~(PKA_CR_MODE | interruptEnables)) | (mode << PKA_CR_MODE_Pos) | interruptEnables;
         Pka().CR |= PKA_CR_START;
 
         while ((Pka().SR & (PKA_SR_PROCENDF | errorFlags)) == 0)
-            ;
+            __WFE();
 
         really_assert((Pka().SR & errorFlags) == 0);
 
@@ -243,7 +255,11 @@ namespace hal
         while ((Pka().SR & PKA_SR_BUSY) != 0)
             ;
 
+        Pka().CR &= ~interruptEnables;
         interrupt.ClearPending();
+        SCB->SCR = systemControl;
+        if (irqWasEnabled)
+            NVIC_EnableIRQ(irq);
     }
 
     void PkaStm::OnInterrupt()
