@@ -154,8 +154,8 @@ namespace hal
         RootKeys rootKeys;
         MacAddress publicAddress;
         uint8_t txPowerLevel;
-        uint16_t gapServiceHandle = 0;
-        uint16_t gapDeviceNameCharHandle = 0;
+        services::AttAttribute::Handle gapServiceHandle = 0;
+        services::AttAttribute::Handle gapDeviceNameCharHandle = 0;
     };
 }
 
