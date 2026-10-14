@@ -92,10 +92,10 @@ namespace hal
             aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
     }
 
-    void GapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void GapCentralSt::SetIdentityAddress(services::GapAddress address)
     {
         AssertStateIs({ services::GapState::standby });
-        GapSt::SetIdentityAddress(macAddress, addressType);
+        GapSt::SetIdentityAddress(address.address, address.type);
     }
 
     void GapCentralSt::StartDeviceDiscovery()
