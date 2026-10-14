@@ -61,6 +61,7 @@ namespace hal
         std::size_t GetNumberOfBonds() const override;
         bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
         infra::MemoryRange<const services::Bond> GetBondList() const override;
+        bool IsBondListPersisted() const override;
 
         // Implementation of GapPairing
         void PairAndBond() override;
