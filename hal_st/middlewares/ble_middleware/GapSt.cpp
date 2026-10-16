@@ -128,7 +128,14 @@ namespace hal
 
     infra::MemoryRange<const services::Bond> GapSt::GetBondList() const
     {
-        LOG_AND_ABORT_NOT_IMPLEMENTED();
+        bondList.clear();
+        bondStorageInteractor.IterateBondedDevices([this](const services::Bond& bond)
+            {
+                really_assert(!bondList.full());
+                bondList.push_back(bond);
+            });
+
+        return infra::MakeRange(bondList);
     }
 
     bool GapSt::IsBondListPersisted() const
