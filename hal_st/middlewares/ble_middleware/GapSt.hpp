@@ -5,6 +5,7 @@
 #include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
+#include "infra/util/BoundedVector.hpp"
 #include "services/ble/BondStorageInteractor.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
@@ -148,6 +149,7 @@ namespace hal
 
     private:
         services::BondStorageInteractor& bondStorageInteractor;
+        mutable infra::BoundedVector<services::Bond>::WithMaxSize<maxNumberOfBonds> bondList;
         RootKeys rootKeys;
         MacAddress publicAddress;
         uint8_t txPowerLevel;
