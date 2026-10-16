@@ -3,6 +3,7 @@
 #include "ble_gap_aci.h"
 #include "ble_types.h"
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 #include <cstdint>
 
@@ -50,11 +51,11 @@ namespace hal
         }
     }
 
-    GapSt::GapSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
+    GapSt::GapSt(hal::HciEventSource& hciEventSource, const Configuration& configuration)
         : HciEventSink(hciEventSource)
         , ownAddressType(configuration.privacy ? GAP_RESOLVABLE_PRIVATE_ADDR : GAP_PUBLIC_ADDR)
         , securityLevel(configuration.security.securityLevel)
-        , bondStorageSynchronizer(bondStorageSynchronizer)
+        , bondStorageInteractor(configuration.bondStorageInteractor)
         , rootKeys(configuration.rootKeys)
         , publicAddress(configuration.address)
         , txPowerLevel(configuration.txPowerLevel)
@@ -92,9 +93,16 @@ namespace hal
         }
     }
 
+    services::GapState GapSt::DetermineCurrentState() const
+    {
+        return connectionContext.connectionHandle != invalidConnection ? services::GapState::connected : services::GapState::standby;
+    }
+
     void GapSt::RemoveAllBonds()
     {
-        bondStorageSynchronizer.RemoveAllBonds();
+        AssertStateIs({ services::GapState::standby });
+        bondStorageInteractor.RemoveAllBonds();
+        bondStorageInteractor.AssertBondStoragesAreInSync();
         UpdateNrBonds();
     }
 
@@ -103,24 +111,14 @@ namespace hal
         LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
-    void GapSt::RemoveOldestBond()
-    {
-        LOG_AND_ABORT_NOT_IMPLEMENTED();
-    }
-
     std::size_t GapSt::GetMaxNumberOfBonds() const
     {
-        return bondStorageSynchronizer.GetMaxNumberOfBonds();
+        return bondStorageInteractor.GetMaxNumberOfBonds();
     }
 
     std::size_t GapSt::GetNumberOfBonds() const
     {
-        uint8_t numberOfBondedAddress = 0;
-        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
-
-        aci_gap_get_bonded_devices(&numberOfBondedAddress, bondedDevices.data());
-
-        return numberOfBondedAddress;
+        return bondStorageInteractor.GetNumberOfBonds();
     }
 
     bool GapSt::IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const
@@ -131,6 +129,11 @@ namespace hal
     infra::MemoryRange<const services::Bond> GapSt::GetBondList() const
     {
         LOG_AND_ABORT_NOT_IMPLEMENTED();
+    }
+
+    bool GapSt::IsBondListPersisted() const
+    {
+        return bondStorageInteractor.IsStoragePersisted();
     }
 
     void GapSt::PairAndBond()
@@ -156,6 +159,7 @@ namespace hal
 
     void GapSt::SetSecurityMode(services::GapPairing::SecurityMode mode, services::GapPairing::SecurityLevel level)
     {
+        AssertStateIs({ services::GapState::standby });
         assert(mode == services::GapPairing::SecurityMode::mode1);
 
         SecureConnection secureConnectionSupport = SecurityLevelToSecureConnection(level);
@@ -166,6 +170,7 @@ namespace hal
 
     void GapSt::SetIoCapabilities(services::GapPairing::IoCapabilities caps)
     {
+        AssertStateIs({ services::GapState::standby });
         tBleStatus status = BLE_STATUS_FAILED;
 
         switch (caps)
@@ -186,7 +191,7 @@ namespace hal
                 status = aci_gap_set_io_capability(4);
                 break;
             default:
-                std::abort();
+                LOG_AND_ABORT_ENUM(caps);
                 break;
         }
 
@@ -195,12 +200,12 @@ namespace hal
 
     void GapSt::AuthenticateWithPasskey(uint32_t passkey)
     {
-        std::abort();
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     void GapSt::NumericComparisonConfirm(bool accept)
     {
-        std::abort();
+        LOG_AND_ABORT_NOT_IMPLEMENTED();
     }
 
     void GapSt::GenerateOutOfBandData()
@@ -434,9 +439,27 @@ namespace hal
         if (!IsDeviceBonded(connectionContext.peerAddress, connectionContext.peerAddressType))
             return false;
 
-        hal::MacAddress address = connectionContext.peerAddress;
-        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), address.data());
-        bondStorageSynchronizer.UpdateBondedDevice(address);
+        services::GapAddress peerIdentityAddress{ connectionContext.peerAddress, connectionContext.peerAddressType };
+        aci_gap_resolve_private_addr(connectionContext.peerAddress.data(), peerIdentityAddress.address.data());
+
+        if (!bondStorageInteractor.GetBond(peerIdentityAddress))
+        {
+            if (bondStorageInteractor.Full())
+            {
+                auto leastRecentlyUsedBond = bondStorageInteractor.GetLeastRecentlyUsedBond();
+                really_assert(leastRecentlyUsedBond.has_value());
+                bondStorageInteractor.RemoveBond(leastRecentlyUsedBond->address);
+            }
+
+            // Note: The peerIdentityAddress might be of the wrong type.
+            // This is not an issue right now, because it's not stored in the bond storage
+            auto newBond = services::Bond{ peerIdentityAddress, "" };
+            bondStorageInteractor.AddBond(newBond);
+        }
+        else
+            bondStorageInteractor.MarkAsRecentlyUsed(peerIdentityAddress);
+
+        bondStorageInteractor.AssertBondStoragesAreInSync();
 
         return true;
     }

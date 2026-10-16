@@ -10,12 +10,12 @@ namespace hal
         : public GapCentralSt
     {
     public:
-        TracingGapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer);
+        TracingGapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration, services::Tracer& tracer);
 
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
         void Standby() override;
-        void SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void SetIdentityAddress(services::GapAddress address) override;
         void StartDeviceDiscovery() override;
         std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
         void SetPrivacyMode(bool enabled) override;
@@ -23,9 +23,9 @@ namespace hal
         // Implementation of GapBonding
         void RemoveAllBonds() override;
         void RemoveBondWithAddress(services::GapAddress gapAddress) override;
-        void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
+        infra::MemoryRange<const services::Bond> GetBondList() const override;
         bool IsDeviceBonded(hal::MacAddress address, services::GapDeviceAddressType addressType) const override;
 
         // Implementation of GapPairing

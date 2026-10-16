@@ -5,9 +5,10 @@
 #include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
-#include "services/ble/BondStorageSynchronizer.hpp"
+#include "services/ble/BondStorageInteractor.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
+#include "services/ble/StateGuard.hpp"
 
 namespace hal
 {
@@ -15,6 +16,7 @@ namespace hal
         : public services::AttMtuExchangeImpl
         , public services::GapBonding
         , public services::GapPairing
+        , protected services::StateGuard
         , private HciEventSink
     {
     public:
@@ -43,6 +45,7 @@ namespace hal
 
         struct Configuration
         {
+            services::BondStorageInteractor& bondStorageInteractor;
             const MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
@@ -54,11 +57,11 @@ namespace hal
         // Implementation of GapBonding
         void RemoveAllBonds() override;
         void RemoveBondWithAddress(services::GapAddress gapAddress) override;
-        void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
         bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
         infra::MemoryRange<const services::Bond> GetBondList() const override;
+        bool IsBondListPersisted() const override;
 
         // Implementation of GapPairing
         void PairAndBond() override;
@@ -77,7 +80,9 @@ namespace hal
             mandatory
         };
 
-        GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapSt(HciEventSource& hciEventSource, const Configuration& configuration);
+
+        services::GapState DetermineCurrentState() const override;
 
         virtual void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event);
 
@@ -142,7 +147,7 @@ namespace hal
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
-        services::BondStorageSynchronizer& bondStorageSynchronizer;
+        services::BondStorageInteractor& bondStorageInteractor;
         RootKeys rootKeys;
         MacAddress publicAddress;
         uint8_t txPowerLevel;

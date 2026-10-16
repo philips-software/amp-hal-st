@@ -55,11 +55,11 @@ namespace hal
         , uartHandle()
         , uartArray(peripheralLpuart)
         , uartIrqArray(peripheralLpuartIrq)
+        , isLpUart{true}
     {
         RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
-        isLpUart = true;
     }
 #endif
 
@@ -103,9 +103,12 @@ namespace hal
     UartStm::~UartStm()
     {
         uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
+        
+#if defined(HAS_PERIPHERAL_LPUART)
         if (isLpUart)
             DisableClockLpuart(uartIndex);
         else
+#endif
             DisableClockUart(uartIndex);
     }
 

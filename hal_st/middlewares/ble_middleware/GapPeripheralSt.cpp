@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 
 namespace
@@ -12,8 +13,8 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
-        : GapSt(hciEventSource, bondStorageSynchronizer, configuration)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration)
+        : GapSt(hciEventSource, configuration)
     {
         Initialize(configuration);
     }
@@ -42,6 +43,12 @@ namespace hal
         return address;
     }
 
+    void GapPeripheralSt::SetIdentityAddress(services::GapAddress address)
+    {
+        AssertStateIs({ services::GapState::standby });
+        GapSt::SetIdentityAddress(address.address, address.type);
+    }
+
     void GapPeripheralSt::SetAdvertisementData(infra::ConstByteRange data)
     {
         advertisementData.assign(data);
@@ -60,6 +67,11 @@ namespace hal
     infra::ConstByteRange GapPeripheralSt::GetScanResponseData() const
     {
         return infra::MakeRange(scanResponseData);
+    }
+
+    services::GapState GapPeripheralSt::DetermineCurrentState() const
+    {
+        return state;
     }
 
     void GapPeripheralSt::UpdateAdvertisementData()
@@ -87,6 +99,7 @@ namespace hal
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
+        AssertStateIs({ services::GapState::standby });
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -132,6 +145,7 @@ namespace hal
 
     void GapPeripheralSt::AllowPairing(bool allow)
     {
+        AssertStateIs({ services::GapState::standby });
         allowPairing = allow;
     }
 
