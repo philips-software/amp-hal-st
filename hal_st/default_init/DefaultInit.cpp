@@ -77,7 +77,7 @@ extern "C"
 
     void assert_failed(uint8_t* file, uint32_t line)
     {
-        infra::ExecuteLogAndAbortHook("Assertion failed", reinterpret_cast<const char*>(file), line, "");
+        infra::ExecuteLogAndAbortHook("HAL Assert failed", reinterpret_cast<const char*>(file), line, "");
         std::abort();
     }
 }
