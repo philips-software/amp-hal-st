@@ -18,6 +18,7 @@ namespace hal
         void RemoveAllBonds() override;
         void RemoveBondWithAddress(services::GapAddress gapAddress) override;
         void AllowPairing(bool allow) override;
+        void NumericComparisonConfirm(bool accept) override;
         infra::MemoryRange<const services::Bond> GetBondList() const override;
 
     protected:
@@ -29,6 +30,7 @@ namespace hal
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
         void HandlePairingCompleteEvent(const aci_gap_pairing_complete_event_rp0& event) override;
         void HandleBondLostEvent() override;
+        void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) override;
         void HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event) override;
 
     private:

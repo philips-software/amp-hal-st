@@ -28,6 +28,7 @@ namespace hal
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
+        void NumericComparisonConfirm(bool accept) override;
 
 
     protected:
@@ -35,6 +36,7 @@ namespace hal
         services::GapState DetermineCurrentState() const override;
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
+        void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) override;
 
     private:
         void UpdateAdvertisementData();
