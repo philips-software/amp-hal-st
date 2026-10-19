@@ -149,15 +149,6 @@ namespace hal
         allowPairing = allow;
     }
 
-    void GapPeripheralSt::NumericComparisonConfirm(bool accept)
-    {
-        AssertStateIs({ services::GapState::standby, services::GapState::connected });
-
-        // The peer may have disconnected or the pairing may have timed out before the confirmation arrives
-        if (connectionContext.connectionHandle != GapSt::invalidConnection)
-            aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
-    }
-
     void GapPeripheralSt::UpdateResolvingList()
     {
         aci_gap_configure_whitelist();
@@ -204,18 +195,6 @@ namespace hal
         GapSt::HandleHciLeEnhancedConnectionCompleteEvent(event);
 
         UpdateState(services::GapState::connected);
-    }
-
-    void GapPeripheralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
-    {
-        GapSt::HandleNumericComparisonValueEvent(event);
-
-        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
-
-        GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
-            {
-                observer.AuthenticationRequired(true, static_cast<int32_t>(passkey));
-            });
     }
 
     void GapPeripheralSt::Initialize(const Configuration& configuration)
