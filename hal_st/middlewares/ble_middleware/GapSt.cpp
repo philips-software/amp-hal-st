@@ -5,6 +5,8 @@
 #include "infra/event/EventDispatcherWithWeakPtr.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
+#include <algorithm>
+#include <array>
 #include <cstdint>
 
 namespace hal
@@ -128,11 +130,26 @@ namespace hal
 
     infra::MemoryRange<const services::Bond> GapSt::GetBondList() const
     {
+        uint8_t numberOfBondedDevices = 0;
+        std::array<Bonded_Device_Entry_t, maxNumberOfBonds> bondedDevices;
+        aci_gap_get_bonded_devices(&numberOfBondedDevices, bondedDevices.data());
+        const auto stackBonds = infra::Head(infra::MakeRange(bondedDevices), numberOfBondedDevices);
+
         bondList.clear();
-        bondStorageInteractor.IterateBondedDevices([this](const services::Bond& bond)
+        bondStorageInteractor.IterateBondedDevices([this, &stackBonds](const services::Bond& bond)
             {
                 really_assert(!bondList.full());
-                bondList.push_back(bond);
+
+                // The bond storage may not keep the address type, so take it from the BLE stack
+                auto stackBond = std::find_if(stackBonds.begin(), stackBonds.end(), [&bond](const Bonded_Device_Entry_t& entry)
+                    {
+                        return infra::ContentsEqual(infra::MakeRange(entry.Address), infra::MakeRange(bond.address.address));
+                    });
+                really_assert(stackBond != stackBonds.end());
+
+                auto bondWithAddressType = bond;
+                bondWithAddressType.address.type = ToDeviceAddressType(stackBond->Address_Type);
+                bondList.push_back(bondWithAddressType);
             });
 
         return infra::MakeRange(bondList);
