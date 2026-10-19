@@ -1,4 +1,5 @@
 #include "hal_st/middlewares/ble_middleware/GattServerSt.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include <variant>
 
 namespace
@@ -38,6 +39,26 @@ namespace
     {
         return infra::enum_cast(access);
     }
+
+#if defined(STM32WBA)
+    // The stack creates the Client Characteristic Configuration descriptor without security; give it the write security of its characteristic
+    void ProtectClientCharacteristicConfiguration(services::GattServerCharacteristic& characteristic)
+    {
+        constexpr uint16_t clientCharacteristicConfigurationOffset = 2;
+        const auto notifyOrIndicate = services::GattCharacteristic::PropertyFlags::notify | services::GattCharacteristic::PropertyFlags::indicate;
+        const auto writeSecurity = services::GattServerCharacteristic::PermissionFlags::authenticatedWrite | services::GattServerCharacteristic::PermissionFlags::authorizedWrite | services::GattServerCharacteristic::PermissionFlags::encryptedWrite;
+
+        if ((characteristic.Properties() & notifyOrIndicate) == services::GattCharacteristic::PropertyFlags::none)
+            return;
+
+        const auto permissions = ConvertPermissions(characteristic.Permissions() & writeSecurity);
+        if (permissions == ATTR_PERMISSION_NONE)
+            return;
+
+        auto result = aci_gatt_set_security_permission(characteristic.ServiceHandle(), characteristic.Handle() + clientCharacteristicConfigurationOffset, permissions);
+        really_assert(result == BLE_STATUS_SUCCESS);
+    }
+#endif
 }
 
 namespace hal
@@ -123,7 +144,12 @@ namespace hal
             &characteristic.Handle());
 
         if (result == BLE_STATUS_SUCCESS)
+        {
+#if defined(STM32WBA)
+            ProtectClientCharacteristicConfiguration(characteristic);
+#endif
             characteristic.Attach(*this);
+        }
         else
             ReportError(result);
     }
