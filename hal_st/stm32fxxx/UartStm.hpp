@@ -81,7 +81,9 @@ namespace hal
 
         infra::MemoryRange<const uint8_t> sendData;
         bool sending = false;
+#if defined(HAS_PERIPHERAL_LPUART)
         bool isLpUart = false;
+#endif
         infra::MemoryRange<IRQn_Type const> uartIrqArray;
     };
 }

@@ -4,8 +4,8 @@
 
 namespace hal
 {
-    TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer)
-        : GapPeripheralSt(hciEventSource, bondStorageSynchronizer, configuration)
+    TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration, services::Tracer& tracer)
+        : GapPeripheralSt(hciEventSource, configuration)
         , tracer(tracer)
     {}
 
@@ -27,10 +27,32 @@ namespace hal
         GapPeripheralSt::RemoveAllBonds();
     }
 
+    void TracingGapPeripheralSt::RemoveBondWithAddress(services::GapAddress gapAddress)
+    {
+        tracer.Trace() << "GapPeripheralSt::RemoveBondWithAddress, MAC address: "
+                       << infra::AsLittleEndianMacAddress(gapAddress.address)
+                       << ", type: "
+                       << gapAddress.type;
+        GapPeripheralSt::RemoveBondWithAddress(gapAddress);
+    }
+
     void TracingGapPeripheralSt::AllowPairing(bool allow)
     {
         tracer.Trace() << "GapPeripheralSt::AllowPairing Allow = " << allow;
         GapPeripheralSt::AllowPairing(allow);
+    }
+
+    void TracingGapPeripheralSt::NumericComparisonConfirm(bool accept)
+    {
+        tracer.Trace() << "GapPeripheralSt::NumericComparisonConfirm Accept = " << accept;
+        GapPeripheralSt::NumericComparisonConfirm(accept);
+    }
+
+    infra::MemoryRange<const services::Bond> TracingGapPeripheralSt::GetBondList() const
+    {
+        auto bonds = GapPeripheralSt::GetBondList();
+        tracer.Trace() << "GapPeripheralSt::GetBondList called. Returned " << bonds.size() << " bonds";
+        return bonds;
     }
 
     void TracingGapPeripheralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
@@ -85,6 +107,12 @@ namespace hal
     {
         tracer.Trace() << "GapPeripheralSt::HandleBondLostEvent";
         GapPeripheralSt::HandleBondLostEvent();
+    }
+
+    void TracingGapPeripheralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
+    {
+        tracer.Trace() << "GapPeripheralSt::HandleNumericComparisonValueEvent Handle = " << event.Connection_Handle << " Value = " << event.Numeric_Value;
+        GapPeripheralSt::HandleNumericComparisonValueEvent(event);
     }
 
     void TracingGapPeripheralSt::HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event)

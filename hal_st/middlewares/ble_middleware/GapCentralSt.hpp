@@ -13,21 +13,24 @@ namespace hal
         , public GapSt
     {
     public:
-        GapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration);
 
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
         void Standby() override;
-        void SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType) override;
+        void SetIdentityAddress(services::GapAddress address) override;
         void StartDeviceDiscovery() override;
         std::optional<hal::MacAddress> ResolvePrivateAddress(hal::MacAddress address) const override;
         void SetPrivacyMode(bool enabled) override;
 
         // Implementation of GapPairing
+        void PairAndBond() override;
         void AllowPairing(bool allow) override;
-        void NumericComparisonConfirm(bool accept) override;
+        void AuthenticateWithPasskey(uint32_t passkey) override;
 
     protected:
+        services::GapState DetermineCurrentState() const override;
+
         [[nodiscard]] SecureConnection SecurityLevelToSecureConnection(services::GapPairing::SecurityLevel level) const override;
 
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
@@ -36,7 +39,6 @@ namespace hal
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
         void HandleHciLeDataLengthChangeEvent(const hci_le_data_length_change_event_rp0& event) override;
         void HandleHciLePhyUpdateCompleteEvent(const hci_le_phy_update_complete_event_rp0& event) override;
-        void HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event) override;
         void HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event) override;
         void HandleGattCompleteEvent(const aci_gatt_proc_complete_event_rp0& event) override;
         void HandleL2capConnectionUpdateRequestEvent(const aci_l2cap_connection_update_req_event_rp0& event) override;
