@@ -42,6 +42,12 @@ namespace hal
         GapPeripheralSt::AllowPairing(allow);
     }
 
+    void TracingGapPeripheralSt::NumericComparisonConfirm(bool accept)
+    {
+        tracer.Trace() << "GapPeripheralSt::NumericComparisonConfirm Accept = " << accept;
+        GapPeripheralSt::NumericComparisonConfirm(accept);
+    }
+
     infra::MemoryRange<const services::Bond> TracingGapPeripheralSt::GetBondList() const
     {
         auto bonds = GapPeripheralSt::GetBondList();
@@ -101,6 +107,12 @@ namespace hal
     {
         tracer.Trace() << "GapPeripheralSt::HandleBondLostEvent";
         GapPeripheralSt::HandleBondLostEvent();
+    }
+
+    void TracingGapPeripheralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
+    {
+        tracer.Trace() << "GapPeripheralSt::HandleNumericComparisonValueEvent Handle = " << event.Connection_Handle << " Value = " << event.Numeric_Value;
+        GapPeripheralSt::HandleNumericComparisonValueEvent(event);
     }
 
     void TracingGapPeripheralSt::HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event)
