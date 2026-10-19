@@ -2,8 +2,8 @@
 
 namespace hal
 {
-    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer)
-        : GapCentralSt(hciEventSource, bondStorageSynchronizer, configuration)
+    TracingGapCentralSt::TracingGapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration, services::Tracer& tracer)
+        : GapCentralSt(hciEventSource, configuration)
         , tracer(tracer)
     {}
 
@@ -24,13 +24,13 @@ namespace hal
         GapCentralSt::Standby();
     }
 
-    void TracingGapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void TracingGapCentralSt::SetIdentityAddress(services::GapAddress address)
     {
         tracer.Trace() << "TracingGapCentralSt::SetIdentityAddress, MAC address: "
-                       << infra::AsMacAddress(macAddress)
+                       << infra::AsMacAddress(address.address)
                        << ", type: "
-                       << addressType;
-        GapCentralSt::SetIdentityAddress(macAddress, addressType);
+                       << address.type;
+        GapCentralSt::SetIdentityAddress(address);
     }
 
     void TracingGapCentralSt::StartDeviceDiscovery()
@@ -56,6 +56,12 @@ namespace hal
         GapCentralSt::SetPrivacyMode(enabled);
     }
 
+    void TracingGapCentralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        tracer.Trace() << "TracingGapCentralSt::SetDeviceName name=" << name;
+        GapCentralSt::SetDeviceName(name);
+    }
+
     void TracingGapCentralSt::RemoveAllBonds()
     {
         tracer.Trace() << "TracingGapCentralSt::RemoveAllBonds";
@@ -69,12 +75,6 @@ namespace hal
                        << ", type: "
                        << gapAddress.type;
         GapCentralSt::RemoveBondWithAddress(gapAddress);
-    }
-
-    void TracingGapCentralSt::RemoveOldestBond()
-    {
-        tracer.Trace() << "TracingGapCentralSt::RemoveOldestBond";
-        GapCentralSt::RemoveOldestBond();
     }
 
     std::size_t TracingGapCentralSt::GetMaxNumberOfBonds() const

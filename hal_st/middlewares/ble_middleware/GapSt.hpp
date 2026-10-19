@@ -5,7 +5,7 @@
 #include "ble_defs.h"
 #include "hal_st/middlewares/ble_middleware/HciEventObserver.hpp"
 #include "infra/util/BoundedString.hpp"
-#include "services/ble/BondStorageSynchronizer.hpp"
+#include "services/ble/BondStorageInteractor.hpp"
 #include "services/ble/Gap.hpp"
 #include "services/ble/Gatt.hpp"
 #include "services/ble/StateGuard.hpp"
@@ -20,9 +20,11 @@ namespace hal
         , private HciEventSink
     {
     public:
+        static constexpr std::size_t maxDeviceNameSize = 32;
+
         struct GapService
         {
-            infra::BoundedString::WithStorage<32> deviceName;
+            infra::BoundedString::WithStorage<maxDeviceNameSize> deviceName;
             uint16_t appearance;
         };
 
@@ -45,6 +47,7 @@ namespace hal
 
         struct Configuration
         {
+            services::BondStorageInteractor& bondStorageInteractor;
             const MacAddress& address;
             const GapService& gapService;
             const RootKeys& rootKeys;
@@ -56,11 +59,11 @@ namespace hal
         // Implementation of GapBonding
         void RemoveAllBonds() override;
         void RemoveBondWithAddress(services::GapAddress gapAddress) override;
-        void RemoveOldestBond() override;
         std::size_t GetMaxNumberOfBonds() const override;
         std::size_t GetNumberOfBonds() const override;
         bool IsDeviceBonded(MacAddress address, services::GapDeviceAddressType addressType) const override;
         infra::MemoryRange<const services::Bond> GetBondList() const override;
+        bool IsBondListPersisted() const override;
 
         // Implementation of GapPairing
         void PairAndBond() override;
@@ -79,7 +82,7 @@ namespace hal
             mandatory
         };
 
-        GapSt(HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapSt(HciEventSource& hciEventSource, const Configuration& configuration);
 
         services::GapState DetermineCurrentState() const override;
 
@@ -106,6 +109,8 @@ namespace hal
 
         void SetIdentityAddress(const MacAddress& address, services::GapDeviceAddressType addressType) const;
         void ReinitializeGapWithPrivacy(uint8_t role, bool privacyEnabled, const GapService& gapService);
+        void InitializeGapService(uint8_t role, bool privacyEnabled, const GapService& gapService);
+        void UpdateDeviceName(infra::BoundedConstString name) const;
 
     private:
         // Implementation of HciEventSink
@@ -146,10 +151,12 @@ namespace hal
         static constexpr uint8_t maxNumberOfBonds = 10;
 
     private:
-        services::BondStorageSynchronizer& bondStorageSynchronizer;
+        services::BondStorageInteractor& bondStorageInteractor;
         RootKeys rootKeys;
         MacAddress publicAddress;
         uint8_t txPowerLevel;
+        services::AttAttribute::Handle gapServiceHandle = 0;
+        services::AttAttribute::Handle gapDeviceNameCharHandle = 0;
     };
 }
 

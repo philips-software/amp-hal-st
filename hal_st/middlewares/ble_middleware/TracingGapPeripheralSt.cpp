@@ -4,8 +4,8 @@
 
 namespace hal
 {
-    TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer)
-        : GapPeripheralSt(hciEventSource, bondStorageSynchronizer, configuration)
+    TracingGapPeripheralSt::TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration, services::Tracer& tracer)
+        : GapPeripheralSt(hciEventSource, configuration)
         , tracer(tracer)
     {}
 
@@ -40,6 +40,12 @@ namespace hal
     {
         tracer.Trace() << "GapPeripheralSt::AllowPairing Allow = " << allow;
         GapPeripheralSt::AllowPairing(allow);
+    }
+
+    void TracingGapPeripheralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        tracer.Trace() << "GapPeripheralSt::SetDeviceName name = " << name;
+        GapPeripheralSt::SetDeviceName(name);
     }
 
     infra::MemoryRange<const services::Bond> TracingGapPeripheralSt::GetBondList() const

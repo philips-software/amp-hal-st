@@ -10,11 +10,12 @@ namespace hal
         : public GapPeripheralSt
     {
     public:
-        TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration, services::Tracer& tracer);
+        TracingGapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration, services::Tracer& tracer);
 
         // Implementation of GapPeripheralSt
         void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         void Standby() override;
+        void SetDeviceName(infra::BoundedConstString name) override;
         void RemoveAllBonds() override;
         void RemoveBondWithAddress(services::GapAddress gapAddress) override;
         void AllowPairing(bool allow) override;
