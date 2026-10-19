@@ -92,10 +92,10 @@ namespace hal
             aci_gap_terminate(connectionContext.connectionHandle, remoteUserTerminatedConnection);
     }
 
-    void GapCentralSt::SetIdentityAddress(hal::MacAddress macAddress, services::GapDeviceAddressType addressType)
+    void GapCentralSt::SetIdentityAddress(services::GapAddress address)
     {
         AssertStateIs({ services::GapState::standby });
-        GapSt::SetIdentityAddress(macAddress, addressType);
+        GapSt::SetIdentityAddress(address.address, address.type);
     }
 
     void GapCentralSt::StartDeviceDiscovery()
@@ -128,6 +128,15 @@ namespace hal
         SetIoCapabilities(security.ioCapabilities);
         SetSecurityMode(security.securityMode, security.securityLevel);
         hci_le_set_default_phy(allPhys, speed2Mbps, speed2Mbps);
+    }
+
+    void GapCentralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        AssertStateIs({ services::GapState::standby });
+        really_assert(name.size() <= gapService.deviceName.max_size());
+
+        gapService.deviceName.assign(name);
+        UpdateDeviceName(gapService.deviceName);
     }
 
     void GapCentralSt::PairAndBond()
@@ -327,11 +336,7 @@ namespace hal
 
     void GapCentralSt::Initialize(const Configuration& configuration)
     {
-        uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
-
-        aci_gap_init(GAP_CENTRAL_ROLE, configuration.privacy ? PRIVACY_ENABLED : PRIVACY_DISABLED, configuration.gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, configuration.gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(configuration.gapService.deviceName.data()));
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(configuration.gapService.appearance), reinterpret_cast<const uint8_t*>(&configuration.gapService.appearance));
+        InitializeGapService(GAP_CENTRAL_ROLE, configuration.privacy, configuration.gapService);
 
         SetIoCapabilities(configuration.security.ioCapabilities);
         SetSecurityMode(configuration.security.securityMode, configuration.security.securityLevel);
