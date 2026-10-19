@@ -145,13 +145,6 @@ namespace hal
         GapSt::AuthenticateWithPasskey(passkey);
     }
 
-    void GapCentralSt::NumericComparisonConfirm(bool accept)
-    {
-        AssertStateIs({ services::GapState::connected });
-
-        aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
-    }
-
     services::GapState GapCentralSt::DetermineCurrentState() const
     {
         if (discovering)
@@ -259,18 +252,6 @@ namespace hal
         GapSt::HandleHciLePhyUpdateCompleteEvent(event);
 
         really_assert(event.Connection_Handle == connectionContext.connectionHandle);
-    }
-
-    void GapCentralSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
-    {
-        GapSt::HandleNumericComparisonValueEvent(event);
-
-        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
-
-        GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
-            {
-                observer.AuthenticationRequired(true, static_cast<int32_t>(passkey));
-            });
     }
 
     void GapCentralSt::HandleGapDiscoveryProcedureEvent()

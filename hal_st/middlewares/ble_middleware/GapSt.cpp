@@ -229,7 +229,11 @@ namespace hal
 
     void GapSt::NumericComparisonConfirm(bool accept)
     {
-        LOG_AND_ABORT_NOT_IMPLEMENTED();
+        AssertStateIs({ services::GapState::standby, services::GapState::connected });
+
+        // The peer may have disconnected or the pairing may have timed out before the confirmation arrives
+        if (connectionContext.connectionHandle != GapSt::invalidConnection)
+            aci_gap_numeric_comparison_value_confirm_yesno(connectionContext.connectionHandle, accept ? 1 : 0);
     }
 
     void GapSt::GenerateOutOfBandData()
@@ -308,6 +312,16 @@ namespace hal
     void GapSt::HandleBondLostEvent()
     {
         aci_gap_allow_rebond(connectionContext.connectionHandle);
+    }
+
+    void GapSt::HandleNumericComparisonValueEvent(const aci_gap_numeric_comparison_value_event_rp0& event)
+    {
+        really_assert(event.Connection_Handle == connectionContext.connectionHandle);
+
+        GapPairing::NotifyObservers([passkey = event.Numeric_Value](auto& observer)
+            {
+                observer.AuthenticationRequired(true, static_cast<int32_t>(passkey));
+            });
     }
 
     void GapSt::HandleMtuExchangeResponseEvent(const aci_att_exchange_mtu_resp_event_rp0& event)
