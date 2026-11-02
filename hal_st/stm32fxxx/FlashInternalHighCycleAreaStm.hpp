@@ -3,6 +3,7 @@
 
 #include "hal/interfaces/FlashHomogeneous.hpp"
 #include "hal_st/stm32fxxx/HighCycleAreaOrOtpIrqHandler.hpp"
+#include "hal_st/stm32fxxx/WatchDogStm.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include <cstdint>
 #include DEVICE_HEADER
@@ -19,6 +20,7 @@ namespace hal
         class WithIrqHandler;
 
         explicit FlashInternalHighCycleAreaWorker(HalfWordRange flashMemory);
+        FlashInternalHighCycleAreaWorker(HalfWordRange flashMemory, WatchDogStm& watchDog);
 
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address);
         void ReadBuffer(infra::ByteRange buffer, uint32_t address);
@@ -37,9 +39,12 @@ namespace hal
         };
 
         static BankConfig ReadBankConfig();
+        void EraseActiveBankSectors(uint32_t firstSector, uint32_t count);
+        void EraseSectorWithinFullWatchDogPeriod(uint32_t bank, uint32_t sector);
 
     private:
         HalfWordRange flashMemory;
+        WatchDogStm* watchDog{ nullptr };
         const BankConfig bankConfig;
         uint32_t amountOfSectorsInActiveBankInMemoryRange;
         uint32_t amountOfSectorsInInactiveBankInMemoryRange;
@@ -57,6 +62,7 @@ namespace hal
         class WithIrqHandler;
 
         explicit FlashInternalHighCycleAreaStm(HalfWordRange flashMemory);
+        FlashInternalHighCycleAreaStm(HalfWordRange flashMemory, WatchDogStm& watchDog);
 
         // implementation of Flash interface
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address, infra::Function<void()> onDone) override;
@@ -70,6 +76,7 @@ namespace hal
     {
     public:
         explicit WithIrqHandler(HalfWordRange flashMemory);
+        WithIrqHandler(HalfWordRange flashMemory, WatchDogStm& watchDog);
     };
 }
 

@@ -19,6 +19,20 @@ namespace
         for (; begin != end; ++destination, ++begin)
             *destination = *begin;
     }
+
+    void Erase(uint32_t bank, uint32_t firstSector, uint32_t count)
+    {
+        FLASH_EraseInitTypeDef eraseInitStruct{};
+        eraseInitStruct.Banks = bank;
+        eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+        eraseInitStruct.Sector = firstSector;
+        eraseInitStruct.NbSectors = count;
+
+        uint32_t sectorError = 0;
+        auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
+        really_assert(result == HAL_OK);
+        really_assert(sectorError == 0xFFFFFFFFU);
+    }
 }
 
 namespace hal
@@ -49,6 +63,12 @@ namespace hal
 
         really_assert(bankConfig.enabledSectorsActiveBank >= amountOfSectorsInActiveBankInMemoryRange + firstSectorOffsetInActiveBank);
         really_assert(bankConfig.enabledSectorsInactiveBank >= amountOfSectorsInInactiveBankInMemoryRange + firstSectorOffsetInInactiveBank);
+    }
+
+    FlashInternalHighCycleAreaWorker::FlashInternalHighCycleAreaWorker(HalfWordRange flashMemory, WatchDogStm& watchDog)
+        : FlashInternalHighCycleAreaWorker(flashMemory)
+    {
+        this->watchDog = &watchDog;
     }
 
     void FlashInternalHighCycleAreaWorker::ReadBuffer(infra::ByteRange buffer, uint32_t address)
@@ -84,35 +104,31 @@ namespace hal
 
         const uint32_t activeSectorsEnd = std::min(endIndex, amountOfSectorsInActiveBankInMemoryRange);
         if (beginIndex < activeSectorsEnd)
-        {
-            FLASH_EraseInitTypeDef eraseInitStruct{};
-            eraseInitStruct.Banks = bankConfig.activeBank;
-            eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-            eraseInitStruct.Sector = FLASH_SECTOR_NB - bankConfig.enabledSectorsActiveBank + firstSectorOffsetInActiveBank + beginIndex;
-            eraseInitStruct.NbSectors = activeSectorsEnd - beginIndex;
-
-            uint32_t sectorError = 0;
-            auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
-            really_assert(result == HAL_OK);
-            really_assert(sectorError == 0xFFFFFFFFU);
-        }
+            EraseActiveBankSectors(FLASH_SECTOR_NB - bankConfig.enabledSectorsActiveBank + firstSectorOffsetInActiveBank + beginIndex, activeSectorsEnd - beginIndex);
 
         const uint32_t inactiveSectorsBegin = std::max(beginIndex, amountOfSectorsInActiveBankInMemoryRange);
         if (inactiveSectorsBegin < endIndex)
-        {
-            FLASH_EraseInitTypeDef eraseInitStruct{};
-            eraseInitStruct.Banks = bankConfig.inactiveBank;
-            eraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-            eraseInitStruct.Sector = FLASH_SECTOR_NB - bankConfig.enabledSectorsInactiveBank + firstSectorOffsetInInactiveBank + (inactiveSectorsBegin - amountOfSectorsInActiveBankInMemoryRange);
-            eraseInitStruct.NbSectors = endIndex - inactiveSectorsBegin;
-
-            uint32_t sectorError = 0;
-            auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &sectorError);
-            really_assert(result == HAL_OK);
-            really_assert(sectorError == 0xFFFFFFFFU);
-        }
+            Erase(bankConfig.inactiveBank, FLASH_SECTOR_NB - bankConfig.enabledSectorsInactiveBank + firstSectorOffsetInInactiveBank + (inactiveSectorsBegin - amountOfSectorsInActiveBankInMemoryRange), endIndex - inactiveSectorsBegin);
 
         HAL_FLASH_Lock();
+    }
+
+    void FlashInternalHighCycleAreaWorker::EraseActiveBankSectors(uint32_t firstSector, uint32_t count)
+    {
+        if (watchDog == nullptr)
+            Erase(bankConfig.activeBank, firstSector, count);
+        else
+            for (uint32_t sector = firstSector; sector != firstSector + count; ++sector)
+                EraseSectorWithinFullWatchDogPeriod(bankConfig.activeBank, sector);
+    }
+
+    void FlashInternalHighCycleAreaWorker::EraseSectorWithinFullWatchDogPeriod(uint32_t bank, uint32_t sector)
+    {
+        const uint32_t primask = __get_PRIMASK();
+        __disable_irq();
+        watchDog->WatchDogRefresh();
+        Erase(bank, sector, 1);
+        __set_PRIMASK(primask);
     }
 
     uint32_t FlashInternalHighCycleAreaWorker::TotalSectors() const
@@ -166,7 +182,16 @@ namespace hal
         , FlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), sectorSize }
     {}
 
+    FlashInternalHighCycleAreaStm::FlashInternalHighCycleAreaStm(HalfWordRange flashMemory, WatchDogStm& watchDog)
+        : FlashInternalHighCycleAreaWorker(flashMemory, watchDog)
+        , FlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), sectorSize }
+    {}
+
     FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(HalfWordRange flashMemory)
         : FlashInternalHighCycleAreaStm(flashMemory)
+    {}
+
+    FlashInternalHighCycleAreaStm::WithIrqHandler::WithIrqHandler(HalfWordRange flashMemory, WatchDogStm& watchDog)
+        : FlashInternalHighCycleAreaStm(flashMemory, watchDog)
     {}
 }
