@@ -53,4 +53,17 @@ namespace hal
     {
         missedFeedCount = 0;
     }
+
+    WatchDogRefreshedCriticalSection::WatchDogRefreshedCriticalSection(WatchDogStm& watchDog)
+        : watchDog(watchDog)
+    {
+        criticalSection.emplace();
+        watchDog.WatchDogRefresh();
+    }
+
+    WatchDogRefreshedCriticalSection::~WatchDogRefreshedCriticalSection()
+    {
+        criticalSection.reset();
+        watchDog.WatchDogRefresh();
+    }
 }

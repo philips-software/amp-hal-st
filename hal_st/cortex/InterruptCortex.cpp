@@ -55,6 +55,17 @@ namespace hal
         return static_cast<IRQn_Type>(((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) >> SCB_ICSR_VECTACTIVE_Pos) - 16);
     }
 
+    CriticalSectionScoped::CriticalSectionScoped()
+        : primaskBit(__get_PRIMASK())
+    {
+        __disable_irq();
+    }
+
+    CriticalSectionScoped::~CriticalSectionScoped()
+    {
+        __set_PRIMASK(primaskBit);
+    }
+
     InterruptHandler::InterruptHandler()
     {}
 

@@ -124,11 +124,8 @@ namespace hal
 
     void FlashInternalHighCycleAreaWorker::EraseSectorWithinFullWatchDogPeriod(uint32_t bank, uint32_t sector)
     {
-        const uint32_t primask = __get_PRIMASK();
-        __disable_irq();
-        watchDog->WatchDogRefresh();
+        WatchDogRefreshedCriticalSection criticalSection(*watchDog);
         Erase(bank, sector, 1);
-        __set_PRIMASK(primask);
     }
 
     uint32_t FlashInternalHighCycleAreaWorker::TotalSectors() const
