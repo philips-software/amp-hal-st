@@ -2,6 +2,7 @@
 #define HAL_ST_GAP_PERIPHERAL_ST_HPP
 
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
+
 #include "infra/util/BoundedVector.hpp"
 
 namespace hal
@@ -11,11 +12,12 @@ namespace hal
         , public GapSt
     {
     public:
-        GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration);
+        GapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration);
 
         // Implementation of GapPeripheral
         services::GapAddress GetAddress() const override;
         services::GapAddress GetIdentityAddress() const override;
+        void SetIdentityAddress(services::GapAddress address) override;
         void SetAdvertisementData(infra::ConstByteRange data) override;
         infra::ConstByteRange GetAdvertisementData() const override;
         void SetScanResponseData(infra::ConstByteRange data) override;
@@ -23,12 +25,15 @@ namespace hal
         void Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier) override;
         void Standby() override;
         void SetConnectionParameters(const services::GapConnectionParameters& connParam) override;
+        void SetDeviceName(infra::BoundedConstString name) override;
 
         // Implementation of GapPairing
         void AllowPairing(bool allow) override;
 
+
     protected:
         // Implementation of GapSt
+        services::GapState DetermineCurrentState() const override;
         void HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event) override;
         void HandleHciLeEnhancedConnectionCompleteEvent(const hci_le_enhanced_connection_complete_event_rp0& event) override;
 

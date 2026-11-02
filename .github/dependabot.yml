@@ -13,7 +13,12 @@ updates:
         update-types:
           - patch
           - minor
+    commit-message:
+      prefix: "ci(deps)"
+
   - package-ecosystem: docker
     directory: .devcontainer
     schedule:
       interval: daily
+    commit-message:
+      prefix: "build(deps)"

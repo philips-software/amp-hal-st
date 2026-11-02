@@ -1,5 +1,6 @@
 #include "hal_st/middlewares/ble_middleware/GapPeripheralSt.hpp"
 #include "infra/event/EventDispatcher.hpp"
+#include "infra/util/ReallyAssert.hpp"
 #include "services/ble/Gap.hpp"
 
 namespace
@@ -12,8 +13,8 @@ namespace
 
 namespace hal
 {
-    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, services::BondStorageSynchronizer& bondStorageSynchronizer, const Configuration& configuration)
-        : GapSt(hciEventSource, bondStorageSynchronizer, configuration)
+    GapPeripheralSt::GapPeripheralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration)
+        : GapSt(hciEventSource, configuration)
     {
         Initialize(configuration);
     }
@@ -42,6 +43,12 @@ namespace hal
         return address;
     }
 
+    void GapPeripheralSt::SetIdentityAddress(services::GapAddress address)
+    {
+        AssertStateIs({ services::GapState::standby });
+        GapSt::SetIdentityAddress(address.address, address.type);
+    }
+
     void GapPeripheralSt::SetAdvertisementData(infra::ConstByteRange data)
     {
         advertisementData.assign(data);
@@ -60,6 +67,11 @@ namespace hal
     infra::ConstByteRange GapPeripheralSt::GetScanResponseData() const
     {
         return infra::MakeRange(scanResponseData);
+    }
+
+    services::GapState GapPeripheralSt::DetermineCurrentState() const
+    {
+        return state;
     }
 
     void GapPeripheralSt::UpdateAdvertisementData()
@@ -87,6 +99,7 @@ namespace hal
 
     void GapPeripheralSt::Advertise(services::GapAdvertisementType type, AdvertisementIntervalMultiplier multiplier)
     {
+        AssertStateIs({ services::GapState::standby });
         assert(multiplier >= advertisementIntervalMultiplierMin && multiplier <= advertisementIntervalMultiplierMax);
 
         auto advTypeSt = ConvertAdvertisementType(type);
@@ -130,8 +143,17 @@ namespace hal
             connParam.slaveLatency, connParam.supervisorTimeoutMs);
     }
 
+    void GapPeripheralSt::SetDeviceName(infra::BoundedConstString name)
+    {
+        AssertStateIs({ services::GapState::standby });
+        really_assert(name.size() <= maxDeviceNameSize);
+
+        UpdateDeviceName(name);
+    }
+
     void GapPeripheralSt::AllowPairing(bool allow)
     {
+        AssertStateIs({ services::GapState::standby });
         allowPairing = allow;
     }
 
@@ -185,11 +207,7 @@ namespace hal
 
     void GapPeripheralSt::Initialize(const Configuration& configuration)
     {
-        uint16_t gapServiceHandle, gapDevNameCharHandle, gapAppearanceCharHandle;
-
-        aci_gap_init(GAP_PERIPHERAL_ROLE, configuration.privacy ? PRIVACY_ENABLED : PRIVACY_DISABLED, configuration.gapService.deviceName.size(), &gapServiceHandle, &gapDevNameCharHandle, &gapAppearanceCharHandle);
-        aci_gatt_update_char_value(gapServiceHandle, gapDevNameCharHandle, 0, configuration.gapService.deviceName.size(), reinterpret_cast<const uint8_t*>(configuration.gapService.deviceName.data()));
-        aci_gatt_update_char_value(gapServiceHandle, gapAppearanceCharHandle, 0, sizeof(configuration.gapService.appearance), reinterpret_cast<const uint8_t*>(&configuration.gapService.appearance));
+        InitializeGapService(GAP_PERIPHERAL_ROLE, configuration.privacy, configuration.gapService);
 
         SetIoCapabilities(configuration.security.ioCapabilities);
         SetSecurityMode(configuration.security.securityMode, configuration.security.securityLevel);
