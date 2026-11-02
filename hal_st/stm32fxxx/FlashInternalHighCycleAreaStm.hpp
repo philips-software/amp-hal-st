@@ -40,7 +40,6 @@ namespace hal
 
         static BankConfig ReadBankConfig();
         void EraseActiveBankSectors(uint32_t firstSector, uint32_t count);
-        void EraseSectorWithinFullWatchDogPeriod(uint32_t bank, uint32_t sector);
 
     private:
         HalfWordRange flashMemory;

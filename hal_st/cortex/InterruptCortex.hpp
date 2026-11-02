@@ -27,7 +27,7 @@ namespace hal
         ~CriticalSectionScoped();
 
     private:
-        uint32_t primaskBit;
+        uint32_t primask;
     };
 
     class InterruptHandler

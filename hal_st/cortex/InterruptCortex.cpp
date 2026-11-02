@@ -56,14 +56,14 @@ namespace hal
     }
 
     CriticalSectionScoped::CriticalSectionScoped()
-        : primaskBit(__get_PRIMASK())
+        : primask(__get_PRIMASK())
     {
         __disable_irq();
     }
 
     CriticalSectionScoped::~CriticalSectionScoped()
     {
-        __set_PRIMASK(primaskBit);
+        __set_PRIMASK(primask);
     }
 
     InterruptHandler::InterruptHandler()

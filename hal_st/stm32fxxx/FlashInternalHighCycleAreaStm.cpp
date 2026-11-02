@@ -119,13 +119,10 @@ namespace hal
             Erase(bankConfig.activeBank, firstSector, count);
         else
             for (uint32_t sector = firstSector; sector != firstSector + count; ++sector)
-                EraseSectorWithinFullWatchDogPeriod(bankConfig.activeBank, sector);
-    }
-
-    void FlashInternalHighCycleAreaWorker::EraseSectorWithinFullWatchDogPeriod(uint32_t bank, uint32_t sector)
-    {
-        WatchDogRefreshedCriticalSection criticalSection(*watchDog);
-        Erase(bank, sector, 1);
+            {
+                WatchDogRefreshedCriticalSection criticalSection(*watchDog);
+                Erase(bankConfig.activeBank, sector, 1);
+            }
     }
 
     uint32_t FlashInternalHighCycleAreaWorker::TotalSectors() const
