@@ -23,12 +23,11 @@ namespace hal
 
     UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config, bool hasFlowControl)
         : uartIndex(oneBasedIndex - 1)
+        , uartArray(peripheralUart)
         , uartTx(uartTxPin, PinConfigTypeStm::uartTx, oneBasedIndex)
         , uartRx(uartRxPin, PinConfigTypeStm::uartRx, oneBasedIndex)
         , uartRts(uartRtsPin, PinConfigTypeStm::uartRts, oneBasedIndex)
         , uartCts(uartCtsPin, PinConfigTypeStm::uartCts, oneBasedIndex)
-        , uartHandle()
-        , uartArray(peripheralUart)
         , uartIrqArray(peripheralUartIrq)
     {
         really_assert(oneBasedIndex != 0); // first element is 1 in oneBasedIndex
@@ -46,16 +45,15 @@ namespace hal
         : UartStm(oneBasedIndex, uartTxPin, uartRxPin, uartRtsPin, uartCtsPin, lpUart, config, true)
     {}
 
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config, bool hasFlowControl)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, [[maybe_unused]] LpUart lpUart, const Config& config, bool hasFlowControl)
         : uartIndex(oneBasedIndex - 1)
+        , uartArray(peripheralLpuart)
         , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, oneBasedIndex)
         , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, oneBasedIndex)
         , uartRts(uartRtsPin, PinConfigTypeStm::lpuartRts, oneBasedIndex)
         , uartCts(uartCtsPin, PinConfigTypeStm::lpuartCts, oneBasedIndex)
-        , uartHandle()
-        , uartArray(peripheralLpuart)
+        , isLpUart(true)
         , uartIrqArray(peripheralLpuartIrq)
-        , isLpUart{true}
     {
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
