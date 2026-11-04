@@ -141,12 +141,12 @@ namespace hal
         : SynchronousUartStmSendOnly(aUartIndex, uartTx, uartTx, HwFlowControl::hwControlDisable, baudrate)
     {}
 
-    SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
-        HwFlowControl flowControl, uint32_t baudrate)
-        : uartBase(peripheralUart[aUartIndex - 1])
+    SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, HwFlowControl flowControl, uint32_t baudrate)
+        : uartIndex(aUartIndex - 1)
+        , uartBase(peripheralUart[uartIndex])
         , uartTx(uartTx, PinConfigTypeStm::uartTx, aUartIndex)
     {
-        EnableClockUart(aUartIndex - 1);
+        EnableClockUart(uartIndex);
 
         if (flowControl != HwFlowControl::hwControlDisable)
             this->uartRts.emplace(uartRts, PinConfigTypeStm::uartRts, aUartIndex);
@@ -160,12 +160,12 @@ namespace hal
     {}
 
     SynchronousUartStmSendOnly::SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl, uint32_t baudrate)
-        : uartBase(peripheralLpuart[aUartIndex - 1])
+        : uartIndex(aUartIndex - 1)
+        , uartBase(peripheralLpuart[uartIndex])
         , uartTx(uartTx, PinConfigTypeStm::lpuartTx, aUartIndex)
-        , uartIndex(aUartIndex - 1)
-        , isLpUart{true}
+        , isLpUart{ true }
     {
-        EnableClockLpuart(aUartIndex - 1);
+        EnableClockLpuart(uartIndex);
 
         if (flowControl != HwFlowControl::hwControlDisable)
             this->uartRts.emplace(uartRts, PinConfigTypeStm::lpuartRts, aUartIndex);
@@ -177,7 +177,7 @@ namespace hal
     SynchronousUartStmSendOnly::~SynchronousUartStmSendOnly()
     {
         uartBase->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-  
+
 #if defined(HAS_PERIPHERAL_LPUART)
         if (isLpUart)
             DisableClockLpuart(uartIndex);
