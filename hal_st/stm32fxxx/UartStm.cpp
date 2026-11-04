@@ -133,7 +133,6 @@ namespace hal
 
     void UartStm::RegisterInterrupt(const Config& config)
     {
-        NVIC_ClearPendingIRQ(uartIrqArray[uartIndex]);
         Register(uartIrqArray[uartIndex], config.priority);
     }
 
