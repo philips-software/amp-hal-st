@@ -23,18 +23,17 @@ namespace hal
 
     UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config, bool hasFlowControl)
         : uartIndex(oneBasedIndex - 1)
+        , uartArray(peripheralUart)
         , uartTx(uartTxPin, PinConfigTypeStm::uartTx, oneBasedIndex)
         , uartRx(uartRxPin, PinConfigTypeStm::uartRx, oneBasedIndex)
         , uartRts(uartRtsPin, PinConfigTypeStm::uartRts, oneBasedIndex)
         , uartCts(uartCtsPin, PinConfigTypeStm::uartCts, oneBasedIndex)
-        , uartHandle()
-        , uartArray(peripheralUart)
         , uartIrqArray(peripheralUartIrq)
     {
         really_assert(oneBasedIndex != 0); // first element is 1 in oneBasedIndex
-        RegisterInterrupt(config);
         EnableClockUart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
+        RegisterInterrupt(config);
     }
 
 #if defined(HAS_PERIPHERAL_LPUART)
@@ -46,20 +45,19 @@ namespace hal
         : UartStm(oneBasedIndex, uartTxPin, uartRxPin, uartRtsPin, uartCtsPin, lpUart, config, true)
     {}
 
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config, bool hasFlowControl)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, [[maybe_unused]] LpUart lpUart, const Config& config, bool hasFlowControl)
         : uartIndex(oneBasedIndex - 1)
+        , uartArray(peripheralLpuart)
         , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, oneBasedIndex)
         , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, oneBasedIndex)
         , uartRts(uartRtsPin, PinConfigTypeStm::lpuartRts, oneBasedIndex)
         , uartCts(uartCtsPin, PinConfigTypeStm::lpuartCts, oneBasedIndex)
-        , uartHandle()
-        , uartArray(peripheralLpuart)
+        , isLpUart(true)
         , uartIrqArray(peripheralLpuartIrq)
-        , isLpUart{true}
     {
-        RegisterInterrupt(config);
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
+        RegisterInterrupt(config);
     }
 #endif
 
@@ -102,8 +100,8 @@ namespace hal
 
     UartStm::~UartStm()
     {
-        uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE);
-        
+        DisableInterrupts();
+
 #if defined(HAS_PERIPHERAL_LPUART)
         if (isLpUart)
             DisableClockLpuart(uartIndex);
@@ -136,6 +134,13 @@ namespace hal
     void UartStm::RegisterInterrupt(const Config& config)
     {
         Register(uartIrqArray[uartIndex], config.priority);
+    }
+
+    void UartStm::DisableInterrupts()
+    {
+        uartArray[uartIndex]->CR1 &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_TXEIE | USART_CR1_TCIE | USART_CR1_RXNEIE | USART_CR1_IDLEIE | USART_CR1_PEIE);
+        uartArray[uartIndex]->CR3 &= ~USART_CR3_EIE;
+        NVIC_ClearPendingIRQ(uartIrqArray[uartIndex]);
     }
 
     void UartStm::TransferComplete()
