@@ -18,6 +18,18 @@ namespace hal
 
     IRQn_Type ActiveInterrupt();
 
+    class CriticalSectionScoped
+    {
+    public:
+        CriticalSectionScoped();
+        CriticalSectionScoped(const CriticalSectionScoped& other) = delete;
+        CriticalSectionScoped& operator=(const CriticalSectionScoped& other) = delete;
+        ~CriticalSectionScoped();
+
+    private:
+        uint32_t primask;
+    };
+
     class InterruptHandler
     {
     protected:

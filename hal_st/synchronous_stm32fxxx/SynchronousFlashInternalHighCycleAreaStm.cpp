@@ -9,6 +9,11 @@ namespace hal
         , SynchronousFlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), FlashInternalHighCycleAreaWorker::SectorSize() }
     {}
 
+    SynchronousFlashInternalHighCycleAreaStm::SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory, WatchDogStm& watchDog)
+        : FlashInternalHighCycleAreaWorker(flashMemory, watchDog)
+        , SynchronousFlashHomogeneous{ FlashInternalHighCycleAreaWorker::TotalSectors(), FlashInternalHighCycleAreaWorker::SectorSize() }
+    {}
+
     void SynchronousFlashInternalHighCycleAreaStm::WriteBuffer(infra::ConstByteRange buffer, uint32_t address)
     {
         FlashInternalHighCycleAreaWorker::WriteBuffer(buffer, address);
