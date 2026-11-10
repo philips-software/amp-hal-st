@@ -16,11 +16,17 @@ namespace hal
     public:
         using Config = detail::UartStmConfig;
 
-        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        [[deprecated("Use UartStmDma with GpioPins")]] UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, const Config& config = Config());
+        [[deprecated("Use UartStmDma with GpioPinsFlowCtrl")]] UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPins& pins, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwners&& gpioOwners, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config = Config());
 #if defined(HAS_PERIPHERAL_LPUART)
-        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
-        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPins& pins, LpUart lpUart, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, LpUart lpUart, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwners&& gpioOwners, LpUart lpUart, const Config& config = Config());
+        UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, LpUart lpUart, const Config& config = Config());
 #endif
         ~UartStmDma();
 

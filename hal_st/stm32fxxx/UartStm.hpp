@@ -37,26 +37,56 @@ namespace hal
         , private InterruptHandler
     {
     public:
+        struct GpioPins
+        {
+            GpioPinStm& tx;
+            GpioPinStm& rx;
+        };
+
+        struct GpioPinsFlowCtrl
+        {
+            GpioPinStm& tx;
+            GpioPinStm& rx;
+            GpioPinStm& rts;
+            GpioPinStm& cts;
+        };
+
+        struct GpioOwners
+        {
+            GpioPinStmOwner txOwner;
+            GpioPinStmOwner rxOwner;
+        };
+
+        struct GpioOwnersFlowCtrl
+        {
+            GpioPinStmOwner txOwner;
+            GpioPinStmOwner rxOwner;
+            GpioPinStmOwner rtsOwner;
+            GpioPinStmOwner ctsOwner;
+        };
+
         using Config = detail::UartStmConfig;
 
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, const Config& config = Config());
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config = Config());
-#if defined(HAS_PERIPHERAL_LPUART)
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config = Config());
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRx, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config = Config());
-#endif
+        [[deprecated("Use UartStm with GpioPins")]] UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, const Config& config = Config());
+        [[deprecated("Use UartStm with GpioPinsFlowCtrl")]] UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, const GpioPins& pins, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioOwners&& gpioOwners, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config = Config());
 
-        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, const Config& config = Config());
-        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, const Config& config = Config());
 #if defined(HAS_PERIPHERAL_LPUART)
-        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, LpUart lpUart, const Config& config = Config());
-        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, LpUart lpUart, const Config& config = Config());
+        [[deprecated("Use UartStm with GpioPins and LpUart")]] UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, LpUart lpUart, const Config& config = Config());
+        [[deprecated("Use UartStm with GpioPinsFlowCtrl and LpUart")]] UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, const GpioPins& pins, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioOwners&& gpioOwners, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, LpUart lpUart, const Config& config = Config());
 #endif
 
     private:
-        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, const Config& config, bool hasFlowControl);
+        UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config, bool hasFlowControl);
 #if defined(HAS_PERIPHERAL_LPUART)
-        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, LpUart lpUart, const Config& config, bool hasFlowControl);
+        UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, LpUart lpUart, const Config& config, bool hasFlowControl);
 #endif
 
     public:
