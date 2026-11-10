@@ -23,6 +23,8 @@ namespace hal
         UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwners&& gpioOwners, const Config& config = Config());
         UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config = Config());
 #if defined(HAS_PERIPHERAL_LPUART)
+        [[deprecated("Use UartStmDma with GpioPins and LpUart")]] UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, LpUart lpUart, const Config& config = Config());
+        [[deprecated("Use UartStmDma with GpioPinsFlowCtrl and LpUart")]] UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, LpUart lpUart, const Config& config = Config());
         UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPins& pins, LpUart lpUart, const Config& config = Config());
         UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, LpUart lpUart, const Config& config = Config());
         UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioOwners&& gpioOwners, LpUart lpUart, const Config& config = Config());

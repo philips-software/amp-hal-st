@@ -49,6 +49,14 @@ namespace hal
     }
 
 #if defined(HAS_PERIPHERAL_LPUART)
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, LpUart lpUart, const Config& config)
+        : UartStmDma{ transmitStream, oneBasedIndex, GpioPins{ tx, rx }, lpUart, config }
+    {}
+
+    UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, LpUart lpUart, const Config& config)
+        : UartStmDma{ transmitStream, oneBasedIndex, GpioPinsFlowCtrl{ tx, rx, rts, cts }, lpUart, config }
+    {}
+
     UartStmDma::UartStmDma(DmaStm::TransmitStream& transmitStream, uint8_t oneBasedIndex, const GpioPins& pins, LpUart lpUart, const Config& config)
         : UartStmDma{ transmitStream, oneBasedIndex, GpioOwners{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx } }, lpUart, config }
     {
