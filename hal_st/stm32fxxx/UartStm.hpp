@@ -108,6 +108,7 @@ namespace hal
     private:
         void UartStmHalInit(const Config& config, bool hasFlowControl);
         void RegisterInterrupt(const Config& config);
+        void DisableInterrupts();
         void TransferComplete();
         void Invoke() override;
 
