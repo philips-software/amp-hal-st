@@ -266,6 +266,25 @@ namespace hal
         return GpioStm::Instance().DacChannel(port, index, dac);
     }
 
+    GpioPinStmOwner::GpioPinStmOwner(GpioPinStm& pin)
+        : GpioPinOwner{ pin }
+    {}
+
+    GpioPinStmOwner::GpioPinStmOwner(const GpioPinStm& pin, GpioPinOwner&& other) noexcept(true)
+        : GpioPinOwner{ std::move(other) }
+    {
+        really_assert(&pin == &GetPin());
+    }
+
+    GpioPinStmOwner::GpioPinStmOwner(GpioPinStmOwner&& other) noexcept(true)
+        : GpioPinOwner{ std::move(other) }
+    {}
+
+    GpioPinStm& GpioPinStmOwner::GetPin() const
+    {
+        return static_cast<GpioPinStm&>(GpioPinOwner::GetPin());
+    }
+
     DummyPinStm::DummyPinStm()
         : GpioPinStm(Port::A, 0)
     {
@@ -353,27 +372,25 @@ namespace hal
     }
 
     PeripheralPinStm::PeripheralPinStm(GpioPinStm& pin, PinConfigTypeStm pinConfigType, uint8_t peripheral)
-        : GpioPinOwner{ pin }
+        : GpioPinStmOwner{ pin }
     {
-        static_cast<GpioPinStm&>(GetPin()).ConfigPeripheral(pinConfigType, peripheral);
+        GetPin().ConfigPeripheral(pinConfigType, peripheral);
     }
 
-    PeripheralPinStm::PeripheralPinStm(const GpioPinStm& pin, hal::GpioPinOwner&& pinOwner, PinConfigTypeStm pinConfigType, uint8_t peripheral)
-        : GpioPinOwner{ std::move(pinOwner) }
+    PeripheralPinStm::PeripheralPinStm(GpioPinStmOwner&& pinOwner, PinConfigTypeStm pinConfigType, uint8_t peripheral)
+        : GpioPinStmOwner{ std::move(pinOwner) }
     {
-        really_assert(&pin == &GetPin());
-
-        static_cast<GpioPinStm&>(GetPin()).ReConfigPeripheral(pinConfigType, peripheral);
+        GetPin().ReConfigPeripheral(pinConfigType, peripheral);
     }
 
     AnalogPinStm::AnalogPinStm(GpioPinStm& pin)
-        : GpioPinOwner{ pin }
+        : GpioPinStmOwner{ pin }
     {
-        static_cast<GpioPinStm&>(GetPin()).ConfigAnalog();
+        GetPin().ConfigAnalog();
     }
 
     AnalogPinStm::AnalogPinStm(uint32_t channel)
-        : GpioPinOwner{ dummyPinStm }
+        : GpioPinStmOwner{ dummyPinStm }
         , channel{ channel }
     {}
 
@@ -382,13 +399,13 @@ namespace hal
         if (channel != 0xffffffff)
             return channel;
         really_assert(HasPin());
-        return adcChannel[static_cast<GpioPinStm&>(GetPin()).AdcChannel(adc)];
+        return adcChannel[GetPin().AdcChannel(adc)];
     }
 
     uint32_t AnalogPinStm::DacChannel(uint8_t dac) const
     {
         really_assert(HasPin());
-        return static_cast<GpioPinStm&>(GetPin()).DacChannel(dac);
+        return GetPin().DacChannel(dac);
     }
 
     MultiGpioPinStm::MultiGpioPinStm(infra::MemoryRange<const std::pair<Port, uint8_t>> table, Drive drive, Speed speed, WeakPull weakPull)

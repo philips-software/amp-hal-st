@@ -168,6 +168,22 @@ namespace hal
         WeakPull weakPull;
     };
 
+    class GpioPinStmOwner
+        : public GpioPinOwner
+    {
+    public:
+        explicit GpioPinStmOwner(GpioPinStm& pin);
+
+        GpioPinStmOwner(const GpioPinStm& pin, GpioPinOwner&& other) noexcept(true);
+        GpioPinStmOwner(GpioPinStmOwner&& other) noexcept(true);
+
+        GpioPinStmOwner(const GpioPinStmOwner& other) = delete;
+        GpioPinStmOwner& operator=(const GpioPinStmOwner& other) = delete;
+
+    protected:
+        GpioPinStm& GetPin() const;
+    };
+
     class DummyPinStm
         : public GpioPinStm
     {
@@ -198,11 +214,11 @@ namespace hal
     extern DummyPinStm dummyPinStm;
 
     class PeripheralPinStm
-        : public GpioPinOwner
+        : public GpioPinStmOwner
     {
     public:
         PeripheralPinStm(GpioPinStm& pin, PinConfigTypeStm pinConfigType, uint8_t peripheral);
-        PeripheralPinStm(const GpioPinStm& pin, GpioPinOwner&& pinOwner, PinConfigTypeStm pinConfigType, uint8_t peripheral);
+        PeripheralPinStm(GpioPinStmOwner&& pinOwner, PinConfigTypeStm pinConfigType, uint8_t peripheral);
 
         PeripheralPinStm(const PeripheralPinStm& other) = delete;
         PeripheralPinStm& operator=(const PeripheralPinStm& other) = delete;
@@ -210,7 +226,7 @@ namespace hal
     };
 
     class AnalogPinStm
-        : public GpioPinOwner
+        : public GpioPinStmOwner
     {
     public:
         explicit AnalogPinStm(GpioPinStm& pin);

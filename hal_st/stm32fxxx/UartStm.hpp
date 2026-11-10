@@ -1,7 +1,6 @@
 #ifndef HAL_UART_STM_HPP
 #define HAL_UART_STM_HPP
 
-#include "generated/stm32fxxx/PeripheralTable.hpp"
 #include "hal/interfaces/SerialCommunication.hpp"
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "hal_st/stm32fxxx/GpioStm.hpp"
@@ -40,16 +39,24 @@ namespace hal
     public:
         using Config = detail::UartStmConfig;
 
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config = Config());
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config = Config());
 #if defined(HAS_PERIPHERAL_LPUART)
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, LpUart lpUart, const Config& config = Config());
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRx, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config = Config());
 #endif
-    private:
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl);
+
+        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, const Config& config = Config());
 #if defined(HAS_PERIPHERAL_LPUART)
-        UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, LpUart lpUart, const Config& config, bool hasFlowControl);
+        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, LpUart lpUart, const Config& config = Config());
+        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, LpUart lpUart, const Config& config = Config());
+#endif
+
+    private:
+        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, const Config& config, bool hasFlowControl);
+#if defined(HAS_PERIPHERAL_LPUART)
+        UartStm(uint8_t oneBasedIndex, GpioPinStmOwner&& uartTxOwner, GpioPinStmOwner&& uartRxOwner, GpioPinStmOwner&& uartRtsOwner, GpioPinStmOwner&& uartCtsOwner, LpUart lpUart, const Config& config, bool hasFlowControl);
 #endif
 
     public:
@@ -57,6 +64,11 @@ namespace hal
 
         void SendData(infra::MemoryRange<const uint8_t> data, infra::Function<void()> actionOnCompletion = infra::emptyFunction) override;
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
+
+        hal::PeripheralPinStm& TxPin();
+        hal::PeripheralPinStm& RxPin();
+        hal::PeripheralPinStm& RtsPin();
+        hal::PeripheralPinStm& CtsPin();
 
     protected:
         uint8_t uartIndex;
