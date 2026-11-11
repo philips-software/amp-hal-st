@@ -8,6 +8,7 @@
 #include "infra/util/ReallyAssert.hpp"
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 
 #include DEVICE_HEADER
 
@@ -18,8 +19,26 @@ namespace hal
         uint32_t defaultRxTimeout = 16;
     }
 
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, const Config& config)
-        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, config)
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, const Config& config)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, GpioPins{ tx, rx }, config }
+    {}
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, const Config& config)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, GpioPinsFlowCtrl{ tx, rx, rts, cts }, config }
+    {}
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, const GpioPins& pins, const Config& config)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, GpioOwners{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx } }, config }
+    {
+    }
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, const Config& config)
+        : UartStmDuplexDma{ rxBuffer, transmitStream, receiveStream, oneBasedIndex, GpioOwnersFlowCtrl{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx }, GpioPinStmOwner{ pins.rts }, GpioPinStmOwner{ pins.cts } }, config }
+    {
+    }
+
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioOwners&& gpioOwners, const Config& config)
+        : UartStmDma(transmitStream, oneBasedIndex, std::move(gpioOwners), config)
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
@@ -33,23 +52,8 @@ namespace hal
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
 
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config)
-        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
-        , rxBuffer{ rxBuffer }
-        , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
-            {
-                HalfReceiveComplete();
-            },
-            [this]
-            {
-                FullReceiveComplete();
-            } }
-    {
-        uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
-    }
-
-    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioPinStm& uartTx, GpioPinStm& uartRx, GpioPinStm& uartRts, GpioPinStm& uartCts, const Config& config, bool hasFlowControl)
-        : UartStmDma(transmitStream, oneBasedIndex, uartTx, uartRx, uartRts, uartCts, config)
+    UartStmDuplexDma::UartStmDuplexDma(infra::MemoryRange<uint8_t> rxBuffer, hal::DmaStm::TransmitStream& transmitStream, hal::DmaStm::ReceiveStream& receiveStream, uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config)
+        : UartStmDma(transmitStream, oneBasedIndex, std::move(gpioOwnersFlowCtrl), config)
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {

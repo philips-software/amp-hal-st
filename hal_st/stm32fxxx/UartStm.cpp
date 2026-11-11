@@ -8,27 +8,44 @@
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/ReallyAssert.hpp"
 #include <cstdint>
+#include <utility>
 
 #include DEVICE_HEADER
 
 namespace hal
 {
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, const Config& config)
-        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, dummyPinStm, dummyPinStm, config, false)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, const Config& config)
+        : UartStm{ oneBasedIndex, GpioPins{ tx, rx }, config }
     {}
 
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config)
-        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, uartRtsPin, uartCtsPin, config, true)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, const Config& config)
+        : UartStm{ oneBasedIndex, GpioPinsFlowCtrl{ tx, rx, rts, cts }, config }
     {}
 
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, const Config& config, bool hasFlowControl)
-        : uartIndex(oneBasedIndex - 1)
-        , uartArray(peripheralUart)
-        , uartTx(uartTxPin, PinConfigTypeStm::uartTx, oneBasedIndex)
-        , uartRx(uartRxPin, PinConfigTypeStm::uartRx, oneBasedIndex)
-        , uartRts(uartRtsPin, PinConfigTypeStm::uartRts, oneBasedIndex)
-        , uartCts(uartCtsPin, PinConfigTypeStm::uartCts, oneBasedIndex)
-        , uartIrqArray(peripheralUartIrq)
+    UartStm::UartStm(uint8_t oneBasedIndex, const GpioPins& pins, const Config& config)
+        : UartStm{ oneBasedIndex, GpioOwnersFlowCtrl{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx }, GpioPinStmOwner{ dummyPinStm }, GpioPinStmOwner{ dummyPinStm } }, config, false }
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, const Config& config)
+        : UartStm{ oneBasedIndex, GpioOwnersFlowCtrl{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx }, GpioPinStmOwner{ pins.rts }, GpioPinStmOwner{ pins.cts } }, config, true }
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioOwners&& gpioOwners, const Config& config)
+        : UartStm{ oneBasedIndex, GpioOwnersFlowCtrl{ std::move(gpioOwners.txOwner), std::move(gpioOwners.rxOwner), GpioPinStmOwner{ dummyPinStm }, GpioPinStmOwner{ dummyPinStm } }, config, false }
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config)
+        : UartStm{ oneBasedIndex, std::move(gpioOwnersFlowCtrl), config, true }
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, const Config& config, bool hasFlowControl)
+        : uartIndex{ static_cast<uint8_t>(oneBasedIndex - 1) }
+        , uartArray{ peripheralUart }
+        , uartTx{ std::move(gpioOwnersFlowCtrl.txOwner), PinConfigTypeStm::uartTx, oneBasedIndex }
+        , uartRx{ std::move(gpioOwnersFlowCtrl.rxOwner), PinConfigTypeStm::uartRx, oneBasedIndex }
+        , uartRts{ std::move(gpioOwnersFlowCtrl.rtsOwner), PinConfigTypeStm::uartRts, oneBasedIndex }
+        , uartCts{ std::move(gpioOwnersFlowCtrl.ctsOwner), PinConfigTypeStm::uartCts, oneBasedIndex }
+        , uartIrqArray{ peripheralUartIrq }
     {
         really_assert(oneBasedIndex != 0); // first element is 1 in oneBasedIndex
         EnableClockUart(uartIndex);
@@ -37,24 +54,41 @@ namespace hal
     }
 
 #if defined(HAS_PERIPHERAL_LPUART)
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, LpUart lpUart, const Config& config)
-        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, dummyPinStm, dummyPinStm, lpUart, config, false)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, LpUart lpUart, const Config& config)
+        : UartStm{ oneBasedIndex, GpioPins{ tx, rx }, lpUart, config }
     {}
 
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, LpUart lpUart, const Config& config)
-        : UartStm(oneBasedIndex, uartTxPin, uartRxPin, uartRtsPin, uartCtsPin, lpUart, config, true)
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& tx, GpioPinStm& rx, GpioPinStm& rts, GpioPinStm& cts, LpUart lpUart, const Config& config)
+        : UartStm{ oneBasedIndex, GpioPinsFlowCtrl{ tx, rx, rts, cts }, lpUart, config }
     {}
 
-    UartStm::UartStm(uint8_t oneBasedIndex, GpioPinStm& uartTxPin, GpioPinStm& uartRxPin, GpioPinStm& uartRtsPin, GpioPinStm& uartCtsPin, [[maybe_unused]] LpUart lpUart, const Config& config, bool hasFlowControl)
-        : uartIndex(oneBasedIndex - 1)
-        , uartArray(peripheralLpuart)
-        , uartTx(uartTxPin, PinConfigTypeStm::lpuartTx, oneBasedIndex)
-        , uartRx(uartRxPin, PinConfigTypeStm::lpuartRx, oneBasedIndex)
-        , uartRts(uartRtsPin, PinConfigTypeStm::lpuartRts, oneBasedIndex)
-        , uartCts(uartCtsPin, PinConfigTypeStm::lpuartCts, oneBasedIndex)
-        , isLpUart(true)
-        , uartIrqArray(peripheralLpuartIrq)
+    UartStm::UartStm(uint8_t oneBasedIndex, const GpioPins& pins, LpUart lpUart, const Config& config)
+        : UartStm(oneBasedIndex, GpioOwnersFlowCtrl{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx }, GpioPinStmOwner{ dummyPinStm }, GpioPinStmOwner{ dummyPinStm } }, lpUart, config, false)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, const GpioPinsFlowCtrl& pins, LpUart lpUart, const Config& config)
+        : UartStm(oneBasedIndex, GpioOwnersFlowCtrl{ GpioPinStmOwner{ pins.tx }, GpioPinStmOwner{ pins.rx }, GpioPinStmOwner{ pins.rts }, GpioPinStmOwner{ pins.cts } }, lpUart, config, true)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioOwners&& gpioOwners, LpUart lpUart, const Config& config)
+        : UartStm(oneBasedIndex, GpioOwnersFlowCtrl{ std::move(gpioOwners.txOwner), std::move(gpioOwners.rxOwner), GpioPinStmOwner{ dummyPinStm }, GpioPinStmOwner{ dummyPinStm } }, lpUart, config, false)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, LpUart lpUart, const Config& config)
+        : UartStm(oneBasedIndex, std::move(gpioOwnersFlowCtrl), lpUart, config, true)
+    {}
+
+    UartStm::UartStm(uint8_t oneBasedIndex, GpioOwnersFlowCtrl&& gpioOwnersFlowCtrl, LpUart lpUart, const Config& config, bool hasFlowControl)
+        : uartIndex{ static_cast<uint8_t>(oneBasedIndex - 1) }
+        , uartArray{ peripheralLpuart }
+        , uartTx{ std::move(gpioOwnersFlowCtrl.txOwner), PinConfigTypeStm::uartTx, oneBasedIndex }
+        , uartRx{ std::move(gpioOwnersFlowCtrl.rxOwner), PinConfigTypeStm::uartRx, oneBasedIndex }
+        , uartRts{ std::move(gpioOwnersFlowCtrl.rtsOwner), PinConfigTypeStm::uartRts, oneBasedIndex }
+        , uartCts{ std::move(gpioOwnersFlowCtrl.ctsOwner), PinConfigTypeStm::uartCts, oneBasedIndex }
+        , isLpUart{ true }
+        , uartIrqArray{ peripheralLpuartIrq }
     {
+        really_assert(oneBasedIndex != 0); // first element is 1 in oneBasedIndex
         EnableClockLpuart(uartIndex);
         UartStmHalInit(config, hasFlowControl);
         RegisterInterrupt(config);
@@ -129,6 +163,26 @@ namespace hal
             uartArray[uartIndex]->CR1 &= ~(USART_CR1_RE | USART_CR1_RXNEIE);
         else
             uartArray[uartIndex]->CR1 |= USART_CR1_RE | USART_CR1_RXNEIE;
+    }
+
+    hal::PeripheralPinStm& UartStm::TxPin()
+    {
+        return uartTx;
+    }
+
+    hal::PeripheralPinStm& UartStm::RxPin()
+    {
+        return uartRx;
+    }
+
+    hal::PeripheralPinStm& UartStm::RtsPin()
+    {
+        return uartRts;
+    }
+
+    hal::PeripheralPinStm& UartStm::CtsPin()
+    {
+        return uartCts;
     }
 
     void UartStm::RegisterInterrupt(const Config& config)

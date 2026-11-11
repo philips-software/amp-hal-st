@@ -141,14 +141,21 @@ namespace hal
         bool GetOutputLatch() const override;
         void SetAsInput() override;
         bool IsInput() const override;
+
         void Config(PinConfigType config) override;
         void Config(PinConfigType config, bool startOutputState) override;
+
+        void ReConfig(PinConfigType config) override;
+        void ReConfig(PinConfigType config, bool startOutputState) override;
+
         void ResetConfig() override;
         void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type = InterruptType::dispatched) override;
         void DisableInterrupt() override;
 
         virtual void ConfigAnalog();
         virtual void ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral);
+        virtual void ReConfigAnalog();
+        virtual void ReConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral);
 
         uint32_t AdcChannel(uint8_t adc) const;
         uint32_t DacChannel(uint8_t dac) const;
@@ -159,6 +166,23 @@ namespace hal
         Drive drive;
         Speed speed;
         WeakPull weakPull;
+    };
+
+    class GpioPinStmOwner
+        : public GpioPinOwner
+    {
+    public:
+        explicit GpioPinStmOwner(GpioPinStm& pin);
+
+        GpioPinStmOwner(const GpioPinStm& pin, GpioPinOwner&& other) noexcept(true);
+        GpioPinStmOwner(GpioPinStmOwner&& other) noexcept(true);
+
+        GpioPinStmOwner(const GpioPinStmOwner& other) = delete;
+        GpioPinStmOwner& operator=(const GpioPinStmOwner& other) = delete;
+
+    protected:
+        GpioPinStm& GetPin();
+        const GpioPinStm& GetPin() const;
     };
 
     class DummyPinStm
@@ -172,50 +196,58 @@ namespace hal
         bool GetOutputLatch() const override;
         void SetAsInput() override;
         bool IsInput() const override;
+
         void Config(PinConfigType config) override;
         void Config(PinConfigType config, bool startOutputState) override;
+        void ReConfig(PinConfigType config) override;
+        void ReConfig(PinConfigType config, bool startOutputState) override;
+
         void ResetConfig() override;
         void EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type = InterruptType::dispatched) override;
         void DisableInterrupt() override;
+
         void ConfigAnalog() override;
         void ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral) override;
+        void ReConfigAnalog() override;
+        void ReConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral) override;
     };
 
     extern DummyPinStm dummyPinStm;
 
     class PeripheralPinStm
+        : public GpioPinStmOwner
     {
     public:
         PeripheralPinStm(GpioPinStm& pin, PinConfigTypeStm pinConfigType, uint8_t peripheral);
+        PeripheralPinStm(GpioPinStmOwner&& pinOwner, PinConfigTypeStm pinConfigType, uint8_t peripheral);
+
         PeripheralPinStm(const PeripheralPinStm& other) = delete;
         PeripheralPinStm& operator=(const PeripheralPinStm& other) = delete;
-        ~PeripheralPinStm();
-
-    private:
-        GpioPinStm& pin;
+        // ~PeripheralPinStm();
     };
 
     class AnalogPinStm
+        : public GpioPinStmOwner
     {
     public:
-        AnalogPinStm(GpioPinStm& pin);
-        AnalogPinStm(uint32_t channel);
+        explicit AnalogPinStm(GpioPinStm& pin);
+        explicit AnalogPinStm(uint32_t channel);
+
         AnalogPinStm(const AnalogPinStm& other) = delete;
         AnalogPinStm& operator=(const AnalogPinStm& other) = delete;
-        ~AnalogPinStm();
+        // ~AnalogPinStm();
 
         uint32_t AdcChannel(uint8_t adc) const;
         uint32_t DacChannel(uint8_t dac) const;
 
     private:
-        GpioPinStm& pin;
         uint32_t channel{ 0xffffffff };
     };
 
     class MultiGpioPinStm
     {
     public:
-        MultiGpioPinStm(infra::MemoryRange<const std::pair<Port, uint8_t>> table, Drive drive = Drive::Default, Speed speed = Speed::Default, WeakPull weakPull = WeakPull::Default);
+        explicit MultiGpioPinStm(infra::MemoryRange<const std::pair<Port, uint8_t>> table, Drive drive = Drive::Default, Speed speed = Speed::Default, WeakPull weakPull = WeakPull::Default);
 
         void ResetConfig();
         void ConfigAnalog();
@@ -232,6 +264,7 @@ namespace hal
     {
     public:
         MultiPeripheralPinStm(hal::MultiGpioPinStm& pins, PinConfigTypeStm pinConfigType, uint8_t peripheral);
+
         MultiPeripheralPinStm(const MultiPeripheralPinStm& other) = delete;
         MultiPeripheralPinStm& operator=(const MultiPeripheralPinStm& other) = delete;
         ~MultiPeripheralPinStm();
@@ -271,7 +304,7 @@ namespace hal
         };
 
     public:
-        GpioStm(infra::MemoryRange<const infra::MemoryRange<const GpioStm::PinoutTable>> pinoutTable, infra::MemoryRange<const GpioStm::AnalogPinPosition> analogTable = infra::MemoryRange<const GpioStm::AnalogPinPosition>());
+        explicit GpioStm(infra::MemoryRange<const infra::MemoryRange<const GpioStm::PinoutTable>> pinoutTable, infra::MemoryRange<const GpioStm::AnalogPinPosition> analogTable = infra::MemoryRange<const GpioStm::AnalogPinPosition>());
 
     public:
         std::pair<const PinPosition&, const PinoutTable&> GetPeripheralPinConfig(Port port, uint8_t index, PinConfigTypeStm pinConfigType, uint8_t peripheral) const;
@@ -294,7 +327,7 @@ namespace hal
         std::array<infra::Function<void()>, 16> handlers;
         std::array<InterruptType, 16> interruptTypes{};
         std::array<std::atomic_bool, 16> notificationScheduled{};
-        std::array<uint32_t, 11> assignedPins;
+        std::array<uint32_t, 11> assignedPins{};
 
 #if defined(STM32F0) || defined(STM32G0)
         ImmediateInterruptHandler interruptDispatcher0_1;

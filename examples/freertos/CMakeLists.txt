@@ -1,3 +1,10 @@
+set_source_files_properties(
+    Main.cpp PROPERTIES COMPILE_FLAGS
+    "$<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:MSVC>:/wd4996>"
+)
+
+######################################################################
+
 add_executable(examples_st.freertos_nucleo144 Main.cpp)
 emil_build_for(examples_st.freertos_nucleo144 TARGET_MCU_VENDOR st PREREQUISITE_BOOL HALST_BUILD_EXAMPLES_FREERTOS)
 
