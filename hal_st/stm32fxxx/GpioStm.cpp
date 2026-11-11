@@ -292,9 +292,7 @@ namespace hal
 
     DummyPinStm::DummyPinStm()
         : GpioPinStm(Port::A, 0)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     bool DummyPinStm::Get() const
     {
@@ -302,9 +300,7 @@ namespace hal
     }
 
     void DummyPinStm::Set(bool value)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     bool DummyPinStm::GetOutputLatch() const
     {
@@ -312,9 +308,7 @@ namespace hal
     }
 
     void DummyPinStm::SetAsInput()
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     bool DummyPinStm::IsInput() const
     {
@@ -322,59 +316,37 @@ namespace hal
     }
 
     void DummyPinStm::Config(PinConfigType config)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::Config(PinConfigType config, bool startOutputState)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ReConfig(PinConfigType config)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ReConfig(PinConfigType config, bool startOutputState)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ResetConfig()
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::EnableInterrupt(const infra::Function<void()>& action, InterruptTrigger trigger, InterruptType type)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::DisableInterrupt()
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ConfigAnalog()
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ReConfigAnalog()
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     void DummyPinStm::ReConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
-    {
-        /* dummy pin, no behaviour */
-    }
+    {}
 
     PeripheralPinStm::PeripheralPinStm(GpioPinStm& pin, PinConfigTypeStm pinConfigType, uint8_t peripheral)
         : GpioPinStmOwner{ pin }
