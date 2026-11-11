@@ -280,9 +280,14 @@ namespace hal
         : GpioPinOwner{ std::move(other) }
     {}
 
-    GpioPinStm& GpioPinStmOwner::GetPin() const
+    GpioPinStm& GpioPinStmOwner::GetPin()
     {
         return static_cast<GpioPinStm&>(GpioPinOwner::GetPin());
+    }
+
+    const GpioPinStm& GpioPinStmOwner::GetPin() const
+    {
+        return static_cast<const GpioPinStm&>(GpioPinOwner::GetPin());
     }
 
     DummyPinStm::DummyPinStm()

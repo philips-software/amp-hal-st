@@ -181,7 +181,8 @@ namespace hal
         GpioPinStmOwner& operator=(const GpioPinStmOwner& other) = delete;
 
     protected:
-        GpioPinStm& GetPin() const;
+        GpioPinStm& GetPin();
+        const GpioPinStm& GetPin() const;
     };
 
     class DummyPinStm
