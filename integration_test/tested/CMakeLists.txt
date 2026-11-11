@@ -1,4 +1,6 @@
 set_source_files_properties(
+    MainStm32f767.cpp
+    MainStm32wb55.cpp
     Tested.cpp
     Tested.hpp
 
