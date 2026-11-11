@@ -1,3 +1,10 @@
+set_source_files_properties(
+    Main.cpp PROPERTIES COMPILE_FLAGS
+    "$<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:MSVC>:/wd4996>"
+)
+
+######################################################################
+
 add_executable(examples_st.blink_nucleo144 Main.cpp)
 emil_build_for(examples_st.blink_nucleo144
     TARGET_MCU stm32f429
@@ -49,8 +56,3 @@ halst_target_default_linker_scripts(examples_st.blink_nucleo64)
 halst_target_default_init(examples_st.blink_nucleo64)
 
 emil_generate_artifacts(TARGET examples_st.blink_nucleo64 LST MAP BIN HEX)
-
-set_source_files_properties(
-    Main.cpp PROPERTIES COMPILE_FLAGS
-    "$<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:MSVC>:/wd4996>"
-)
