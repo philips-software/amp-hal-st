@@ -55,6 +55,9 @@ namespace hal
 
     void GapCentralSt::Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout)
     {
+        if (RejectDuringRfTest())
+            return;
+
         AssertStateIs({ services::GapState::standby });
 
         auto peerAddress = addressType == services::GapDeviceAddressType::publicAddress ? GAP_PUBLIC_ADDR : GAP_STATIC_RANDOM_ADDR;
@@ -72,19 +75,25 @@ namespace hal
 
         initiatingStateTimer.Start(initiatingTimeout, [this]()
             {
+                gapProcedureStopping = true;
                 aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
             });
     }
 
     void GapCentralSt::Standby()
     {
+        if (RejectDuringRfTest())
+            return;
+
         if (std::exchange(discovering, false))
         {
+            gapProcedureStopping = true;
             initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
         }
         else if (initiatingStateTimer.Armed())
         {
+            gapProcedureStopping = true;
             initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
         }
@@ -94,12 +103,18 @@ namespace hal
 
     void GapCentralSt::SetIdentityAddress(services::GapAddress address)
     {
+        if (RejectDuringRfTest())
+            return;
+
         AssertStateIs({ services::GapState::standby });
         GapSt::SetIdentityAddress(address.address, address.type);
     }
 
     void GapCentralSt::StartDeviceDiscovery()
     {
+        if (RejectDuringRfTest())
+            return;
+
         AssertStateIs({ services::GapState::standby });
 
         if (!std::exchange(discovering, true))
@@ -122,6 +137,9 @@ namespace hal
 
     void GapCentralSt::SetPrivacyMode(bool enabled)
     {
+        if (RejectDuringRfTest())
+            return;
+
         AssertStateIs({ services::GapState::standby });
 
         ReinitializeGapWithPrivacy(GAP_CENTRAL_ROLE, enabled, gapService);
@@ -132,6 +150,9 @@ namespace hal
 
     void GapCentralSt::SetDeviceName(infra::BoundedConstString name)
     {
+        if (RejectDuringRfTest())
+            return;
+
         AssertStateIs({ services::GapState::standby });
         really_assert(name.size() <= gapService.deviceName.max_size());
 
@@ -170,6 +191,32 @@ namespace hal
             return services::GapState::initiating;
 
         return GapSt::DetermineCurrentState();
+    }
+
+    bool GapCentralSt::AcquireRfTest(services::Tracer& tracer)
+    {
+        if (rfTestTracer != nullptr || gapProcedureStopping || DetermineCurrentState() != services::GapState::standby)
+        {
+            tracer.Trace() << "RF test rejected: GAP or RF test active";
+            return false;
+        }
+
+        rfTestTracer = &tracer;
+        return true;
+    }
+
+    void GapCentralSt::ReleaseRfTest()
+    {
+        rfTestTracer = nullptr;
+    }
+
+    bool GapCentralSt::RejectDuringRfTest()
+    {
+        if (rfTestTracer == nullptr)
+            return false;
+
+        rfTestTracer->Trace() << "GAP operation rejected: RF test active";
+        return true;
     }
 
     void GapCentralSt::HandleHciDisconnectEvent(const hci_disconnection_complete_event_rp0& event)
@@ -214,6 +261,9 @@ namespace hal
 
     void GapCentralSt::HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event)
     {
+        if (event.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC || event.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
+            gapProcedureStopping = false;
+
         GapSt::HandleGapProcedureCompleteEvent(event);
 
         really_assert(event.Status == BLE_STATUS_SUCCESS);

@@ -1,6 +1,7 @@
 #ifndef HAL_ST_DTM_ST_HPP
 #define HAL_ST_DTM_ST_HPP
 
+#include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "services/ble/Dtm.hpp"
 #include <cstdint>
@@ -12,15 +13,35 @@ namespace hal
         : public services::Dtm
     {
     public:
+        BleDtmSt() = default;
+        BleDtmSt(GapCentralSt& gapCentral, services::Tracer& tracer);
+
         // Implementation of services::Dtm
         bool StartTone(uint8_t rfChannel, uint8_t offset) override;
         bool StopTone() override;
         bool SetTxPowerLevel(uint8_t txPower) override;
+        bool StartContinuousRx(uint8_t channel) override;
+        std::optional<int8_t> ReadRssi() override;
+        bool StopContinuousRx() override;
         bool StartRxTest(uint8_t frequency, uint8_t phy) override;
         bool StartTxTest(uint8_t frequency, uint8_t dataLength, uint8_t packetPayload, uint8_t phy) override;
         void StopTest(infra::AutoResetFunction<void(std::optional<uint16_t>)>&& onStopped) override;
 
     private:
+        enum class State
+        {
+            idle,
+            tone,
+            continuousRx
+        };
+
+        bool Acquire();
+        void Release();
+
+        State state = State::idle;
+        GapCentralSt* gapCentral = nullptr;
+        services::Tracer* tracer = nullptr;
+
         struct ParameterLimits
         {
             uint8_t min;

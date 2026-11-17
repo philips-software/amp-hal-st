@@ -5,6 +5,7 @@
 #include "hal_st/middlewares/ble_middleware/GapSt.hpp"
 #include "infra/timer/Timer.hpp"
 #include "infra/util/AutoResetFunction.hpp"
+#include "services/tracer/Tracer.hpp"
 
 namespace hal
 {
@@ -14,6 +15,8 @@ namespace hal
     {
     public:
         GapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration);
+        bool AcquireRfTest(services::Tracer& tracer);
+        void ReleaseRfTest();
 
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
@@ -57,6 +60,7 @@ namespace hal
         void HandleConnectionCompleteCommon(uint8_t status);
         void HandleOobDataGeneration();
         void Initialize(const Configuration& configuration);
+        bool RejectDuringRfTest();
 
     private:
         static const services::GapConnectionParameters connectionUpdateParameters;
@@ -72,6 +76,8 @@ namespace hal
         const uint8_t commandDisallowed = 0x0c;
 
         bool discovering = false;
+        bool gapProcedureStopping = false;
+        services::Tracer* rfTestTracer = nullptr;
         services::GapConnectionParameters connectionParameters;
         infra::TimerSingleShot initiatingStateTimer;
 
