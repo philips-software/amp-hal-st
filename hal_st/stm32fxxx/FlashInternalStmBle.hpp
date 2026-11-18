@@ -34,17 +34,6 @@ namespace hal
         void SingleWrite();
         void SingleErase();
 
-        class CriticalSectionScoped
-        {
-        public:
-            CriticalSectionScoped(WatchDogStm& watchdog);
-            ~CriticalSectionScoped();
-
-        private:
-            uint32_t primaskBit;
-            WatchDogStm& watchdog;
-        };
-
         static constexpr uint32_t hwBlockFlashReqByCpu2 = 7;
         infra::ConstByteRange flashMemory;
         WatchDogStm& watchdog;

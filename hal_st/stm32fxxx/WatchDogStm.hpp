@@ -5,6 +5,7 @@
 #include "hal_st/cortex/InterruptCortex.hpp"
 #include "infra/timer/Timer.hpp"
 #include <atomic>
+#include <optional>
 
 namespace hal
 {
@@ -44,6 +45,19 @@ namespace hal
         std::atomic<uint32_t> missedFeedCount{ 0 };
         const uint32_t maxMissedFeeds{ 0 };
         infra::Function<void()> onExpired;
+    };
+
+    class WatchDogRefreshedCriticalSection
+    {
+    public:
+        explicit WatchDogRefreshedCriticalSection(WatchDogStm& watchDog);
+        WatchDogRefreshedCriticalSection(const WatchDogRefreshedCriticalSection& other) = delete;
+        WatchDogRefreshedCriticalSection& operator=(const WatchDogRefreshedCriticalSection& other) = delete;
+        ~WatchDogRefreshedCriticalSection();
+
+    private:
+        WatchDogStm& watchDog;
+        std::optional<CriticalSectionScoped> criticalSection;
     };
 }
 
