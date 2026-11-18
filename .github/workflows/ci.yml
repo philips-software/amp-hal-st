@@ -154,7 +154,7 @@ jobs:
     name: Embedded Build on devcontainer
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/philips-software/amp-devcontainer-embedded-cpp:9.0.0@sha256:2ea81b75aece14e1083181c3fdc46920b8d59b27fb4b2ba8aa039a188a482bed # 9.0.0
+      image: ghcr.io/philips-software/amp-devcontainer-embedded-cpp:9.1.0@sha256:f759e7b8966aa085997d3af6e0b5acf2d5c2e39fe4eaf0734769752160c26c65 # 9.1.0
       options: --user root
     needs: [host_build_test_ubuntu]
     strategy:
