@@ -71,7 +71,6 @@ namespace hal
         const uint8_t commandDisallowed = 0x0c;
 
         bool discovering = false;
-        bool gapProcedureStopping = false;
         services::GapConnectionParameters connectionParameters;
         infra::TimerSingleShot initiatingStateTimer;
 

@@ -72,7 +72,6 @@ namespace hal
 
         initiatingStateTimer.Start(initiatingTimeout, [this]()
             {
-                gapProcedureStopping = true;
                 aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
             });
     }
@@ -81,13 +80,11 @@ namespace hal
     {
         if (std::exchange(discovering, false))
         {
-            gapProcedureStopping = true;
             initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_GENERAL_DISCOVERY_PROC);
         }
         else if (initiatingStateTimer.Armed())
         {
-            gapProcedureStopping = true;
             initiatingStateTimer.Cancel();
             aci_gap_terminate_gap_proc(GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC);
         }
@@ -217,9 +214,6 @@ namespace hal
 
     void GapCentralSt::HandleGapProcedureCompleteEvent(const aci_gap_proc_complete_event_rp0& event)
     {
-        if (event.Procedure_Code == GAP_GENERAL_DISCOVERY_PROC || event.Procedure_Code == GAP_DIRECT_CONNECTION_ESTABLISHMENT_PROC)
-            gapProcedureStopping = false;
-
         GapSt::HandleGapProcedureCompleteEvent(event);
 
         really_assert(event.Status == BLE_STATUS_SUCCESS);
