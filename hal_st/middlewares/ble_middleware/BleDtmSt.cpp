@@ -60,10 +60,15 @@ namespace hal
 
     bool BleDtmSt::StartContinuousRx(uint8_t channel)
     {
+#if defined(STM32WB)
         if (channel > rfChannelLimits.max)
             return false;
 
         return aci_hal_rx_start(channel) == BLE_STATUS_SUCCESS;
+#else
+        static_cast<void>(channel);
+        return false;
+#endif
     }
 
     std::optional<int8_t> BleDtmSt::ReadRssi()
@@ -77,6 +82,10 @@ namespace hal
 
     bool BleDtmSt::StopContinuousRx()
     {
+#if defined(STM32WB)
         return aci_hal_rx_stop() == BLE_STATUS_SUCCESS;
+#else
+        return false;
+#endif
     }
 }
