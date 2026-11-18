@@ -9,44 +9,21 @@ extern "C"
 
 namespace hal
 {
-    BleDtmSt::BleDtmSt(GapCentralSt& gapCentral, services::Tracer& tracer)
-        : gapCentral(&gapCentral)
-        , tracer(&tracer)
+    BleDtmSt::BleDtmSt(services::Tracer& tracer)
+        : tracer(&tracer)
     {}
-
-    bool BleDtmSt::Acquire()
-    {
-        return state == State::idle && (gapCentral == nullptr || gapCentral->AcquireRfTest(*tracer));
-    }
-
-    void BleDtmSt::Release()
-    {
-        state = State::idle;
-        if (gapCentral != nullptr)
-            gapCentral->ReleaseRfTest();
-    }
 
     bool BleDtmSt::StartTone(uint8_t rfChannel, uint8_t offset)
     {
-        if (rfChannel >= rfChannelLimits.min && rfChannel <= rfChannelLimits.max && offset >= rfOffsetLimits.min && offset <= rfOffsetLimits.max && Acquire())
-        {
-            if (aci_hal_tone_start(rfChannel, offset) == BLE_STATUS_SUCCESS)
-            {
-                state = State::tone;
-                return true;
-            }
-            Release();
-        }
+        if (rfChannel >= rfChannelLimits.min && rfChannel <= rfChannelLimits.max && offset >= rfOffsetLimits.min && offset <= rfOffsetLimits.max)
+            return aci_hal_tone_start(rfChannel, offset) == BLE_STATUS_SUCCESS;
 
         return false;
     }
 
     bool BleDtmSt::StopTone()
     {
-        if (state != State::tone || aci_hal_tone_stop() != BLE_STATUS_SUCCESS)
-            return false;
-        Release();
-        return true;
+        return aci_hal_tone_stop() == BLE_STATUS_SUCCESS;
     }
 
     bool BleDtmSt::SetTxPowerLevel(uint8_t txPower)
@@ -87,19 +64,15 @@ namespace hal
 
     bool BleDtmSt::StartContinuousRx(uint8_t channel)
     {
-        if (channel > rfChannelLimits.max || !Acquire())
+        if (channel > rfChannelLimits.max)
             return false;
 
         const auto status = aci_hal_rx_start(channel);
         if (status == BLE_STATUS_SUCCESS)
-        {
-            state = State::continuousRx;
             return true;
-        }
 
         if (tracer != nullptr)
             tracer->Trace() << "ACI_HAL_RX_START failed with status " << static_cast<uint32_t>(status);
-        Release();
         return false;
     }
 
@@ -119,10 +92,6 @@ namespace hal
 
     bool BleDtmSt::StopContinuousRx()
     {
-        if (state != State::continuousRx || aci_hal_rx_stop() != BLE_STATUS_SUCCESS)
-            return false;
-
-        Release();
-        return true;
+        return aci_hal_rx_stop() == BLE_STATUS_SUCCESS;
     }
 }

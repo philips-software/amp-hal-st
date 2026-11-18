@@ -1,9 +1,9 @@
 #ifndef HAL_ST_DTM_ST_HPP
 #define HAL_ST_DTM_ST_HPP
 
-#include "hal_st/middlewares/ble_middleware/GapCentralSt.hpp"
 #include "infra/util/AutoResetFunction.hpp"
 #include "services/ble/Dtm.hpp"
+#include "services/tracer/Tracer.hpp"
 #include <cstdint>
 #include <optional>
 
@@ -14,7 +14,7 @@ namespace hal
     {
     public:
         BleDtmSt() = default;
-        BleDtmSt(GapCentralSt& gapCentral, services::Tracer& tracer);
+        explicit BleDtmSt(services::Tracer& tracer);
 
         // Implementation of services::Dtm
         bool StartTone(uint8_t rfChannel, uint8_t offset) override;
@@ -28,18 +28,6 @@ namespace hal
         void StopTest(infra::AutoResetFunction<void(std::optional<uint16_t>)>&& onStopped) override;
 
     private:
-        enum class State
-        {
-            idle,
-            tone,
-            continuousRx
-        };
-
-        bool Acquire();
-        void Release();
-
-        State state = State::idle;
-        GapCentralSt* gapCentral = nullptr;
         services::Tracer* tracer = nullptr;
 
         struct ParameterLimits
