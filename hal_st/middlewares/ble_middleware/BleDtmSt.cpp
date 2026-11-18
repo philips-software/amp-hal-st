@@ -9,10 +9,6 @@ extern "C"
 
 namespace hal
 {
-    BleDtmSt::BleDtmSt(services::Tracer& tracer)
-        : tracer(&tracer)
-    {}
-
     bool BleDtmSt::StartTone(uint8_t rfChannel, uint8_t offset)
     {
         if (rfChannel >= rfChannelLimits.min && rfChannel <= rfChannelLimits.max && offset >= rfOffsetLimits.min && offset <= rfOffsetLimits.max)
@@ -67,25 +63,14 @@ namespace hal
         if (channel > rfChannelLimits.max)
             return false;
 
-        const auto status = aci_hal_rx_start(channel);
-        if (status == BLE_STATUS_SUCCESS)
-            return true;
-
-        if (tracer != nullptr)
-            tracer->Trace() << "ACI_HAL_RX_START failed with status " << static_cast<uint32_t>(status);
-        return false;
+        return aci_hal_rx_start(channel) == BLE_STATUS_SUCCESS;
     }
 
     std::optional<int8_t> BleDtmSt::ReadRssi()
     {
         uint8_t rssi = 0;
-        const auto status = aci_hal_read_rssi(&rssi);
-        if (status != BLE_STATUS_SUCCESS || (rssi > 20 && rssi <= 128))
-        {
-            if (tracer != nullptr)
-                tracer->Trace() << "ACI_HAL_READ_RSSI failed: status " << static_cast<uint32_t>(status) << ", value " << static_cast<uint32_t>(rssi);
+        if (aci_hal_read_rssi(&rssi) != BLE_STATUS_SUCCESS || (rssi > 20 && rssi <= 128))
             return std::nullopt;
-        }
 
         return static_cast<int8_t>(rssi <= 127 ? rssi : static_cast<int16_t>(rssi) - 256);
     }

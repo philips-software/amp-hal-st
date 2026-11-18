@@ -3,7 +3,6 @@
 
 #include "infra/util/AutoResetFunction.hpp"
 #include "services/ble/Dtm.hpp"
-#include "services/tracer/Tracer.hpp"
 #include <cstdint>
 #include <optional>
 
@@ -14,7 +13,6 @@ namespace hal
     {
     public:
         BleDtmSt() = default;
-        explicit BleDtmSt(services::Tracer& tracer);
 
         // Implementation of services::Dtm
         bool StartTone(uint8_t rfChannel, uint8_t offset) override;
@@ -28,8 +26,6 @@ namespace hal
         void StopTest(infra::AutoResetFunction<void(std::optional<uint16_t>)>&& onStopped) override;
 
     private:
-        services::Tracer* tracer = nullptr;
-
         struct ParameterLimits
         {
             uint8_t min;
