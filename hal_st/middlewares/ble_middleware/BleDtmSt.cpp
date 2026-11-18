@@ -9,10 +9,10 @@ extern "C"
 
 namespace hal
 {
-    bool BleDtmSt::StartTone(uint8_t rfChannel, uint8_t offset)
+    bool BleDtmSt::StartTone(uint8_t rfChannel)
     {
-        if (rfChannel >= rfChannelLimits.min && rfChannel <= rfChannelLimits.max && offset >= rfOffsetLimits.min && offset <= rfOffsetLimits.max)
-            return aci_hal_tone_start(rfChannel, offset) == BLE_STATUS_SUCCESS;
+        if (rfChannel >= rfChannelLimits.min && rfChannel <= rfChannelLimits.max)
+            return aci_hal_tone_start(rfChannel, 0) == BLE_STATUS_SUCCESS;
 
         return false;
     }
