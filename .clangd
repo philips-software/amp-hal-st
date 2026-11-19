@@ -2,10 +2,13 @@ CompileFlags:
   CompilationDatabase: build/
 Diagnostics:
   UnusedIncludes: Strict
+  MissingIncludes: Strict
+  Includes:
+    IgnoreHeader: ['stm32[^/]*\.h', 'core_cm[^/]*\.h', 'cmsis_[^/]*\.h']
   ClangTidy:
     Add: []
     Remove: []
 InlayHints:
-  Enabled: No
+  Enabled: Yes
   ParameterNames: No
   DeducedTypes: No

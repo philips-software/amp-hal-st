@@ -1,3 +1,10 @@
+set_source_files_properties(
+    Main.cpp PROPERTIES COMPILE_FLAGS
+    "$<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:MSVC>:/wd4996>"
+)
+
+######################################################################
+
 macro(add_sesame_example target_name)
 
     add_executable(${target_name})

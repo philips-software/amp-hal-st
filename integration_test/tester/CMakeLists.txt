@@ -1,3 +1,16 @@
+set_source_files_properties(
+    ForwardingEchoToTested.cpp
+    ForwardingEchoToTested.hpp
+    Main.cpp
+    Tester.cpp
+    Tester.hpp
+
+    PROPERTIES COMPILE_FLAGS
+        "$<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:Clang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:AppleClang>:-Wno-deprecated-declarations>$<$<CXX_COMPILER_ID:MSVC>:/wd4996>"
+)
+
+######################################################################
+
 add_executable(integration_test.tester)
 emil_build_for(integration_test.tester TARGET_MCU stm32f767)
 
