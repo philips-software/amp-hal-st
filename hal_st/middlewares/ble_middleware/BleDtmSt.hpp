@@ -18,9 +18,7 @@ namespace hal
         bool StartTone(uint8_t rfChannel) override;
         bool StopTone() override;
         bool SetTxPowerLevel(int8_t txPowerDbm) override;
-        bool StartContinuousRx(uint8_t channel) override;
         std::optional<int8_t> ReadRssi() override;
-        bool StopContinuousRx() override;
         bool StartRxTest(uint8_t frequency, uint8_t phy) override;
         bool StartTxTest(uint8_t frequency, uint8_t dataLength, uint8_t packetPayload, uint8_t phy) override;
         void StopTest(infra::AutoResetFunction<void(std::optional<uint16_t>)>&& onStopped) override;

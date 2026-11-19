@@ -90,14 +90,6 @@ namespace hal
             onStopped(std::nullopt);
     }
 
-    bool BleDtmSt::StartContinuousRx(uint8_t channel)
-    {
-        if (channel > rfChannelLimits.max)
-            return false;
-
-        return aci_hal_rx_start(channel) == BLE_STATUS_SUCCESS;
-    }
-
     std::optional<int8_t> BleDtmSt::ReadRssi()
     {
         uint8_t rssi = 0;
@@ -107,8 +99,4 @@ namespace hal
         return static_cast<int8_t>(rssi <= 127 ? rssi : static_cast<int16_t>(rssi) - 256);
     }
 
-    bool BleDtmSt::StopContinuousRx()
-    {
-        return aci_hal_rx_stop() == BLE_STATUS_SUCCESS;
-    }
 }
