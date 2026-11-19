@@ -17,7 +17,7 @@ namespace hal
         // Implementation of services::Dtm
         bool StartTone(uint8_t rfChannel) override;
         bool StopTone() override;
-        bool SetTxPowerLevel(uint8_t txPower) override;
+        bool SetTxPowerLevel(int8_t txPowerDbm) override;
         bool StartContinuousRx(uint8_t channel) override;
         std::optional<int8_t> ReadRssi() override;
         bool StopContinuousRx() override;
@@ -33,7 +33,6 @@ namespace hal
         };
 
         static constexpr ParameterLimits rfChannelLimits{ 0x00, 0x27 };
-        static constexpr ParameterLimits txPowerLimits{ 0x00, 0x23 };
         static constexpr ParameterLimits payLoadLimits{ 0x00, 0x07 };
         static constexpr ParameterLimits frequencyLimits{ 0x00, 0x27 };
         static constexpr ParameterLimits phyLimits{ 0x01, 0x04 };

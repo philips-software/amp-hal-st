@@ -1,4 +1,7 @@
 #include "hal_st/middlewares/ble_middleware/BleDtmSt.hpp"
+#include <array>
+#include <cstdint>
+#include <limits>
 #include <optional>
 
 extern "C"
@@ -9,6 +12,38 @@ extern "C"
 
 namespace hal
 {
+    namespace
+    {
+        constexpr std::array<int16_t, 32> txPowerLevelsInHundredthDbm{
+            -4000, -2085, -1975, -1885, -1760, -1650, -1525, -1410,
+            -1315, -1205, -1090, -990, -885, -780, -690, -590,
+            -495, -400, -315, -245, -180, -130, -85, -50,
+            -15, 0, 100, 200, 300, 400, 500, 600
+        };
+
+        uint8_t ClosestTxPowerLevel(int8_t txPowerDbm)
+        {
+            const int16_t requestedPower = static_cast<int16_t>(txPowerDbm) * 100;
+            uint8_t closestLevel = 0;
+            int16_t smallestDifference = std::numeric_limits<int16_t>::max();
+
+            for (uint8_t level = 0; level < txPowerLevelsInHundredthDbm.size(); ++level)
+            {
+                int16_t difference = requestedPower - txPowerLevelsInHundredthDbm[level];
+                if (difference < 0)
+                    difference = -difference;
+
+                if (difference < smallestDifference)
+                {
+                    closestLevel = level;
+                    smallestDifference = difference;
+                }
+            }
+
+            return closestLevel;
+        }
+    }
+
     bool BleDtmSt::StartTone(uint8_t rfChannel)
     {
         if (rfChannel >= rfChannelLimits.min && rfChannel <= rfChannelLimits.max)
@@ -22,12 +57,9 @@ namespace hal
         return aci_hal_tone_stop() == BLE_STATUS_SUCCESS;
     }
 
-    bool BleDtmSt::SetTxPowerLevel(uint8_t txPower)
+    bool BleDtmSt::SetTxPowerLevel(int8_t txPowerDbm)
     {
-        if (txPower >= txPowerLimits.min && txPower <= txPowerLimits.max)
-            return aci_hal_set_tx_power_level(0, txPower) == BLE_STATUS_SUCCESS;
-
-        return false;
+        return aci_hal_set_tx_power_level(0, ClosestTxPowerLevel(txPowerDbm)) == BLE_STATUS_SUCCESS;
     }
 
     bool BleDtmSt::StartRxTest(uint8_t rxFrequency, uint8_t phy)
@@ -60,15 +92,10 @@ namespace hal
 
     bool BleDtmSt::StartContinuousRx(uint8_t channel)
     {
-#if defined(STM32WB)
         if (channel > rfChannelLimits.max)
             return false;
 
         return aci_hal_rx_start(channel) == BLE_STATUS_SUCCESS;
-#else
-        static_cast<void>(channel);
-        return false;
-#endif
     }
 
     std::optional<int8_t> BleDtmSt::ReadRssi()
@@ -82,10 +109,6 @@ namespace hal
 
     bool BleDtmSt::StopContinuousRx()
     {
-#if defined(STM32WB)
         return aci_hal_rx_stop() == BLE_STATUS_SUCCESS;
-#else
-        return false;
-#endif
     }
 }
