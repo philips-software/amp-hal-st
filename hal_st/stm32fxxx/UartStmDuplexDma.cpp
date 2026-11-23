@@ -23,12 +23,13 @@ namespace hal
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
-                HalfReceiveComplete();
+                ReceiveComplete();
             },
             [this]
             {
-                FullReceiveComplete();
-            } }
+                ReceiveComplete();
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -38,12 +39,13 @@ namespace hal
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
-                HalfReceiveComplete();
+                ReceiveComplete();
             },
             [this]
             {
-                FullReceiveComplete();
-            } }
+                ReceiveComplete();
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -53,12 +55,13 @@ namespace hal
         , rxBuffer{ rxBuffer }
         , receiveDmaChannel{ receiveStream, receiveRegister, 1, [this]
             {
-                HalfReceiveComplete();
+                ReceiveComplete();
             },
             [this]
             {
-                FullReceiveComplete();
-            } }
+                ReceiveComplete();
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -81,6 +84,7 @@ namespace hal
         }
         else
         {
+            lastReceivedPosition = 0;
             receiveDmaChannel.StartReceive(rxBuffer);
 
             uartArray[uartIndex]->CR2 |= USART_CR2_RTOEN;
@@ -89,28 +93,27 @@ namespace hal
         }
     }
 
-    void UartStmDuplexDma::HalfReceiveComplete()
+    void UartStmDuplexDma::ReceiveComplete()
     {
-        ReceiveComplete(this->rxBuffer.size() / 2);
+        const auto currentPosition = receiveDmaChannel.ReceivedSize() % rxBuffer.size();
+
+        if (currentPosition < lastReceivedPosition)
+            ReceivedUpTo(rxBuffer.size());
+
+        ReceivedUpTo(currentPosition);
     }
 
-    void UartStmDuplexDma::FullReceiveComplete()
+    void UartStmDuplexDma::ReceivedUpTo(size_t position)
     {
-        ReceiveComplete(this->rxBuffer.size());
-    }
-
-    void UartStmDuplexDma::ReceiveComplete(size_t currentPosition)
-    {
-        if (currentPosition == lastReceivedPosition || !dataReceived)
+        if (position == lastReceivedPosition || !dataReceived)
             return;
 
-        really_assert(lastReceivedPosition <= currentPosition);
+        really_assert(lastReceivedPosition < position && position <= rxBuffer.size());
 
-        infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + currentPosition);
-        lastReceivedPosition = currentPosition == rxBuffer.size() ? 0 : currentPosition;
+        infra::ConstByteRange receivedData(rxBuffer.begin() + lastReceivedPosition, rxBuffer.begin() + position);
+        lastReceivedPosition = position % rxBuffer.size();
 
-        if (dataReceived != nullptr)
-            dataReceived(receivedData);
+        dataReceived(receivedData);
     }
 
     void UartStmDuplexDma::Invoke()
@@ -118,13 +121,7 @@ namespace hal
         if (uartArray[uartIndex]->ISR & USART_ISR_RTOF)
         {
             uartArray[uartIndex]->ICR = USART_ICR_RTOCF;
-
-            const auto receivedSize = receiveDmaChannel.ReceivedSize();
-
-            if (receiveDmaChannel.IsInterruptPending())
-                return;
-
-            ReceiveComplete(receivedSize);
+            ReceiveComplete();
         }
     }
 }

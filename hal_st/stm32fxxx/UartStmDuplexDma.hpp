@@ -39,9 +39,8 @@ namespace hal
         void ReceiveData(infra::Function<void(infra::ConstByteRange data)> dataReceived) override;
 
     private:
-        void HalfReceiveComplete();
-        void FullReceiveComplete();
-        void ReceiveComplete(size_t currentPosition);
+        void ReceiveComplete();
+        void ReceivedUpTo(size_t position);
 
         // Implementation InterruptHandler
         void Invoke() override;
