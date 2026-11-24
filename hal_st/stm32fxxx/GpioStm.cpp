@@ -6,6 +6,7 @@
 #include "infra/util/Function.hpp"
 #include "infra/util/MemoryRange.hpp"
 #include "infra/util/ReallyAssert.hpp"
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -160,10 +161,24 @@ namespace hal
 
     void GpioPinStm::Config(PinConfigType config)
     {
-        assert(config != PinConfigType::output); // Use Config(_, startOutputState) for outputs
+        really_assert(config != PinConfigType::output); // Use Config(_, startOutputState) for outputs
 
         GpioStm::Instance().ReservePin(port, index);
 
+        ReConfig(config);
+    }
+
+    void GpioPinStm::Config(PinConfigType config, bool startOutputState)
+    {
+        really_assert(config != PinConfigType::input);
+
+        GpioStm::Instance().ReservePin(port, index);
+
+        ReConfig(config, startOutputState);
+    }
+
+    void GpioPinStm::ReConfig(PinConfigType config)
+    {
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->PUPDR, 2, static_cast<uint8_t>(weakPull), index);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OTYPER, 1, static_cast<uint16_t>(drive), index);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OSPEEDR, 2, static_cast<uint8_t>(speed), index);
@@ -172,12 +187,8 @@ namespace hal
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->MODER, 2, 0, index);
     }
 
-    void GpioPinStm::Config(PinConfigType config, bool startOutputState)
+    void GpioPinStm::ReConfig(PinConfigType config, bool startOutputState)
     {
-        assert(config != PinConfigType::input);
-
-        GpioStm::Instance().ReservePin(port, index);
-
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->PUPDR, 2, static_cast<uint8_t>(weakPull), index);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OTYPER, 1, static_cast<uint16_t>(drive), index);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OSPEEDR, 2, static_cast<uint8_t>(speed), index);
@@ -213,6 +224,18 @@ namespace hal
     {
         GpioStm::Instance().ReservePin(port, index);
 
+        ReConfigAnalog();
+    }
+
+    void GpioPinStm::ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
+    {
+        GpioStm::Instance().ReservePin(port, index);
+
+        ReConfigPeripheral(pinConfigType, peripheral);
+    }
+
+    void GpioPinStm::ReConfigAnalog()
+    {
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->PUPDR, 2, static_cast<uint8_t>(weakPull), index);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OTYPER, 1, static_cast<uint16_t>(drive), index);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OSPEEDR, 2, static_cast<uint8_t>(speed), index);
@@ -220,23 +243,16 @@ namespace hal
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->MODER, 2, 3, index);
     }
 
-    void GpioPinStm::ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
+    void GpioPinStm::ReConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
     {
-        std::pair<const GpioStm::PinPosition&, const GpioStm::PinoutTable&> peripheralPinConfig = GpioStm::Instance().GetPeripheralPinConfig(port, index, pinConfigType, peripheral);
-
-        GpioStm::Instance().ReservePin(port, index);
-
-        uint8_t alternateFunction = peripheralPinConfig.first.alternateFunction;
-        Drive drive = peripheralPinConfig.second.drive;
-        Speed speed = peripheralPinConfig.second.speed;
-        WeakPull weakPull = peripheralPinConfig.second.weakPull;
+        const auto& [pinPosition, pinoutTable] = GpioStm::Instance().GetPeripheralPinConfig(port, index, pinConfigType, peripheral);
 
         // Peripherals use the weakpull, drive, and speed from the peripheral's definition
-        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->PUPDR, 2, static_cast<uint8_t>(weakPull), index);
-        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OTYPER, 1, static_cast<uint16_t>(drive), index);
-        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OSPEEDR, 2, static_cast<uint8_t>(speed), index);
+        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->PUPDR, 2, static_cast<uint8_t>(pinoutTable.weakPull), index);
+        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OTYPER, 1, static_cast<uint16_t>(pinoutTable.drive), index);
+        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->OSPEEDR, 2, static_cast<uint8_t>(pinoutTable.speed), index);
 
-        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->AFR[index >> 3], 4, alternateFunction, index & 7);
+        infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->AFR[index >> 3], 4, pinPosition.alternateFunction, index & 7);
         infra::ReplaceBits(portToGPIOPort[static_cast<uint8_t>(port)]->MODER, 2, 2, index);
     }
 
@@ -248,6 +264,30 @@ namespace hal
     uint32_t GpioPinStm::DacChannel(uint8_t dac) const
     {
         return GpioStm::Instance().DacChannel(port, index, dac);
+    }
+
+    GpioPinStmOwner::GpioPinStmOwner(GpioPinStm& pin)
+        : GpioPinOwner{ pin }
+    {}
+
+    GpioPinStmOwner::GpioPinStmOwner(const GpioPinStm& pin, GpioPinOwner&& other) noexcept(true)
+        : GpioPinOwner{ std::move(other) }
+    {
+        really_assert(&pin == &GetPin());
+    }
+
+    GpioPinStmOwner::GpioPinStmOwner(GpioPinStmOwner&& other) noexcept(true)
+        : GpioPinOwner{ std::move(other) }
+    {}
+
+    GpioPinStm& GpioPinStmOwner::GetPin()
+    {
+        return static_cast<GpioPinStm&>(GpioPinOwner::GetPin());
+    }
+
+    const GpioPinStm& GpioPinStmOwner::GetPin() const
+    {
+        return static_cast<const GpioPinStm&>(GpioPinOwner::GetPin());
     }
 
     DummyPinStm::DummyPinStm()
@@ -281,6 +321,12 @@ namespace hal
     void DummyPinStm::Config(PinConfigType config, bool startOutputState)
     {}
 
+    void DummyPinStm::ReConfig(PinConfigType config)
+    {}
+
+    void DummyPinStm::ReConfig(PinConfigType config, bool startOutputState)
+    {}
+
     void DummyPinStm::ResetConfig()
     {}
 
@@ -296,50 +342,54 @@ namespace hal
     void DummyPinStm::ConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
     {}
 
+    void DummyPinStm::ReConfigAnalog()
+    {}
+
+    void DummyPinStm::ReConfigPeripheral(PinConfigTypeStm pinConfigType, uint8_t peripheral)
+    {}
+
     PeripheralPinStm::PeripheralPinStm(GpioPinStm& pin, PinConfigTypeStm pinConfigType, uint8_t peripheral)
-        : pin(pin)
+        : GpioPinStmOwner{ pin }
     {
-        pin.ConfigPeripheral(pinConfigType, peripheral);
+        GetPin().ConfigPeripheral(pinConfigType, peripheral);
     }
 
-    PeripheralPinStm::~PeripheralPinStm()
+    PeripheralPinStm::PeripheralPinStm(GpioPinStmOwner&& pinOwner, PinConfigTypeStm pinConfigType, uint8_t peripheral)
+        : GpioPinStmOwner{ std::move(pinOwner) }
     {
-        pin.ResetConfig();
+        GetPin().ReConfigPeripheral(pinConfigType, peripheral);
     }
 
     AnalogPinStm::AnalogPinStm(GpioPinStm& pin)
-        : pin(pin)
+        : GpioPinStmOwner{ pin }
     {
-        pin.ConfigAnalog();
+        GetPin().ConfigAnalog();
     }
 
     AnalogPinStm::AnalogPinStm(uint32_t channel)
-        : pin(dummyPinStm)
-        , channel(channel)
+        : GpioPinStmOwner{ dummyPinStm }
+        , channel{ channel }
     {}
-
-    AnalogPinStm::~AnalogPinStm()
-    {
-        pin.ResetConfig();
-    }
 
     uint32_t AnalogPinStm::AdcChannel(uint8_t adc) const
     {
         if (channel != 0xffffffff)
             return channel;
-        return adcChannel[pin.AdcChannel(adc)];
+        really_assert(HasPin());
+        return adcChannel[GetPin().AdcChannel(adc)];
     }
 
     uint32_t AnalogPinStm::DacChannel(uint8_t dac) const
     {
-        return pin.DacChannel(dac);
+        really_assert(HasPin());
+        return GetPin().DacChannel(dac);
     }
 
     MultiGpioPinStm::MultiGpioPinStm(infra::MemoryRange<const std::pair<Port, uint8_t>> table, Drive drive, Speed speed, WeakPull weakPull)
-        : table(table)
-        , drive(drive)
-        , speed(speed)
-        , weakPull(weakPull)
+        : table{ table }
+        , drive{ drive }
+        , speed{ speed }
+        , weakPull{ weakPull }
     {}
 
     void MultiGpioPinStm::ResetConfig()
@@ -389,7 +439,7 @@ namespace hal
     }
 
     MultiPeripheralPinStm::MultiPeripheralPinStm(hal::MultiGpioPinStm& pins, PinConfigTypeStm pinConfigType, uint8_t peripheral)
-        : pins(pins)
+        : pins{ pins }
     {
         pins.ConfigPeripheral(pinConfigType, peripheral);
     }
@@ -401,60 +451,59 @@ namespace hal
 
     // clang-format off
     GpioStm::GpioStm(infra::MemoryRange<const infra::MemoryRange<const GpioStm::PinoutTable>> pinoutTable, infra::MemoryRange<const GpioStm::AnalogPinPosition> analogTable)
-        : pinoutTable(pinoutTable)
-        , analogTable(analogTable)
-        , assignedPins()
+        : pinoutTable{pinoutTable}
+        , analogTable{analogTable}
 #if defined(STM32F0) | defined(STM32G0)
-        , interruptDispatcher0_1(EXTI0_1_IRQn, [this]()
-              { ExtiInterrupt(EXTI0_1_IRQn, 0, 2); })
-        , interruptDispatcher2_3(EXTI2_3_IRQn, [this]()
-              { ExtiInterrupt(EXTI2_3_IRQn, 2, 4); })
-        , interruptDispatcher4_15(EXTI4_15_IRQn, [this]()
-              { ExtiInterrupt(EXTI4_15_IRQn, 4, 16); })
+        , interruptDispatcher0_1{ EXTI0_1_IRQn, [this]()
+              { ExtiInterrupt(EXTI0_1_IRQn, 0, 2); } }
+        , interruptDispatcher2_3{ EXTI2_3_IRQn, [this]()
+              { ExtiInterrupt(EXTI2_3_IRQn, 2, 4); } }
+        , interruptDispatcher4_15{ EXTI4_15_IRQn, [this]()
+              { ExtiInterrupt(EXTI4_15_IRQn, 4, 16); } }
 #else
-        , interruptDispatcher0(EXTI0_IRQn, [this]()
-              { ExtiInterrupt(EXTI0_IRQn, 0, 1); })
-        , interruptDispatcher1(EXTI1_IRQn, [this]()
-              { ExtiInterrupt(EXTI1_IRQn, 1, 2); })
+        , interruptDispatcher0{ EXTI0_IRQn, [this]()
+              { ExtiInterrupt(EXTI0_IRQn, 0, 1); } }
+        , interruptDispatcher1{ EXTI1_IRQn, [this]()
+              { ExtiInterrupt(EXTI1_IRQn, 1, 2); } }
 #if defined(STM32F3)
-        , interruptDispatcher2(EXTI2_TSC_IRQn, [this]()
-              { ExtiInterrupt(EXTI2_TSC_IRQn, 2, 3); })
+        , interruptDispatcher2{ EXTI2_TSC_IRQn, [this]()
+              { ExtiInterrupt(EXTI2_TSC_IRQn, 2, 3); } }
 #else
-        , interruptDispatcher2(EXTI2_IRQn, [this]()
-              { ExtiInterrupt(EXTI2_IRQn, 2, 3); })
+        , interruptDispatcher2{ EXTI2_IRQn, [this]()
+              { ExtiInterrupt(EXTI2_IRQn, 2, 3); } }
 #endif
-        , interruptDispatcher3(EXTI3_IRQn, [this]()
-              { ExtiInterrupt(EXTI3_IRQn, 3, 4); })
-        , interruptDispatcher4(EXTI4_IRQn, [this]()
-              { ExtiInterrupt(EXTI4_IRQn, 4, 5); })
+        , interruptDispatcher3{ EXTI3_IRQn, [this]()
+              { ExtiInterrupt(EXTI3_IRQn, 3, 4); } }
+        , interruptDispatcher4{ EXTI4_IRQn, [this]()
+              { ExtiInterrupt(EXTI4_IRQn, 4, 5); } }
 #if defined(STM32WBA) || defined(STM32H5)
-        , interruptDispatcher5(EXTI5_IRQn, [this]()
-              { ExtiInterrupt(EXTI5_IRQn, 5, 6); })
-        , interruptDispatcher6(EXTI6_IRQn, [this]()
-              { ExtiInterrupt(EXTI6_IRQn, 6, 7); })
-        , interruptDispatcher7(EXTI7_IRQn, [this]()
-              { ExtiInterrupt(EXTI7_IRQn, 7, 8); })
-        , interruptDispatcher8(EXTI8_IRQn, [this]()
-              { ExtiInterrupt(EXTI8_IRQn, 8, 9); })
-        , interruptDispatcher9(EXTI9_IRQn, [this]()
-              { ExtiInterrupt(EXTI9_IRQn, 9, 10); })
-        , interruptDispatcher10(EXTI10_IRQn, [this]()
-              { ExtiInterrupt(EXTI10_IRQn, 10, 11); })
-        , interruptDispatcher11(EXTI11_IRQn, [this]()
-              { ExtiInterrupt(EXTI11_IRQn, 11, 12); })
-        , interruptDispatcher12(EXTI12_IRQn, [this]()
-              { ExtiInterrupt(EXTI12_IRQn, 12, 13); })
-        , interruptDispatcher13(EXTI13_IRQn, [this]()
-              { ExtiInterrupt(EXTI13_IRQn, 13, 14); })
-        , interruptDispatcher14(EXTI14_IRQn, [this]()
-              { ExtiInterrupt(EXTI14_IRQn, 14, 15); })
-        , interruptDispatcher15(EXTI15_IRQn, [this]()
-              { ExtiInterrupt(EXTI15_IRQn, 15, 16); })
+        , interruptDispatcher5{ EXTI5_IRQn, [this]()
+              { ExtiInterrupt(EXTI5_IRQn, 5, 6); } }
+        , interruptDispatcher6{ EXTI6_IRQn, [this]()
+              { ExtiInterrupt(EXTI6_IRQn, 6, 7); } }
+        , interruptDispatcher7{ EXTI7_IRQn, [this]()
+              { ExtiInterrupt(EXTI7_IRQn, 7, 8); } }
+        , interruptDispatcher8{ EXTI8_IRQn, [this]()
+              { ExtiInterrupt(EXTI8_IRQn, 8, 9); } }
+        , interruptDispatcher9{ EXTI9_IRQn, [this]()
+              { ExtiInterrupt(EXTI9_IRQn, 9, 10); } }
+        , interruptDispatcher10{ EXTI10_IRQn, [this]()
+              { ExtiInterrupt(EXTI10_IRQn, 10, 11); } }
+        , interruptDispatcher11{ EXTI11_IRQn, [this]()
+              { ExtiInterrupt(EXTI11_IRQn, 11, 12); } }
+        , interruptDispatcher12{ EXTI12_IRQn, [this]()
+              { ExtiInterrupt(EXTI12_IRQn, 12, 13); } }
+        , interruptDispatcher13{ EXTI13_IRQn, [this]()
+              { ExtiInterrupt(EXTI13_IRQn, 13, 14); } }
+        , interruptDispatcher14{ EXTI14_IRQn, [this]()
+              { ExtiInterrupt(EXTI14_IRQn, 14, 15); } }
+        , interruptDispatcher15{ EXTI15_IRQn, [this]()
+              { ExtiInterrupt(EXTI15_IRQn, 15, 16); } }
 #else
-        , interruptDispatcher9_5(EXTI9_5_IRQn, [this]()
-              { ExtiInterrupt(EXTI9_5_IRQn, 5, 10); })
-        , interruptDispatcher15_10(EXTI15_10_IRQn, [this]()
-              { ExtiInterrupt(EXTI15_10_IRQn, 10, 16); })
+        , interruptDispatcher9_5{ EXTI9_5_IRQn, [this]()
+              { ExtiInterrupt(EXTI9_5_IRQn, 5, 10); } }
+        , interruptDispatcher15_10{ EXTI15_10_IRQn, [this]()
+              { ExtiInterrupt(EXTI15_10_IRQn, 10, 16); } }
 #endif
 #endif
     {
@@ -631,16 +680,16 @@ namespace hal
 
     void GpioStm::ReservePin(Port port, uint8_t index)
     {
-        assert(static_cast<uint8_t>(port) < assignedPins.size());
-        assert(index < 32 && index >= 0);
-        assert((assignedPins[static_cast<uint8_t>(port)] & (1 << index)) == 0);
+        really_assert(static_cast<uint8_t>(port) < assignedPins.size());
+        really_assert(index < 32 && index >= 0);
+        really_assert((assignedPins[static_cast<uint8_t>(port)] & (1 << index)) == 0);
         assignedPins[static_cast<uint8_t>(port)] |= 1 << index;
     }
 
     void GpioStm::ClearPinReservation(Port port, uint8_t index)
     {
-        assert(static_cast<uint8_t>(port) < assignedPins.size());
-        assert(index < 32 && index >= 0);
+        really_assert(static_cast<uint8_t>(port) < assignedPins.size());
+        really_assert(index < 32 && index >= 0);
         assignedPins[static_cast<uint8_t>(port)] &= ~(1 << index);
     }
 }
