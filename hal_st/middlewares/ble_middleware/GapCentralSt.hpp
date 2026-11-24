@@ -14,7 +14,6 @@ namespace hal
     {
     public:
         GapCentralSt(hal::HciEventSource& hciEventSource, const Configuration& configuration);
-
         // Implementation of services::GapCentral
         void Connect(hal::MacAddress macAddress, services::GapDeviceAddressType addressType, infra::Duration initiatingTimeout) override;
         void Standby() override;
