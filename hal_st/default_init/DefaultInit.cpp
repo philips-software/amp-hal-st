@@ -59,11 +59,16 @@ extern "C"
         return HAL_OK;
     }
 
+    // Executes an undefined instruction, so that every abort ends in the HardFault handler, where
+    // DefaultFaultTracer (when instantiated) traces the stack frame and backtrace of the caller.
+    // - Do not use __BKPT(): when a debug probe has enabled halting debug (DHCSR.C_DEBUGEN, for example
+    //   OpenOCD on a test bench), the core halts on it before the HardFault handler runs, and nothing is traced.
+    // - Do not reset here: a system reset is not an exception, so no fault handler runs and the stack is lost.
+    // - Called again from the HardFault handler after tracing, the undefined instruction locks up the core;
+    //   only a running watchdog resets the device from there.
     [[gnu::weak]] void abort()
     {
-        __BKPT();
-        HAL_NVIC_SystemReset();
-        __builtin_unreachable();
+        __builtin_trap();
     }
 
     void _init()
