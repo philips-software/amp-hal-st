@@ -920,12 +920,13 @@ namespace hal
         }
     }
 
-    DmaStm::CircularStreamInterruptHandler::CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+    DmaStm::CircularStreamInterruptHandler::CircularStreamInterruptHandler(Stream& stream, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority)
         : stream{ stream }
         , immediateInterruptHandler{ dmaIrq[stream.dmaIndex][stream.streamIndex], [this]
             {
                 OnInterrupt();
-            } }
+            },
+            priority }
         , transferHalfComplete{ transferHalfComplete }
         , transferFullComplete{ transferFullComplete }
     {
@@ -1132,9 +1133,9 @@ namespace hal
 #endif
     }
 
-    CircularTransceiverDmaChannel::CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
+    CircularTransceiverDmaChannel::CircularTransceiverDmaChannel(DmaStm::TransceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority)
         : TransceiverDmaChannelBase{ stream, peripheralAddress, peripheralTransferSize }
-        , circularStreamInterruptHandler{ stream, transferHalfComplete, transferFullComplete }
+        , circularStreamInterruptHandler{ stream, transferHalfComplete, transferFullComplete, priority }
     {}
 
     bool CircularTransceiverDmaChannel::IsInterruptPending() const
@@ -1142,8 +1143,8 @@ namespace hal
         return circularStreamInterruptHandler.IsInterruptPending();
     }
 
-    CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete }
+    CircularTransmitDmaChannel::CircularTransmitDmaChannel(DmaStm::TransmitStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority)
+        : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete, priority }
     {
 #ifdef GPDMA1
         SetMemoryToPeripheralMode();
@@ -1152,8 +1153,8 @@ namespace hal
 #endif
     }
 
-    CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete)
-        : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete }
+    CircularReceiveDmaChannel::CircularReceiveDmaChannel(DmaStm::ReceiveStream& stream, volatile void* peripheralAddress, uint8_t peripheralTransferSize, const infra::Function<void()>& transferHalfComplete, const infra::Function<void()>& transferFullComplete, InterruptPriority priority)
+        : CircularTransceiverDmaChannel{ stream, peripheralAddress, peripheralTransferSize, transferHalfComplete, transferFullComplete, priority }
     {
 #ifdef GPDMA1
         SetPeripheralToMemoryMode();

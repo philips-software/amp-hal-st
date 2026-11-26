@@ -28,7 +28,8 @@ namespace hal
             [this]
             {
                 FullReceiveComplete();
-            } }
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -43,7 +44,8 @@ namespace hal
             [this]
             {
                 FullReceiveComplete();
-            } }
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }
@@ -58,7 +60,8 @@ namespace hal
             [this]
             {
                 FullReceiveComplete();
-            } }
+            },
+            config.priority }
     {
         uartArray[uartIndex]->CR3 |= USART_CR3_DMAT | USART_CR3_DMAR;
     }

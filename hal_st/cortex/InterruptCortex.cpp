@@ -221,11 +221,10 @@ namespace hal
         }
     }
 
-    ImmediateInterruptHandler::ImmediateInterruptHandler(IRQn_Type irq, const infra::Function<void()>& onInvoke)
-        : InterruptHandler()
-        , onInvoke(onInvoke)
+    ImmediateInterruptHandler::ImmediateInterruptHandler(IRQn_Type irq, const infra::Function<void()>& onInvoke, InterruptPriority priority)
+        : onInvoke(onInvoke)
     {
-        Register(irq);
+        Register(irq, priority);
     }
 
     ImmediateInterruptHandler::ImmediateInterruptHandler(ImmediateInterruptHandler&& other, const infra::Function<void()>& onInvoke)
