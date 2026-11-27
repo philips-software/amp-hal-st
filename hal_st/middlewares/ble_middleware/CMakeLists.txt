@@ -18,10 +18,10 @@ target_link_libraries(hal_st.ble_middleware PUBLIC
 )
 
 target_sources(hal_st.ble_middleware PRIVATE
-    BleDtmSt.cpp
-    BleDtmSt.hpp
     AuthoritativeBondStorageSt.cpp
     AuthoritativeBondStorageSt.hpp
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:BleDtmSt.cpp>
+    $<$<STREQUAL:${TARGET_MCU_FAMILY},stm32wbxx>:BleDtmSt.hpp>
     GapCentralSt.cpp
     GapCentralSt.hpp
     GapPeripheralSt.cpp

@@ -126,7 +126,7 @@ namespace hal
 
     bool FlashInternalStmBle::SingleOperation(FlashOperation operation)
     {
-        CriticalSectionScoped criticalSectionScoped(watchdog);
+        WatchDogRefreshedCriticalSection criticalSection(watchdog);
 
         if (LL_HSEM_1StepLock(HSEM, hwBlockFlashReqByCpu2) == 0)
         {
@@ -164,19 +164,5 @@ namespace hal
         auto result = HAL_FLASHEx_Erase(&eraseInitStruct, &pageError);
         really_assert(result == HAL_OK);
         currentEraseIndex++;
-    }
-
-    FlashInternalStmBle::CriticalSectionScoped::CriticalSectionScoped(WatchDogStm& watchdog)
-        : watchdog(watchdog)
-    {
-        primaskBit = __get_PRIMASK();
-        __disable_irq();
-        watchdog.WatchDogRefresh();
-    }
-
-    FlashInternalStmBle::CriticalSectionScoped::~CriticalSectionScoped()
-    {
-        __set_PRIMASK(primaskBit);
-        watchdog.WatchDogRefresh();
     }
 }

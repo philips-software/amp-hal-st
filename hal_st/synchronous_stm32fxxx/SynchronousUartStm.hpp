@@ -73,8 +73,7 @@ namespace hal
         };
 
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, uint32_t baudrate = 115200);
-        SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts,
-            HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
+        SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
 #if defined(HAS_PERIPHERAL_LPUART)
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, SyncLpUart lpUart, uint32_t baudrate = 115200);
         SynchronousUartStmSendOnly(uint8_t aUartIndex, GpioPinStm& uartTx, GpioPinStm& uartRts, SyncLpUart lpUart, HwFlowControl flowControl = HwFlowControl::hwControlRtsCtsEnable, uint32_t baudrate = 115200);
@@ -87,12 +86,12 @@ namespace hal
     private:
         void UartStmHalInit(HwFlowControl flowControl, uint32_t baudrate);
 
+        uint8_t uartIndex;
         USART_TypeDef* const uartBase;
         PeripheralPinStm uartTx;
         std::optional<PeripheralPinStm> uartRts;
-        uint8_t uartIndex;
 #if defined(HAS_PERIPHERAL_LPUART)
-        bool isLpUart{false};
+        bool isLpUart{ false };
 #endif
     };
 }

@@ -55,6 +55,17 @@ namespace hal
         return static_cast<IRQn_Type>(((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) >> SCB_ICSR_VECTACTIVE_Pos) - 16);
     }
 
+    CriticalSectionScoped::CriticalSectionScoped()
+        : primask(__get_PRIMASK())
+    {
+        __disable_irq();
+    }
+
+    CriticalSectionScoped::~CriticalSectionScoped()
+    {
+        __set_PRIMASK(primask);
+    }
+
     InterruptHandler::InterruptHandler()
     {}
 
@@ -210,11 +221,10 @@ namespace hal
         }
     }
 
-    ImmediateInterruptHandler::ImmediateInterruptHandler(IRQn_Type irq, const infra::Function<void()>& onInvoke)
-        : InterruptHandler()
-        , onInvoke(onInvoke)
+    ImmediateInterruptHandler::ImmediateInterruptHandler(IRQn_Type irq, const infra::Function<void()>& onInvoke, InterruptPriority priority)
+        : onInvoke(onInvoke)
     {
-        Register(irq);
+        Register(irq, priority);
     }
 
     ImmediateInterruptHandler::ImmediateInterruptHandler(ImmediateInterruptHandler&& other, const infra::Function<void()>& onInvoke)

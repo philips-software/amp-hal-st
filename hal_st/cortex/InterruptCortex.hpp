@@ -18,6 +18,18 @@ namespace hal
 
     IRQn_Type ActiveInterrupt();
 
+    class CriticalSectionScoped
+    {
+    public:
+        CriticalSectionScoped();
+        CriticalSectionScoped(const CriticalSectionScoped& other) = delete;
+        CriticalSectionScoped& operator=(const CriticalSectionScoped& other) = delete;
+        ~CriticalSectionScoped();
+
+    private:
+        uint32_t primask;
+    };
+
     class InterruptHandler
     {
     protected:
@@ -91,7 +103,7 @@ namespace hal
         : public InterruptHandler
     {
     public:
-        ImmediateInterruptHandler(IRQn_Type irq, const infra::Function<void()>& onInvoke);
+        ImmediateInterruptHandler(IRQn_Type irq, const infra::Function<void()>& onInvoke, InterruptPriority priority = InterruptPriority::Normal);
         ImmediateInterruptHandler(const ImmediateInterruptHandler& other) = delete;
         ImmediateInterruptHandler(ImmediateInterruptHandler&& other) = delete;
         ImmediateInterruptHandler(ImmediateInterruptHandler&& other, const infra::Function<void()>& onInvoke);

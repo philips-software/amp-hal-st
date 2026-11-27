@@ -19,6 +19,7 @@ namespace hal
         using HalfWordRange = FlashInternalHighCycleAreaWorker::HalfWordRange;
 
         explicit SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory);
+        SynchronousFlashInternalHighCycleAreaStm(HalfWordRange flashMemory, WatchDogStm& watchDog);
 
         // implementation of Flash interface
         void WriteBuffer(infra::ConstByteRange buffer, uint32_t address) override;
