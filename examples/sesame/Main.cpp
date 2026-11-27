@@ -143,7 +143,7 @@ int main()
 #elif SECURE_DIFFIE_HELLMAN
     static services::EchoPolicyDiffieHellman::KeyMaterial keyMaterial{ key_material::deviceCertificate, key_material::deviceCertificatePrivateKey, key_material::rootCaCertificate };
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds, sesame_security::DiffieHellmanKeyEstablishment>::AndProxies<leds_and_button::ButtonProxy, sesame_security::DiffieHellmanKeyEstablishment> serializerFactory;
-    static main_::EchoOnSesameSecuredDiffieHellman::WithMessageSize<256>::WithCryptoMbedTls echo{ bufferedUart, serializerFactory, keyMaterial, randomDataGenerator };
+    static main_::EchoOnSesameSecuredDiffieHellman::WithCryptoAndMessageSize<services::CryptoMbedTls, 256> echo{ bufferedUart, serializerFactory, services::echoErrorPolicyAbortOnMessageFormatError, services::immediatelyGranted, keyMaterial, randomDataGenerator };
 #else
     static services::MethodSerializerFactory::ForServices<leds_and_button::Leds>::AndProxies<leds_and_button::ButtonProxy> serializerFactory;
     static main_::EchoOnSesame::WithMessageSize<256> echo{ bufferedUart, serializerFactory };
